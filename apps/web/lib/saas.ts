@@ -68,7 +68,7 @@ export async function isCustomDomainRequest(): Promise<boolean> {
     const host = (await headers()).get('host')?.split(':')[0]?.toLowerCase()
     if (!host || host === 'localhost' || /^[\d.]+$/.test(host)) return false
 
-    const platform = (process.env.NEXT_PUBLIC_LEARNHOUSE_DOMAIN || '').toLowerCase()
+    const platform = (process.env.NEXT_PUBLIC_STARLAB_DOMAIN || '').toLowerCase()
     // Platform apex or subdomain → not a custom domain (keep Turnstile on).
     if (platform && (host === platform || host.endsWith(`.${platform}`))) return false
 

@@ -3,7 +3,7 @@
 Unlike test_llm_ollama.py (which exercises the llm primitives directly), this drives the
 actual production service functions — activity chat, chat title, follow-ups, course planning,
 and MagicBlocks — and configures the provider through the REAL config path
-(LEARNHOUSE_AI_* env vars -> get_learnhouse_config() -> build_model), exactly as a deployment
+(STARLAB_AI_* env vars -> get_starlab_config() -> build_model), exactly as a deployment
 would. Proves the whole stack runs on a non-Gemini provider with config-only changes.
 
 Run locally:
@@ -51,12 +51,12 @@ pytestmark = [
 @pytest.fixture(autouse=True)
 def _ollama_env(monkeypatch):
     """Configure the REAL config to use Ollama for every tier (env path, not a mock)."""
-    monkeypatch.setenv("LEARNHOUSE_AI_PROVIDER", "ollama")
-    monkeypatch.setenv("LEARNHOUSE_AI_BASE_URL", f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/v1")
+    monkeypatch.setenv("STARLAB_AI_PROVIDER", "ollama")
+    monkeypatch.setenv("STARLAB_AI_BASE_URL", f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/v1")
     for tier in ("FAST", "STANDARD", "PRO"):
-        monkeypatch.setenv(f"LEARNHOUSE_AI_MODEL_{tier}", OLLAMA_MODEL)
+        monkeypatch.setenv(f"STARLAB_AI_MODEL_{tier}", OLLAMA_MODEL)
     # Embeddings follow the same (ollama) provider; use a local embedding model.
-    monkeypatch.setenv("LEARNHOUSE_AI_EMBEDDING_MODEL", OLLAMA_EMBED_MODEL)
+    monkeypatch.setenv("STARLAB_AI_EMBEDDING_MODEL", OLLAMA_EMBED_MODEL)
 
 
 @pytest.mark.asyncio

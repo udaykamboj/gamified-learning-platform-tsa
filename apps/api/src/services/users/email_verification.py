@@ -16,7 +16,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization, OrganizationRead
 from src.db.users import User, UserRead
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.services.orgs.orgs import get_org_default_language, resolve_org_sender_name
 from src.services.users.emails import send_email_verification_email
 from src.services.email.utils import (
@@ -36,7 +36,7 @@ NO_ORG_UUID = "none"
 
 def get_redis_connection() -> redis.Redis:
     """Get Redis connection from config."""
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -135,13 +135,13 @@ async def send_verification_email(
     # which case the generic request fallback would land on the org app
     # (frontend_domain), not the platform. So for org-less signups prefer, in
     # order: a trusted request origin → the explicitly-configured platform URL
-    # (LEARNHOUSE_PLATFORM_URL) → the existing fallback. The platform-URL step
+    # (STARLAB_PLATFORM_URL) → the existing fallback. The platform-URL step
     # only fires when the env var is set, so self-hosted deployments that don't
     # set it keep their current behavior.
     if org_id is None:
         base_url = get_trusted_base_url_from_request(request)
         if not base_url:
-            platform_url = os.environ.get("LEARNHOUSE_PLATFORM_URL")
+            platform_url = os.environ.get("STARLAB_PLATFORM_URL")
             base_url = (
                 platform_url.rstrip("/")
                 if platform_url

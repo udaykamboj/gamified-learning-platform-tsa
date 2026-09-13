@@ -6,7 +6,7 @@ const RESERVED_TLDS = new Set([
   'example',
 ])
 
-// RFC 2606 reserved second-level domains. The LearnHouse seeder rejects these,
+// RFC 2606 reserved second-level domains. The StarLab seeder rejects these,
 // silently leaving the install with no admin user, so the CLI must too.
 const RESERVED_DOMAINS = new Set([
   'example.com',
@@ -40,7 +40,7 @@ export function validateDomain(value: string): string | undefined {
   // Allow localhost or valid domain names
   if (value === 'localhost') return undefined
   const re = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
-  if (!re.test(value)) return 'Please enter a valid domain (e.g., learnhouse.example.com)'
+  if (!re.test(value)) return 'Please enter a valid domain (e.g., starlab.example.com)'
   return undefined
 }
 

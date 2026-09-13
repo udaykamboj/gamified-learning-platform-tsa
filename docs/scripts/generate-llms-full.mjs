@@ -6,8 +6,8 @@ import { API_GROUPS, METHOD_TO_ACTION } from '../lib/reference/config.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CONTENT_DIR = path.join(__dirname, '..', 'content')
 const OUTPUT_FILE = path.join(__dirname, '..', 'public', 'llms-full.txt')
-const SITE_URL = 'https://docs.learnhouse.app'
-const API_BASE_URL = (process.env.LEARNHOUSE_API_URL || 'https://api.learnhouse.io').replace(/\/$/, '')
+const SITE_URL = 'https://docs.starlab.app'
+const API_BASE_URL = (process.env.STARLAB_API_URL || 'https://api.starlab.io').replace(/\/$/, '')
 const SNAPSHOT_PATH = path.join(__dirname, '..', 'lib', 'reference', 'openapi.snapshot.json')
 
 function collectMdxFiles(dir, basePath = '') {
@@ -65,9 +65,9 @@ mdxFiles.sort((a, b) => {
 
 const sections = []
 
-sections.push('# LearnHouse Documentation — Full Content')
+sections.push('# StarLab Documentation — Full Content')
 sections.push('')
-sections.push('> This file contains the complete text of all LearnHouse documentation pages.')
+sections.push('> This file contains the complete text of all StarLab documentation pages.')
 sections.push(`> Source: ${SITE_URL}`)
 sections.push('')
 
@@ -130,7 +130,7 @@ for (const [specPath, methods] of Object.entries(spec.paths || {})) {
 
 sections.push('---')
 sections.push('')
-sections.push('# LearnHouse API Reference')
+sections.push('# StarLab API Reference')
 sections.push(`URL: ${SITE_URL}/reference`)
 sections.push('')
 sections.push(`Base URL: ${API_BASE_URL} — all endpoints are prefixed with /api/v1.`)

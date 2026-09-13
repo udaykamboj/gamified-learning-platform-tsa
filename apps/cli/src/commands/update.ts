@@ -18,21 +18,21 @@ import {
 } from './update-ee.js'
 
 // Community (monolith) layout: one app container, alembic under /app/api, in-container db.
-const COMMUNITY_LAYOUT: EditionLayout = { appService: 'learnhouse-app', alembicCwd: '/app/api', dbService: 'db' }
+const COMMUNITY_LAYOUT: EditionLayout = { appService: 'starlab-app', alembicCwd: '/app/api', dbService: 'db' }
 
-const GHCR_BASE = 'ghcr.io/learnhouse/app'
+const GHCR_BASE = 'ghcr.io/starlab/app'
 
 async function resolveTag(version: string): Promise<boolean> {
   try {
     const tokenResp = await fetch(
-      'https://ghcr.io/token?scope=repository:learnhouse/app:pull',
+      'https://ghcr.io/token?scope=repository:starlab/app:pull',
       { signal: AbortSignal.timeout(5000) },
     )
     if (!tokenResp.ok) return false
     const { token } = (await tokenResp.json()) as { token: string }
 
     const manifestResp = await fetch(
-      `https://ghcr.io/v2/learnhouse/app/manifests/${version}`,
+      `https://ghcr.io/v2/starlab/app/manifests/${version}`,
       {
         signal: AbortSignal.timeout(5000),
         headers: {
@@ -52,7 +52,7 @@ export async function updateCommand(options: { version?: string; migrate?: boole
   const dir = findInstallDir()
   const config = readConfig(dir)
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run `npx learnhouse setup` first.')
+    p.log.error('No StarLab installation found. Run `npx starlab setup` first.')
     process.exit(1)
     return
   }
@@ -60,7 +60,7 @@ export async function updateCommand(options: { version?: string; migrate?: boole
   // Enterprise installs use a different upgrade path: license re-auth, EE images,
   // a pre-upgrade DB backup, and Alembic migrations against the (possibly external) DB.
   if (config.edition === 'enterprise') {
-    p.intro(pc.cyan('Upgrading LearnHouse Enterprise'))
+    p.intro(pc.cyan('Upgrading StarLab Enterprise'))
     await updateEnterprise(config, {
       version: options.version,
       migrate: options.migrate,
@@ -73,9 +73,9 @@ export async function updateCommand(options: { version?: string; migrate?: boole
   const targetVersion = options.version?.replace(/^v/, '')
 
   if (targetVersion) {
-    p.intro(pc.cyan(`Updating LearnHouse to v${targetVersion}`))
+    p.intro(pc.cyan(`Updating StarLab to v${targetVersion}`))
   } else {
-    p.intro(pc.cyan('Updating LearnHouse to latest'))
+    p.intro(pc.cyan('Updating StarLab to latest'))
   }
 
   const ui = {
@@ -119,7 +119,7 @@ export async function updateCommand(options: { version?: string; migrate?: boole
         if (!existsWithV) {
           s.stop('Version not found')
           p.log.error(
-            `Version ${targetVersion} not found on ghcr.io/learnhouse/app`,
+            `Version ${targetVersion} not found on ghcr.io/starlab/app`,
           )
           process.exit(1)
         }
@@ -179,7 +179,7 @@ export async function updateCommand(options: { version?: string; migrate?: boole
       p.log.step('Running database migrations')
       dockerComposeStop(config.installDir, COMMUNITY_LAYOUT.appService)
       if (!migrateBeforeBoot(config.installDir, COMMUNITY_LAYOUT, previousHeads, ui)) {
-        const previousImage = composeContent.match(/image:\s*(\S*learnhouse\/app:\S+)/)?.[1]
+        const previousImage = composeContent.match(/image:\s*(\S*starlab\/app:\S+)/)?.[1]
         if (previousImage) {
           writeFileSync(composePath, replaceComposeImageTag(readFileSync(composePath, 'utf-8'), previousImage))
         }
@@ -195,9 +195,9 @@ export async function updateCommand(options: { version?: string; migrate?: boole
     s.stop('Services restarted')
 
     // 4) Wait for the app, then run migrations via the shared helper.
-    s.start('Waiting for LearnHouse to be ready')
+    s.start('Waiting for StarLab to be ready')
     await waitForHealth(`http://localhost:${config.httpPort}`)
-    s.stop('LearnHouse is up')
+    s.stop('StarLab is up')
 
     if (options.migrate !== false) {
       // Normally a no-op after the pre-start run; catches anything the new
@@ -209,13 +209,13 @@ export async function updateCommand(options: { version?: string; migrate?: boole
       }
     } else {
       p.log.info('Skipped migrations (--no-migrate). Run later:')
-      p.log.info('  docker compose exec learnhouse-app sh -c "cd /app/api && uv run alembic upgrade head"')
+      p.log.info('  docker compose exec starlab-app sh -c "cd /app/api && uv run alembic upgrade head"')
     }
 
     if (targetVersion) {
-      p.log.success(`LearnHouse has been updated to v${targetVersion}!`)
+      p.log.success(`StarLab has been updated to v${targetVersion}!`)
     } else {
-      p.log.success('LearnHouse has been updated to the latest version!')
+      p.log.success('StarLab has been updated to the latest version!')
     }
   } catch {
     s.stop('Update failed')

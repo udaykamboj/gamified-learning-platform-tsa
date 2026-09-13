@@ -6,7 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, SuperadminAPITokenUser, User, UserRead
 from src.services.users.users import security_get_user
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -79,7 +79,7 @@ JWT_SECRET_KEY = SECRET_KEY
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 JWT_COOKIE_SAMESITE = "lax"
 JWT_COOKIE_SECURE = True
-JWT_COOKIE_DOMAIN = get_learnhouse_config().hosting_config.cookie_config.domain
+JWT_COOKIE_DOMAIN = get_starlab_config().hosting_config.cookie_config.domain
 JWT_COOKIE_NAME = "LH_access"
 
 
@@ -215,13 +215,13 @@ def _refresh_token_lifetime() -> timedelta:
     Only a user who does not open the app at all for this long loses their
     session.
 
-    Overridable with ``LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS`` for operators who
+    Overridable with ``STARLAB_AUTH_REFRESH_TOKEN_DAYS`` for operators who
     want a longer or shorter window, but never below
     ``MIN_REFRESH_TOKEN_DAYS`` — a shorter window is nearly always a
     misconfiguration that shows up as users complaining they get logged out.
     """
     import os
-    raw = os.environ.get("LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS")
+    raw = os.environ.get("STARLAB_AUTH_REFRESH_TOKEN_DAYS")
     if raw:
         try:
             days = int(raw)

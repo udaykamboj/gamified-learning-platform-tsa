@@ -23,10 +23,10 @@ server {
     # Increase the maximum allowed size of the client request header fields
     client_header_buffer_size 32k;
 
-    # Proxy all requests to the learnhouse-app service
+    # Proxy all requests to the starlab-app service
     # The app container has internal nginx routing between frontend, backend, and collab
     location / {
-        proxy_pass http://learnhouse-app:80;
+        proxy_pass http://starlab-app:80;
         # Use $http_host (not $host) so the port is preserved — Next.js Server
         # Actions reject POSTs where origin and x-forwarded-host disagree.
         proxy_set_header Host $http_host;

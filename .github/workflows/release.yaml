@@ -11,7 +11,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: learnhouse/app
+  IMAGE_NAME: starlab/app
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
           file: ./Dockerfile
           platforms: ${{ matrix.platform }}
           build-args: |
-            LEARNHOUSE_PUBLIC=true
+            STARLAB_PUBLIC=true
           cache-from: type=gha,scope=release-${{ steps.prep.outputs.platform_pair }}
           cache-to: type=gha,mode=max,scope=release-${{ steps.prep.outputs.platform_pair }}
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
@@ -167,7 +167,7 @@ jobs:
           fi
 
           # Build the embed description
-          DESC="A new version of LearnHouse is available with **${FEAT_COUNT}** new feature(s) and **${FIX_COUNT}** bug fix(es)."
+          DESC="A new version of StarLab is available with **${FEAT_COUNT}** new feature(s) and **${FIX_COUNT}** bug fix(es)."
           if [ -n "$HIGHLIGHTS" ]; then
             DESC="${DESC}\n\n**Highlights:**\n${HIGHLIGHTS}"
           fi
@@ -180,32 +180,32 @@ jobs:
           {
             "content": "<@&RELEASE_PING_ROLE_ID>",
             "embeds": [{
-              "title": "LearnHouse ${VERSION}",
+              "title": "StarLab ${VERSION}",
               "url": "https://github.com/${{ github.repository }}/releases/tag/${VERSION}",
               "description": "${DESC}",
               "color": 3066993,
               "fields": [
                 {
                   "name": "Install",
-                  "value": "\`npx learnhouse setup\`",
+                  "value": "\`npx starlab setup\`",
                   "inline": true
                 },
                 {
                   "name": "Upgrade",
-                  "value": "\`npx learnhouse update --version ${VERSION}\`",
+                  "value": "\`npx starlab update --version ${VERSION}\`",
                   "inline": true
                 },
                 {
                   "name": "Docker",
-                  "value": "\`docker pull ghcr.io/learnhouse/app:${VERSION}\`",
+                  "value": "\`docker pull ghcr.io/starlab/app:${VERSION}\`",
                   "inline": false
                 }
               ],
               "thumbnail": {
-                "url": "https://github.com/learnhouse.png"
+                "url": "https://github.com/starlab.png"
               },
               "footer": {
-                "text": "LearnHouse • Open Source LMS"
+                "text": "StarLab • Open Source LMS"
               },
               "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             }]

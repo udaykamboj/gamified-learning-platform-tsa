@@ -8,8 +8,8 @@ export const ACCESS_TOKEN_MAX_AGE = 8 * 60 * 60 // 8 hours
 export const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 // 30 days
 
 export function getDomainFromRequest(request: NextRequest): { domain: string; topDomain: string } {
-  const envDomain = getConfig('NEXT_PUBLIC_LEARNHOUSE_DOMAIN')
-  const envTopDomain = getConfig('NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN')
+  const envDomain = getConfig('NEXT_PUBLIC_STARLAB_DOMAIN')
+  const envTopDomain = getConfig('NEXT_PUBLIC_STARLAB_TOP_DOMAIN')
   if (envDomain) {
     return {
       domain: envDomain,

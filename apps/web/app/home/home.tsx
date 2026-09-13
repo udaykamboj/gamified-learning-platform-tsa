@@ -5,7 +5,7 @@ import { useLHAnalytics } from '@services/analytics/useLHAnalytics'
 import { AnalyticsEvent } from '@services/analytics/events'
 import DemoEntryCard from '@components/Objects/Demo/DemoEntryCard'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { getAPIUrl, getUriWithOrg, getLEARNHOUSE_PLATFORM_URL_VAL } from '@services/config/config'
+import { getAPIUrl, getUriWithOrg, getSTARLAB_PLATFORM_URL_VAL } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { signOut } from '@components/Contexts/AuthContext'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
@@ -40,14 +40,14 @@ import {
 } from '@components/ui/dialog'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 
-function HomeClient() {
+function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean }) {
   const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const router = useRouter()
   const access_token = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
   const isLoading = session?.status === 'loading'
-  const platformUrl = getLEARNHOUSE_PLATFORM_URL_VAL()
+  const platformUrl = getSTARLAB_PLATFORM_URL_VAL()
 
   const { data: orgs, isLoading: orgsLoading } = useQuery({
     queryKey: ['orgs', 'user'],
@@ -66,10 +66,10 @@ function HomeClient() {
   // their first org rather than a confusing empty hub. Mirrors the platform's
   // post-signup onboarding hop.
   useEffect(() => {
-    if (isAuthenticated && Array.isArray(orgs) && orgs.length === 0) {
+    if (redirectEmptyOrgs && isAuthenticated && Array.isArray(orgs) && orgs.length === 0) {
       router.replace('/new')
     }
-  }, [isAuthenticated, orgs, router])
+  }, [isAuthenticated, orgs, redirectEmptyOrgs, router])
 
   return (
     <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
@@ -90,16 +90,16 @@ function HomeClient() {
           }}
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
+        <div className="relative z-10 flex flex-col items-center justify-start min-h-screen px-4 pb-12">
           <div className="w-full max-w-md flex flex-col items-center">
             {/* Brand */}
             <div className="flex flex-col items-center mb-10">
               { }
               <img
-                src="/lrn.svg"
-                alt="LearnHouse"
-                width={44}
-                height={44}
+                src="/starlab-black.svg"
+                alt="StarLab"
+                width={154}
+                height={30}
                 className="opacity-90"
               />
               <h1 className="mt-6 font-black tracking-tight text-2xl text-gray-900 text-center">
@@ -242,12 +242,12 @@ function HomeClient() {
                 className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30 hover:text-black/60 transition-colors"
               >
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">LearnHouse</span>
+                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">StarLab</span>
               </a>
             ) : (
               <div className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30">
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50">LearnHouse</span>
+                <span className="font-semibold tracking-tight text-black/50">StarLab</span>
               </div>
             )}
             <CopyrightFooter year={new Date().getFullYear()} className="mt-4 pt-0" />
@@ -320,7 +320,12 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
   return (
     <div className="relative flex items-center p-4 bg-white rounded-2xl nice-shadow hover:shadow-lg transition-all group">
       <Link
-        href={getUriWithOrg(org.slug, '/')}
+        href="/dashboard"
+        onClick={(event) => {
+          event.preventDefault()
+          document.cookie = `LH_org=${encodeURIComponent(org.slug)}; path=/; SameSite=Lax`
+          window.location.assign('/dashboard')
+        }}
         className="flex items-center flex-1 min-w-0"
       >
         {org.logo_image ? (

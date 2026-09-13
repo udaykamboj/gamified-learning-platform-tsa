@@ -22,8 +22,8 @@ import {
   Type,
   Box,
 } from 'lucide-react'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
-import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
+import starlabAI_icon from 'public/starlab_ai_simple.png'
+const starlabAI_logo_black = '/starlab-black.svg'
 import {
   AIEditorStateTypes,
   useAIEditor,
@@ -1028,7 +1028,7 @@ function AIEditorSidePanel(props: AIEditorSidePanelProps) {
                 isInputDisabled ? 'animate-pulse' : ''
               }`}
               width={24}
-              src={learnhouseAI_icon}
+              src={starlabAI_icon}
               alt=""
             />
             <span className="text-sm font-semibold text-white/80">
@@ -1488,7 +1488,7 @@ const AIEditorSidePanelPlaceholder = (props: { sendMessage: (_msg: string) => vo
             <Image
               width={80}
               className="mx-auto"
-              src={learnhouseAI_logo_black}
+              src={starlabAI_logo_black}
               alt=""
             />
             <p className="pt-3 text-lg font-semibold text-white/70 flex flex-col justify-center items-center">

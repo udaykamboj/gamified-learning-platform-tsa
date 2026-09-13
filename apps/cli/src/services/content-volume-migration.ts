@@ -30,15 +30,15 @@ export function migrateContentVolume(
   const envPath = path.join(installDir, '.env')
   if (fs.existsSync(envPath)) {
     const env = fs.readFileSync(envPath, 'utf-8')
-    if (/^LEARNHOUSE_CONTENT_DELIVERY_TYPE\s*=\s*s3api\s*$/m.test(env)) {
+    if (/^STARLAB_CONTENT_DELIVERY_TYPE\s*=\s*s3api\s*$/m.test(env)) {
       return { status: 'skipped_s3' }
     }
   }
 
   const projectName =
-    compose.match(/^name:\s*(\S+)/m)?.[1] ?? `learnhouse-${deploymentId}`
-  const volumeFull = `${projectName}_learnhouse_content_${deploymentId}`
-  const containerName = `learnhouse-app-${deploymentId}`
+    compose.match(/^name:\s*(\S+)/m)?.[1] ?? `starlab-${deploymentId}`
+  const volumeFull = `${projectName}_starlab_content_${deploymentId}`
+  const containerName = `starlab-app-${deploymentId}`
 
   let copiedBytes = 0
   const hasContainer = dockerContainerExists(containerName)
@@ -109,15 +109,15 @@ export function patchComposeAddContentVolume(
   compose: string,
   deploymentId: string,
 ): string {
-  const mountLine = `      - learnhouse_content_${deploymentId}:${CONTENT_PATH}`
+  const mountLine = `      - starlab_content_${deploymentId}:${CONTENT_PATH}`
 
-  const appStart = compose.indexOf('learnhouse-app:')
+  const appStart = compose.indexOf('starlab-app:')
   if (appStart === -1) {
-    throw new Error('learnhouse-app service not found in docker-compose.yml')
+    throw new Error('starlab-app service not found in docker-compose.yml')
   }
   const networksIdx = compose.indexOf('\n    networks:', appStart)
   if (networksIdx === -1) {
-    throw new Error('No service-level networks: block under learnhouse-app')
+    throw new Error('No service-level networks: block under starlab-app')
   }
 
   const appBody = compose.slice(appStart, networksIdx)
@@ -132,7 +132,7 @@ export function patchComposeAddContentVolume(
     compose = compose.slice(0, networksIdx + 1) + block + compose.slice(networksIdx + 1)
   }
 
-  const volumeEntry = `  learnhouse_content_${deploymentId}:`
+  const volumeEntry = `  starlab_content_${deploymentId}:`
   if (/^volumes:\s*$/m.test(compose) || /^volumes:\s*\n/m.test(compose)) {
     if (!compose.includes(volumeEntry)) {
       compose = compose.replace(/\s*$/, '') + `\n${volumeEntry}\n`

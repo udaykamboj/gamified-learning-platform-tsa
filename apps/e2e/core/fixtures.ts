@@ -1,7 +1,7 @@
 /**
  * Shared Playwright fixtures.
  *
- * The big one: we suppress LearnHouse's first-run onboarding (the "Welcome"
+ * The big one: we suppress StarLab's first-run onboarding (the "Welcome"
  * splash + the "Getting Started" checklist) by pre-seeding its localStorage
  * state via an init script that runs before any page script on every
  * navigation. Without this, the onboarding's full-screen overlay intercepts

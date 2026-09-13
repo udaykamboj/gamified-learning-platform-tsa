@@ -45,14 +45,14 @@ describe('backup / restore — real tar, stubbed database', () => {
 
   beforeEach(() => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-br-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     origHome = process.env.HOME
     process.env.HOME = home
     dockerMock.isContainerRunning.mockReturnValue(true)
@@ -78,8 +78,8 @@ describe('backup / restore — real tar, stubbed database', () => {
     // Pin the exact pg_dump invocation: it MUST target the deployment's db
     // container and pass --clean --if-exists so the restore is idempotent.
     expect(dockerMock.dockerExecToFile).toHaveBeenCalledWith(
-      'learnhouse-db-dep1',
-      'pg_dump -U learnhouse --clean --if-exists learnhouse',
+      'starlab-db-dep1',
+      'pg_dump -U starlab --clean --if-exists starlab',
       expect.stringMatching(/database\.sql$/),
     )
 
@@ -177,7 +177,7 @@ describe('backup / restore — real tar, stubbed database', () => {
     await backupCommand() // make an archive while the config is still local
     const backupsDir = path.join(installDir, 'backups')
     const archive = path.join(backupsDir, fs.readdirSync(backupsDir).find((f) => f.endsWith('.tar.gz'))!)
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: true, orgSlug: 'default',
@@ -243,7 +243,7 @@ describe('backup / restore — real tar, stubbed database', () => {
       // Prove the menu actually ROUTED to restore (ran psql) rather than no-opping —
       // the previous version of this test had no assertion at all.
       expect(dockerMock.dockerExecFromFile).toHaveBeenCalledWith(
-        'learnhouse-db-dep1', 'psql -U learnhouse -d learnhouse', expect.stringMatching(/database\.sql$/),
+        'starlab-db-dep1', 'psql -U starlab -d starlab', expect.stringMatching(/database\.sql$/),
       )
     } finally {
       Object.defineProperty(process.stdout, 'isTTY', { value: orig, configurable: true })
@@ -259,8 +259,8 @@ describe('backup / restore — real tar, stubbed database', () => {
     // Prove the restore ACTUALLY ran psql against the right container with the
     // extracted dump — not merely that the command returned without throwing.
     expect(dockerMock.dockerExecFromFile).toHaveBeenCalledWith(
-      'learnhouse-db-dep1',
-      'psql -U learnhouse -d learnhouse',
+      'starlab-db-dep1',
+      'psql -U starlab -d starlab',
       expect.stringMatching(/database\.sql$/),
     )
   })
@@ -319,7 +319,7 @@ describe('backup / restore — real tar, stubbed database', () => {
 
   it('restore exits when the found config has no deployment id', async () => {
     const cwdDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-rnoid-'))
-    fs.writeFileSync(path.join(cwdDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(cwdDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z', // no deploymentId
       installDir: cwdDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -344,7 +344,7 @@ describe('backup / restore — real tar, stubbed database', () => {
   })
 
   it('restore exits when no deployment id can be resolved', async () => {
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z', // no deploymentId
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -356,7 +356,7 @@ describe('backup / restore — real tar, stubbed database', () => {
   })
 
   it('backup and restore refuse an external database', async () => {
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: true, orgSlug: 'default',
@@ -372,9 +372,9 @@ describe('backup / restore — real tar, stubbed database', () => {
     const backupsDir = path.join(installDir, 'backups')
     const archive = path.join(backupsDir, fs.readdirSync(backupsDir).find((f) => f.endsWith('.tar.gz'))!)
     // Change the live .env, then restore — the archived .env should come back.
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=changed\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=changed\n')
     await backupCommand(archive, { restore: true })
-    expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('LEARNHOUSE_DOMAIN=localhost')
+    expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('STARLAB_DOMAIN=localhost')
   })
 
   it('restore restores the .env in interactive mode when confirmed', async () => {
@@ -384,9 +384,9 @@ describe('backup / restore — real tar, stubbed database', () => {
     const orig = process.stdout.isTTY
     Object.defineProperty(process.stdout, 'isTTY', { value: true, configurable: true })
     try {
-      fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=changed\n')
+      fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=changed\n')
       await restoreCommand(archive) // confirm=true (stub) → restore + .env restore
-      expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('LEARNHOUSE_DOMAIN=localhost')
+      expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('STARLAB_DOMAIN=localhost')
     } finally {
       Object.defineProperty(process.stdout, 'isTTY', { value: orig, configurable: true })
     }

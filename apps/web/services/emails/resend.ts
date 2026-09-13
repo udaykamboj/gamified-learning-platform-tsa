@@ -2,7 +2,7 @@ import 'server-only'
 import { Resend } from 'resend'
 import * as React from 'react'
 import { isSaaSMode } from '@lib/saas'
-import { LearnHouseEmail, type LearnHouseEmailProps } from '@components/Emails/LearnHouseEmail'
+import { StarLabEmail, type StarLabEmailProps } from '@components/Emails/StarLabEmail'
 
 // Resend transactional email. Lazy singleton so a keyless build/deploy never
 // throws at import time. `send()` renders the shared React Email template and is
@@ -28,7 +28,7 @@ export function isEmailEnabled(): boolean {
 }
 
 const DEFAULT_FROM =
-  process.env.RESEND_FROM_EMAIL || 'LearnHouse <hello@emails.learnhouse.app>'
+  process.env.RESEND_FROM_EMAIL || 'StarLab <hello@emails.starlab.app>'
 
 export interface SendResult {
   ok: boolean
@@ -43,7 +43,7 @@ export interface SendResult {
 export async function send(
   to: string | string[],
   subject: string,
-  props: LearnHouseEmailProps,
+  props: StarLabEmailProps,
   from: string = DEFAULT_FROM,
 ): Promise<SendResult> {
   // SaaS-only: transactional email never sends on OSS/self-hosted, even if a
@@ -61,7 +61,7 @@ export async function send(
       from,
       to: Array.isArray(to) ? to : [to],
       subject,
-      react: React.createElement(LearnHouseEmail, props),
+      react: React.createElement(StarLabEmail, props),
     })
     if (error) {
       console.error('[email] Resend error:', error)

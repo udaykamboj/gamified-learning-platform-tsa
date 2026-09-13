@@ -11,7 +11,7 @@ import {
 } from '@services/auth/cookies'
 import { isLocalhost } from '@services/utils/ts/hostUtils'
 
-const BACKEND_URL = (getConfig('NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
+const BACKEND_URL = (getConfig('NEXT_PUBLIC_STARLAB_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
 
 // Paths that return tokens in response body (relative to /api/v1/auth/)
 // `verify-email` auto-signs-in the user on successful email verification, so
@@ -87,6 +87,9 @@ function appendClearAuthCookies(response: NextResponse, request: NextRequest) {
   const domainScoped =
     !isLocalhost(host) && topDomain && topDomain !== 'localhost' ? `.${topDomain}` : undefined
 
+  // ALWAYS try to clear .localhost if host is localhost, to clean up stuck cookies
+  const localhostScoped = isLocalhost(host) ? '.localhost' : undefined
+
   const clear = (name: string, httpOnly: boolean, domain?: string) => {
     const httpPart = httpOnly ? '; HttpOnly' : ''
     const domainPart = domain ? `; Domain=${domain}` : ''
@@ -99,10 +102,12 @@ function appendClearAuthCookies(response: NextResponse, request: NextRequest) {
   for (const n of CLEAR_HTTPONLY) {
     clear(n, true)
     if (domainScoped) clear(n, true, domainScoped)
+    if (localhostScoped) clear(n, true, localhostScoped)
   }
   for (const n of CLEAR_MARKERS) {
     clear(n, false)
     if (domainScoped) clear(n, false, domainScoped)
+    if (localhostScoped) clear(n, false, localhostScoped)
   }
 }
 
@@ -290,7 +295,12 @@ async function proxyRequest(
   let responseBody: BodyInit
 
   if (responseContentType?.includes('application/json')) {
-    responseData = await backendResponse.json()
+    const text = await backendResponse.text()
+    try {
+      responseData = text ? JSON.parse(text) : {}
+    } catch (e) {
+      responseData = { detail: { message: 'Invalid JSON from backend', raw: text } }
+    }
     responseBody = JSON.stringify(responseData)
   } else {
     responseBody = await backendResponse.text()

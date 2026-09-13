@@ -152,13 +152,13 @@ describe('EE setup — start, DNS and file variants (CI)', () => {
   it('writes a local-TLS override and prints the self-signed TLS notice', async () => {
     const fs = await import('node:fs'); const path = await import('node:path')
     await setupEnterprise({ ...CI, name: 'ee-tls', localTls: true, start: true }) // start → dnsBlock TLS note (170-171)
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-tls', 'docker-compose.override.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-tls', 'docker-compose.override.yml'))).toBe(true)
   })
 
   it('prints the wildcard DNS records for an agency install', async () => {
     const fs = await import('node:fs'); const path = await import('node:path')
     await setupEnterprise({ ...CI, name: 'ee-agency', tenancy: 'agency', start: true }) // start → agency dnsBlock (160-161)
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-agency', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-agency', 'docker-compose.yml'))).toBe(true)
   })
 
   it('aborts the start when 80/443 are already in use', async () => {
@@ -180,7 +180,7 @@ describe('EE setup — start, DNS and file variants (CI)', () => {
     dk.upInvokesRetry = true // exercises the retry-notice callback, then succeeds
     await setupEnterprise({ ...CI, name: 'ee-retry', start: true })
     const fs = await import('node:fs'); const path = await import('node:path')
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-retry', '.env'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-retry', '.env'))).toBe(true)
   })
 
   it('reuses the existing deployment id and secrets on redeploy', async () => {
@@ -188,7 +188,7 @@ describe('EE setup — start, DNS and file variants (CI)', () => {
     await setupEnterprise({ ...CI, name: 'ee-redeploy', start: false })
     await setupEnterprise({ ...CI, name: 'ee-redeploy', start: false })
     const fs = await import('node:fs'); const path = await import('node:path')
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-redeploy', '.env'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-redeploy', '.env'))).toBe(true)
   })
 })
 

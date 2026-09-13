@@ -1,6 +1,9 @@
 from typing import List, Literal, Optional, Union
-from fastapi import APIRouter, Depends, Request, UploadFile, Query, Path, HTTPException
+from fastapi import APIRouter, Depends, Request, UploadFile, Query, Path, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
+from src.security.superadmin import is_user_superadmin
+from src.db.users import AnonymousUser, PublicUser
+from src.core.events.database import get_db_session
 from src.services.orgs.invites import (
     create_invite_code,
     delete_invite_code,
@@ -21,15 +24,40 @@ from src.services.orgs.users import (
     update_user_role,
 )
 from src.db.organization_config import OrganizationConfigBase
-from src.db.users import AnonymousUser, PublicUser
 from src.db.organizations import (
     OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.core.events.database import get_db_session
 from src.security.auth import get_current_user, get_authenticated_user
 from src.security.features_utils.dependencies import require_org_admin
+
+
+async def _require_platform_superadmin(
+    db_session: AsyncSession = Depends(get_db_session),
+    request: Request = None,
+):
+    """Enforce that only the platform superadmin can create organizations.
+
+    This is the single-org model enforcement: regular users (students, org admins)
+    cannot create new organizations — only the seeded platform superadmin can.
+    Unlike the EE `require_superadmin`, this guard works in all deployment modes.
+    """
+    from src.security.auth import get_current_user as _get_current_user
+    user = await _get_current_user(request, db_session)
+    if isinstance(user, AnonymousUser):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    if not await is_user_superadmin(user.id, db_session):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only platform superadmins can create organizations in single-organization mode.",
+        )
+    return user
+
+
 from src.services.orgs.orgs import (
     create_org,
     create_org_with_config,
@@ -80,61 +108,6 @@ feature_config_router = APIRouter(
     dependencies=[Depends(require_org_admin)],
 )
 
-
-@router.post(
-    "/",
-    response_model=OrganizationRead,
-    summary="Create an organization",
-    description="Create a new organization owned by the authenticated user.",
-    responses={
-        200: {"description": "Organization created.", "model": OrganizationRead},
-        401: {"description": "Not authenticated"},
-    },
-)
-async def api_create_org(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    return await create_org(request, org_object, current_user, db_session)
-
-
-# Temporary pre-alpha code
-@router.post(
-    "/withconfig/",
-    response_model=OrganizationRead,
-    summary="Create an organization with config",
-    description="Create a new organization together with its base configuration in a single call (pre-alpha).",
-    responses={
-        200: {"description": "Organization and configuration created.", "model": OrganizationRead},
-        401: {"description": "Not authenticated"},
-    },
-)
-async def api_create_org_withconfig(
-    request: Request,
-    org_object: OrganizationCreate,
-    config_object: OrganizationConfigBase,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    # SECURITY: create_org_with_config() persists the client-supplied config
-    # verbatim. The config carries the org's billing plan (cloud.plan), so a
-    # self-service caller could otherwise mint a free "enterprise"/"pro" org and
-    # unlock every paid feature/limit without paying. The standard create_org
-    # path always provisions a "free" plan; force the same here so the plan can
-    # only ever be elevated through the billing system, not the request body.
-    if config_object.cloud is not None:
-        config_object.cloud.plan = "free"
-    return await create_org_with_config(
-        request, org_object, current_user, db_session, config_object
-    )
 
 
 @router.get(

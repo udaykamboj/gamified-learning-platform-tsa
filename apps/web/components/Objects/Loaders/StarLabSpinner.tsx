@@ -1,11 +1,11 @@
 'use client'
 
-type LearnHouseSpinnerProps = {
+type StarLabSpinnerProps = {
   size?: number
   className?: string
 }
 
-function LearnHouseSpinner({ size = 44, className = '' }: LearnHouseSpinnerProps) {
+function StarLabSpinner({ size = 44, className = '' }: StarLabSpinnerProps) {
   return (
     <div className={`flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
       <div
@@ -20,4 +20,4 @@ function LearnHouseSpinner({ size = 44, className = '' }: LearnHouseSpinnerProps
   )
 }
 
-export default LearnHouseSpinner
+export default StarLabSpinner

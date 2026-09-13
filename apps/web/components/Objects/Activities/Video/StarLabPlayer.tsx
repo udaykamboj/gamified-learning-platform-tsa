@@ -49,7 +49,7 @@ export interface ThumbnailsConfig {
   rows: number
 }
 
-interface LearnHousePlayerProps {
+interface StarLabPlayerProps {
   src: string
   /** When true, `src` is an HLS master playlist (.m3u8). */
   isHls?: boolean
@@ -74,7 +74,7 @@ const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2]
  * Video.js and its plugins are imported dynamically inside an effect so nothing
  * touches `window`/`document` during SSR.
  */
-const LearnHousePlayer: React.FC<LearnHousePlayerProps> = ({
+const StarLabPlayer: React.FC<StarLabPlayerProps> = ({
   src,
   isHls = false,
   fallbackSrc,
@@ -326,7 +326,7 @@ const LearnHousePlayer: React.FC<LearnHousePlayerProps> = ({
     // those styles don't, so the progress bar and the buffered overlay end up
     // filling in opposite directions. Transport controls are left-to-right
     // everywhere anyway.
-    <div dir="ltr" className="learnhouse-player relative w-full h-full" data-vjs-player>
+    <div dir="ltr" className="starlab-player relative w-full h-full" data-vjs-player>
       <div ref={containerRef} className="w-full h-full" />
       {loadError && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/80 p-4 text-center text-white">
@@ -347,4 +347,4 @@ const LearnHousePlayer: React.FC<LearnHousePlayerProps> = ({
   )
 }
 
-export default LearnHousePlayer
+export default StarLabPlayer

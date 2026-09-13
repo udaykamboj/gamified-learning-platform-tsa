@@ -83,12 +83,12 @@ describe('EE helpers', () => {
 describe('generateEeDockerCompose (single)', () => {
   const yml = generateEeDockerCompose(baseEe())
   it('uses the EE registry images', () => {
-    expect(yml).toContain('images.learnhouse.app/enterprise-backend:${EE_IMAGE_TAG:-prod}')
-    expect(yml).toContain('images.learnhouse.app/enterprise-frontend:${EE_IMAGE_TAG:-prod}')
-    expect(yml).toContain('images.learnhouse.app/enterprise-collab:${EE_IMAGE_TAG:-prod}')
+    expect(yml).toContain('images.starlab.app/enterprise-backend:${EE_IMAGE_TAG:-prod}')
+    expect(yml).toContain('images.starlab.app/enterprise-frontend:${EE_IMAGE_TAG:-prod}')
+    expect(yml).toContain('images.starlab.app/enterprise-collab:${EE_IMAGE_TAG:-prod}')
   })
   it('namespaces project by deploymentId', () => {
-    expect(yml).toContain('name: learnhouse-abcd1234')
+    expect(yml).toContain('name: starlab-abcd1234')
   })
   it('has all six services', () => {
     for (const svc of ['db:', 'redis:', 'caddy:', 'api:', 'web:', 'collab:']) {
@@ -96,9 +96,9 @@ describe('generateEeDockerCompose (single)', () => {
     }
   })
   it('is single-tenant', () => {
-    expect(yml).toContain('LEARNHOUSE_TENANCY: single')
-    expect(yml).toContain('NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG: "false"')
-    expect(yml).not.toContain('LEARNHOUSE_TENANCY: multi')
+    expect(yml).toContain('STARLAB_TENANCY: single')
+    expect(yml).toContain('NEXT_PUBLIC_STARLAB_MULTI_ORG: "false"')
+    expect(yml).not.toContain('STARLAB_TENANCY: multi')
   })
   it('uses the DOMAIN var for caddy', () => {
     expect(yml).toContain('DOMAIN: ${DOMAIN:?DOMAIN is required}')
@@ -120,12 +120,12 @@ describe('generateEeDockerCompose (single)', () => {
 describe('generateEeDockerCompose (agency)', () => {
   const yml = generateEeDockerCompose(baseEe({ eeTenancy: 'agency' }))
   it('is multi-tenant', () => {
-    expect(yml).toContain('LEARNHOUSE_TENANCY: multi')
-    expect(yml).toContain('NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG: "true"')
+    expect(yml).toContain('STARLAB_TENANCY: multi')
+    expect(yml).toContain('NEXT_PUBLIC_STARLAB_MULTI_ORG: "true"')
   })
   it('uses AGENCY_DOMAIN + cookie domain', () => {
     expect(yml).toContain('AGENCY_DOMAIN: ${AGENCY_DOMAIN:?AGENCY_DOMAIN is required}')
-    expect(yml).toContain('LEARNHOUSE_COOKIE_DOMAIN: .${AGENCY_DOMAIN}')
+    expect(yml).toContain('STARLAB_COOKIE_DOMAIN: .${AGENCY_DOMAIN}')
   })
 })
 
@@ -156,15 +156,15 @@ describe('generateEeEnv', () => {
   const secrets = { dbPassword: 'DBPASS', jwtSecret: 'JWTSECRET', collabKey: 'COLLABKEY' }
   it('single: writes the env-var contract', () => {
     const env = generateEeEnv(baseEe(), secrets)
-    expect(env).toContain('LEARNHOUSE_LICENSE_KEY=lh_live_TESTKEY')
+    expect(env).toContain('STARLAB_LICENSE_KEY=lh_live_TESTKEY')
     expect(env).toContain('DOMAIN=learn.acme.com')
     expect(env).toContain('ACME_EMAIL=ops@acme.com')
     expect(env).toContain('EE_IMAGE_TAG=prod')
     expect(env).toContain('DB_PASSWORD=DBPASS')
-    expect(env).toContain('LEARNHOUSE_AUTH_JWT_SECRET_KEY=JWTSECRET')
+    expect(env).toContain('STARLAB_AUTH_JWT_SECRET_KEY=JWTSECRET')
     expect(env).toContain('COLLAB_INTERNAL_KEY=COLLABKEY')
-    expect(env).toContain('LEARNHOUSE_INITIAL_ADMIN_EMAIL=admin@acme.com')
-    expect(env).toContain('LEARNHOUSE_INITIAL_ADMIN_PASSWORD=sup3rsecret')
+    expect(env).toContain('STARLAB_INITIAL_ADMIN_EMAIL=admin@acme.com')
+    expect(env).toContain('STARLAB_INITIAL_ADMIN_PASSWORD=sup3rsecret')
   })
   it('agency: uses AGENCY_DOMAIN', () => {
     const env = generateEeEnv(baseEe({ eeTenancy: 'agency' }), secrets)
@@ -173,11 +173,11 @@ describe('generateEeEnv', () => {
   })
   it('quotes special-char admin password literally (single-quote scheme)', () => {
     const env = generateEeEnv(baseEe({ adminPassword: 'p@ss$word#1' }), secrets)
-    expect(env).toContain("LEARNHOUSE_INITIAL_ADMIN_PASSWORD='p@ss$word#1'")
+    expect(env).toContain("STARLAB_INITIAL_ADMIN_PASSWORD='p@ss$word#1'")
   })
   it('quotes admin email so $ cannot interpolate', () => {
     const env = generateEeEnv(baseEe({ adminEmail: 'a$b@corp.com' }), secrets)
-    expect(env).toContain("LEARNHOUSE_INITIAL_ADMIN_EMAIL='a$b@corp.com'")
+    expect(env).toContain("STARLAB_INITIAL_ADMIN_EMAIL='a$b@corp.com'")
   })
 })
 
@@ -222,14 +222,14 @@ describe('writeConfig persists EE metadata', () => {
   afterEach(() => { fs.rmSync(dir, { recursive: true, force: true }) })
   it('stores edition/tenancy/localTls for enterprise', () => {
     writeConfig(baseEe({ installDir: dir, eeTenancy: 'agency', eeLocalTls: true }))
-    const json = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8'))
+    const json = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8'))
     expect(json.edition).toBe('enterprise')
     expect(json.eeTenancy).toBe('agency')
     expect(json.eeLocalTls).toBe(true)
   })
   it('marks community installs as community', () => {
     writeConfig(baseEe({ installDir: dir, edition: 'community' }))
-    const json = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8'))
+    const json = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8'))
     expect(json.edition).toBe('community')
     expect(json.eeTenancy).toBeUndefined()
   })
@@ -253,11 +253,11 @@ describe('setup --ci --edition enterprise (file generation)', () => {
     expect(fs.existsSync(path.join(dir, '.env'))).toBe(true)
     expect(fs.existsSync(path.join(dir, 'Caddyfile'))).toBe(true)
     expect(fs.existsSync(path.join(dir, 'pgvector-init.sql'))).toBe(true)
-    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8'))
+    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8'))
     expect(cfg.edition).toBe('enterprise')
     expect(cfg.eeTenancy).toBe('single')
     const compose = fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8')
-    expect(compose).toContain('LEARNHOUSE_TENANCY: single')
+    expect(compose).toContain('STARLAB_TENANCY: single')
   })
 
   it('agency + local-tls: multi-tenant compose + override + local_certs', () => {
@@ -265,7 +265,7 @@ describe('setup --ci --edition enterprise (file generation)', () => {
     expect(r.exitCode).toBe(0)
     expect(fs.existsSync(path.join(dir, 'docker-compose.override.yml'))).toBe(true)
     const compose = fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8')
-    expect(compose).toContain('LEARNHOUSE_TENANCY: multi')
+    expect(compose).toContain('STARLAB_TENANCY: multi')
     const caddy = fs.readFileSync(path.join(dir, 'Caddyfile'), 'utf-8')
     expect(caddy).toContain('local_certs')
     const env = fs.readFileSync(path.join(dir, '.env'), 'utf-8')
@@ -303,10 +303,10 @@ describe('setup --ci --edition enterprise (file generation)', () => {
 
   it('reuses deploymentId on redeploy (so data volumes are not orphaned)', () => {
     cli(base(''))
-    const id1 = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8')).deploymentId
+    const id1 = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8')).deploymentId
     const composeName1 = fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8').match(/^name:\s*(\S+)/m)?.[1]
     cli(base(''))
-    const id2 = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8')).deploymentId
+    const id2 = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8')).deploymentId
     const composeName2 = fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8').match(/^name:\s*(\S+)/m)?.[1]
     expect(id1).toBeTruthy()
     expect(id2).toBe(id1)

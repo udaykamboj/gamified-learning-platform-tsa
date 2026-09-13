@@ -46,22 +46,22 @@ async function showWelcome() {
     console.log(`    ${pc.cyan(cmd.name.padEnd(14))} ${pc.dim(cmd.desc)}`)
   }
   console.log()
-  console.log(pc.dim('  Run a command with: npx learnhouse <command>'))
-  console.log(pc.dim('  Get started with:   npx learnhouse setup'))
+  console.log(pc.dim('  Run a command with: npx starlab <command>'))
+  console.log(pc.dim('  Get started with:   npx starlab setup'))
   console.log()
 }
 
 const program = new Command()
 
 program
-  .name('learnhouse')
-  .description('The official LearnHouse CLI — deploy, manage, and operate your LearnHouse instance')
+  .name('starlab')
+  .description('The official StarLab CLI — deploy, manage, and operate your StarLab instance')
   .version(VERSION)
   .action(showWelcome)
 
 program
   .command('setup')
-  .description('Interactive setup wizard for LearnHouse')
+  .description('Interactive setup wizard for StarLab')
   .option('--ci', 'Non-interactive mode with defaults (for CI/automation)')
   .option('--name <name>', 'Installation name (default: "default")')
   .option('--domain <domain>', 'Domain name (default: "localhost")')
@@ -89,27 +89,27 @@ program
 
 program
   .command('start')
-  .description('Start LearnHouse services')
+  .description('Start StarLab services')
   .action(startCommand)
 
 program
   .command('stop')
-  .description('Stop LearnHouse services')
+  .description('Stop StarLab services')
   .action(stopCommand)
 
 program
   .command('logs')
-  .description('Stream logs from LearnHouse services')
+  .description('Stream logs from StarLab services')
   .action(logsCommand)
 
 program
   .command('config')
-  .description('Show current LearnHouse configuration')
+  .description('Show current StarLab configuration')
   .action(configCommand)
 
 program
   .command('backup')
-  .description('Backup & restore LearnHouse database')
+  .description('Backup & restore StarLab database')
   .argument('[archive]', 'Path to backup archive for restore')
   .option('--restore', 'Restore from a backup archive')
   .action(backupCommand)
@@ -121,17 +121,17 @@ program
 
 program
   .command('doctor')
-  .description('Diagnose common issues with LearnHouse')
+  .description('Diagnose common issues with StarLab')
   .action(doctorCommand)
 
 program
   .command('shell')
-  .description('Open a shell in a LearnHouse container')
+  .description('Open a shell in a StarLab container')
   .action(shellCommand)
 
 program
   .command('update')
-  .description('Update LearnHouse to latest or a specific version (EE: backs up the DB + runs migrations)')
+  .description('Update StarLab to latest or a specific version (EE: backs up the DB + runs migrations)')
   // Note: --version is intentionally avoided here because Commander v15 intercepts
   // --version at the root program level, so subcommand --version flags silently
   // become the global version output. Use --to or -v instead.

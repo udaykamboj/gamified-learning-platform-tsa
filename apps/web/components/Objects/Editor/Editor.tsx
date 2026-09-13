@@ -12,7 +12,7 @@ const ToolbarButtons = dynamic(
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import starlabAI_icon from 'public/starlab_ai_simple.png'
 import {
   AIEditorStateTypes,
   useAIEditor,
@@ -466,7 +466,7 @@ function Editor(props: EditorProps) {
             <div className="activity-editor-doc-section">
               <div className="activity-editor-info-wrapper">
                 <Link href="/">
-                  <EditorLearnHouseLogo />
+                  <EditorStarLabLogo />
                 </Link>
                 <Link target="_blank" href={`/course/${course_uuid}`}>
                   <img
@@ -514,7 +514,7 @@ function Editor(props: EditorProps) {
                         <Image
                           className=""
                           width={20}
-                          src={learnhouseAI_icon}
+                          src={starlabAI_icon}
                           alt=""
                         />
                       </i>{' '}
@@ -529,7 +529,7 @@ function Editor(props: EditorProps) {
                         <Image
                           className="opacity-50 grayscale"
                           width={20}
-                          src={learnhouseAI_icon}
+                          src={starlabAI_icon}
                           alt=""
                         />
                       </i>
@@ -706,7 +706,7 @@ const logoAnimations = [
   },
 ]
 
-const EditorLearnHouseLogo = () => {
+const EditorStarLabLogo = () => {
   const [animation] = React.useState(
     () => logoAnimations[Math.floor(Math.random() * logoAnimations.length)]
   )
@@ -719,8 +719,8 @@ const EditorLearnHouseLogo = () => {
         transition={animation.transition}
       >
         <Image
-          src="/lrn.svg"
-          alt="LearnHouse"
+          src="/starlab-black.svg"
+          alt="StarLab"
           width={14}
           height={14}
           className="invert"

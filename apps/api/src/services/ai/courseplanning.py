@@ -5,7 +5,7 @@ import redis
 import json
 import base64
 
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.services.ai.llm import generate_stream, attachments_to_parts, model_for_tier
 from src.services.ai.schemas.courseplanning import (
     CoursePlan,
@@ -16,7 +16,7 @@ from src.services.ai.schemas.courseplanning import (
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+LH_CONFIG = get_starlab_config()
 
 # Redis key pattern for course planning sessions
 COURSE_PLANNING_SESSION_KEY = "course_planning_session:{session_uuid}"
@@ -214,7 +214,7 @@ IMPORTANT GUIDELINES:
 - Activity names should be descriptive (e.g., "Introduction to Variables", "Quiz: Testing Your Knowledge")
 
 ACTIVITY TYPES AND SUGGESTED BLOCKS:
-Activities in LearnHouse use a rich content editor with various block types. For each activity, suggest appropriate blocks:
+Activities in StarLab use a rich content editor with various block types. For each activity, suggest appropriate blocks:
 - paragraph: Regular text content
 - heading: Section headers (levels 1-3)
 - bulletList: Unordered lists

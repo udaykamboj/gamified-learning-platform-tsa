@@ -9,7 +9,7 @@ import { autoDetectDeploymentId, isContainerRunning, dockerExecFromFile } from '
 export async function restoreCommand(archivePath: string) {
   if (!archivePath) {
     p.log.error('Please provide the path to a backup archive.')
-    p.log.info('Usage: npx learnhouse restore <backup-file.tar.gz>')
+    p.log.info('Usage: npx starlab restore <backup-file.tar.gz>')
     process.exit(1)
   }
 
@@ -22,7 +22,7 @@ export async function restoreCommand(archivePath: string) {
   const config = readConfig(installDir)
 
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run setup first.')
+    p.log.error('No StarLab installation found. Run setup first.')
     process.exit(1)
   }
 
@@ -38,7 +38,7 @@ export async function restoreCommand(archivePath: string) {
     process.exit(1)
   }
 
-  const dbContainer = `learnhouse-db-${id}`
+  const dbContainer = `starlab-db-${id}`
   if (!isContainerRunning(dbContainer)) {
     p.log.error('Database container is not running. Start services first.')
     process.exit(1)
@@ -98,7 +98,7 @@ export async function restoreCommand(archivePath: string) {
     // Drop and recreate the database
     dockerExecFromFile(
       dbContainer,
-      'psql -U learnhouse -d learnhouse',
+      'psql -U starlab -d starlab',
       dumpPath,
     )
     s2.stop('Database restored')
@@ -126,5 +126,5 @@ export async function restoreCommand(archivePath: string) {
   fs.rmSync(tmpDir, { recursive: true, force: true })
 
   p.log.success(pc.green(pc.bold('Restore complete!')))
-  p.log.info('You may want to restart services: npx learnhouse stop && npx learnhouse start')
+  p.log.info('You may want to restart services: npx starlab stop && npx starlab start')
 }

@@ -3,8 +3,8 @@ name: E2E
 permissions:
   contents: read
 
-# End-to-end UI acceptance suite (apps/e2e). It boots a full LearnHouse
-# self-host via the LearnHouse CLI — pulling the PUBLISHED app image — and
+# End-to-end UI acceptance suite (apps/e2e). It boots a full StarLab
+# self-host via the StarLab CLI — pulling the PUBLISHED app image — and
 # drives the UI with Playwright across every feature module under
 # apps/e2e/features/.
 #
@@ -49,7 +49,7 @@ jobs:
       - name: Run E2E suite (all feature modules)
         working-directory: apps/e2e
         env:
-          E2E_CLI: node ${{ github.workspace }}/apps/cli/dist/bin/learnhouse.js
+          E2E_CLI: node ${{ github.workspace }}/apps/cli/dist/bin/starlab.js
           E2E_ADMIN_PASSWORD: E2eTestAdmin!234
           E2E_PORT: '8080'
         run: bun run test

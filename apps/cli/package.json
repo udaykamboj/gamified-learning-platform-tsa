@@ -1,10 +1,10 @@
 {
-  "name": "learnhouse",
+  "name": "starlab",
   "version": "1.5.1",
-  "description": "The official LearnHouse CLI — deploy, manage, and operate your LearnHouse instance",
+  "description": "The official StarLab CLI — deploy, manage, and operate your StarLab instance",
   "type": "module",
   "bin": {
-    "learnhouse": "./dist/bin/learnhouse.js"
+    "starlab": "./dist/bin/starlab.js"
   },
   "files": [
     "dist"
@@ -23,15 +23,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/learnhouse/learnhouse.git",
+    "url": "https://github.com/starlab/starlab.git",
     "directory": "apps/cli"
   },
-  "homepage": "https://learnhouse.app",
+  "homepage": "https://starlab.app",
   "bugs": {
-    "url": "https://github.com/learnhouse/learnhouse/issues"
+    "url": "https://github.com/starlab/starlab/issues"
   },
   "keywords": [
-    "learnhouse",
+    "starlab",
     "lms",
     "self-hosted",
     "cli",
@@ -39,7 +39,7 @@
     "education",
     "learning-management-system"
   ],
-  "author": "LearnHouse",
+  "author": "StarLab",
   "devDependencies": {
     "@types/node": "^26.0.0",
     "@vitest/coverage-v8": "^4",

@@ -10,21 +10,21 @@ import PostHogProvider from '../components/Analytics/PostHogProvider'
 
 export const metadata = {
   title: {
-    default: 'LearnHouse Docs',
-    template: '%s – LearnHouse Docs',
+    default: 'StarLab Docs',
+    template: '%s – StarLab Docs',
   },
   description:
-    'Official documentation for LearnHouse, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
+    'Official documentation for StarLab, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
   keywords: [
-    'LearnHouse',
+    'StarLab',
     'open source LMS',
     'learning management system',
     'self-hosted LMS',
     'course creation',
-    'LearnHouse documentation',
-    'LearnHouse docs',
+    'StarLab documentation',
+    'StarLab docs',
   ],
-  metadataBase: new URL('https://docs.learnhouse.app'),
+  metadataBase: new URL('https://docs.starlab.app'),
   robots: {
     index: true,
     follow: true,
@@ -39,22 +39,22 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://docs.learnhouse.app',
-    siteName: 'LearnHouse Docs',
+    url: 'https://docs.starlab.app',
+    siteName: 'StarLab Docs',
     description:
-      'Official documentation for LearnHouse, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
+      'Official documentation for StarLab, the open-source learning management system (LMS). Guides for self-hosting, course creation, AI features, API reference, and more.',
     images: [
       {
-        url: 'https://docs.learnhouse.app/img/pages/learnhouse-github.png',
-        alt: 'LearnHouse Docs',
+        url: 'https://docs.starlab.app/img/pages/starlab-github.png',
+        alt: 'StarLab Docs',
         width: 2051,
         height: 1016,
       },
     ],
   },
   twitter: {
-    creator: '@getlearnhouse',
-    site: '@getlearnhouse',
+    creator: '@getstarlab',
+    site: '@getstarlab',
     card: 'summary_large_image',
   },
   icons: {
@@ -83,7 +83,7 @@ export default async function RootLayout({ children }) {
           <CustomNavbar />
           <Layout
             pageMap={await getPageMap()}
-            docsRepositoryBase="https://github.com/learnhouse/learnhouse/tree/dev/docs"
+            docsRepositoryBase="https://github.com/starlab/starlab/tree/dev/docs"
             sidebar={{ defaultMenuCollapseLevel: 2 }}
             editLink="Edit this page on GitHub"
             footer={<></>}

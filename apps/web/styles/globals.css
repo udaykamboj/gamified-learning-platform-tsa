@@ -4,7 +4,8 @@
 @plugin 'tailwindcss-animate';
 
 @import 'tailwindcss';
-
+@import './universe.css';
+@import '../components/ui/Dock.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -2563,5 +2564,44 @@
   height: 300px;
   min-height: 200px;
   display: block;
+}
+
+/* Keep legacy utility-heavy pages coherent when the application is rendered
+   in dark mode. A number of shared catalog and auth components still use
+   light-only utility classes instead of theme tokens. Scope these fallbacks to
+   the application shell so editors and third-party content are unaffected. */
+.dark .lh-org-font-root [class~="bg-white"],
+.dark .lh-org-font-root [class~="bg-gray-50"],
+.dark .lh-org-font-root [class~="bg-neutral-50"] {
+  background-color: #111318 !important;
+}
+
+.dark .lh-org-font-root [class~="bg-gray-100"],
+.dark .lh-org-font-root [class~="bg-neutral-100"] {
+  background-color: #191c24 !important;
+}
+
+.dark .lh-org-font-root [class~="text-black"],
+.dark .lh-org-font-root [class*="text-black/"] {
+  color: #f4f4f5 !important;
+}
+
+.dark .lh-org-font-root [class~="text-gray-900"],
+.dark .lh-org-font-root [class~="text-gray-800"],
+.dark .lh-org-font-root [class~="text-gray-700"] {
+  color: #e4e4e7 !important;
+}
+
+.dark .lh-org-font-root [class~="text-gray-600"],
+.dark .lh-org-font-root [class~="text-gray-500"],
+.dark .lh-org-font-root [class~="text-gray-400"],
+.dark .lh-org-font-root [class~="text-gray-300"] {
+  color: #a1a1aa !important;
+}
+
+.dark .lh-org-font-root [class~="border-gray-100"],
+.dark .lh-org-font-root [class~="border-gray-200"],
+.dark .lh-org-font-root [class~="border-neutral-200"] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 

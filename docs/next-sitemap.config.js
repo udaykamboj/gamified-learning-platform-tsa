@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://docs.learnhouse.app',
+  siteUrl: 'https://docs.starlab.app',
   generateRobotsTxt: true,
   sitemapSize: 5000,
   exclude: ['/404', '/500'],

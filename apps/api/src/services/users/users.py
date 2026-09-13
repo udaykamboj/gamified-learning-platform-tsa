@@ -8,7 +8,7 @@ from fastapi import HTTPException, Request, UploadFile, status
 import redis
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.security.features_utils.usage import (
     check_limits_with_usage,
     increase_feature_usage,
@@ -152,7 +152,7 @@ async def _get_welcome_cta_url(
         # platform — so only use it after the explicit platform URL.
         base_url = get_trusted_base_url_from_request(request)
         if not base_url:
-            platform_url = os.environ.get("LEARNHOUSE_PLATFORM_URL")
+            platform_url = os.environ.get("STARLAB_PLATFORM_URL")
             base_url = (
                 platform_url.rstrip("/")
                 if platform_url
@@ -384,7 +384,7 @@ async def create_user_with_invite(
 
     # Mark the invitation as no longer pending in Redis
     try:
-        LH_CONFIG = get_learnhouse_config()
+        LH_CONFIG = get_starlab_config()
         redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
         if redis_conn_string:
             r = redis.Redis.from_url(redis_conn_string)

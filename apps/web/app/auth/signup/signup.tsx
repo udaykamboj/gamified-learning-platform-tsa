@@ -33,14 +33,14 @@ function SignUpClient(props: SignUpClientProps) {
 
   const isAuthenticated = session.status === 'authenticated'
   // There is only an org to JOIN when we actually resolved one (a subdomain or an
-  // invite). On the org-less apex (`learnhouse.io/signup`) props.org is null, so a
+  // invite). On the org-less apex (`starlab.io/signup`) props.org is null, so a
   // signed-in visitor has nothing to sign up for and no org to join → send them to
   // the hub instead of a broken "Join <nothing>" screen.
   const hasOrgToJoin = !!props.org
 
   useEffect(() => {
     if (isAuthenticated && !hasOrgToJoin) {
-      router.replace('/home')
+      router.replace('/dashboard')
     }
   }, [isAuthenticated, hasOrgToJoin, router])
 
@@ -64,7 +64,7 @@ function SignUpClient(props: SignUpClientProps) {
     <AuthLayout
       org={props.org}
       welcomeText={t('auth.invited_to_join')}
-      title={t('auth.image_title_signup', { defaultValue: 'Start teaching with LearnHouse.' })}
+      title={t('auth.image_title_signup', { defaultValue: 'Start teaching with StarLab.' })}
       subtitle={t('auth.image_subtitle_signup', {
         defaultValue: 'Create your account and launch your first course in minutes.',
       })}

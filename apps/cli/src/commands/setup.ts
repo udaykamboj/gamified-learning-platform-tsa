@@ -50,9 +50,9 @@ async function confirmOrBack(message: string): Promise<typeof BACK | boolean> {
 }
 
 async function stepInstallDir(): Promise<string | typeof BACK> {
-  const baseDir = path.join(os.homedir(), '.learnhouse')
+  const baseDir = path.join(os.homedir(), '.starlab')
 
-  p.log.info(`All installations are stored in ${pc.cyan('~/.learnhouse/<name>')}`)
+  p.log.info(`All installations are stored in ${pc.cyan('~/.starlab/<name>')}`)
 
   const name = await p.text({
     message: 'Name for this installation:',
@@ -69,8 +69,8 @@ async function stepInstallDir(): Promise<string | typeof BACK> {
   const resolved = path.join(baseDir, name as string)
 
   // Warn if target already contains a deployment
-  if (fs.existsSync(path.join(resolved, 'learnhouse.config.json'))) {
-    p.log.warn(`~/.learnhouse/${name} already contains a LearnHouse installation.`)
+  if (fs.existsSync(path.join(resolved, 'starlab.config.json'))) {
+    p.log.warn(`~/.starlab/${name} already contains a StarLab installation.`)
     const overwrite = await p.confirm({
       message: 'Overwrite existing installation?',
       initialValue: false,
@@ -211,7 +211,7 @@ export async function setupCommand(options: SetupOptions) {
     await checkPrerequisites()
 
     const installName = options.name || 'default'
-    const baseDir = path.join(os.homedir(), '.learnhouse')
+    const baseDir = path.join(os.homedir(), '.starlab')
     const resolvedDir = path.join(baseDir, installName)
     fs.mkdirSync(resolvedDir, { recursive: true })
 
@@ -266,7 +266,7 @@ export async function setupCommand(options: SetupOptions) {
       unsplashEnabled: false,
     }
 
-    console.log(`Setting up LearnHouse in ~/.learnhouse/${installName}`)
+    console.log(`Setting up StarLab in ~/.starlab/${installName}`)
 
     const { image: appImage } = await resolveAppImage(config.channel)
     console.log(`Using image: ${appImage}`)
@@ -289,11 +289,11 @@ export async function setupCommand(options: SetupOptions) {
         if (healthy) {
           const seeded = await waitForOrgSeed(`http://localhost:${config.httpPort}`, config.orgSlug)
           if (seeded) {
-            console.log('LearnHouse is ready!')
+            console.log('StarLab is ready!')
           } else {
             console.error('')
             console.error(`API is healthy but organization "${config.orgSlug}" was not seeded.`)
-            console.error('Run `npx learnhouse logs` to inspect; pin a different image tag and re-run.')
+            console.error('Run `npx starlab logs` to inspect; pin a different image tag and re-run.')
             console.error('')
             process.exit(1)
           }
@@ -321,7 +321,7 @@ export async function setupCommand(options: SetupOptions) {
 
   // ─── Interactive mode ───────────────────────────────────────
   await printBanner()
-  p.intro(pc.cyan('LearnHouse Setup Wizard'))
+  p.intro(pc.cyan('StarLab Setup Wizard'))
 
   // Edition selection (Community vs Enterprise)
   let edition = options.edition
@@ -541,7 +541,7 @@ export async function setupCommand(options: SetupOptions) {
 
   // Resolve Docker image version
   const s0 = p.spinner()
-  s0.start('Resolving LearnHouse image version')
+  s0.start('Resolving StarLab image version')
   const { image: appImage, isLatest } = await resolveAppImage(config.channel)
   s0.stop(`Using image: ${appImage}`)
   if (isLatest) {
@@ -578,7 +578,7 @@ export async function setupCommand(options: SetupOptions) {
 
   // Start services
   const startNow = await p.confirm({
-    message: 'Start LearnHouse now?',
+    message: 'Start StarLab now?',
     initialValue: true,
   })
   if (p.isCancel(startNow)) { p.cancel(); process.exit(0) }
@@ -588,7 +588,7 @@ export async function setupCommand(options: SetupOptions) {
   const finalUrl = `${finalProtocol}://${config.domain}${finalPortSuffix}`
 
   if (startNow) {
-    p.log.step('Starting LearnHouse')
+    p.log.step('Starting StarLab')
     const s2 = p.spinner()
     s2.start('Pulling images and starting services (this may take a few minutes)')
 
@@ -609,9 +609,9 @@ export async function setupCommand(options: SetupOptions) {
           `Docker couldn't publish to it.`
         )
         p.log.info(
-          'Fix one of these and re-run `learnhouse start` (your config is already saved):\n' +
+          'Fix one of these and re-run `starlab start` (your config is already saved):\n' +
           `  • Stop whatever is using port ${config.httpPort}, or\n` +
-          `  • Re-run \`learnhouse setup\` and pick a different port, or\n` +
+          `  • Re-run \`starlab setup\` and pick a different port, or\n` +
           `  • Edit HTTP_PORT in ${finalDir}/.env and run \`docker compose up -d\` from there.`
         )
       } else {
@@ -623,30 +623,30 @@ export async function setupCommand(options: SetupOptions) {
 
     // Health check
     const s3 = p.spinner()
-    s3.start('Waiting for LearnHouse to be ready (up to 3 minutes)')
+    s3.start('Waiting for StarLab to be ready (up to 3 minutes)')
 
     const healthy = await waitForHealth(`http://localhost:${config.httpPort}`)
 
     if (healthy) {
       const seeded = await waitForOrgSeed(`http://localhost:${config.httpPort}`, config.orgSlug)
       if (seeded) {
-        s3.stop('LearnHouse is ready!')
+        s3.stop('StarLab is ready!')
       } else {
         s3.stop(`API is healthy but organization "${config.orgSlug}" was not seeded`)
         p.log.error(
-          `\`/api/v1/orgs/slug/${config.orgSlug}\` returns no org. Run \`learnhouse logs\` to inspect, ` +
+          `\`/api/v1/orgs/slug/${config.orgSlug}\` returns no org. Run \`starlab logs\` to inspect, ` +
           'pin a different image tag, and re-run setup.',
         )
         process.exit(1)
       }
     } else {
       s3.stop('Health check timed out')
-      p.log.warn('LearnHouse may still be starting. Check status with:')
+      p.log.warn('StarLab may still be starting. Check status with:')
       p.log.message(`  cd ${finalDir} && docker compose ps`)
     }
 
     // Success
-    p.log.success(pc.green(pc.bold('LearnHouse is installed!')))
+    p.log.success(pc.green(pc.bold('StarLab is installed!')))
     p.log.message([
       '',
       `  ${pc.cyan('URL:')}       ${finalUrl}`,
@@ -654,14 +654,14 @@ export async function setupCommand(options: SetupOptions) {
       `  ${pc.cyan('Password:')}  ${config.adminPassword}`,
       '',
       `  ${pc.dim('Management commands:')}`,
-      `  ${pc.dim('$')} npx learnhouse start    ${pc.dim('Start services')}`,
-      `  ${pc.dim('$')} npx learnhouse stop     ${pc.dim('Stop services')}`,
-      `  ${pc.dim('$')} npx learnhouse logs     ${pc.dim('View logs')}`,
-      `  ${pc.dim('$')} npx learnhouse config   ${pc.dim('Show configuration')}`,
-      `  ${pc.dim('$')} npx learnhouse backup   ${pc.dim('Backup & restore')}`,
-      `  ${pc.dim('$')} npx learnhouse deployments ${pc.dim('Manage deployments')}`,
-      `  ${pc.dim('$')} npx learnhouse doctor   ${pc.dim('Diagnose issues')}`,
-      `  ${pc.dim('$')} npx learnhouse shell    ${pc.dim('Container shell')}`,
+      `  ${pc.dim('$')} npx starlab start    ${pc.dim('Start services')}`,
+      `  ${pc.dim('$')} npx starlab stop     ${pc.dim('Stop services')}`,
+      `  ${pc.dim('$')} npx starlab logs     ${pc.dim('View logs')}`,
+      `  ${pc.dim('$')} npx starlab config   ${pc.dim('Show configuration')}`,
+      `  ${pc.dim('$')} npx starlab backup   ${pc.dim('Backup & restore')}`,
+      `  ${pc.dim('$')} npx starlab deployments ${pc.dim('Manage deployments')}`,
+      `  ${pc.dim('$')} npx starlab doctor   ${pc.dim('Diagnose issues')}`,
+      `  ${pc.dim('$')} npx starlab shell    ${pc.dim('Container shell')}`,
       '',
     ].join('\n'))
   } else {

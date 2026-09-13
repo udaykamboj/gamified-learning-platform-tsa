@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
+import { isAdminUser } from '@services/auth/roles'
 
 type SuperadminAuthorizationProps = {
   children: React.ReactNode
@@ -33,9 +34,9 @@ const SuperadminAuthorization: React.FC<SuperadminAuthorizationProps> = ({
       return
     }
 
-    setIsAuthorized(session?.data?.user?.is_superadmin === true)
+    setIsAuthorized(isAdminUser(session))
     setIsChecking(false)
-  }, [session.status, isUserAuthenticated, session?.data?.user?.is_superadmin, router])
+  }, [session.status, isUserAuthenticated, session, router])
 
   useEffect(() => {
     checkAuth()

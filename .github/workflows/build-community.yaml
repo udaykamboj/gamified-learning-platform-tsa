@@ -43,7 +43,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: learnhouse/app
+  IMAGE_NAME: starlab/app
 
 jobs:
   build:
@@ -83,7 +83,7 @@ jobs:
           file: ./Dockerfile
           platforms: ${{ matrix.platform }}
           build-args: |
-            LEARNHOUSE_PUBLIC=true
+            STARLAB_PUBLIC=true
           cache-from: type=gha,scope=${{ steps.prep.outputs.platform_pair }}
           cache-to: type=gha,mode=max,scope=${{ steps.prep.outputs.platform_pair }}
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name == 'push' }}

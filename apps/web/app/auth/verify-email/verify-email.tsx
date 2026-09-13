@@ -65,7 +65,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                     // fresh, now-verified user lands somewhere useful. A full
                     // navigation lets auth bootstrap from the new cookies.
                     setTimeout(() => {
-                        window.location.assign('/home')
+                        window.location.assign('/dashboard')
                     }, 1200)
                 } else {
                     track(AnalyticsEvent.EmailVerificationCompleted, { result: 'fail' })
@@ -111,7 +111,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                                 </span>
                                 {success && (
                                     <span className="text-sm ms-2">
-                                        · <Link href="/home" className="underline hover:no-underline">{t('auth.continue_to_dashboard', { defaultValue: 'Continue to your dashboard' })}</Link>
+                                        · <Link href="/dashboard" className="underline hover:no-underline">{t('auth.continue_to_dashboard', { defaultValue: 'Continue to your dashboard' })}</Link>
                                     </span>
                                 )}
                             </div>
@@ -173,7 +173,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                                     </div>
                                 </div>
                                 <Link
-                                    href="/home"
+                                    href="/dashboard"
                                     className="box-border w-full inline-flex h-[44px] rounded-lg items-center justify-center bg-black hover:bg-black/85 text-white px-[15px] font-bold text-[14px] leading-none transition-all"
                                 >
                                     {t('auth.continue_to_dashboard', { defaultValue: 'Continue to your dashboard' })}

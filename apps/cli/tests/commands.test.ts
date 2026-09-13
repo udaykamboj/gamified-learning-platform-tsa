@@ -167,16 +167,16 @@ describe('command guards — no installation / bad arguments', () => {
 describe('scale — mem_limit parse/set', () => {
   const compose = [
     'services:',
-    '  learnhouse-app:',
-    '    image: ghcr.io/learnhouse/app:latest',
-    '    container_name: learnhouse-app-dep1',
+    '  starlab-app:',
+    '    image: ghcr.io/starlab/app:latest',
+    '    container_name: starlab-app-dep1',
     '    mem_limit: 2g',
     '  db:',
     '    image: pgvector/pgvector:pg16',
-    '    container_name: learnhouse-db-dep1',
+    '    container_name: starlab-db-dep1',
     '  redis:',
     '    image: redis:7-alpine',
-    '    container_name: learnhouse-redis-dep1',
+    '    container_name: starlab-redis-dep1',
     '',
   ].join('\n')
 
@@ -188,32 +188,32 @@ describe('scale — mem_limit parse/set', () => {
     const p = path.join(dir, 'docker-compose.yml')
     fs.writeFileSync(p, compose)
     const limits = parseMemLimit(p)
-    expect(limits.get('learnhouse-app')).toBe('2g')
+    expect(limits.get('starlab-app')).toBe('2g')
     expect(limits.has('db')).toBe(false)
     expect(limits.has('redis')).toBe(false)
   })
 
   it('setMemLimit replaces an existing mem_limit in place', () => {
-    const updated = setMemLimit(compose, 'learnhouse-app', '512m')
+    const updated = setMemLimit(compose, 'starlab-app', '512m')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'), updated)
-    expect(parseMemLimit(path.join(dir, 'docker-compose.yml')).get('learnhouse-app')).toBe('512m')
+    expect(parseMemLimit(path.join(dir, 'docker-compose.yml')).get('starlab-app')).toBe('512m')
   })
 
   it('setMemLimit inserts a new mem_limit after container_name', () => {
     const updated = setMemLimit(compose, 'db', '1g')
-    expect(updated).toMatch(/container_name: learnhouse-db-dep1\n {4}mem_limit: 1g/)
+    expect(updated).toMatch(/container_name: starlab-db-dep1\n {4}mem_limit: 1g/)
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'), updated)
     expect(parseMemLimit(path.join(dir, 'docker-compose.yml')).get('db')).toBe('1g')
   })
 
   it('setMemLimit round-trips for every standard service', () => {
     let c = compose
-    c = setMemLimit(c, 'learnhouse-app', '4g')
+    c = setMemLimit(c, 'starlab-app', '4g')
     c = setMemLimit(c, 'db', '1g')
     c = setMemLimit(c, 'redis', '256m')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'), c)
     const limits = parseMemLimit(path.join(dir, 'docker-compose.yml'))
-    expect(limits.get('learnhouse-app')).toBe('4g')
+    expect(limits.get('starlab-app')).toBe('4g')
     expect(limits.get('db')).toBe('1g')
     expect(limits.get('redis')).toBe('256m')
   })
@@ -240,12 +240,12 @@ describe('checkDevEnv', () => {
   it('returns true when every required dev var is present (quoted/commented values too)', async () => {
     // Quotes and inline comments exercise the parseEnvFile stripping branches.
     writeEnv('apps/api/.env',
-      'LEARNHOUSE_AUTH_JWT_SECRET_KEY="jwt-secret"  # the signing key\nCOLLAB_INTERNAL_KEY=\'collab-key\'\n')
+      'STARLAB_AUTH_JWT_SECRET_KEY="jwt-secret"  # the signing key\nCOLLAB_INTERNAL_KEY=\'collab-key\'\n')
     writeEnv('apps/web/.env.local',
-      'NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL=http://localhost:9000\n')
+      'NEXT_PUBLIC_STARLAB_BACKEND_URL=http://localhost:9000\n')
     writeEnv('apps/collab/.env',
-      'COLLAB_PORT=4000\nLEARNHOUSE_API_URL=http://localhost:9000\n' +
-      'LEARNHOUSE_AUTH_JWT_SECRET_KEY=jwt\nCOLLAB_INTERNAL_KEY=collab\n')
+      'COLLAB_PORT=4000\nSTARLAB_API_URL=http://localhost:9000\n' +
+      'STARLAB_AUTH_JWT_SECRET_KEY=jwt\nCOLLAB_INTERNAL_KEY=collab\n')
 
     expect(await checkDevEnv(root)).toBe(true)
   })
@@ -260,7 +260,7 @@ describe('checkDevEnv', () => {
     expect(await checkDevEnv(root)).toBe(true)
     expect(fs.existsSync(path.join(root, 'apps/api/.env'))).toBe(true)
     expect(fs.readFileSync(path.join(root, 'apps/api/.env'), 'utf-8'))
-      .toContain('LEARNHOUSE_AUTH_JWT_SECRET_KEY=')
+      .toContain('STARLAB_AUTH_JWT_SECRET_KEY=')
     // Assert an actual DEFAULT VALUE is written (not just that the file exists):
     // the collab WebSocket port default must be 4000, the value the dev stack expects.
     expect(fs.readFileSync(path.join(root, 'apps/collab/.env'), 'utf-8'))
@@ -274,7 +274,7 @@ describe('checkDevEnv', () => {
     H.q.select.push('defaults')
     expect(await checkDevEnv(root)).toBe(true)
     const body = fs.readFileSync(path.join(root, 'apps/api/.env'), 'utf-8')
-    expect(body).toMatch(/COLLAB_INTERNAL_KEY=collab\nLEARNHOUSE_AUTH_JWT_SECRET_KEY=/)
+    expect(body).toMatch(/COLLAB_INTERNAL_KEY=collab\nSTARLAB_AUTH_JWT_SECRET_KEY=/)
   })
 })
 
@@ -292,30 +292,30 @@ describe('interactive command flows', () => {
   let execSyncMock: ReturnType<typeof vi.fn>
 
   const COMPOSE = [
-    'name: learnhouse-dep1',
+    'name: starlab-dep1',
     'services:',
-    '  learnhouse-app:',
-    '    image: ghcr.io/learnhouse/app:latest',
-    '    container_name: learnhouse-app-dep1',
+    '  starlab-app:',
+    '    image: ghcr.io/starlab/app:latest',
+    '    container_name: starlab-app-dep1',
     '  db:',
     '    image: pgvector/pgvector:pg16',
-    '    container_name: learnhouse-db-dep1',
+    '    container_name: starlab-db-dep1',
     '  redis:',
     '    image: redis:7-alpine',
-    '    container_name: learnhouse-redis-dep1',
+    '    container_name: starlab-redis-dep1',
     '',
   ].join('\n')
 
   beforeEach(async () => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-flow-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\nHTTP_PORT=8080\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=localhost\nHTTP_PORT=8080\n')
     fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), COMPOSE)
 
     origHome = process.env.HOME
@@ -339,13 +339,13 @@ describe('interactive command flows', () => {
   })
 
   it('scale writes the chosen mem_limits for every service', async () => {
-    H.q.text.push('512m', '1g', '256m') // learnhouse-app, db, redis
+    H.q.text.push('512m', '1g', '256m') // starlab-app, db, redis
     H.q.confirm.push(false)             // do not restart
 
     await scaleCommand()
 
     const limits = parseMemLimit(path.join(installDir, 'docker-compose.yml'))
-    expect(limits.get('learnhouse-app')).toBe('512m')
+    expect(limits.get('starlab-app')).toBe('512m')
     expect(limits.get('db')).toBe('1g')
     expect(limits.get('redis')).toBe('256m')
   })
@@ -366,8 +366,8 @@ describe('interactive command flows', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose stats')) throw new Error('no compose stats') // → fallback
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
-      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nlearnhouse-app-dep1\t5%\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
+      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nstarlab-app-dep1\t5%\n')
       return Buffer.from('')
     }) as never)
     H.q.text.push('512m', '1g', '256m')
@@ -395,7 +395,7 @@ describe('interactive command flows', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose stats')) throw new Error('no compose stats')
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('docker stats')) throw new Error('stats unavailable') // → outer catch
       return Buffer.from('')
     }) as never)
@@ -409,9 +409,9 @@ describe('interactive command flows', () => {
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('docker ps')) {
         return Buffer.from([
-          'learnhouse-app-abc123\tUp 2 hours\tlearnhouse/app:1.4.8',
-          'learnhouse-db-abc123\tUp 2 hours\tpostgres:16',
-          'learnhouse-redis-abc123\tExited (0) 1 min ago\tredis:7',
+          'starlab-app-abc123\tUp 2 hours\tstarlab/app:1.4.8',
+          'starlab-db-abc123\tUp 2 hours\tpostgres:16',
+          'starlab-redis-abc123\tExited (0) 1 min ago\tredis:7',
         ].join('\n'))
       }
       return Buffer.from('')
@@ -432,7 +432,7 @@ describe('interactive command flows', () => {
       if (cmd.includes('docker stats')) throw new Error('stats blew up') // fallback container stats fail → 181
       if (cmd.includes('docker ps')) {
         // container id matches the fixture deploymentId (dep1) so it counts as running
-        return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tlearnhouse/app:1.4.8')
+        return Buffer.from('starlab-app-dep1\tUp 2 hours\tstarlab/app:1.4.8')
       }
       return Buffer.from('')
     }) as never)
@@ -456,10 +456,10 @@ describe('interactive command flows', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     let ps = 0
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('name=learnhouse-app-')) {
-        return Buffer.from('learnhouse-app-abc123\tUp 2 hours\tlearnhouse/app:1.4.8')
+      if (cmd.includes('name=starlab-app-')) {
+        return Buffer.from('starlab-app-abc123\tUp 2 hours\tstarlab/app:1.4.8')
       }
-      if (cmd.includes('name=learnhouse-')) { ps++; throw new Error('broad query failed') }
+      if (cmd.includes('name=starlab-')) { ps++; throw new Error('broad query failed') }
       return Buffer.from('')
     }) as never)
     H.q.select.push('view')
@@ -497,26 +497,26 @@ describe('interactive command flows', () => {
     await scaleCommand()
 
     const limits = parseMemLimit(path.join(installDir, 'docker-compose.yml'))
-    expect(limits.has('learnhouse-app')).toBe(false)
+    expect(limits.has('starlab-app')).toBe(false)
     expect(limits.get('db')).toBe('1g')
     expect(limits.has('redis')).toBe(false)
   })
 
   it('env edits a variable and persists it to .env', async () => {
-    H.q.select.push('domain', 'LEARNHOUSE_DOMAIN', '_done') // category, key, then done
+    H.q.select.push('domain', 'STARLAB_DOMAIN', '_done') // category, key, then done
     H.q.text.push('school.example.com')
     H.q.confirm.push(false)
 
     await envCommand()
 
     expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8'))
-      .toContain('LEARNHOUSE_DOMAIN=school.example.com')
+      .toContain('STARLAB_DOMAIN=school.example.com')
   })
 
   it('env makes no change when the editor is dismissed immediately', async () => {
     H.q.select.push('_done')
     await envCommand()
-    expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('LEARNHOUSE_DOMAIN=localhost')
+    expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8')).toContain('STARLAB_DOMAIN=localhost')
   })
 
   it('deployments → scale sets mem limits through the resource menu', async () => {
@@ -524,7 +524,7 @@ describe('interactive command flows', () => {
     H.q.text.push('512m', '1g', '256m') // per-service limits
     H.q.confirm.push(false)            // no restart
     await expect(deploymentsCommand()).resolves.toBeUndefined()
-    expect(parseMemLimit(path.join(installDir, 'docker-compose.yml')).get('learnhouse-app')).toBe('512m')
+    expect(parseMemLimit(path.join(installDir, 'docker-compose.yml')).get('starlab-app')).toBe('512m')
   })
 
   it('deployments → scale restarts services when confirmed', async () => {
@@ -538,8 +538,8 @@ describe('interactive command flows', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose stats')) throw new Error('no compose stats')
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
-      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nlearnhouse-app-dep1\t5%\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
+      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nstarlab-app-dep1\t5%\n')
       return Buffer.from('')
     }) as never)
     H.q.select.push('scale')
@@ -556,16 +556,16 @@ describe('interactive command flows', () => {
 
   it('deployments → scale replaces an existing mem_limit', async () => {
     fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), [
-      'name: learnhouse-dep1', 'services:',
-      '  learnhouse-app:', '    container_name: learnhouse-app-dep1', '    mem_limit: 1g',
-      '  db:', '    container_name: learnhouse-db-dep1',
-      '  redis:', '    container_name: learnhouse-redis-dep1', '',
+      'name: starlab-dep1', 'services:',
+      '  starlab-app:', '    container_name: starlab-app-dep1', '    mem_limit: 1g',
+      '  db:', '    container_name: starlab-db-dep1',
+      '  redis:', '    container_name: starlab-redis-dep1', '',
     ].join('\n'))
     H.q.select.push('scale')
     H.q.text.push('512m', '', '') // change app 1g → 512m; db/redis unchanged
     H.q.confirm.push(false)
     await expect(deploymentsCommand()).resolves.toBeUndefined()
-    expect(parseMemLimit(path.join(installDir, 'docker-compose.yml')).get('learnhouse-app')).toBe('512m')
+    expect(parseMemLimit(path.join(installDir, 'docker-compose.yml')).get('starlab-app')).toBe('512m')
   })
 
   it('deployments → scale reports no changes when all limits are invalid/empty', async () => {
@@ -592,7 +592,7 @@ describe('interactive command flows', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('stats')
-        ? Buffer.from('NAME\tCPU\tMEM\nlearnhouse-app-dep1\t5%\t200MiB\n')
+        ? Buffer.from('NAME\tCPU\tMEM\nstarlab-app-dep1\t5%\t200MiB\n')
         : Buffer.from('')) as never)
     H.q.select.push('scale')
     H.q.text.push('512m', '1g', '256m')
@@ -605,7 +605,7 @@ describe('interactive command flows', () => {
       '# top comment',
       'NEXTAUTH_SECRET=supersecretvalue',   // secret + present → masked on display (67)
       'STRAY_LINE_WITHOUT_EQUALS',           // no "=" → preserved verbatim on write (97-98)
-      'POSTGRES_DB=learnhouse',              // not edited → passed through unchanged (105)
+      'POSTGRES_DB=starlab',              // not edited → passed through unchanged (105)
       '',
     ].join('\n'))
     // Edit an EXISTING key so the rewrite loop runs: the edited line is replaced
@@ -616,7 +616,7 @@ describe('interactive command flows', () => {
     await expect(envCommand()).resolves.toBeUndefined()
     const body = fs.readFileSync(path.join(installDir, '.env'), 'utf-8')
     expect(body).toContain('STRAY_LINE_WITHOUT_EQUALS')        // 97-98
-    expect(body).toContain('POSTGRES_DB=learnhouse')            // 105
+    expect(body).toContain('POSTGRES_DB=starlab')            // 105
     expect(body).toContain('NEXTAUTH_SECRET=rotated-secret-value')
   })
 
@@ -637,12 +637,12 @@ describe('interactive command flows', () => {
     // editor reaches its ".env missing" guard.
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-env-noenv-home-'))
     const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-env-noenv-cwd-'))
-    fs.writeFileSync(path.join(proj, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(proj, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: proj, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(proj, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n')
+    fs.writeFileSync(path.join(proj, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  starlab-app:\n')
     const origCwd = process.cwd()
     process.env.HOME = empty
     process.chdir(proj)
@@ -656,16 +656,16 @@ describe('interactive command flows', () => {
   })
 
   it('env restarts services after an edit when the user confirms', async () => {
-    H.q.select.push('domain', 'LEARNHOUSE_DOMAIN', '_done')
+    H.q.select.push('domain', 'STARLAB_DOMAIN', '_done')
     H.q.text.push('restarted.example.com')
     H.q.confirm.push(true) // restart now → dockerComposeDown + Up (mocked)
     await expect(envCommand()).resolves.toBeUndefined()
     expect(fs.readFileSync(path.join(installDir, '.env'), 'utf-8'))
-      .toContain('LEARNHOUSE_DOMAIN=restarted.example.com')
+      .toContain('STARLAB_DOMAIN=restarted.example.com')
   })
 
   it('env tolerates a restart failure after an edit', async () => {
-    H.q.select.push('domain', 'LEARNHOUSE_DOMAIN', '_done')
+    H.q.select.push('domain', 'STARLAB_DOMAIN', '_done')
     H.q.text.push('new.example.com')
     H.q.confirm.push(true)
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
@@ -932,12 +932,12 @@ describe('dev command guards', () => {
     }
     if (withEnv) {
       fs.writeFileSync(path.join(root, 'apps/api/.env'),
-        'LEARNHOUSE_AUTH_JWT_SECRET_KEY=x\nCOLLAB_INTERNAL_KEY=y\n')
+        'STARLAB_AUTH_JWT_SECRET_KEY=x\nCOLLAB_INTERNAL_KEY=y\n')
       fs.writeFileSync(path.join(root, 'apps/web/.env.local'),
-        'NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL=http://localhost:9000\n')
+        'NEXT_PUBLIC_STARLAB_BACKEND_URL=http://localhost:9000\n')
       fs.writeFileSync(path.join(root, 'apps/collab/.env'),
-        'COLLAB_PORT=4000\nLEARNHOUSE_API_URL=http://localhost:9000\n' +
-        'LEARNHOUSE_AUTH_JWT_SECRET_KEY=x\nCOLLAB_INTERNAL_KEY=y\n')
+        'COLLAB_PORT=4000\nSTARLAB_API_URL=http://localhost:9000\n' +
+        'STARLAB_AUTH_JWT_SECRET_KEY=x\nCOLLAB_INTERNAL_KEY=y\n')
     }
     return root
   }
@@ -963,7 +963,7 @@ describe('dev command guards', () => {
     vi.restoreAllMocks()
   })
 
-  it('exits when not inside a LearnHouse project', async () => {
+  it('exits when not inside a StarLab project', async () => {
     process.chdir(tmp) // a bare temp dir — no apps/api+apps/web up the tree
     await expect(devCommand({})).rejects.toBeInstanceOf(ProcessExit)
   })
@@ -1448,15 +1448,15 @@ describe('command success paths', () => {
 
   beforeEach(async () => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-ok-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\nHTTP_PORT=8080\n')
-    fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    container_name: learnhouse-app-dep1\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=localhost\nHTTP_PORT=8080\n')
+    fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  starlab-app:\n    container_name: starlab-app-dep1\n')
     origHome = process.env.HOME
     process.env.HOME = home
     H.reset()
@@ -1497,7 +1497,7 @@ describe('command success paths', () => {
   it('health shows green when redis pings and http responds', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('redis-cli ping')) return Buffer.from('PONG')
       return Buffer.from('') // pg_isready etc. → no throw → pass
@@ -1516,7 +1516,7 @@ describe('command success paths', () => {
   it('health exits when no deployment id can be determined', async () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-h-noid-home-'))
     const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-h-noid-cwd-'))
-    fs.writeFileSync(path.join(proj, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(proj, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z', // no deploymentId
       installDir: proj, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -1538,7 +1538,7 @@ describe('command success paths', () => {
   it('health reports PostgreSQL not ready when pg_isready fails', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-db-dep1\tUp 2 hours\tpgvector/pgvector:pg16\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-db-dep1\tUp 2 hours\tpgvector/pgvector:pg16\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('pg_isready')) throw new Error('db starting up') // → "PostgreSQL not ready" (54)
       if (cmd.includes('redis-cli ping')) return Buffer.from('PONG')
@@ -1551,7 +1551,7 @@ describe('command success paths', () => {
   it('health surfaces redis ping, HTTP and resource-stats failures', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')      // containers running
       if (cmd.includes('redis-cli ping')) throw new Error('redis down')  // → "Redis not responding" (68)
       if (cmd.includes('compose') && cmd.includes('stats')) throw new Error('no stats') // primary stats fail
@@ -1565,7 +1565,7 @@ describe('command success paths', () => {
   it('health notes when there are no running containers for resource stats', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tExited (0) 1 min ago\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tExited (0) 1 min ago\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('false')
       if (cmd.includes('compose') && cmd.includes('stats')) throw new Error('no stats') // → fallback
       return Buffer.from('')
@@ -1577,11 +1577,11 @@ describe('command success paths', () => {
   it('health reports a non-200 http and falls back for disk/stats failures', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('system df')) throw new Error('disk usage unavailable')
       if (cmd.includes('compose stats')) throw new Error('compose stats failed') // → fallback
-      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nlearnhouse-app-dep1\t5%\n')
+      if (cmd.includes('docker stats')) return Buffer.from('NAME\tCPU\nstarlab-app-dep1\t5%\n')
       return Buffer.from('')
     }) as never)
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('err', { status: 503 })) // resp.ok false
@@ -1592,9 +1592,9 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('docker ps')) return Buffer.from(
-        'learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n' +
-        'learnhouse-db-dep1\tUp 2 hours (healthy)\tpgvector/pgvector:pg16\n' +
-        'learnhouse-redis-dep1\tUp 2 hours\tredis:7-alpine\n')
+        'starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n' +
+        'starlab-db-dep1\tUp 2 hours (healthy)\tpgvector/pgvector:pg16\n' +
+        'starlab-redis-dep1\tUp 2 hours\tredis:7-alpine\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('RestartCount')) return Buffer.from('0')
       if (cmd.includes('{{.Image}}')) return Buffer.from('sha256:abcdef0123456789')
@@ -1612,7 +1612,7 @@ describe('command success paths', () => {
     await new Promise<void>((r) => probe.listen(0, () => r()))
     const port = (probe.address() as { port: number }).port
     await new Promise<void>((r) => probe.close(() => r()))
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: port,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -1622,7 +1622,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : cmd.includes('State.Running') ? Buffer.from('true') : Buffer.from('')) as never)
     try {
       await expect(doctorCommand()).resolves.toBeUndefined() // hits the port-in-use branch
@@ -1633,10 +1633,10 @@ describe('command success paths', () => {
 
   it('doctor warns on short secrets and unreadable logs', async () => {
     fs.writeFileSync(path.join(installDir, '.env'),
-      'LEARNHOUSE_DOMAIN=localhost\nHTTP_PORT=8080\nLEARNHOUSE_AUTH_JWT_SECRET_KEY=abc\n') // too short
+      'STARLAB_DOMAIN=localhost\nHTTP_PORT=8080\nSTARLAB_AUTH_JWT_SECRET_KEY=abc\n') // too short
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('RestartCount')) return Buffer.from('0')
       if (cmd.includes('docker logs')) throw new Error('cannot read logs') // → warn branch
@@ -1674,7 +1674,7 @@ describe('command success paths', () => {
   it('doctor skips container checks when no deployment id can be determined', async () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noid-home-'))
     const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noid-cwd-'))
-    fs.writeFileSync(path.join(proj, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(proj, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z', // no deploymentId
       installDir: proj, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -1697,9 +1697,9 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('docker ps')) return Buffer.from(
-        'learnhouse-app-dep1\tRestarting (1) 3 seconds ago\tghcr.io/learnhouse/app:1.4.2\n' +
-        'learnhouse-db-dep1\tExited (1) 5 minutes ago\tpgvector/pgvector:pg16\n' +
-        'learnhouse-redis-dep1\tUp 2 hours\tredis:7-alpine\n')
+        'starlab-app-dep1\tRestarting (1) 3 seconds ago\tghcr.io/starlab/app:1.4.2\n' +
+        'starlab-db-dep1\tExited (1) 5 minutes ago\tpgvector/pgvector:pg16\n' +
+        'starlab-redis-dep1\tUp 2 hours\tredis:7-alpine\n')
       if (cmd.includes('State.Running')) return Buffer.from('false')
       if (cmd.includes('RestartCount')) return Buffer.from('7') // > 3 → warn
       if (cmd.includes('docker logs')) return Buffer.from('ERR\n')
@@ -1711,10 +1711,10 @@ describe('command success paths', () => {
 
   it('doctor confirms when every required env var is present and strong', async () => {
     fs.writeFileSync(path.join(installDir, '.env'), [
-      'LEARNHOUSE_DOMAIN=localhost',
-      'LEARNHOUSE_SQL_CONNECTION_STRING=postgresql://u:p@db:5432/lh',
-      'LEARNHOUSE_REDIS_CONNECTION_STRING=redis://redis:6379/0',
-      'LEARNHOUSE_AUTH_JWT_SECRET_KEY=a-strong-jwt-secret-value',
+      'STARLAB_DOMAIN=localhost',
+      'STARLAB_SQL_CONNECTION_STRING=postgresql://u:p@db:5432/lh',
+      'STARLAB_REDIS_CONNECTION_STRING=redis://redis:6379/0',
+      'STARLAB_AUTH_JWT_SECRET_KEY=a-strong-jwt-secret-value',
       'NEXTAUTH_SECRET=another-strong-secret-value',
       'NEXTAUTH_URL=http://localhost:8080',
       'POSTGRES_PASSWORD=a-strong-db-password',
@@ -1722,7 +1722,7 @@ describe('command success paths', () => {
     ].join('\n'))
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('RestartCount')) return Buffer.from('0')
       if (cmd.includes('docker logs')) return Buffer.from('INFO: ok\n')
@@ -1737,18 +1737,18 @@ describe('command success paths', () => {
     // compose + config.json but no .env, so doctor reaches the ".env missing" fail.
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noenv-home-'))
     const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noenv-cwd-'))
-    fs.writeFileSync(path.join(proj, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(proj, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: proj, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(proj, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n')
+    fs.writeFileSync(path.join(proj, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  starlab-app:\n')
     const origCwd = process.cwd()
     process.env.HOME = empty
     process.chdir(proj)
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       return Buffer.from('')
     }) as never)
@@ -1764,7 +1764,7 @@ describe('command success paths', () => {
   it('doctor warns on low disk space (megabytes)', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('df -h')) return Buffer.from('500m\n') // low → "Low disk space" warn
       return Buffer.from('')
@@ -1776,7 +1776,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('df -h') ? Buffer.from('0.5g\n')
-        : cmd.includes('docker ps') ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        : cmd.includes('docker ps') ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
           : cmd.includes('State.Running') ? Buffer.from('true') : Buffer.from('')) as never)
     await expect(doctorCommand()).resolves.toBeUndefined()
   })
@@ -1785,7 +1785,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('df -h')) throw new Error('df unavailable') // → "Could not check disk space" catch
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       return Buffer.from('')
     }) as never)
@@ -1797,7 +1797,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : cmd.includes('State.Running') ? Buffer.from('true') : Buffer.from('')) as never)
     await expect(doctorCommand()).resolves.toBeUndefined()
   })
@@ -1805,7 +1805,7 @@ describe('command success paths', () => {
   it('doctor reports container errors found in the logs', async () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       if (cmd.includes('State.Running')) return Buffer.from('true')
       if (cmd.includes('RestartCount')) return Buffer.from('3') // some restarts
       if (cmd.includes('docker logs')) return Buffer.from('ERROR: database connection refused\nERROR: retrying\n')
@@ -1824,7 +1824,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : Buffer.from('')) as never)
     H.q.select.push('view')
     await expect(deploymentsCommand()).resolves.toBeUndefined()
@@ -1842,9 +1842,9 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : Buffer.from('')) as never)
-    H.q.select.push('learnhouse-app-dep1')
+    H.q.select.push('starlab-app-dep1')
     await expect(shellCommand()).resolves.toBeUndefined()
   })
 
@@ -1852,7 +1852,7 @@ describe('command success paths', () => {
     // A config found via the cwd-fallback that lacks deploymentId, and autodetect
     // returns nothing → the `if (!id)` guard fires.
     const cwdDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noid-'))
-    fs.writeFileSync(path.join(cwdDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(cwdDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z', // no deploymentId
       installDir: cwdDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -1861,7 +1861,7 @@ describe('command success paths', () => {
     const emptyHome = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-noid-home-'))
     const origCwd = process.cwd()
     const origHome2 = process.env.HOME
-    process.env.HOME = emptyHome // no ~/.learnhouse installs → findInstallDir falls back to cwd
+    process.env.HOME = emptyHome // no ~/.starlab installs → findInstallDir falls back to cwd
     process.chdir(cwdDir)
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockReturnValue(Buffer.from('')) // autoDetect → null
@@ -1880,7 +1880,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tExited (0)\tghcr.io/learnhouse/app:1.4.2\n') // not "Up"
+        ? Buffer.from('starlab-app-dep1\tExited (0)\tghcr.io/starlab/app:1.4.2\n') // not "Up"
         : Buffer.from('')) as never)
     await expect(shellCommand()).rejects.toBeInstanceOf(ProcessExit)
   })
@@ -1889,7 +1889,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) =>
       cmd.includes('docker ps')
-        ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : Buffer.from('')) as never)
     // empty select queue → cancel sentinel → p.cancel() + exit(0)
     await expect(shellCommand()).rejects.toBeInstanceOf(ProcessExit)
@@ -1897,7 +1897,7 @@ describe('command success paths', () => {
 
   it('shell and logs exit when no deployment id can be resolved', async () => {
     // config without a deploymentId + autoDetect returns nothing → no id.
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
@@ -1912,7 +1912,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose ps -q')) return Buffer.from('') // no compose services → fallback
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tExited (0)\tghcr.io/learnhouse/app:1.4.2\n') // not "Up"
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tExited (0)\tghcr.io/starlab/app:1.4.2\n') // not "Up"
       return Buffer.from('')
     }) as never)
     await expect(logsCommand()).rejects.toBeInstanceOf(ProcessExit)
@@ -1922,7 +1922,7 @@ describe('command success paths', () => {
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose ps -q')) return Buffer.from('') // no compose services
-      if (cmd.includes('docker ps')) return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      if (cmd.includes('docker ps')) return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       return Buffer.from('')
     }) as never)
     await expect(logsCommand()).resolves.toBeUndefined()
@@ -1983,12 +1983,12 @@ describe('setup / update in-process', () => {
       adminEmail: 'admin@school.dev', adminPassword: 'password123',
       orgName: 'Test Org', orgSlug: 'default', start: false,
     })
-    const dir = path.join(home, '.learnhouse', 'unit')
+    const dir = path.join(home, '.starlab', 'unit')
     expect(fs.existsSync(path.join(dir, 'docker-compose.yml'))).toBe(true)
     expect(fs.existsSync(path.join(dir, '.env'))).toBe(true)
-    expect(fs.existsSync(path.join(dir, 'learnhouse.config.json'))).toBe(true)
+    expect(fs.existsSync(path.join(dir, 'starlab.config.json'))).toBe(true)
     expect(fs.readFileSync(path.join(dir, '.env'), 'utf-8'))
-      .toContain('LEARNHOUSE_INITIAL_ADMIN_EMAIL=admin@school.dev')
+      .toContain('STARLAB_INITIAL_ADMIN_EMAIL=admin@school.dev')
   })
 
   it('the interactive wizard generates a complete community install', async () => {
@@ -2019,12 +2019,12 @@ describe('setup / update in-process', () => {
 
     await setupCommand({})
 
-    const dir = path.join(home, '.learnhouse', 'default')
+    const dir = path.join(home, '.starlab', 'default')
     expect(fs.existsSync(path.join(dir, 'docker-compose.yml'))).toBe(true)
     expect(fs.existsSync(path.join(dir, '.env'))).toBe(true)
-    expect(fs.existsSync(path.join(dir, 'learnhouse.config.json'))).toBe(true)
+    expect(fs.existsSync(path.join(dir, 'starlab.config.json'))).toBe(true)
     expect(fs.readFileSync(path.join(dir, '.env'), 'utf-8'))
-      .toContain('LEARNHOUSE_INITIAL_ADMIN_EMAIL=admin@school.dev')
+      .toContain('STARLAB_INITIAL_ADMIN_EMAIL=admin@school.dev')
   })
 
   it('the interactive wizard lets you go back and edit a step before confirming', async () => {
@@ -2044,7 +2044,7 @@ describe('setup / update in-process', () => {
 
     await setupCommand({})
     const cfg = JSON.parse(fs.readFileSync(
-      path.join(home, '.learnhouse', 'edited-install', 'learnhouse.config.json'), 'utf-8'))
+      path.join(home, '.starlab', 'edited-install', 'starlab.config.json'), 'utf-8'))
     expect(cfg.orgSlug).toBe('edited')
   })
 
@@ -2067,33 +2067,33 @@ describe('setup / update in-process', () => {
   it('the wizard edit menu can re-run the install-directory step', async () => {
     wizardThenEdit('edit-dir', 0, { text: ['edit-dir'] }) // case 0
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'edit-dir', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'edit-dir', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the wizard edit menu can re-run the domain step', async () => {
     wizardThenEdit('edit-dom', 1, { text: ['localhost', '8200'] }) // case 1: domain + port
     await setupCommand({})
-    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.learnhouse', 'edit-dom', 'learnhouse.config.json'), 'utf-8'))
+    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.starlab', 'edit-dom', 'starlab.config.json'), 'utf-8'))
     expect(cfg.httpPort).toBe(8200)
   })
 
   it('the wizard edit menu can re-run the database step', async () => {
     wizardThenEdit('edit-db', 2, { select: ['local', 'ai', 'local'], confirm: [true] }) // case 2: db+image+redis, ack
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'edit-db', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'edit-db', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the wizard edit menu can re-run the admin step', async () => {
     wizardThenEdit('edit-adm', 4, { text: ['admin2@school.dev'], password: ['adminpassword456'] }) // case 4
     await setupCommand({})
-    const env = fs.readFileSync(path.join(home, '.learnhouse', 'edit-adm', '.env'), 'utf-8')
-    expect(env).toContain('LEARNHOUSE_INITIAL_ADMIN_EMAIL=admin2@school.dev')
+    const env = fs.readFileSync(path.join(home, '.starlab', 'edit-adm', '.env'), 'utf-8')
+    expect(env).toContain('STARLAB_INITIAL_ADMIN_EMAIL=admin2@school.dev')
   })
 
   it('the wizard edit menu can re-run the optional-features step', async () => {
     wizardThenEdit('edit-feat', 5, { multiselect: [[]] }) // case 5
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'edit-feat', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'edit-feat', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the wizard can go back through every step before proceeding', async () => {
@@ -2129,7 +2129,7 @@ describe('setup / update in-process', () => {
     H.q.confirm.push(true, true, true, false) // db ack ×3 (s2 runs 3×); start now = no
     H.q.multiselect.push([])
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'bn', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'bn', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the wizard exits when the edition prompt is cancelled', async () => {
@@ -2166,7 +2166,7 @@ describe('setup / update in-process', () => {
     H.q.text.push('learn.school.dev', 'ops@school.dev', 'admin@school.dev')
     H.q.confirm.push(false, false)                       // localTls=no, startNow=no
     await setupCommand({ name: 'ee-via-setup' }) // completes → dispatch returns (340-341)
-    const base = path.join(home, '.learnhouse')
+    const base = path.join(home, '.starlab')
     expect(fs.readdirSync(base).some((d) => fs.existsSync(path.join(base, d, 'Caddyfile')))).toBe(true)
   })
 
@@ -2186,7 +2186,7 @@ describe('setup / update in-process', () => {
       domain: 'learn.school.dev', adminEmail: 'admin@school.dev', adminPassword: 'password123',
       tenancy: 'single', start: false,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ci-ee-ok', 'docker-compose.yml'))).toBe(true) // 173-174
+    expect(fs.existsSync(path.join(home, '.starlab', 'ci-ee-ok', 'docker-compose.yml'))).toBe(true) // 173-174
   })
 
   it('the wizard cancels from the summary menu', async () => {
@@ -2214,13 +2214,13 @@ describe('setup / update in-process', () => {
     H.q.confirm.push(true, false) // db ack; start now = no
     H.q.multiselect.push([])
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'autossl', 'extra', 'Caddyfile'))).toBe(true) // 565
+    expect(fs.existsSync(path.join(home, '.starlab', 'autossl', 'extra', 'Caddyfile'))).toBe(true) // 565
   })
 
   it('the wizard warns and can overwrite an existing installation', async () => {
-    const existing = path.join(home, '.learnhouse', 'dup')
+    const existing = path.join(home, '.starlab', 'dup')
     fs.mkdirSync(existing, { recursive: true })
-    fs.writeFileSync(path.join(existing, 'learnhouse.config.json'), '{}') // pre-existing install
+    fs.writeFileSync(path.join(existing, 'starlab.config.json'), '{}') // pre-existing install
     H.q.select.push('community', 'stable', 'continue', 'local', 'ai', 'local', 'continue', 'continue', 'continue', 'confirm')
     H.q.text.push('dup', 'localhost', '8108', 'Test Org', 'default', 'admin@school.dev')
     H.q.password.push('adminpassword123')
@@ -2231,9 +2231,9 @@ describe('setup / update in-process', () => {
   })
 
   it('the wizard exits when an existing-install overwrite is declined', async () => {
-    const existing = path.join(home, '.learnhouse', 'dup2')
+    const existing = path.join(home, '.starlab', 'dup2')
     fs.mkdirSync(existing, { recursive: true })
-    fs.writeFileSync(path.join(existing, 'learnhouse.config.json'), '{}')
+    fs.writeFileSync(path.join(existing, 'starlab.config.json'), '{}')
     H.q.select.push('community', 'stable')
     H.q.text.push('dup2')
     H.q.confirm.push(false) // overwrite declined → exit (78-80)
@@ -2301,7 +2301,7 @@ describe('setup / update in-process', () => {
     H.q.confirm.push(true, true)
     H.q.multiselect.push([])
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'timeout-wiz', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'timeout-wiz', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the wizard start path exits when the org never seeds', async () => {
@@ -2322,7 +2322,7 @@ describe('setup / update in-process', () => {
     H.q.multiselect.push([])
 
     await setupCommand({})
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'started', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'started', 'docker-compose.yml'))).toBe(true)
   })
 
   it('setup --ci with start surfaces a port-conflict and exits', async () => {
@@ -2353,7 +2353,7 @@ describe('setup / update in-process', () => {
       adminEmail: 'admin@school.dev', adminPassword: 'password123',
       orgName: 'Test', orgSlug: 'default', start: true,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'started', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'started', 'docker-compose.yml'))).toBe(true)
   })
 
   it('setup --ci with start exits when the org is never seeded', async () => {
@@ -2371,7 +2371,7 @@ describe('setup / update in-process', () => {
       ci: true, name: 'slow', domain: 'localhost', port: 8095,
       adminEmail: 'admin@school.dev', adminPassword: 'password123', start: true,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'slow', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'slow', 'docker-compose.yml'))).toBe(true)
   })
 
   it('setup --ci with start exits on a generic startup failure', async () => {
@@ -2387,41 +2387,41 @@ describe('setup / update in-process', () => {
   })
 
   it('update on an enterprise install runs the EE upgrade path', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee')
+    const dir = path.join(home, '.starlab', 'ee')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'learn.school.dev', httpPort: 443,
       useHttps: true, autoSsl: true, useExternalDb: false, orgSlug: 'default',
       edition: 'enterprise', eeTenancy: 'single',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'DOMAIN=learn.school.dev\nLEARNHOUSE_LICENSE_KEY=lh_live_TESTKEY\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'DOMAIN=learn.school.dev\nSTARLAB_LICENSE_KEY=lh_live_TESTKEY\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  api:\n    image: images.learnhouse.app/enterprise-backend:prod\n')
+      'name: starlab-dep1\nservices:\n  api:\n    image: images.starlab.app/enterprise-backend:prod\n')
 
     await expect(updateCommand({ backup: false, migrate: false })).resolves.toBeUndefined()
   })
 
   function seedInstall(dir: string) {
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ghcr.io/learnhouse/app:1.4.0\n    container_name: learnhouse-app-dep1\n')
+      'name: starlab-dep1\nservices:\n  starlab-app:\n    image: ghcr.io/starlab/app:1.4.0\n    container_name: starlab-app-dep1\n')
   }
 
   it('update aborts when the default pre-upgrade backup fails', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     // Default backup ON; execSync writes no dump file → backupDatabase throws → abort.
     await expect(updateCommand({ migrate: false })).rejects.toBeInstanceOf(ProcessExit)
   })
 
   it('update --to resolves a version that only exists under a v-prefixed tag', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: string) => {
       if (String(url).includes('/token')) return new Response(JSON.stringify({ token: 't' }), { status: 200 })
       // bare "1.9.9" manifest 404s; the "v1.9.9" retry succeeds → targetImage uses the v-tag.
@@ -2434,14 +2434,14 @@ describe('setup / update in-process', () => {
   })
 
   it('update --to a nonexistent version fails before changing anything', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     // fetch already rejects (beforeEach) → resolveTag false for both name and v-prefix.
     await expect(updateCommand({ version: '0.0.0-nope', backup: false, migrate: false }))
       .rejects.toBeInstanceOf(ProcessExit)
   })
 
   it('update exits cleanly when a docker step throws unexpectedly', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose down')) throw new Error('docker daemon crashed')
@@ -2451,35 +2451,35 @@ describe('setup / update in-process', () => {
   })
 
   it('update handles an already-mounted content volume', async () => {
-    const dir = path.join(home, '.learnhouse', 'mounted')
+    const dir = path.join(home, '.starlab', 'mounted')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ghcr.io/learnhouse/app:1.4.0\n    volumes:\n      - x:/app/api/content\n')
+      'name: starlab-dep1\nservices:\n  starlab-app:\n    image: ghcr.io/starlab/app:1.4.0\n    volumes:\n      - x:/app/api/content\n')
     await expect(updateCommand({ backup: false, migrate: false })).resolves.toBeUndefined()
   })
 
   it('update skips content migration on an S3 install', async () => {
-    const dir = path.join(home, '.learnhouse', 's3')
+    const dir = path.join(home, '.starlab', 's3')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_CONTENT_DELIVERY_TYPE=s3api\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_CONTENT_DELIVERY_TYPE=s3api\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ghcr.io/learnhouse/app:1.4.0\n')
+      'name: starlab-dep1\nservices:\n  starlab-app:\n    image: ghcr.io/starlab/app:1.4.0\n')
     await expect(updateCommand({ backup: false, migrate: false })).resolves.toBeUndefined()
   })
 
   it('update with migration exits when the alembic upgrade fails', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('alembic upgrade')) throw new Error('relation broken') // not "already exists" → rethrow → false
@@ -2489,22 +2489,22 @@ describe('setup / update in-process', () => {
   })
 
   it('update with migration runs alembic (no-op when already at head)', async () => {
-    seedInstall(path.join(home, '.learnhouse', 'test'))
+    seedInstall(path.join(home, '.starlab', 'test'))
     // execSync '' → alembic current == heads (both empty) → already-at-head success.
     await expect(updateCommand({ backup: false, migrate: true })).resolves.toBeUndefined()
   })
 
   it('EE update exits when the migration fails', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee-migfail')
+    const dir = path.join(home, '.starlab', 'ee-migfail')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'learn.school.dev', httpPort: 443,
       useHttps: true, autoSsl: true, useExternalDb: false, orgSlug: 'default',
       edition: 'enterprise', eeTenancy: 'single',
     }))
     fs.writeFileSync(path.join(dir, '.env'), 'DOMAIN=learn.school.dev\nEE_IMAGE_TAG=prod\n')
-    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  api:\n    image: x\n')
+    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  api:\n    image: x\n')
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('alembic upgrade')) throw new Error('migration broke')
@@ -2514,16 +2514,16 @@ describe('setup / update in-process', () => {
   })
 
   it('EE update aborts (and reverts the tag) when the image pull fails', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee-pullfail')
+    const dir = path.join(home, '.starlab', 'ee-pullfail')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'learn.school.dev', httpPort: 443,
       useHttps: true, autoSsl: true, useExternalDb: false, orgSlug: 'default',
       edition: 'enterprise', eeTenancy: 'single',
     }))
     fs.writeFileSync(path.join(dir, '.env'), 'DOMAIN=learn.school.dev\nEE_IMAGE_TAG=prod\n')
-    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  api:\n    image: x\n')
+    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  api:\n    image: x\n')
     const m = (await import('node:child_process')).execSync as unknown as ReturnType<typeof vi.fn>
     m.mockImplementation(((cmd: string) => {
       if (cmd.includes('compose pull')) throw new Error('manifest unknown')
@@ -2533,16 +2533,16 @@ describe('setup / update in-process', () => {
   })
 
   it('EE update aborts when the default pre-upgrade backup fails', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee')
+    const dir = path.join(home, '.starlab', 'ee')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'learn.school.dev', httpPort: 443,
       useHttps: true, autoSsl: true, useExternalDb: false, orgSlug: 'default',
       edition: 'enterprise', eeTenancy: 'single',
     }))
     fs.writeFileSync(path.join(dir, '.env'), 'DOMAIN=learn.school.dev\n')
-    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  api:\n    image: x\n')
+    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  api:\n    image: x\n')
     // Default backup ON; execSync writes no dump → backup fails → EE update aborts.
     await expect(updateCommand({ migrate: false })).rejects.toBeInstanceOf(ProcessExit)
   })
@@ -2552,7 +2552,7 @@ describe('setup / update in-process', () => {
       ci: true, name: 'bad', domain: 'localhost', port: 8090,
       adminEmail: 'admin@school.dev', adminPassword: 'short', start: false,
     })).rejects.toBeInstanceOf(ProcessExit)
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'bad'))).toBe(false)
+    expect(fs.existsSync(path.join(home, '.starlab', 'bad'))).toBe(false)
   })
 
   it('setup --ci --edition enterprise dispatches to the EE installer', async () => {
@@ -2564,7 +2564,7 @@ describe('setup / update in-process', () => {
   it('setup --ci exits when no admin password is given', async () => {
     await expect(setupCommand({ ci: true, name: 'np', domain: 'localhost', start: false }))
       .rejects.toBeInstanceOf(ProcessExit) // 176-178
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'np'))).toBe(false)
+    expect(fs.existsSync(path.join(home, '.starlab', 'np'))).toBe(false)
   })
 
   it('setup --ci rejects an invalid admin email', async () => {
@@ -2590,16 +2590,16 @@ describe('setup / update in-process', () => {
 
   it('update runs the full upgrade flow against a fixture install', async () => {
     // Seed an install for findInstallDir/readConfig to pick up.
-    const dir = path.join(home, '.learnhouse', 'test')
+    const dir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ghcr.io/learnhouse/app:1.4.0\n    container_name: learnhouse-app-dep1\n    networks:\n      - n\nnetworks:\n  n:\n')
+      'name: starlab-dep1\nservices:\n  starlab-app:\n    image: ghcr.io/starlab/app:1.4.0\n    container_name: starlab-app-dep1\n    networks:\n      - n\nnetworks:\n  n:\n')
 
     // EE readiness probe reports a non-ee state → the flow warns but completes.
     healthMock.waitForEeReady.mockResolvedValue('timeout')
@@ -2609,7 +2609,7 @@ describe('setup / update in-process', () => {
 
     // The compose tag was rewritten to :latest (offline fallback).
     expect(fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8'))
-      .toContain('ghcr.io/learnhouse/app:latest')
+      .toContain('ghcr.io/starlab/app:latest')
   })
 
   it('setup --ci EE with external DB and Cloudflare DNS generates config', async () => {
@@ -2619,7 +2619,7 @@ describe('setup / update in-process', () => {
       tenancy: 'single', externalDb: 'postgresql://u:p@db.ext:5432/lh',
       dnsProvider: 'cloudflare', cfApiToken: 'cf_token', start: false,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-ext', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-ext', 'docker-compose.yml'))).toBe(true)
   })
 
   it.each([
@@ -2638,8 +2638,8 @@ describe('setup / update in-process', () => {
       domain: 'apps.school.dev', adminEmail: 'admin@school.dev',
       adminPassword: 'password123', tenancy: 'agency', start: false,
     })
-    const dir = path.join(home, '.learnhouse', 'ee-agency')
-    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8'))
+    const dir = path.join(home, '.starlab', 'ee-agency')
+    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8'))
     expect(cfg.eeTenancy).toBe('agency')
     expect(fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8')).toContain('multi')
   })
@@ -2654,7 +2654,7 @@ describe('setup / update in-process', () => {
   })
 
   it('EE interactive overwrites an existing install when confirmed', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee-int')
+    const dir = path.join(home, '.starlab', 'ee-int')
     fs.mkdirSync(dir, { recursive: true })
     fs.writeFileSync(path.join(dir, '.env'), 'X=1\n') // firstDeploy=false → overwrite prompt
     H.q.select.push('single')
@@ -2666,7 +2666,7 @@ describe('setup / update in-process', () => {
   })
 
   it('EE interactive cancels when the overwrite is declined', async () => {
-    const dir = path.join(home, '.learnhouse', 'ee-int2')
+    const dir = path.join(home, '.starlab', 'ee-int2')
     fs.mkdirSync(dir, { recursive: true })
     fs.writeFileSync(path.join(dir, '.env'), 'X=1\n')
     H.q.select.push('single')
@@ -2682,7 +2682,7 @@ describe('setup / update in-process', () => {
     H.q.text.push('learn.school.dev', 'ops@school.dev', 'admin@school.dev')
     H.q.confirm.push(false, true) // localTls=no, startNow=YES → startEe (login/pull/up, mocked)
     await setupEnterprise({ name: 'ee-int-start' })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-int-start', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-int-start', 'docker-compose.yml'))).toBe(true)
   })
 
   it('the interactive EE wizard generates an enterprise install', async () => {
@@ -2693,7 +2693,7 @@ describe('setup / update in-process', () => {
 
     await setupEnterprise({ name: 'ee-int' })
 
-    const base = path.join(home, '.learnhouse')
+    const base = path.join(home, '.starlab')
     const found = fs.readdirSync(base).find((d) =>
       fs.existsSync(path.join(base, d, 'docker-compose.yml')) &&
       fs.existsSync(path.join(base, d, 'Caddyfile')))
@@ -2753,7 +2753,7 @@ describe('setup / update in-process', () => {
       domain: 'learn.school.dev', adminEmail: 'admin@school.dev',
       adminPassword: 'password123', tenancy: 'single', start: true,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-oss', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-oss', 'docker-compose.yml'))).toBe(true)
   })
 
   it('EE setup with start warns when EE readiness times out', async () => {
@@ -2763,7 +2763,7 @@ describe('setup / update in-process', () => {
       domain: 'learn.school.dev', adminEmail: 'admin@school.dev',
       adminPassword: 'password123', tenancy: 'single', start: true,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-to', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-to', 'docker-compose.yml'))).toBe(true)
   })
 
   it('EE setup with start exits when the registry login fails', async () => {
@@ -2782,7 +2782,7 @@ describe('setup / update in-process', () => {
       domain: 'learn.school.dev', adminEmail: 'admin@school.dev',
       adminPassword: 'password123', tenancy: 'single', start: true,
     })
-    expect(fs.existsSync(path.join(home, '.learnhouse', 'ee-start', 'docker-compose.yml'))).toBe(true)
+    expect(fs.existsSync(path.join(home, '.starlab', 'ee-start', 'docker-compose.yml'))).toBe(true)
   })
 
   it('EE setup exits when it cannot write the config files', async () => {
@@ -2800,26 +2800,26 @@ describe('setup / update in-process', () => {
       domain: 'learn.school.dev', adminEmail: 'admin@school.dev',
       adminPassword: 'password123', tenancy: 'single', start: false,
     })
-    const dir = path.join(home, '.learnhouse', 'ee')
+    const dir = path.join(home, '.starlab', 'ee')
     expect(fs.existsSync(path.join(dir, 'docker-compose.yml'))).toBe(true)
     expect(fs.existsSync(path.join(dir, '.env'))).toBe(true)
     expect(fs.existsSync(path.join(dir, 'Caddyfile'))).toBe(true)
-    expect(fs.existsSync(path.join(dir, 'learnhouse.config.json'))).toBe(true)
-    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'learnhouse.config.json'), 'utf-8'))
+    expect(fs.existsSync(path.join(dir, 'starlab.config.json'))).toBe(true)
+    const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'starlab.config.json'), 'utf-8'))
     expect(cfg.edition).toBe('enterprise')
   })
 
   it('update --to <version> resolves the tag via GHCR and pins it', async () => {
-    const dir = path.join(home, '.learnhouse', 'test')
+    const dir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(path.join(dir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(dir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.0', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir: dir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     fs.writeFileSync(path.join(dir, 'docker-compose.yml'),
-      'name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ghcr.io/learnhouse/app:1.4.0\n    container_name: learnhouse-app-dep1\n    networks:\n      - n\nnetworks:\n  n:\n')
+      'name: starlab-dep1\nservices:\n  starlab-app:\n    image: ghcr.io/starlab/app:1.4.0\n    container_name: starlab-app-dep1\n    networks:\n      - n\nnetworks:\n  n:\n')
 
     // resolveTag fetches a GHCR token then the manifest — make both succeed.
     vi.spyOn(globalThis, 'fetch').mockImplementation((async (u: unknown) =>
@@ -2829,7 +2829,7 @@ describe('setup / update in-process', () => {
 
     await expect(updateCommand({ version: '1.2.6', backup: false, migrate: false })).resolves.toBeUndefined()
     expect(fs.readFileSync(path.join(dir, 'docker-compose.yml'), 'utf-8'))
-      .toContain('ghcr.io/learnhouse/app:1.2.6')
+      .toContain('ghcr.io/starlab/app:1.2.6')
   })
 })
 
@@ -2929,10 +2929,10 @@ describe('docker log streamers', () => {
   })
 
   it('dockerLogsMulti tails each named container', () => {
-    dockerLogsMulti(['learnhouse-app-dep1', 'learnhouse-db-dep1'])
+    dockerLogsMulti(['starlab-app-dep1', 'starlab-db-dep1'])
     expect(spawnMock).toHaveBeenCalledTimes(2)
-    expect(spawnMock.mock.calls[0][1]).toContain('learnhouse-app-dep1')
-    expect(spawnMock.mock.calls[1][1]).toContain('learnhouse-db-dep1')
+    expect(spawnMock.mock.calls[0][1]).toContain('starlab-app-dep1')
+    expect(spawnMock.mock.calls[1][1]).toContain('starlab-db-dep1')
   })
 
   it('dockerLogsMulti forwards SIGINT to every child', () => {
@@ -2965,10 +2965,10 @@ describe('docker log streamers', () => {
     const ss = (await import('node:child_process')).spawnSync as unknown as ReturnType<typeof vi.fn>
     ss.mockReturnValue({ status: 0, stdout: Buffer.from(''), stderr: Buffer.from('') })
     const prev = process.exitCode
-    dockerExecInteractive('learnhouse-app-dep1', '/bin/sh')
+    dockerExecInteractive('starlab-app-dep1', '/bin/sh')
     const call = ss.mock.calls.at(-1) as [string, string[]]
     expect(call[0]).toBe('docker')
-    expect(call[1].slice(0, 4)).toEqual(['exec', '-it', 'learnhouse-app-dep1', '/bin/sh'])
+    expect(call[1].slice(0, 4)).toEqual(['exec', '-it', 'starlab-app-dep1', '/bin/sh'])
     process.exitCode = prev
   })
 })

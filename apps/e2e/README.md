@@ -1,7 +1,7 @@
-# LearnHouse E2E — UI acceptance tests
+# StarLab E2E — UI acceptance tests
 
-Browser-driven, human-like end-to-end tests for LearnHouse. The suite boots a
-real **self-host via the LearnHouse CLI** (`setup --ci`, pulling the published
+Browser-driven, human-like end-to-end tests for StarLab. The suite boots a
+real **self-host via the StarLab CLI** (`setup --ci`, pulling the published
 image) and drives the UI with Playwright like a real user. It validates the
 **shipped self-host product**.
 
@@ -78,7 +78,7 @@ bunx playwright test 06-manual-grading            # one spec by name
 | `E2E_PORT` | `8080` | HTTP port for the self-host. |
 | `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` | `admin@school.dev` / `E2eTestAdmin!234` | Bootstrapped admin. |
 | `E2E_ORG_SLUG` | `default` | Bootstrapped org slug. |
-| `E2E_CLI` | `npx --yes learnhouse@latest` | CLI used to boot (override for a local build). |
+| `E2E_CLI` | `npx --yes starlab@latest` | CLI used to boot (override for a local build). |
 | `E2E_SKIP_BOOT` | — | `1` to skip booting (assumes instance already up). |
 | `E2E_KEEP` | — | `1` to keep the instance running after the suite. |
 
@@ -132,6 +132,6 @@ server-verify dispatch, CODE grading, retry caps, due dates, permissions).
 
 > The two fixes are not in the published `:latest` image yet, so the
 > manual-grading grade assertion requires this branch's code in the running
-> instance (it passes against `learnhouse dev` / a branch-built image).
+> instance (it passes against `starlab dev` / a branch-built image).
 > CODE task type is covered by backend tests only (Judge0 isn't available on a
 > self-host).

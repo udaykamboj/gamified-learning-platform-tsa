@@ -4,21 +4,22 @@ import React from 'react'
 import { fetchInstanceMode, isSuperadminSurfaceBlocked } from '@lib/eeGate'
 import EERequiredScreen from '@components/Security/EERequiredScreen'
 
-// The gate is resolved per request. An ISR-cached result would outlive a
-// licence change, and this layout is what decides whether /admin exists.
+// The admin console is CORE to the single-org build: it renders in every
+// deployment mode, and access is enforced by the role/permission layer
+// (SuperadminAuthorization + backend _require_platform_superadmin), never by
+// licensing. The mode lookup below is retained for compatibility with the
+// shared gate helper but never blocks.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | LearnHouse Admin',
-    default: 'LearnHouse Admin',
+    template: '%s | StarLab Admin',
+    default: 'StarLab Admin',
   },
 }
 
-// Wraps everything under /admin, including /admin/login, which sits outside
-// the (dashboard) route group and was previously ungated. Returning the screen
-// here short-circuits AdminProviders, so OSS never bootstraps a session or
-// renders the login form.
+// Wraps everything under /admin, including /admin/login. The gate helper is
+// never-fire in this build, so AdminProviders always bootstraps.
 export default async function AdminRootLayout({
   children,
 }: {

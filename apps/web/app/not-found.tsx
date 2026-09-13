@@ -1,7 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/black_logo.png'
 
 export default function NotFound() {
   return (
@@ -13,8 +12,8 @@ export default function NotFound() {
     <div className="pb-20">
         <Image quality={100}
           width={270}
-          height={100}
-          src={learnhouseIcon}
+          height={53}
+          src="/starlab-black.svg"
           alt="logo"
         />
         </div>

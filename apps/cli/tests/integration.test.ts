@@ -31,7 +31,7 @@ import {
  *   1. Live install          — boot one fresh install and exercise every
  *                              non-interactive command against it.
  *   2. Upgrade old → new     — boot a pinned OLD image and upgrade via the CLI,
- *                              proving `learnhouse update` actually pulls and
+ *                              proving `starlab update` actually pulls and
  *                              the database survives (the LEA-47 fixes).
  *   3. No installation       — error paths when no install exists.
  *
@@ -53,8 +53,8 @@ describe('CLI integration — live install (command coverage)', () => {
   // Boot once; every nested suite shares this live install.
   beforeAll(async () => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-cmd-'))
-    fs.mkdirSync(path.join(home, '.learnhouse'), { recursive: true })
-    installDir = path.join(home, '.learnhouse', CMD_NAME)
+    fs.mkdirSync(path.join(home, '.starlab'), { recursive: true })
+    installDir = path.join(home, '.starlab', CMD_NAME)
 
     // Use a custom org slug so we can verify it propagated end-to-end.
     const setup = cli(
@@ -74,7 +74,7 @@ describe('CLI integration — live install (command coverage)', () => {
     if (setup.exitCode !== 0) throw new Error(`setup failed:\n${setup.stdout}\n${setup.stderr}`)
 
     deploymentId = JSON.parse(
-      fs.readFileSync(path.join(installDir, 'learnhouse.config.json'), 'utf-8'),
+      fs.readFileSync(path.join(installDir, 'starlab.config.json'), 'utf-8'),
     ).deploymentId
 
     composeUp(installDir)
@@ -94,10 +94,10 @@ describe('CLI integration — live install (command coverage)', () => {
   describe('setup --ci generates correct config files', () => {
     it('writes docker-compose.yml with the app image, pgvector and nginx', () => {
       const compose = fs.readFileSync(path.join(installDir, 'docker-compose.yml'), 'utf-8')
-      expect(compose).toContain('ghcr.io/learnhouse/app:')
+      expect(compose).toContain('ghcr.io/starlab/app:')
       expect(compose).toContain('pgvector')
       expect(compose).toContain('nginx')
-      expect(compose).toContain(`container_name: learnhouse-app-${deploymentId}`)
+      expect(compose).toContain(`container_name: starlab-app-${deploymentId}`)
     })
 
     it('adds the socat SSR-forward sidecar for a non-80 port', () => {
@@ -116,16 +116,16 @@ describe('CLI integration — live install (command coverage)', () => {
 
     it('.env carries the org slug/name and admin credentials, with no "=undefined"', () => {
       const env = fs.readFileSync(path.join(installDir, '.env'), 'utf-8')
-      expect(env).toContain('NEXT_PUBLIC_LEARNHOUSE_DEFAULT_ORG=acme')
-      expect(env).toContain('LEARNHOUSE_INITIAL_ORG_SLUG=acme')
+      expect(env).toContain('NEXT_PUBLIC_STARLAB_DEFAULT_ORG=acme')
+      expect(env).toContain('STARLAB_INITIAL_ORG_SLUG=acme')
       expect(env).toContain('Acme Academy')
-      expect(env).toContain(`LEARNHOUSE_INITIAL_ADMIN_EMAIL=${TEST_ADMIN_EMAIL}`)
-      expect(env).toContain(`LEARNHOUSE_INITIAL_ADMIN_PASSWORD=${TEST_ADMIN_PASSWORD}`)
+      expect(env).toContain(`STARLAB_INITIAL_ADMIN_EMAIL=${TEST_ADMIN_EMAIL}`)
+      expect(env).toContain(`STARLAB_INITIAL_ADMIN_PASSWORD=${TEST_ADMIN_PASSWORD}`)
       expect(env).not.toMatch(/=undefined(\s|$)/)
     })
 
-    it('learnhouse.config.json records the right metadata', () => {
-      const cfg = JSON.parse(fs.readFileSync(path.join(installDir, 'learnhouse.config.json'), 'utf-8'))
+    it('starlab.config.json records the right metadata', () => {
+      const cfg = JSON.parse(fs.readFileSync(path.join(installDir, 'starlab.config.json'), 'utf-8'))
       expect(cfg.domain).toBe('localhost')
       expect(cfg.httpPort).toBe(CMD_PORT)
       expect(cfg.orgSlug).toBe('acme')
@@ -181,7 +181,7 @@ describe('CLI integration — live install (command coverage)', () => {
     it('shows app, db, redis and nginx as Up', () => {
       const r = cli('status')
       expect(r.exitCode).toBe(0)
-      expect(r.stdout).toContain('learnhouse-app')
+      expect(r.stdout).toContain('starlab-app')
       expect(r.stdout).toContain('Up')
       expect(r.stdout).toContain('db')
       expect(r.stdout).toContain('redis')
@@ -208,7 +208,7 @@ describe('CLI integration — live install (command coverage)', () => {
       expect(r.exitCode).toBe(0)
       expect(r.stdout).toContain('Docker installed')
       expect(r.stdout).toContain('Docker daemon running')
-      expect(r.stdout).toContain('learnhouse-app running')
+      expect(r.stdout).toContain('starlab-app running')
       expect(r.stdout).toContain('environment variables present')
       expect(r.stdout).toMatch(/disk space|available/i)
       expect(r.stdout).toMatch(/restart/i)
@@ -240,7 +240,7 @@ describe('CLI integration — live install (command coverage)', () => {
     it('the .env file is readable, writable and persists edits', () => {
       const envPath = path.join(installDir, '.env')
       const original = fs.readFileSync(envPath, 'utf-8')
-      expect(original).toContain('LEARNHOUSE_DOMAIN')
+      expect(original).toContain('STARLAB_DOMAIN')
       expect(fs.statSync(envPath).mode & 0o200).toBeGreaterThan(0) // owner-writable
 
       fs.writeFileSync(envPath, original + '\nLH_TEST_SENTINEL=from-integration-test\n')
@@ -257,12 +257,12 @@ describe('CLI integration — live install (command coverage)', () => {
 
     it('this deployment has app, db and redis containers running', () => {
       const r = spawnSync('docker',
-        ['ps', '--filter', `name=learnhouse`, '--filter', `name=${deploymentId}`, '--format', '{{.Names}}'],
+        ['ps', '--filter', `name=starlab`, '--filter', `name=${deploymentId}`, '--format', '{{.Names}}'],
         { encoding: 'utf-8' })
       const names = (r.stdout ?? '').trim().split('\n').filter(Boolean)
-      expect(names.some((n) => n.includes('learnhouse-app'))).toBe(true)
-      expect(names.some((n) => n.includes('learnhouse-db'))).toBe(true)
-      expect(names.some((n) => n.includes('learnhouse-redis'))).toBe(true)
+      expect(names.some((n) => n.includes('starlab-app'))).toBe(true)
+      expect(names.some((n) => n.includes('starlab-db'))).toBe(true)
+      expect(names.some((n) => n.includes('starlab-redis'))).toBe(true)
     })
   })
 
@@ -303,7 +303,7 @@ describe('CLI integration — live install (command coverage)', () => {
         const dump = fs.readFileSync(path.join(out, sub!, 'database.sql'), 'utf-8')
         expect(dump).toContain('CREATE TABLE')
         expect(dump).toContain('DROP TABLE IF EXISTS')
-        expect(fs.readFileSync(path.join(out, sub!, '.env'), 'utf-8')).toContain('LEARNHOUSE_DOMAIN')
+        expect(fs.readFileSync(path.join(out, sub!, '.env'), 'utf-8')).toContain('STARLAB_DOMAIN')
       } finally {
         fs.rmSync(out, { recursive: true, force: true })
       }
@@ -369,7 +369,7 @@ describe('CLI integration — live install (command coverage)', () => {
   // ── stop / start ────────────────────────────────────────────────────────────
   describe('stop / start lifecycle', () => {
     const appRunning = () =>
-      getRunningContainers(`learnhouse-app-${deploymentId}`).length > 0
+      getRunningContainers(`starlab-app-${deploymentId}`).length > 0
 
     it('stop brings every container down', () => {
       const r = cli('stop', 60_000)
@@ -438,14 +438,14 @@ describe('CLI integration — live install (command coverage)', () => {
     it('no arguments shows the welcome screen, not an error', () => {
       const r = cli('')
       expect(r.exitCode).toBe(0)
-      expect(r.stdout).toContain('LearnHouse')
+      expect(r.stdout).toContain('StarLab')
       expect(r.stdout).toContain('Available commands')
     })
   })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Section 2 — Upgrade an old image to a new one via `learnhouse update`
+// Section 2 — Upgrade an old image to a new one via `starlab update`
 //
 // This is the LEA-47 regression surface: the update command used to rewrite
 // the compose tag but never pull, so the container restarted on the cached old
@@ -458,7 +458,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
   // to latest applies the full delta of migrations.
   const OLD_VERSION = '1.0.1'
   const NEW_VERSION = 'latest'
-  const GHCR = 'ghcr.io/learnhouse/app'
+  const GHCR = 'ghcr.io/starlab/app'
 
   let home: string
   let installDir: string
@@ -466,12 +466,12 @@ describe('CLI integration — upgrade (old → new image)', () => {
 
   const cli = (args: string, timeoutMs = 120_000) => cliWithHome(home, args, timeoutMs)
   const appContainer = () =>
-    getRunningContainers(`learnhouse-app-${deploymentId}`)[0] ?? `learnhouse-app-${deploymentId}`
+    getRunningContainers(`starlab-app-${deploymentId}`)[0] ?? `starlab-app-${deploymentId}`
 
   beforeAll(async () => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-integ-'))
-    fs.mkdirSync(path.join(home, '.learnhouse'), { recursive: true })
-    installDir = path.join(home, '.learnhouse', INTEG_NAME)
+    fs.mkdirSync(path.join(home, '.starlab'), { recursive: true })
+    installDir = path.join(home, '.starlab', INTEG_NAME)
 
     const setup = cli(
       [
@@ -488,13 +488,13 @@ describe('CLI integration — upgrade (old → new image)', () => {
     if (setup.exitCode !== 0) throw new Error(`setup failed:\n${setup.stdout}\n${setup.stderr}`)
 
     deploymentId = JSON.parse(
-      fs.readFileSync(path.join(installDir, 'learnhouse.config.json'), 'utf-8'),
+      fs.readFileSync(path.join(installDir, 'starlab.config.json'), 'utf-8'),
     ).deploymentId
 
     // Pin the OLD image so we start from a known-stale version.
     const composePath = path.join(installDir, 'docker-compose.yml')
     fs.writeFileSync(composePath, fs.readFileSync(composePath, 'utf-8').replace(
-      /image:\s*ghcr\.io\/learnhouse\/app:\S+/, `image: ${GHCR}:${OLD_VERSION}`))
+      /image:\s*ghcr\.io\/starlab\/app:\S+/, `image: ${GHCR}:${OLD_VERSION}`))
 
     composeUp(installDir)
 
@@ -541,7 +541,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
     it('the running container actually moved off the old image', () => {
       const image = getContainerImage(appContainer())
       expect(image).not.toContain(OLD_VERSION)
-      expect(image).toContain('learnhouse')
+      expect(image).toContain('starlab')
     })
 
     it('health responds and the default org survives the upgrade', async () => {
@@ -551,7 +551,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
 
     it('alembic is at head after the migration ran', () => {
       const r = spawnSync('docker',
-        ['compose', 'exec', 'learnhouse-app', 'sh', '-c', 'cd /app/api && uv run alembic current'],
+        ['compose', 'exec', 'starlab-app', 'sh', '-c', 'cd /app/api && uv run alembic current'],
         { cwd: installDir, encoding: 'utf-8' })
       const out = ((r.stdout ?? '') + (r.stderr ?? '')).toLowerCase()
       expect(out).not.toContain('error')
@@ -561,7 +561,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
     it('cli status and health are green on the upgraded install', () => {
       const status = cli('status')
       expect(status.exitCode).toBe(0)
-      expect(status.stdout).toContain('learnhouse-app')
+      expect(status.stdout).toContain('starlab-app')
       expect(status.stdout).toContain('Up')
 
       const health = cli('health', 60_000)
@@ -573,7 +573,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
   describe('stop / start and doctor on the upgraded install', () => {
     it('stop then start keeps the new image and stays healthy', async () => {
       expect(cli('stop', 60_000).exitCode).toBe(0)
-      expect(getRunningContainers(`learnhouse-app-${deploymentId}`).length).toBe(0)
+      expect(getRunningContainers(`starlab-app-${deploymentId}`).length).toBe(0)
 
       expect(cli('start', 300_000).exitCode).toBe(0)
       expect(getContainerImage(appContainer())).toContain(NEW_VERSION)
@@ -583,7 +583,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
     it('doctor shows all green', () => {
       const r = cli('doctor', 60_000)
       expect(r.exitCode).toBe(0)
-      expect(r.stdout).toContain('learnhouse-app running')
+      expect(r.stdout).toContain('starlab-app running')
       expect(r.stdout).toContain('environment variables present')
     })
   })
@@ -605,7 +605,7 @@ describe('CLI integration — upgrade (old → new image)', () => {
       // Commander v15 intercepts --version at the global level; it must print
       // the CLI version, not perform an update (the old broken flag name).
       const r = cli('update --version 1.2.6 --no-backup --no-migrate', 30_000)
-      expect(r.stdout + r.stderr).not.toContain('Updating LearnHouse')
+      expect(r.stdout + r.stderr).not.toContain('Updating StarLab')
     })
   })
 
@@ -647,7 +647,7 @@ describe('CLI integration — no installation (error paths)', () => {
     '%s fails with a "no installation / run setup" message', (cmd) => {
       const r = cli(cmd)
       expect(r.exitCode).not.toBe(0)
-      expect(r.stdout + r.stderr).toMatch(/no learnhouse installation|setup/i)
+      expect(r.stdout + r.stderr).toMatch(/no starlab installation|setup/i)
     })
 
   it('restore exits non-zero on a nonexistent archive', () => {

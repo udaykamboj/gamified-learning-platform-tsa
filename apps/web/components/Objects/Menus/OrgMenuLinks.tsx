@@ -1,16 +1,19 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag } from '@phosphor-icons/react'
+import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag, MapTrifold, Star, Robot } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
-type Builtin = { feature: string; link: string; labelKey: string; Icon: any }
+type Builtin = { feature: string; link: string; labelKey: string; Icon: any; labelText?: string }
 
 const BUILTIN: Record<string, Builtin> = {
   courses: { feature: 'courses', link: '/courses', labelKey: 'courses.courses', Icon: Books },
+  journey: { feature: 'journey', link: '/journey', labelKey: '', labelText: 'Journey', Icon: MapTrifold },
+  skills: { feature: 'skills', link: '/skills', labelKey: '', labelText: 'Skills', Icon: Star },
+  ai_agent: { feature: 'ai_agent', link: '/ai-agent', labelKey: '', labelText: 'Astra AI', Icon: Robot },
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
   communities: { feature: 'communities', link: '/communities', labelKey: 'communities.title', Icon: ChatsCircle },
@@ -19,7 +22,7 @@ const BUILTIN: Record<string, Builtin> = {
 }
 
 // Default order when an org has no custom menu config.
-const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
+const DEFAULT_ORDER = ['ai_agent', 'journey', 'skills', 'courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()
@@ -57,7 +60,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       if (!isEnabled(meta.feature)) return null // plan/feature gating
       return {
         key: item.type,
-        label: item.label || t(meta.labelKey),
+        label: item.label || meta.labelText || t(meta.labelKey),
         Icon: meta.Icon,
         href: getUriWithOrg(props.orgslug, meta.link),
         external: false,

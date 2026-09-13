@@ -9,7 +9,7 @@ import { autoDetectDeploymentId, isContainerRunning, dockerExecToFile, dockerExe
 function resolveDbContainer(config: { deploymentId?: string }): string | null {
   const id = config.deploymentId || autoDetectDeploymentId()
   if (!id) return null
-  return `learnhouse-db-${id}`
+  return `starlab-db-${id}`
 }
 
 async function createBackup() {
@@ -17,7 +17,7 @@ async function createBackup() {
   const config = readConfig(installDir)
 
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run setup first.')
+    p.log.error('No StarLab installation found. Run setup first.')
     process.exit(1)
   }
 
@@ -35,7 +35,7 @@ async function createBackup() {
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
   const backupDir = path.join(installDir, 'backups')
-  const backupName = `learnhouse-backup-${timestamp}`
+  const backupName = `starlab-backup-${timestamp}`
   const tmpDir = path.join(backupDir, backupName)
   const archivePath = path.join(backupDir, `${backupName}.tar.gz`)
 
@@ -48,7 +48,7 @@ async function createBackup() {
     const dumpPath = path.join(tmpDir, 'database.sql')
     dockerExecToFile(
       dbContainer,
-      'pg_dump -U learnhouse --clean --if-exists learnhouse',
+      'pg_dump -U starlab --clean --if-exists starlab',
       dumpPath,
     )
     s.stop('Database dump created')
@@ -92,7 +92,7 @@ async function createBackup() {
     `  ${pc.dim('File:')} ${archivePath}`,
     `  ${pc.dim('Size:')} ${sizeMb} MB`,
     '',
-    `  ${pc.dim('Restore with:')} npx learnhouse backup --restore ${archivePath}`,
+    `  ${pc.dim('Restore with:')} npx starlab backup --restore ${archivePath}`,
     '',
   ].join('\n'))
 }
@@ -107,7 +107,7 @@ async function restoreBackup(archivePath: string) {
   const config = readConfig(installDir)
 
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run setup first.')
+    p.log.error('No StarLab installation found. Run setup first.')
     process.exit(1)
   }
 
@@ -172,7 +172,7 @@ async function restoreBackup(archivePath: string) {
   try {
     dockerExecFromFile(
       dbContainer,
-      'psql -U learnhouse -d learnhouse',
+      'psql -U starlab -d starlab',
       dumpPath,
     )
     s2.stop('Database restored')
@@ -200,19 +200,19 @@ async function restoreBackup(archivePath: string) {
   fs.rmSync(tmpDir, { recursive: true, force: true })
 
   p.log.success(pc.green(pc.bold('Restore complete!')))
-  p.log.info('You may want to restart services: npx learnhouse stop && npx learnhouse start')
+  p.log.info('You may want to restart services: npx starlab stop && npx starlab start')
 }
 
 export async function backupCommand(archivePath?: string, options?: { restore?: boolean }) {
   // Called with --restore flag
   if (options?.restore && archivePath) {
-    p.intro(pc.cyan('LearnHouse Restore'))
+    p.intro(pc.cyan('StarLab Restore'))
     await restoreBackup(archivePath)
     return
   }
 
   // No flag — in non-interactive mode default to create, otherwise prompt
-  p.intro(pc.cyan('LearnHouse Backup'))
+  p.intro(pc.cyan('StarLab Backup'))
 
   if (!process.stdout.isTTY) {
     await createBackup()
@@ -233,7 +233,7 @@ export async function backupCommand(archivePath?: string, options?: { restore?: 
   } else {
     const filePath = await p.text({
       message: 'Path to backup archive (.tar.gz)',
-      placeholder: './backups/learnhouse-backup-*.tar.gz',
+      placeholder: './backups/starlab-backup-*.tar.gz',
     })
     if (p.isCancel(filePath)) { p.cancel(); process.exit(0) }
     await restoreBackup(filePath as string)

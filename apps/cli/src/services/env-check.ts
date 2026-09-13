@@ -43,7 +43,7 @@ const API_ENV: AppEnvSpec = {
   envFile: 'apps/api/.env',
   vars: [
     {
-      name: 'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+      name: 'STARLAB_AUTH_JWT_SECRET_KEY',
       required: true,
       description: 'JWT signing secret (min 32 chars)',
       defaultValue: generateJwtSecret,
@@ -62,7 +62,7 @@ const WEB_ENV: AppEnvSpec = {
   envFile: 'apps/web/.env.local',
   vars: [
     {
-      name: 'NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL',
+      name: 'NEXT_PUBLIC_STARLAB_BACKEND_URL',
       required: true,
       description: 'Backend API URL',
       defaultValue: 'http://localhost:1338/',
@@ -81,13 +81,13 @@ const COLLAB_ENV: AppEnvSpec = {
       defaultValue: '4000',
     },
     {
-      name: 'LEARNHOUSE_API_URL',
+      name: 'STARLAB_API_URL',
       required: true,
-      description: 'LearnHouse API base URL',
+      description: 'StarLab API base URL',
       defaultValue: 'http://localhost:1338',
     },
     {
-      name: 'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+      name: 'STARLAB_AUTH_JWT_SECRET_KEY',
       required: true,
       description: 'JWT secret (must match API)',
       defaultValue: '', // filled from API value at write-time
@@ -226,7 +226,7 @@ export async function checkDevEnv(root: string): Promise<boolean> {
   const apiFile = path.join(root, API_ENV.envFile)
   const apiExisting = parseEnvFile(apiFile)
 
-  const jwtSecret = apiExisting.get('LEARNHOUSE_AUTH_JWT_SECRET_KEY') || generateJwtSecret()
+  const jwtSecret = apiExisting.get('STARLAB_AUTH_JWT_SECRET_KEY') || generateJwtSecret()
   const collabKey = apiExisting.get('COLLAB_INTERNAL_KEY') || 'dev-collab-internal-key-change-in-prod'
 
   // ── Write ──────────────────────────────────────────────────────────────
@@ -239,7 +239,7 @@ export async function checkDevEnv(root: string): Promise<boolean> {
       const val = existing.get(v.name)
       if (!v.required || (val && val.length > 0)) continue
 
-      if (v.name === 'LEARNHOUSE_AUTH_JWT_SECRET_KEY') {
+      if (v.name === 'STARLAB_AUTH_JWT_SECRET_KEY') {
         toWrite.set(v.name, jwtSecret)
       } else if (v.name === 'COLLAB_INTERNAL_KEY') {
         toWrite.set(v.name, collabKey)

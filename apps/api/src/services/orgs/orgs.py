@@ -2063,3 +2063,9 @@ async def rbac_check(
 
 
 ## 🔒 RBAC Utils ##
+
+
+async def get_default_org(db_session: AsyncSession) -> Optional[Organization]:
+    """Get the first (and only) organization in single-org mode."""
+    stmt = select(Organization).order_by(Organization.id).limit(1)
+    return (await db_session.execute(stmt)).scalar_one_or_none()

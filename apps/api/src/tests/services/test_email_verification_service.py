@@ -57,7 +57,7 @@ class TestEmailVerificationService:
 
     def test_get_redis_connection_errors(self):
         with patch(
-            "src.services.users.email_verification.get_learnhouse_config",
+            "src.services.users.email_verification.get_starlab_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="")
             ),
@@ -69,7 +69,7 @@ class TestEmailVerificationService:
         fake_redis = MagicMock()
         fake_redis.__bool__.return_value = False
         with patch(
-            "src.services.users.email_verification.get_learnhouse_config",
+            "src.services.users.email_verification.get_starlab_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(
                     redis_connection_string="redis://test"
@@ -103,7 +103,7 @@ class TestEmailVerificationService:
             return_value="verification-token",
         ), patch(
             "src.services.users.email_verification.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://starlab.test",
         ), patch(
             "src.services.users.email_verification.send_email_verification_email",
             return_value=True,
@@ -171,7 +171,7 @@ class TestEmailVerificationService:
             return_value="verification-token",
         ), patch(
             "src.services.users.email_verification.get_base_url_from_request",
-            return_value="https://learnhouse.test",
+            return_value="https://starlab.test",
         ), patch(
             "src.services.users.email_verification.send_email_verification_email",
             return_value=False,
@@ -185,7 +185,7 @@ class TestEmailVerificationService:
         self, mock_request, db
     ):
         """Org-less (platform) signup without a trusted origin builds the link on
-        LEARNHOUSE_PLATFORM_URL, not the frontend_domain fallback."""
+        STARLAB_PLATFORM_URL, not the frontend_domain fallback."""
         user = await _make_user(
             db,
             id=23,
@@ -197,7 +197,7 @@ class TestEmailVerificationService:
         fake_redis.setex = Mock()
 
         with patch.dict(
-            os.environ, {"LEARNHOUSE_PLATFORM_URL": "https://www.learnhouse.app"}
+            os.environ, {"STARLAB_PLATFORM_URL": "https://www.starlab.app"}
         ), patch(
             "src.services.users.email_verification.get_redis_connection",
             return_value=fake_redis,
@@ -206,7 +206,7 @@ class TestEmailVerificationService:
             return_value="verification-token",
         ), patch(
             "src.services.users.email_verification.get_base_url_from_request",
-            return_value="https://learnhouse.io",
+            return_value="https://starlab.io",
         ), patch(
             "src.services.users.email_verification.send_email_verification_email",
             return_value=True,
@@ -216,7 +216,7 @@ class TestEmailVerificationService:
         assert result == "Verification email sent"
         # mock_request has no Origin/Referer, so the trusted-origin step yields
         # nothing and the platform URL must win over the (patched) fallback.
-        assert mock_send.call_args.kwargs["base_url"] == "https://www.learnhouse.app"
+        assert mock_send.call_args.kwargs["base_url"] == "https://www.starlab.app"
 
     @pytest.mark.asyncio
     async def test_verify_email_token_paths(
@@ -499,7 +499,7 @@ class TestEmailVerificationService:
         fake_redis = MagicMock()
         fake_redis.__bool__ = MagicMock(return_value=True)
         with patch(
-            "src.services.users.email_verification.get_learnhouse_config",
+            "src.services.users.email_verification.get_starlab_config",
             return_value=SimpleNamespace(
                 redis_config=SimpleNamespace(redis_connection_string="redis://test")
             ),

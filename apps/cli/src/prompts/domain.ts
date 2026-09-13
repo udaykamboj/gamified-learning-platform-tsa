@@ -13,7 +13,7 @@ export interface DomainConfig {
 
 export async function promptDomain(): Promise<DomainConfig> {
   const domain = await p.text({
-    message: 'What domain will LearnHouse be hosted on?',
+    message: 'What domain will StarLab be hosted on?',
     placeholder: 'localhost',
     defaultValue: 'localhost',
     validate: validateDomain,

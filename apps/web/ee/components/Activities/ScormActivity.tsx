@@ -347,7 +347,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
 
                 // Also inject stylesheet for other elements
                 const nestedStyle = nestedIframe.contentDocument.createElement('style')
-                nestedStyle.id = 'learnhouse-scorm-styles'
+                nestedStyle.id = 'starlab-scorm-styles'
                 nestedStyle.textContent = `
                   html, html body, body {
                     margin: 0 !important;
@@ -373,8 +373,8 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
                     height: 0 !important;
                   }
                 `
-                // Remove any existing learnhouse styles first
-                const existing = nestedIframe.contentDocument.getElementById('learnhouse-scorm-styles')
+                // Remove any existing starlab styles first
+                const existing = nestedIframe.contentDocument.getElementById('starlab-scorm-styles')
                 if (existing) existing.remove()
                 // Append to end of head for higher cascade priority
                 nestedIframe.contentDocument.head.appendChild(nestedStyle)

@@ -13,7 +13,7 @@ from pydantic import EmailStr
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization, OrganizationRead
 from src.db.usergroups import UserGroup
@@ -79,7 +79,7 @@ async def create_invite_code(
     await require_not_demo_org(org_id, db_session)
 
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -187,7 +187,7 @@ async def get_invite_codes(
     db_session: AsyncSession,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -252,7 +252,7 @@ async def get_invite_code(
     db_session: AsyncSession,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -315,7 +315,7 @@ async def delete_invite_code(
     db_session: AsyncSession,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -382,7 +382,7 @@ async def send_invite_email(
 
     # Look up the invite code from Redis if a UUID was provided
     if invite_code_uuid:
-        LH_CONFIG = get_learnhouse_config()
+        LH_CONFIG = get_starlab_config()
         redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
         if redis_conn_string:
@@ -424,7 +424,7 @@ async def send_invite_email(
 
         result = send_invitation_email(
             email=email,
-            org_name=sanitize_display_name(org.name, fallback="A LearnHouse organization"),
+            org_name=sanitize_display_name(org.name, fallback="A StarLab organization"),
             inviter_username=sanitize_display_name(user.username),
             invite_code=invite_code,
             signup_url=signup_url,

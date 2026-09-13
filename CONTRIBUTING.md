@@ -1,13 +1,13 @@
-# Contributing to LearnHouse
+# Contributing to StarLab
 
 ## Getting Started
 
-To set up your development environment, use the LearnHouse CLI:
+To set up your development environment, use the StarLab CLI:
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse
-npx learnhouse dev
+git clone https://github.com/starlab/starlab.git
+cd starlab
+npx starlab dev
 ```
 
 This will spin up PostgreSQL and Redis containers, install dependencies, and start the API, Web, and Collab servers. See the [CLI documentation](apps/cli/README.md) for more details.
@@ -33,13 +33,13 @@ This project follows [GitHub's standard forking model](https://guides.github.com
 
 ### Submitting a bug/fix
 
-- Start an issue [here](https://github.com/learnhouse/learnhouse/issues) to report the bug.
+- Start an issue [here](https://github.com/starlab/starlab/issues) to report the bug.
 - Please include a detailed description of the bug and how it can be reproduced.
 - Someone from the team will review the issue and will give you a go ahead.
 
 ### Submitting a feature / idea
 
-- Start a Discussion [here](https://github.com/learnhouse/learnhouse/discussions/categories/ideas) to propose your idea and how it should be implemented.
+- Start a Discussion [here](https://github.com/starlab/starlab/discussions/categories/ideas) to propose your idea and how it should be implemented.
 - Someone from the team will review your idea and will give you a go ahead.
 - Start an issue & link the discussion to it.
 - Clone your fork locally

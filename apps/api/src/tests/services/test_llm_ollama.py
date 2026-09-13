@@ -44,7 +44,7 @@ def _point_config_at_ollama(monkeypatch):
         gemini_api_key=None,
     )
     monkeypatch.setattr(
-        llm_provider, "get_learnhouse_config", lambda: SimpleNamespace(ai_config=cfg)
+        llm_provider, "get_starlab_config", lambda: SimpleNamespace(ai_config=cfg)
     )
 
 

@@ -229,7 +229,7 @@ class TestRuntimeAuthorization:
 
 
 class TestCompletionSyncsToTrail:
-    """P1: finishing a SCORM activity must credit LearnHouse course progress."""
+    """P1: finishing a SCORM activity must credit StarLab course progress."""
 
     def _patch_trail_side_effects(self):
         return (

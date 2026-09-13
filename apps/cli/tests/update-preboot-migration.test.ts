@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-// `learnhouse update` must migrate the database with the NEW image before that
+// `starlab update` must migrate the database with the NEW image before that
 // image boots: the API's startup probes read columns only a migration adds, so
 // booting first crash-loops and the post-start migration never runs. Old images
 // cannot run alembic against the compose db at all (their env.py dials
@@ -43,9 +43,9 @@ vi.mock('../src/services/health.js', () => ({ waitForHealth: async () => true })
 
 import { updateCommand } from '../src/commands/update.js'
 
-const OLD_IMAGE = 'ghcr.io/learnhouse/app:1.0.1'
-const RUN = 'docker compose run --rm --no-deps -T learnhouse-app sh -c "cd /app/api && uv run alembic '
-const EXEC = 'docker compose exec -T learnhouse-app sh -c "cd /app/api && uv run alembic '
+const OLD_IMAGE = 'ghcr.io/starlab/app:1.0.1'
+const RUN = 'docker compose run --rm --no-deps -T starlab-app sh -c "cd /app/api && uv run alembic '
+const EXEC = 'docker compose exec -T starlab-app sh -c "cd /app/api && uv run alembic '
 
 describe('update — migrates with the new image before restarting', () => {
   let home: string
@@ -56,16 +56,16 @@ describe('update — migrates with the new image before restarting', () => {
     calls.list.length = 0
     calls.responses = {}
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-updpb-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.0.1', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     fs.writeFileSync(path.join(installDir, 'docker-compose.yml'),
-      `name: learnhouse-dep1\nservices:\n  learnhouse-app:\n    image: ${OLD_IMAGE}\n`)
+      `name: starlab-dep1\nservices:\n  starlab-app:\n    image: ${OLD_IMAGE}\n`)
     origHome = process.env.HOME
     process.env.HOME = home
     vi.spyOn(process, 'exit').mockImplementation(((c?: number) => { throw new Error(`exit ${c}`) }) as never)
@@ -93,7 +93,7 @@ describe('update — migrates with the new image before restarting', () => {
     const down = calls.list.findIndex((c) => c === 'docker compose down')
     const pull = calls.list.findIndex((c) => c === 'docker compose pull')
     // The old app must be stopped first or its connections block the DDL locks.
-    const stopApp = calls.list.findIndex((c) => c === 'docker compose stop learnhouse-app')
+    const stopApp = calls.list.findIndex((c) => c === 'docker compose stop starlab-app')
     expect(stopApp).toBeGreaterThan(pull)
     expect(stamp).toBeGreaterThan(stopApp)
     expect(upgrade).toBeGreaterThan(stamp)
@@ -121,7 +121,7 @@ describe('update — migrates with the new image before restarting', () => {
     expect(calls.list).not.toContain('docker compose down')
     expect(compose()).toContain(OLD_IMAGE)
     // The stopped old app is brought back on its own image.
-    const stopApp = calls.list.indexOf('docker compose stop learnhouse-app')
+    const stopApp = calls.list.indexOf('docker compose stop starlab-app')
     const restart = calls.list.lastIndexOf('docker compose up -d')
     expect(restart).toBeGreaterThan(stopApp)
   })
@@ -132,7 +132,7 @@ describe('update — migrates with the new image before restarting', () => {
     await expect(updateCommand({ backup: false, migrate: false })).resolves.toBeUndefined()
 
     expect(calls.list.some((c) => c.startsWith(RUN))).toBe(false)
-    expect(calls.list).not.toContain('docker compose stop learnhouse-app')
+    expect(calls.list).not.toContain('docker compose stop starlab-app')
     expect(calls.list).toContain('docker compose down')
   })
 })

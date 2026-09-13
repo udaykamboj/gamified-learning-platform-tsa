@@ -7,12 +7,12 @@ player.
 ## Requires Enterprise Edition
 
 SCORM is an EE-only feature, so these specs need an **EE** instance (the default
-`npx learnhouse@latest` self-host the suite boots is OSS and has no `/scorm`
+`npx starlab@latest` self-host the suite boots is OSS and has no `/scorm`
 routes). Point the suite at a running EE stack instead of booting one:
 
 ```bash
 # From the repo root, in one terminal — start an isolated EE dev stack:
-learnhouse dev --ee
+starlab dev --ee
 
 # Then, against that instance:
 cd apps/e2e

@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import CopilotBubble from '@components/Copilot/CopilotBubble'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -26,6 +25,7 @@ import {
   ChalkboardSimple,
   Signpost,
 } from '@phosphor-icons/react'
+import { StarLabLogo } from '@components/Objects/Menus/StarLabLogo'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
   DropdownMenu,
@@ -134,6 +134,10 @@ export const OrgMenu = (props: any) => {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  // On the home page (Learning Universe) the nav floats over the full-bleed
+  // 3D canvas, so we must NOT render the spacer that compensates for it.
+  const isHomePage = pathname !== null && (/\/orgs\/[^/]+\/?$/.test(pathname) || pathname === '/dashboard' || pathname === '/dashboard/')
+
   // Only hide menu if we're in an activity page and focus mode is enabled
   if (pathname?.includes('/activity/') && isFocusMode) {
     return null;
@@ -141,10 +145,12 @@ export const OrgMenu = (props: any) => {
 
   return (
     <>
-      <div className="backdrop-blur-lg h-[60px] blur-3xl" style={{ zIndex: 'var(--z-behind)', marginTop: topOffset }}></div>
+      {!isHomePage && (
+        <div className="backdrop-blur-lg h-[60px] blur-3xl" style={{ zIndex: 'var(--z-behind)', marginTop: topOffset }}></div>
+      )}
       <nav
         aria-label="Top navigation"
-        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-white/90 nice-shadow' : ''}`}
+        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-black/90 border-b border-white/10' : ''}`}
         style={{
           zIndex: 'var(--z-nav)',
           backgroundColor: primaryColor || undefined,
@@ -156,15 +162,10 @@ export const OrgMenu = (props: any) => {
             <div className="logo flex md:w-auto w-full justify-center">
               <Link href={getUriWithOrg(orgslug, '/')}>
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
-                  {org?.logo_image ? (
-                    <img
-                      src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                      alt="Learnhouse"
-                      style={{ width: 'auto', height: '100%' }}
-                      className="rounded-md"
-                    />
+                  {!org || (org && !org?.logo_image) ? (
+                    <StarLabLogo className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
                   ) : (
-                    <LearnHouseLogo logoFilter={colors.logoFilter} />
+                    <img src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)} alt={org?.name} className="h-[30px] rounded-sm" />
                   )}
                 </div>
               </Link>
@@ -315,7 +316,7 @@ export const OrgMenu = (props: any) => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://docs.learnhouse.app"
+                        href="https://docs.starlab.app"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -326,7 +327,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://learnhouse.app"
+                        href="https://starlab.app"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -337,7 +338,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://discord.gg/learnhouse"
+                        href="https://discord.gg/starlab"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -380,7 +381,7 @@ export const OrgMenu = (props: any) => {
         </div>
       </nav>
       <div
-        className={`fixed inset-x-0 bg-white/80 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed inset-x-0 bg-white/80 dark:bg-neutral-950/95 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out ${
           isMenuOpen ? 'opacity-100' : '-top-full opacity-0'
         }`}
         style={{
@@ -423,7 +424,6 @@ export const OrgMenu = (props: any) => {
     </>
   )
 }
-
 const CopilotMenuButton = ({
   orgslug,
   isBubbleMode,
@@ -557,14 +557,3 @@ const CopilotMenuButton = ({
   )
 }
 
-const LearnHouseLogo = ({ logoFilter }: { logoFilter: string }) => {
-  return (
-    <Image
-      src="/lrn-text.svg"
-      alt="LearnHouse logo"
-      width={133}
-      height={40}
-      style={{ height: 'auto', filter: logoFilter }}
-    />
-  )
-}

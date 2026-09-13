@@ -29,7 +29,7 @@ function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [mobileMenuOpen])
 
-  const logoSrc = '/img/logos/learnhouse-dark.svg'
+  const logoSrc = '/img/logos/starlab-dark.svg'
 
   return (
     <>
@@ -39,7 +39,7 @@ function Navbar() {
           <div className="lh-navbar-left">
             <Link href="/" className="lh-navbar-logo">
               {mounted ? (
-                <img src={logoSrc} alt="LearnHouse" />
+                <img src={logoSrc} alt="StarLab" />
               ) : (
                 <div style={{ width: 100, height: 20 }} />
               )}
@@ -63,7 +63,7 @@ function Navbar() {
                 API Reference
               </Link>
               <a
-                href="https://university.learnhouse.io"
+                href="https://university.starlab.io"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lh-navbar-nav-item"
@@ -73,7 +73,7 @@ function Navbar() {
                 <ArrowUpRight size={11} weight="bold" />
               </a>
               <a
-                href="https://learnhouse.app/integrations"
+                href="https://starlab.app/integrations"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lh-navbar-nav-item"
@@ -83,7 +83,7 @@ function Navbar() {
                 <ArrowUpRight size={11} weight="bold" />
               </a>
               <a
-                href="https://learnhouse.app"
+                href="https://starlab.app"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lh-navbar-nav-item"
@@ -99,7 +99,7 @@ function Navbar() {
           <div className="lh-navbar-right">
             <Search className="lh-navbar-search" placeholder="Search docs..." />
             <a
-              href="https://github.com/learnhouse/learnhouse"
+              href="https://github.com/starlab/starlab"
               target="_blank"
               rel="noopener noreferrer"
               className="lh-navbar-nav-item lh-hide-mobile"
@@ -145,22 +145,22 @@ function Navbar() {
             <BracketsCurly size={16} weight="fill" />
             API Reference
           </Link>
-          <a href="https://university.learnhouse.io" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
+          <a href="https://university.starlab.io" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
             <GraduationCap size={16} weight="fill" />
             Learn
             <ArrowUpRight size={12} weight="bold" />
           </a>
-          <a href="https://learnhouse.app/integrations" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
+          <a href="https://starlab.app/integrations" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
             <Plug size={16} weight="fill" />
             Integrations
             <ArrowUpRight size={12} weight="bold" />
           </a>
-          <a href="https://learnhouse.app" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
+          <a href="https://starlab.app" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
             <Globe size={16} weight="fill" />
             Website
             <ArrowUpRight size={12} weight="bold" />
           </a>
-          <a href="https://github.com/learnhouse/learnhouse" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
+          <a href="https://github.com/starlab/starlab" target="_blank" rel="noopener noreferrer" className="lh-mobile-drawer-link">
             <GithubLogo size={16} weight="fill" />
             GitHub
           </a>

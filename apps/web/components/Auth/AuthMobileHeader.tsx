@@ -2,7 +2,7 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import starlabIcon from 'public/starlab_bigicon_1.png'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 
@@ -19,7 +19,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
     unsplash_photographer_url = '',
     unsplash_photo_url = '',
   } = authBranding
-  const UNSPLASH_UTM = '?utm_source=LearnHouse&utm_medium=referral'
+  const UNSPLASH_UTM = '?utm_source=StarLab&utm_medium=referral'
   const withUtm = (url: string) => (url ? `${url}${UNSPLASH_UTM}` : '')
 
   const getBackgroundStyle = (): React.CSSProperties => {
@@ -71,8 +71,8 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
               quality={100}
               width={40}
               height={40}
-              src={learnhouseIcon}
-              alt="LearnHouse"
+              src={starlabIcon}
+              alt="StarLab"
               className="object-contain"
             />
           )}
@@ -80,7 +80,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
       </Link>
 
       <span className="relative z-10 font-semibold text-white text-lg truncate">
-        {org?.name || 'LearnHouse'}
+        {org?.name || 'StarLab'}
       </span>
 
       {/* Unsplash attribution (required by Unsplash API guidelines) */}

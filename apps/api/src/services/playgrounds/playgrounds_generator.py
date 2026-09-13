@@ -4,7 +4,7 @@ import logging
 import redis
 import json
 
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.services.ai.llm import generate_stream, model_for_tier
 from src.services.playgrounds.schemas.playgrounds_generator import (
     PlaygroundContext,
@@ -14,7 +14,7 @@ from src.services.playgrounds.schemas.playgrounds_generator import (
 
 logger = logging.getLogger(__name__)
 
-LH_CONFIG = get_learnhouse_config()
+LH_CONFIG = get_starlab_config()
 
 PLAYGROUND_SESSION_KEY = "playground_session:{session_uuid}"
 SESSION_TTL = 2160000  # 25 days

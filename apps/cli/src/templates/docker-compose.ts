@@ -23,20 +23,20 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
     ? `
   caddy:
     image: caddy:2-alpine
-    container_name: learnhouse-caddy-${id}
+    container_name: starlab-caddy-${id}
     restart: unless-stopped
     ports:
       - "80:80"
       - "\${HTTP_PORT:-443}:443"
     volumes:
       - ./extra/Caddyfile:/etc/caddy/Caddyfile:ro
-      - learnhouse_caddy_data_${id}:/data
-      - learnhouse_caddy_config_${id}:/config
+      - starlab_caddy_data_${id}:/data
+      - starlab_caddy_config_${id}:/config
     depends_on:
-      learnhouse-app:
+      starlab-app:
         condition: service_healthy
     networks:
-      - learnhouse-network-${id}
+      - starlab-network-${id}
     healthcheck:
       # Use 127.0.0.1 — alpine's wget tries IPv6 first and Caddy only binds v4 by default
       test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1:80/ || exit 1"]
@@ -47,17 +47,17 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
     : `
   nginx:
     image: nginx:alpine
-    container_name: learnhouse-nginx-${id}
+    container_name: starlab-nginx-${id}
     restart: unless-stopped
     ports:
       - "\${HTTP_PORT:-80}:80"
     volumes:
       - ./extra/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      learnhouse-app:
+      starlab-app:
         condition: service_healthy
     networks:
-      - learnhouse-network-${id}
+      - starlab-network-${id}
     healthcheck:
       # Use 127.0.0.1 — alpine's wget resolves localhost to IPv6 first, but nginx only listens on v4 by default
       test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1/ || exit 1"]
@@ -73,12 +73,12 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
     ? `
   ssr-fwd:
     image: alpine/socat:1.8.0.0
-    container_name: learnhouse-ssr-fwd-${id}
+    container_name: starlab-ssr-fwd-${id}
     restart: unless-stopped
-    network_mode: "service:learnhouse-app"
+    network_mode: "service:starlab-app"
     command: TCP-LISTEN:${config.httpPort},fork,reuseaddr TCP:localhost:80
     depends_on:
-      learnhouse-app:
+      starlab-app:
         condition: service_healthy
 `
     : ''
@@ -88,20 +88,20 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
     ? `
   db:
     image: ${dbImage}
-    container_name: learnhouse-db-${id}
+    container_name: starlab-db-${id}
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      - POSTGRES_USER=\${POSTGRES_USER:-learnhouse}
-      - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD:-learnhouse}
-      - POSTGRES_DB=\${POSTGRES_DB:-learnhouse}
+      - POSTGRES_USER=\${POSTGRES_USER:-starlab}
+      - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD:-starlab}
+      - POSTGRES_DB=\${POSTGRES_DB:-starlab}
     volumes:
-      - learnhouse_db_data_${id}:/var/lib/postgresql/data
+      - starlab_db_data_${id}:/var/lib/postgresql/data
     networks:
-      - learnhouse-network-${id}
+      - starlab-network-${id}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \${POSTGRES_USER:-learnhouse}"]
+      test: ["CMD-SHELL", "pg_isready -U \${POSTGRES_USER:-starlab}"]
       interval: 5s
       timeout: 4s
       retries: 5
@@ -112,13 +112,13 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
     ? `
   redis:
     image: redis:7.2.3-alpine
-    container_name: learnhouse-redis-${id}
+    container_name: starlab-redis-${id}
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
-      - learnhouse_redis_data_${id}:/data
+      - starlab_redis_data_${id}:/data
     networks:
-      - learnhouse-network-${id}
+      - starlab-network-${id}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -129,38 +129,38 @@ export function generateDockerCompose(config: SetupConfig, appImage?: string): s
 
   const useLocalContent = !config.s3Enabled
   const appVolumes = useLocalContent
-    ? `    volumes:\n      - learnhouse_content_${id}:/app/api/content\n`
+    ? `    volumes:\n      - starlab_content_${id}:/app/api/content\n`
     : ''
 
   const volumeEntries: string[] = []
   if (config.autoSsl) {
-    volumeEntries.push(`  learnhouse_caddy_data_${id}:`)
-    volumeEntries.push(`  learnhouse_caddy_config_${id}:`)
+    volumeEntries.push(`  starlab_caddy_data_${id}:`)
+    volumeEntries.push(`  starlab_caddy_config_${id}:`)
   }
-  if (useLocalDb) volumeEntries.push(`  learnhouse_db_data_${id}:`)
-  if (useLocalRedis) volumeEntries.push(`  learnhouse_redis_data_${id}:`)
-  if (useLocalContent) volumeEntries.push(`  learnhouse_content_${id}:`)
+  if (useLocalDb) volumeEntries.push(`  starlab_db_data_${id}:`)
+  if (useLocalRedis) volumeEntries.push(`  starlab_redis_data_${id}:`)
+  if (useLocalContent) volumeEntries.push(`  starlab_content_${id}:`)
 
   const volumesSection = volumeEntries.length > 0
     ? `volumes:\n${volumeEntries.join('\n')}`
     : ''
 
-  return `name: learnhouse-${id}
+  return `name: starlab-${id}
 
 services:
-  learnhouse-app:
+  starlab-app:
     image: ${image}
-    container_name: learnhouse-app-${id}
+    container_name: starlab-app-${id}
     restart: unless-stopped
     env_file:
       - .env
     environment:
       # HOSTNAME needs to be set explicitly for the container
       - HOSTNAME=0.0.0.0
-      - LEARNHOUSE_API_URL=http://localhost:9000
+      - STARLAB_API_URL=http://localhost:9000
 ${appVolumes}${appDependsOn}
     networks:
-      - learnhouse-network-${id}
+      - starlab-network-${id}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
       interval: 30s
@@ -169,7 +169,7 @@ ${appVolumes}${appDependsOn}
       start_period: 60s
 ${proxyService}${ssrForwardService}${dbService}${redisService}
 networks:
-  learnhouse-network-${id}:
+  starlab-network-${id}:
     driver: bridge${config.dockerIpv6 ? '\n    enable_ipv6: true' : ''}
 
 ${volumesSection}

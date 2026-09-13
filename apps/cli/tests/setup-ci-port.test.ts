@@ -52,7 +52,7 @@ describe('setup --ci automatic port fallback', () => {
   it('falls back to an available port when 80 is taken', async () => {
     net.available = 8080 // canonical 80 busy → use 8080 (227-230)
     await setupCommand({ ...base, name: 'fb' })
-    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.learnhouse', 'fb', 'learnhouse.config.json'), 'utf-8'))
+    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.starlab', 'fb', 'starlab.config.json'), 'utf-8'))
     expect(cfg.httpPort).toBe(8080)
   })
 
@@ -69,7 +69,7 @@ describe('setup --ci automatic port fallback', () => {
   it('accepts an explicitly-requested port that is free', async () => {
     net.portFree = true
     await setupCommand({ ...base, name: 'okport', port: 9091 })
-    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.learnhouse', 'okport', 'learnhouse.config.json'), 'utf-8'))
+    const cfg = JSON.parse(fs.readFileSync(path.join(home, '.starlab', 'okport', 'starlab.config.json'), 'utf-8'))
     expect(cfg.httpPort).toBe(9091)
   })
 })

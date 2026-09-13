@@ -13,7 +13,7 @@ from sqlalchemy.orm import aliased
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization, OrganizationRead, OrganizationUser
 from src.db.roles import Role, RoleRead
@@ -918,7 +918,7 @@ async def invite_batch_users(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -1131,7 +1131,7 @@ async def get_list_of_invited_users(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -1210,7 +1210,7 @@ async def remove_invited_user(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_starlab_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:

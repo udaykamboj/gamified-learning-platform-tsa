@@ -175,6 +175,72 @@ async def _enforce_password_signup_allowed(db_session: AsyncSession, org_id: int
 
 
 @router.post(
+    "/register",
+    response_model=UserRead,
+    tags=["users"],
+    summary="Register as a student (single-org mode)",
+    description=(
+        "Create a student account that automatically joins the platform's single organization. "
+        "No org_id is needed — the backend resolves the default organization automatically. "
+        "The account is created with the 'User' (student) role."
+    ),
+    responses={
+        200: {"description": "Student account created and joined to the platform organization.", "model": UserRead},
+        400: {"description": "Password fails validation, email already registered, or username taken"},
+        404: {"description": "Platform organization not yet configured. Run the install command first."},
+    },
+)
+async def api_register_student(
+    *,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_object: UserCreate,
+) -> UserRead:
+    """
+    Register a new student account in the platform's single organization.
+
+    This is the primary public signup path for the single-org model. It
+    resolves the platform's default (first non-demo) organization automatically
+    and creates the user with the student role (role_id=4).
+    """
+    from sqlmodel import select as _select
+    from src.db.organizations import Organization
+    from src.services.orgs.orgs import get_org_join_mechanism
+
+    # Resolve the platform's default organization: the first non-demo org by id.
+    default_org = (
+        await db_session.execute(
+            _select(Organization)
+            .where(Organization.is_demo == False)  # noqa: E712
+            .order_by(Organization.id.asc())
+            .limit(1)
+        )
+    ).scalars().first()
+
+    if not default_org or not default_org.id:
+        raise HTTPException(
+            status_code=404,
+            detail="Platform organization not found. Please run the installation command first.",
+        )
+
+    org_id = int(default_org.id)
+
+    # Enforce password signup allowed for this org.
+    await _enforce_password_signup_allowed(db_session, org_id)
+
+    # Respect invite-only setting even on the default org.
+    join_mechanism = await get_org_join_mechanism(request, org_id, current_user, db_session)
+    if join_mechanism == "inviteOnly":
+        raise HTTPException(
+            status_code=403,
+            detail="This platform requires an invitation to join.",
+        )
+
+    return await create_user(request, db_session, current_user, user_object, org_id)
+
+
+@router.post(
     "/{org_id}",
     response_model=UserRead,
     tags=["users"],

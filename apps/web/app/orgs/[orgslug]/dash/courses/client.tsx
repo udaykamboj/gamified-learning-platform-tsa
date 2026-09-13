@@ -5,7 +5,7 @@ import CourseCreationTypeSelector from '@components/Objects/Modals/Course/Create
 import AICourseCreationModal from '@components/Objects/Modals/Course/Create/AICourse/AICourseCreationModal'
 import { BookCopy, Search, X, Trash2, Users, Info } from 'lucide-react'
 import ScormCourseImport from '../../../../../ee/components/Modals/ScormCourseImport'
-import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/Modals/Course/Import'
+import { ImportTypeSelector, StarLabCourseImport } from '@components/Objects/Modals/Course/Import'
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
@@ -45,7 +45,7 @@ function CoursesHome(params: CourseProps) {
   const isCreatingCourse = searchParams.get('new') ? true : false
   const [newCourseModal, setNewCourseModal] = React.useState(isCreatingCourse)
   const [importCourseModal, setImportCourseModal] = React.useState(false)
-  const [importType, setImportType] = React.useState<'select' | 'scorm' | 'learnhouse'>('select')
+  const [importType, setImportType] = React.useState<'select' | 'scorm' | 'starlab'>('select')
   const [creationType, setCreationType] = React.useState<'select' | 'scratch' | 'ai'>('select')
   const [aiCourseModalOpen, setAiCourseModalOpen] = React.useState(false)
   const orgslug = params.orgslug
@@ -252,7 +252,7 @@ function CoursesHome(params: CourseProps) {
     mutateCourses()
   }
 
-  const handleImportTypeSelect = (type: 'scorm' | 'learnhouse') => {
+  const handleImportTypeSelect = (type: 'scorm' | 'starlab') => {
     setImportType(type)
   }
 
@@ -268,9 +268,9 @@ function CoursesHome(params: CourseProps) {
             />
           </FeatureGate>
         )
-      case 'learnhouse':
+      case 'starlab':
         return (
-          <LearnHouseCourseImport
+          <StarLabCourseImport
             orgId={orgId!}
             orgslug={orgslug}
             closeModal={closeImportCourseModal}
@@ -285,8 +285,8 @@ function CoursesHome(params: CourseProps) {
     switch (importType) {
       case 'scorm':
         return t('dashboard.courses.import_scorm')
-      case 'learnhouse':
-        return t('dashboard.courses.import_learnhouse')
+      case 'starlab':
+        return t('dashboard.courses.import_starlab')
       default:
         return t('dashboard.courses.import_course')
     }
@@ -296,8 +296,8 @@ function CoursesHome(params: CourseProps) {
     switch (importType) {
       case 'scorm':
         return t('dashboard.courses.import_scorm_description')
-      case 'learnhouse':
-        return t('dashboard.courses.import_learnhouse_description')
+      case 'starlab':
+        return t('dashboard.courses.import_starlab_description')
       default:
         return t('dashboard.courses.import_select_type')
     }
@@ -395,7 +395,7 @@ function CoursesHome(params: CourseProps) {
         }
       )
       const timestamp = new Date().toISOString().split('T')[0]
-      downloadBlob(blob, `learnhouse-courses-export-${timestamp}.zip`)
+      downloadBlob(blob, `starlab-courses-export-${timestamp}.zip`)
       exportToast.complete(toastId, undefined, count, 'batch')
     } catch (error: any) {
       exportToast.error(toastId, error.message || t('courses.courses_exported_error'), undefined, count, 'batch')
