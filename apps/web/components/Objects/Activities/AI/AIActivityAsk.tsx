@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { FlaskConical, MessageCircle, X } from 'lucide-react'
 import Image from 'next/image'
 import starlabAI_icon from 'public/starlab_ai_simple.png'
-const starlabAI_logo_black = '/starlab-black.svg'
+const starlabAI_logo_black = '/starlab.svg'
 import React, { useEffect, useRef } from 'react'
 import {
   AIChatBotStateTypes,

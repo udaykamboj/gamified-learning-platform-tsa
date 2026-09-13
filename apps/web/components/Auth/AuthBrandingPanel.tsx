@@ -147,7 +147,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
             <div className="login-topbar">
               <Link prefetch href="https://starlab.app" target="_blank">
                 <img
-                  src="/starlab-black.svg"
+                  src="/starlab.svg"
                   alt="StarLab"
                   width={110}
                   height={22}

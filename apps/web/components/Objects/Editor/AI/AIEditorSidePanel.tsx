@@ -23,7 +23,7 @@ import {
   Box,
 } from 'lucide-react'
 import starlabAI_icon from 'public/starlab_ai_simple.png'
-const starlabAI_logo_black = '/starlab-black.svg'
+const starlabAI_logo_black = '/starlab.svg'
 import {
   AIEditorStateTypes,
   useAIEditor,

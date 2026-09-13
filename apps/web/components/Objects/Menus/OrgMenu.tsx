@@ -163,7 +163,7 @@ export const OrgMenu = (props: any) => {
               <Link href={getUriWithOrg(orgslug, '/')}>
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
                   {!org || (org && !org?.logo_image) ? (
-                    <StarLabLogo className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
+                    <img src="/starlab.svg" alt="StarLab" className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
                   ) : (
                     <img src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)} alt={org?.name} className="h-[30px] rounded-sm" />
                   )}

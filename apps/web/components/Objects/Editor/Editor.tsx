@@ -719,7 +719,7 @@ const EditorStarLabLogo = () => {
         transition={animation.transition}
       >
         <Image
-          src="/starlab-black.svg"
+          src="/starlab.svg"
           alt="StarLab"
           width={14}
           height={14}

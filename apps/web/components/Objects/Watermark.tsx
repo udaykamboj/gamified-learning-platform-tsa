@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-const lrnTextLogo = '/starlab-black.svg'
+const lrnTextLogo = '/starlab.svg'
 import React from 'react'
 import { useOrg } from '../Contexts/OrgContext'
 import { useTranslation } from 'react-i18next'

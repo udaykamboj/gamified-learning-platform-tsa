@@ -68,7 +68,7 @@ const EditorStarLabLogo = () => {
         animate={animation.animate}
         transition={animation.transition}
       >
-        <Image src="/starlab-black.svg" alt="StarLab" width={14} height={14} className="invert" />
+        <Image src="/starlab.svg" alt="StarLab" width={14} height={14} className="invert" />
       </motion.div>
     </div>
   )

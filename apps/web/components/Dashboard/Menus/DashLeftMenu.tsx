@@ -252,7 +252,7 @@ function DashLeftMenu() {
           className={cn("flex items-center transition-opacity hover:opacity-70", isCollapsed ? "" : "space-x-3")}
           href={'/'}
         >
-          {planMeetsRequirement(plan, 'standard') && org?.logo_image ? (
+          {org?.logo_image ? (
             <img
               src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
               alt={org?.name}
@@ -260,9 +260,9 @@ function DashLeftMenu() {
             />
           ) : (
             <img
-              src="/lrn-dash.svg"
+              src="/starlab.svg"
               alt="Starlab logo"
-              className="h-8 w-8"
+              className="h-7 w-auto object-contain"
             />
           )}
           {!isCollapsed && (

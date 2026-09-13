@@ -219,15 +219,11 @@ export function SessionProvider({
   children,
   refetchInterval = 60000,
 }: SessionProviderProps) {
-  const [session, setSession] = useState<Session | null>({
-    user: { id: 1, email: 'admin@school.dev', first_name: 'Admin', last_name: 'User', is_superadmin: true },
-    roles: [{ org: { id: 1, slug: 'demo' }, role: 'admin' }],
-    tokens: { access_token: 'mock-token', refresh_token: 'mock-refresh' }
-  } as any)
-  const [status, setStatus] = useState<SessionStatus>('authenticated')
-  const [accessToken, setAccessToken] = useState<string | null>('mock-token')
-  const [tokenExpiry, setTokenExpiry] = useState<number | null>(Date.now() + 10000000)
-  const sessionCacheRef = useRef<SessionCache | null>({ data: { user: {} } as any, timestamp: Date.now() })
+  const [session, setSession] = useState<Session | null>(null)
+  const [status, setStatus] = useState<SessionStatus>('loading')
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [tokenExpiry, setTokenExpiry] = useState<number | null>(null)
+  const sessionCacheRef = useRef<SessionCache | null>(null)
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null)
 
