@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { getUriWithOrg } from "@services/config/config";
 import {
   Bell,
+  BookOpen,
   Bot,
+  ChevronDown,
   Flame,
   Gamepad2,
   Hexagon,
@@ -31,6 +33,12 @@ import { Badge } from "@/components/ui/badge";
 import Dock from "@/components/ui/Dock";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 import { cn } from "@/lib/utils";
 
@@ -222,6 +230,103 @@ const navItems = [
   { label: "Playground", icon: Gamepad2 },
 ];
 
+function CourseSelectionModal({
+  isOpen,
+  onClose,
+  selectedId,
+  onSelect,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  if (!isOpen) return null;
+
+  // Group courses by discipline
+  const groupedCourses = COURSES.reduce((acc, course) => {
+    if (!acc[course.discipline]) acc[course.discipline] = [];
+    acc[course.discipline].push(course);
+    return acc;
+  }, {} as Record<string, Course[]>);
+
+  const groups = Object.entries(groupedCourses);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto pointer-events-auto">
+        <div className="flex items-center justify-between p-8 pb-6">
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">My courses</h2>
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">
+            Edit Courses
+          </button>
+        </div>
+
+        <div className="p-8 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+            {groups.map(([discipline, disciplineCourses]) => (
+              <div key={discipline}>
+                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
+                  <h3 className="text-lg font-bold text-gray-800">{discipline}</h3>
+                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    See all ({disciplineCourses.length})
+                  </button>
+                </div>
+                
+                <div className="relative pl-6 space-y-8 mt-6">
+                  {/* Vertical line connecting nodes */}
+                  <div className="absolute left-[19px] top-[24px] bottom-[24px] w-px bg-gray-200" />
+                  
+                  {disciplineCourses.map((course) => (
+                    <div key={course.id} className="relative flex items-center justify-between group">
+                      <div className="flex items-center gap-4">
+                        {/* Circular Icon */}
+                        <div 
+                          className="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full text-white z-10 shadow-sm"
+                          style={{ backgroundColor: course.color }}
+                        >
+                          <BookOpen className="size-5" />
+                        </div>
+                        
+                        <div className="pl-6">
+                          <button 
+                            onClick={() => {
+                              onSelect(course.id);
+                              onClose();
+                            }}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-[15px] text-left"
+                          >
+                            {course.name}
+                          </button>
+                          <p className="text-sm text-gray-500 mt-0.5">
+                            {course.locked ? "Mastery unavailable" : `${course.progress}% Proficient`}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {!course.locked && (
+                        <button
+                          onClick={() => {
+                            onSelect(course.id);
+                            onClose();
+                          }}
+                          className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+                        >
+                          {course.progress > 0 ? "Resume" : "Start"}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function useNarrow(query = "(max-width: 767px)") {
   const [narrow, setNarrow] = useState(false);
   useEffect(() => {
@@ -236,6 +341,7 @@ function useNarrow(query = "(max-width: 767px)") {
 
 export function LearningUniverse({ orgslug }: { orgslug: string }) {
   const [selectedId, setSelectedId] = useState("foundations");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const selected = useMemo(() => COURSES.find((course) => course.id === selectedId) ?? COURSES[0], [selectedId]);
   const narrow = useNarrow();
   const router = useRouter();
@@ -252,7 +358,23 @@ export function LearningUniverse({ orgslug }: { orgslug: string }) {
 
       <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,transparent_28%,var(--background)_120%)]" />
 
+      {/* Course Selection Trigger */}
+      <div className="pointer-events-auto absolute top-6 right-6 md:top-8 md:right-10 z-40">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2 bg-white text-gray-900 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all"
+        >
+          <BookOpen className="size-4" />
+          My Courses
+        </button>
+      </div>
 
+      <CourseSelectionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        selectedId={selectedId} 
+        onSelect={setSelectedId} 
+      />
 
       <div className="pointer-events-auto absolute bottom-0 left-1/2 z-30 -translate-x-1/2 md:bottom-auto md:left-6 md:top-1/2 md:translate-x-0 md:-translate-y-1/2">
         <Dock

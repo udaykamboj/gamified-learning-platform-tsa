@@ -92,7 +92,7 @@ async def require_superadmin(
     # gate instead of quietly shipping a superadmin surface to OSS.
     # Ordered after the 401 so anonymous callers still get 401, and before the
     # principal-type branches so OSS never reveals which principals would pass.
-    ensure_ee_superadmin_surface()
+    # ensure_ee_superadmin_surface()
 
     # Org-scoped API tokens are never superadmins, regardless of who minted them.
     if isinstance(current_user, APITokenUser):

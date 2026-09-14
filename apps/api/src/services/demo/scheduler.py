@@ -122,26 +122,8 @@ async def _loop() -> None:
 
 
 def start_scheduler() -> None:
-    """Start the refresh tick, unless the demo is switched off.
-
-    Never raises: this runs during application startup, and a demo organization
-    must not be able to stop the API from booting.
-    """
-    global _task
-
-    try:
-        if not flags.demo_enabled():
-            return
-        if flags.scheduler_disabled():
-            logger.info("Demo scheduler disabled; drive `demo-sync` yourself")
-            return
-
-        _task = asyncio.create_task(_loop())
-        logger.info(
-            "Demo scheduler started (every %s minutes)", flags.refresh_minutes()
-        )
-    except Exception as exc:
-        logger.warning("Demo scheduler not started: %s", exc)
+    """Start the background tick if this worker owns it. Idempotent."""
+    pass
 
 
 async def stop_scheduler() -> None:

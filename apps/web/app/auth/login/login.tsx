@@ -26,7 +26,7 @@ interface LoginClientProps {
 
 const LoginClient = (props: LoginClientProps) => {
   const { t } = useTranslation()
-  const { signIn, completeMfaLogin, requestMagicLink } = useAuth()
+  const { signIn, signOut, status, completeMfaLogin, requestMagicLink, completeMagicLink } = useAuth()
   const { track } = useLHAnalytics('public')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ssoEnabled, setSsoEnabled] = useState(false)
@@ -431,6 +431,20 @@ const LoginClient = (props: LoginClientProps) => {
         turnstileRef.current?.reset();
       } else {
         track(AnalyticsEvent.LoginSucceeded, { method: 'credentials' })
+        
+        // STRICT PORTAL SEGREGATION: 
+        // If the resolved landing URL is /admin, this is an Admin account.
+        // They are not allowed to log in via the student portal.
+        if (res.url && res.url.endsWith('/admin')) {
+          // Immediately log them out
+          signOut({ redirect: false })
+          setErrorType('ADMIN_PORTAL_REQUIRED')
+          setError('Admin accounts must log in via the Admin Portal (/admin/login).')
+          setShowErrorModal(true)
+          setIsSubmitting(false)
+          return
+        }
+
         // First signIn already authenticated and set cookies — just redirect.
         // res.url is the role-aware landing (admin console vs student dashboard).
         window.location.href = res.url || callbackUrl

@@ -79,7 +79,7 @@ export default function AiAgentPage() {
 
         {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2.5rem" }}>
-          <Link href="/" style={{
+          <Link href="/dashboard" style={{
             display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.6)",
             textDecoration: "none", fontSize: 13, fontFamily: "var(--font-mono, monospace)",
             letterSpacing: "0.05em", textTransform: "uppercase"

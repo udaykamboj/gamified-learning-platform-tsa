@@ -152,3 +152,31 @@ The JWT currently carries only `sub` (email). The session endpoint (`GET /users/
 - The existing JWT/session auth mechanism
 - The existing RBAC backend enforcement (it already works correctly for admin vs. student)
 - Any database schema migrations. The current schema (`org_id` relations) remains, but the application layer enforces the single-org resolution, meaning we don't have to rewrite the entire LearnHouse backend, honoring the "smallest architectural changes necessary" rule.
+
+---
+
+## Phase 6: Removing 'Org' Terminology (User Requested)
+
+The user has requested to remove references to `orgs` in the naming across the application and keep only what is needed. This represents a massive shift from the original plan (which kept the terminology to avoid breaking things) and touches both the frontend and backend deeply.
+
+### User Review Required
+
+> [!WARNING]
+> Renaming `orgs` to something else (e.g., `platform` or removing the prefix entirely) is a massive refactoring effort. `orgs` is baked deeply into:
+> - **API endpoints** (`/api/v1/orgs/{org_id}/...`)
+> - **Next.js App Router folders** (`apps/web/app/orgs/[orgslug]/...`)
+> - **Proxy Re-writes** (`apps/web/proxy.ts` rewrites virtually all routes to `/orgs/{slug}`)
+> - **Media URL paths** (`content/orgs/{orgUUID}/...`)
+> - **Database Column Names and Types** (`UserOrganization`, `org_id`, etc.)
+> - **Hundreds of internal functions and variables**
+
+### Open Questions
+
+> [!IMPORTANT]
+> **Are you sure you want to proceed with completely purging 'orgs' from the terminology?**
+> 
+> **Option A (Recommended):** Keep the internal codebase naming (`org_id`, `/orgs/` API routes, and `apps/web/app/orgs/[orgslug]/` folder structure) as it is. It's invisible to the end user. The user will only see `/dashboard`, `/courses`, etc., due to the proxy rewrites and backend role enforcement.
+> 
+> **Option B:** Fully rename `orgs` to `platform` (or similar) everywhere in the frontend and backend APIs, but leave the database schema as `organizations` to prevent nasty SQL migration issues. This will take significant time and carries a high risk of breaking existing frontend routing.
+>
+> Please confirm which option you'd like to pursue!

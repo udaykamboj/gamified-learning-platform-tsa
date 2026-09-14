@@ -39,7 +39,7 @@ export default function SkillsPage() {
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "4rem 1.25rem" }}>
         {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3rem" }}>
-          <Link href="/" style={{
+          <Link href="/dashboard" style={{
             display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.5)",
             textDecoration: "none", fontSize: 12, fontFamily: "monospace",
             letterSpacing: "0.1em", textTransform: "uppercase"

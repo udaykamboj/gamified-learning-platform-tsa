@@ -62,10 +62,8 @@ def run_ee_startup(app):
 
 def is_multi_org_allowed() -> bool:
     """Check if multi-org mode is allowed (requires EE or SaaS)."""
-    from src.core.deployment_mode import get_deployment_mode
-    mode = get_deployment_mode()
-    return mode in ('ee', 'saas')
-
+    # Hardcoded to False for single-org architecture
+    return False
 
 async def check_ee_activity_paid_access(request, activity_id, user, db_session) -> bool:
     """

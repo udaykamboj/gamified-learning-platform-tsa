@@ -794,8 +794,19 @@ async def update_user_role(
             detail="Organization not found",
         )
 
-    # RBAC check
-    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+    # In single-org, only platform admins can manage roles, and no self-demotion.
+    if int(current_user.id) == int(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot change your own role",
+        )
+    from src.security.platform_roles import resolve_platform_access
+    access = await resolve_platform_access(int(current_user.id), db_session)
+    if not access.can_manage_platform:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Platform admin access required to change roles",
+        )
 
     # Check if user is the last admin and if the new role is not admin
     statement = select(UserOrganization).where(

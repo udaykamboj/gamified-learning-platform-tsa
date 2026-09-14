@@ -31,47 +31,18 @@ from src.db.organizations import (
 )
 from src.security.auth import get_current_user, get_authenticated_user
 from src.security.features_utils.dependencies import require_org_admin
+from src.security.platform_roles import require_platform_admin
 
 
-async def _require_platform_superadmin(
-    db_session: AsyncSession = Depends(get_db_session),
-    request: Request = None,
-):
-    """Enforce that only the platform superadmin can create organizations.
 
-    This is the single-org model enforcement: regular users (students, org admins)
-    cannot create new organizations — only the seeded platform superadmin can.
-    Unlike the EE `require_superadmin`, this guard works in all deployment modes.
-    """
-    from src.security.auth import get_current_user as _get_current_user
-    user = await _get_current_user(request, db_session)
-    if isinstance(user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-        )
-    if not await is_user_superadmin(user.id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only platform superadmins can create organizations in single-organization mode.",
-        )
-    return user
 
 
 from src.services.orgs.orgs import (
-    create_org,
-    create_org_with_config,
     delete_org,
     wipe_org_content,
     get_organization_by_uuid,
     get_organization_by_slug,
-    get_orgs_by_user,
-    get_orgs_by_user_admin,
     update_org,
-    update_org_logo,
-    update_org_preview,
-    update_org_signup_mechanism,
-    update_org_ai_config,
     update_org_communities_config,
     update_org_payments_config,
     update_org_folders_config,
@@ -211,39 +182,7 @@ async def api_get_org_users(
     )
 
 
-@router.post(
-    "/join",
-    summary="Join an organization",
-    description="Join an existing organization, optionally consuming an invite code.",
-    responses={
-        200: {"description": "Organization joined successfully."},
-        401: {"description": "Not authenticated"},
-        403: {"description": "Organization is invite-only or invite is invalid"},
-        404: {"description": "Organization or invite not found"},
-    },
-)
-async def api_join_an_org(
-    request: Request,
-    args: JoinOrg,
-    current_user: PublicUser = Depends(get_authenticated_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    """
-    Get single Org by ID
-    """
-    # SECURITY: the downstream join_org() trusts the body-supplied user_id and
-    # joins THAT user into the org without verifying it is the caller. Without
-    # this guard any authenticated user could force-add (or, on an "open" org,
-    # silently enroll) an arbitrary other account into an organization. Pin the
-    # join to the authenticated identity. user_id in the body may be either the
-    # numeric id or the user_uuid, so accept either form of the caller's own id.
-    target = str(args.user_id)
-    if target not in (str(current_user.id), str(getattr(current_user, "user_uuid", ""))):
-        raise HTTPException(
-            status_code=403,
-            detail="You can only join an organization as yourself.",
-        )
-    return await join_org(request, args, current_user, db_session)
+
 
 
 @router.put(
@@ -316,7 +255,7 @@ async def api_remove_batch_users_from_org(
 async def api_remove_all_users_from_org(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: PublicUser = Depends(require_platform_admin),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -344,7 +283,7 @@ async def api_remove_all_users_from_org(
 async def api_wipe_org_content(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: PublicUser = Depends(require_platform_admin),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -379,28 +318,7 @@ async def api_remove_user_from_org(
     )
 
 
-@router.delete(
-    "/{org_id}/leave",
-    summary="Leave an organization",
-    description=(
-        "Remove the CURRENT (authenticated) user's own membership in the org — "
-        "self-service, no admin rights required. The last remaining admin cannot "
-        "leave (they must transfer ownership or delete the org)."
-    ),
-    responses={
-        200: {"description": "Left the organization."},
-        400: {"description": "You are the last admin"},
-        401: {"description": "Not authenticated"},
-        404: {"description": "Organization not found or you are not a member"},
-    },
-)
-async def api_leave_org(
-    request: Request,
-    org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    return await leave_org(request, org_id, db_session, current_user)
+
 
 
 # Config related routes
@@ -1473,28 +1391,7 @@ async def api_update_org(
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete(
-    "/{org_id}",
-    summary="Delete an organization",
-    description="Delete an organization by its ID. This action cannot be undone.",
-    responses={
-        200: {"description": "Organization deleted."},
-        401: {"description": "Not authenticated"},
-        403: {"description": "Caller is not an organization administrator"},
-        404: {"description": "Organization not found"},
-    },
-)
-async def api_delete_org(
-    request: Request,
-    org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    """
-    Delete Org by ID
-    """
 
-    return await delete_org(request, org_id, current_user, db_session)
 
 
 @router.put(

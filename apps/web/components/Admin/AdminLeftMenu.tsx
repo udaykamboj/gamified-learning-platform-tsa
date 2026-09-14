@@ -50,11 +50,6 @@ function AdminTopMenu() {
         {/* Navigation */}
         <nav className="flex items-center gap-1">
           <NavLink
-            href="/admin/organizations"
-            icon={<Buildings size={16} weight="fill" />}
-            label="Organizations"
-          />
-          <NavLink
             href="/admin/users"
             icon={<Users size={16} weight="fill" />}
             label="Users"

@@ -14,7 +14,9 @@ export type PlatformRole = 'admin' | 'student'
  * `/dashboard`) and the guard surfaces that keep students out of admin tools.
  */
 export function getUserRole(session: any): PlatformRole | null {
-  const data = session?.data
+  if (!session) return null
+  // Support both NextAuth-style { data: Session } wrappers and raw Session objects
+  const data = session.data !== undefined ? session.data : session
   if (!data) return null
 
   // Superadmins are always admins, regardless of per-org role entries.

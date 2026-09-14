@@ -19,6 +19,8 @@ from src.services.orgs.orgs import get_org_join_mechanism
 from src.security.auth import get_current_user, get_authenticated_user
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
+from src.db.roles import Role
+from src.services.orgs.platform import require_platform_org
 
 from src.db.users import (
     AnonymousUser,
@@ -267,8 +269,8 @@ async def api_create_user_with_orgid(
     org_id: int,
 ) -> UserRead:
     """
-    Create User with Org ID
-    """
+    await require_platform_org(org_id, db_session)
+
     # An org that has turned email+password off must not hand out password
     # accounts for itself — they could never be used to sign in to it.
     await _enforce_password_signup_allowed(db_session, org_id)
@@ -307,8 +309,7 @@ async def api_create_user_with_orgid_and_invite(
     org_id: int,
 ) -> UserRead:
     """
-    Create User with Org ID and invite code
-    """
+    await require_platform_org(org_id, db_session)
     await _enforce_password_signup_allowed(db_session, org_id)
 
     # Throttle invite-code guessing per IP+org. ``detail`` is a plain string
@@ -326,19 +327,9 @@ async def api_create_user_with_orgid_and_invite(
             headers={"Retry-After": str(retry_after)},
         )
 
-    # TODO: This is temporary, logic should be moved to service
-    if (
-        await get_org_join_mechanism(request, org_id, current_user, db_session)
-        == "inviteOnly"
-    ):
-        return await create_user_with_invite(
-            request, db_session, current_user, user_object, org_id, invite_code
-        )
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="This organization does not require an invite code",
-        )
+    return await create_user_with_invite(
+        request, db_session, current_user, user_object, org_id, invite_code
+    )
 
 
 @router.post(
@@ -360,9 +351,14 @@ async def api_create_user_without_org(
     user_object: UserCreate,
 ) -> UserRead:
     """
-    Create User
+    Delegate to the public register path.
     """
-    return await create_user_without_org(request, db_session, current_user, user_object)
+    return await api_register_student(
+        request=request,
+        db_session=db_session,
+        current_user=current_user,
+        user_object=user_object,
+    )
 
 
 @router.get(

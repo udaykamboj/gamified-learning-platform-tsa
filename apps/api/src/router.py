@@ -5,7 +5,7 @@ from src.routers import audit as audit_router_module
 from src.routers import code_execution
 from src.routers import code_submissions
 from src.routers import health
-from src.routers import demo as demo_router_module
+
 from src.routers import instance
 from src.routers import plans
 from src.routers import usergroups
@@ -35,6 +35,7 @@ from src.routers.podcasts import episodes as episodes_router_module
 from src.routers.boards import boards as boards_router_module
 from src.routers.playgrounds import playgrounds as playgrounds_router_module
 from src.routers.playgrounds import playgrounds_generator as playgrounds_generator_router
+from src.routers import superadmin as superadmin_router_module
 from src.core.ee_hooks import register_ee_routers
 from src.core.deployment_mode import get_deployment_mode
 from src.services.dev.dev import isDevModeEnabledOrRaise
@@ -108,6 +109,17 @@ v1_router.include_router(
     prefix="/roles",
     tags=["roles"],
     dependencies=[Depends(require_authenticated_user)]
+)
+v1_router.include_router(
+    stream.router,
+    prefix="/stream",
+    tags=["stream"],
+    dependencies=[Depends(require_authenticated_user_or_api_token)],
+)
+v1_router.include_router(
+    superadmin_router_module.router,
+    prefix="/superadmin",
+    tags=["superadmin"],
 )
 v1_router.include_router(
     api_tokens.router,
@@ -373,9 +385,7 @@ v1_router.include_router(
 
 # Instance info (public, no auth)
 v1_router.include_router(instance.router, prefix="/instance", tags=["instance"])
-# Demo: /demo/status is public (the onboarding page calls it before the
-# visitor has done anything); /demo/enter resolves the user itself.
-v1_router.include_router(demo_router_module.router, prefix="/demo", tags=["demo"])
+
 
 # Sentry feedback relay (rejects API tokens; works for both anonymous and
 # authenticated callers so the in-app feedback modal keeps working everywhere)

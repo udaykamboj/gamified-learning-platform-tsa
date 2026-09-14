@@ -59,15 +59,7 @@ from src.security.session_context import (
 from src.db.organizations import Organization
 
 
-async def _resolve_org_id_from_slug(org_slug: Optional[str], db_session: AsyncSession) -> Optional[int]:
-    """Map an optional login-page org slug to an org id, for the session's
-    ``sorg`` binding. Unknown/absent slug → None (a central/apex login)."""
-    if not org_slug:
-        return None
-    org = (
-        await db_session.execute(select(Organization).where(Organization.slug == org_slug))
-    ).scalars().first()
-    return org.id if org else None
+
 
 
 def get_token_expiry_ms() -> Optional[int]:
@@ -569,7 +561,8 @@ async def login(
     # the refusal can never be used to probe which orgs exist.
     from src.services.orgs.auth_policy import enforce_login_auth_method
 
-    session_org_id = await _resolve_org_id_from_slug(org_slug, db_session)
+    from src.services.orgs.platform import get_platform_org_id
+    session_org_id = await get_platform_org_id(db_session)
     await enforce_login_auth_method(db_session, session_org_id, AUTH_METHOD_PASSWORD)
 
     # Step 6: Reset failed attempts and update login info
@@ -674,6 +667,9 @@ async def third_party_login(
     # when none was found. Signing up with Google into an open org — or through
     # an invite *code* link — therefore created an account with no organization
     # at all, while the equivalent form signup joined the org normally.
+    from src.services.orgs.platform import get_platform_org_id
+    org_id = await get_platform_org_id(db_session)
+
     if org_id is not None:
         from src.db.organizations import Organization
         from src.services.orgs.orgs import get_org_join_mechanism
@@ -920,7 +916,6 @@ async def magic_link_request(
 ):
     from src.services.auth.magic_login import (
         issue_magic_login_token,
-        resolve_org,
         send_magic_login_email,
     )
     from src.services.orgs.auth_policy import is_login_method_allowed
@@ -936,7 +931,8 @@ async def magic_link_request(
 
     generic = {"detail": "If an account exists for that email, a login link has been sent."}
 
-    org = await resolve_org(body.org_slug, db_session)
+    from src.services.orgs.platform import get_platform_org
+    org = await get_platform_org(db_session)
     # If the request is scoped to an org that does not offer magic-link login,
     # do not send one — the link would only be refused at the org gate anyway.
     if org is not None and not await is_login_method_allowed(

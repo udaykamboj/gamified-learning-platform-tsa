@@ -14,7 +14,7 @@ export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
 
   const { data, isLoading, error } = useQuery({
     queryKey: [...queryKeys.superadmin.analytics(), days],
-    queryFn: () => apiFetch(`${getAPIUrl()}ee/superadmin/analytics/global?days=${days}`, accessToken),
+    queryFn: () => apiFetch(`${getAPIUrl()}superadmin/analytics/global?days=${days}`, accessToken),
     enabled: !!accessToken,
     staleTime: 60_000,
   })

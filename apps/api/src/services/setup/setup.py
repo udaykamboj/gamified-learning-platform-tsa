@@ -533,6 +533,14 @@ async def install_default_elements(db_session: AsyncSession):
 
 # Organization creation
 async def install_create_organization(org_object: OrganizationCreate, db_session: AsyncSession):
+    # Make installation idempotent by returning early if the org exists
+    from sqlmodel import select
+    existing_org = (
+        await db_session.execute(select(Organization).where(Organization.slug == org_object.slug))
+    ).scalars().first()
+    if existing_org:
+        return existing_org
+
     org = Organization.model_validate(org_object)
 
     # Complete the org object

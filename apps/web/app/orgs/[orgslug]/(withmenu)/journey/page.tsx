@@ -116,7 +116,7 @@ export default function JourneyPage() {
           <header className="flex h-16 items-center justify-between border-b border-white/10 px-4 md:px-8 shrink-0">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" asChild aria-label="Back to learning universe" className="text-white hover:bg-white/10 hover:text-white">
-                <Link href="/">
+                <Link href="/dashboard">
                   <ArrowLeft className="size-4" />
                 </Link>
               </Button>

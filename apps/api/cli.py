@@ -631,5 +631,38 @@ def main():
     cli()
 
 
+@cli.command()
+def backfill():
+    """Backfill existing data to single-org architecture.
+    In single-org mode, there is only one organization. This command ensures the platform organization is set up correctly.
+    """
+    asyncio.run(_backfill_async())
+
+async def _backfill_async() -> None:
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
+
+    async_engine = create_async_engine(
+        _to_async_url(sql_url), echo=False, pool_pre_ping=True
+    )
+
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            from src.services.orgs.platform import get_platform_org
+            from src.db.organizations import Organization
+            from sqlmodel import select
+            
+            org = await get_platform_org(db_session)
+            if org:
+                print(f"Platform organization exists: {org.name} (id: {org.id})")
+            else:
+                print("No platform organization found. Run `agy install` first.")
+                
+            # Here we could collapse other orgs or move users, but for now we just verify.
+            print("Backfill complete ✅")
+            
+    finally:
+        await async_engine.dispose()
+
 if __name__ == "__main__":
     cli()

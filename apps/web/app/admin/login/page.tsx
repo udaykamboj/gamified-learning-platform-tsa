@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Shield } from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const { signIn } = useAuth()
+  const { signIn, signOut } = useAuth()
   const _router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const result = await signIn('credentials', {
+      const result: any = await signIn('credentials', {
         email,
         password,
         redirect: false,
@@ -27,6 +27,16 @@ export default function AdminLoginPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
+        // STRICT PORTAL SEGREGATION: 
+        // If the resolved landing URL is not /admin, this is not an Admin account.
+        // They are not allowed to log in via the Admin portal.
+        if (result?.url && !result.url.endsWith('/admin')) {
+          // Immediately log them out
+          signOut({ redirect: false })
+          setError('You do not have administrative privileges.')
+          return
+        }
+
         window.location.href = '/admin'
       }
     } catch {

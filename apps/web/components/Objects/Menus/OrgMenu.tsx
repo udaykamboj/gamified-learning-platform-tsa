@@ -160,7 +160,7 @@ export const OrgMenu = (props: any) => {
         <div className="flex items-center justify-between w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center space-x-5 md:w-auto w-full">
             <div className="logo flex md:w-auto w-full justify-center">
-              <Link href={getUriWithOrg(orgslug, '/')}>
+              <Link href="/dashboard">
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
                   {!org || (org && !org?.logo_image) ? (
                     <img src="/starlab.svg" alt="StarLab" className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
