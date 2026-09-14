@@ -6,7 +6,6 @@ import {
   BookOpen,
   Files,
   Users,
-  CurrencyCircleDollar,
   Buildings,
   Globe,
   Question,
@@ -21,7 +20,6 @@ import {
   ChatCircleDots,
   Headphones,
   ChartBar,
-  DotsThree,
   UsersThree,
   Shield,
   UserPlus,
@@ -29,12 +27,9 @@ import {
   Palette,
   Rocket,
   Robot,
-  LinkSimple,
   Key,
-  Lock,
   Wrench,
   ChartLine,
-  MagnifyingGlass,
   ChalkboardSimple,
   Cube,
   ShoppingBag,
@@ -232,7 +227,6 @@ function DashLeftMenu() {
   const showPodcasts = isEnabled('podcasts')
   const showBoards = isEnabled('boards')
   const showPlaygrounds = isEnabled('playgrounds')
-  const showPayments = isEnabled('payments')
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -600,16 +594,6 @@ function DashLeftMenu() {
               })()}
             </HoverMenu>
 
-            {showPayments && (
-              <MenuLink
-                href="/dash/payments/overview"
-                icon={<CurrencyCircleDollar size={20} weight="fill" />}
-                label={t('common.payments')}
-                isCollapsed={isCollapsed}
-                active={isActivePath('/dash/payments')}
-              />
-            )}
-
             {/* Developers with hover menu */}
             <HoverMenu
               content={
@@ -626,24 +610,6 @@ function DashLeftMenu() {
                     <Link href="/dash/developers/automations" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                       <Lightning size={16} weight="fill" />
                       <span className="flex items-center">{t('dashboard.organization.settings.tabs.automations', { defaultValue: 'Automations' })}<PlanBadge currentPlan={plan} requiredPlan="pro" variant="dark" /></span>
-                    </Link>
-                  </HoverMenuItem>
-                  <HoverMenuItem asChild>
-                    <Link href="/dash/developers/domains" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                      <LinkSimple size={16} weight="fill" />
-                      <span className="flex items-center">{t('dashboard.organization.settings.tabs.domains', { defaultValue: 'Domains' })}<PlanBadge currentPlan={plan} requiredPlan="standard" variant="dark" /></span>
-                    </Link>
-                  </HoverMenuItem>
-                  <HoverMenuItem asChild>
-                    <Link href="/dash/developers/seo" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                      <MagnifyingGlass size={16} weight="fill" />
-                      <span>SEO</span>
-                    </Link>
-                  </HoverMenuItem>
-                  <HoverMenuItem asChild>
-                    <Link href="/dash/developers/sso" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                      <Lock size={16} weight="fill" />
-                      <span className="flex items-center">{t('dashboard.organization.settings.tabs.sso', { defaultValue: 'SSO' })}<PlanBadge currentPlan={plan} requiredPlan="enterprise" variant="dark" /></span>
                     </Link>
                   </HoverMenuItem>
                 </HoverMenuContent>
@@ -746,83 +712,6 @@ function DashLeftMenu() {
               })()}
             </HoverMenu>
 
-            {/* Disabled features shown in an "Other" hover menu */}
-            {(!showCommunities || !showPodcasts || !showBoards || !showPlaygrounds || !showPayments) && (
-              <HoverMenu
-                content={
-                  <HoverMenuContent className="w-64">
-                    <HoverMenuLabel className="flex items-center justify-between text-white/70 font-medium">
-                      <span>{t('common.other')}</span>
-                      <span className="text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/[0.06] text-white/25">
-                        {t('common.disabled')}
-                      </span>
-                    </HoverMenuLabel>
-                    <HoverMenuSeparator />
-                    {!showCommunities && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/communities" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <ChatsCircle size={16} weight="fill" />
-                          <span>{t('communities.title')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showPodcasts && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/podcasts" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <Headphones size={16} weight="fill" />
-                          <span>{t('podcasts.podcasts')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showBoards && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/boards" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <ChalkboardSimple size={16} weight="fill" />
-                          <span>{t('common.boards')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showPlaygrounds && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/playgrounds" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <Cube size={16} weight="fill" />
-                          <span>{t('common.playgrounds')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showPayments && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/payments/overview" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <CurrencyCircleDollar size={16} weight="fill" />
-                          <span>{t('common.payments')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                  </HoverMenuContent>
-                }
-              >
-                <button
-                  aria-label={t('dashboard.nav.other')}
-                  className={cn(
-                    "flex items-center w-full rounded-lg text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all",
-                    isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3"
-                  )}
-                >
-                  <span className="relative flex items-center justify-center">
-                    <DotsThree size={20} weight="bold" />
-                    {isCollapsed && (
-                      <CaretDown aria-hidden="true" size={8} weight="bold" className="absolute -end-2.5 text-white/20" />
-                    )}
-                  </span>
-                  {!isCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 text-start">{t('common.other')}</span>
-                      <CaretDown aria-hidden="true" size={14} weight="bold" className="text-white/20" />
-                    </>
-                  )}
-                </button>
-              </HoverMenu>
-            )}
           </div>
         </AdminAuthorization>
       </div>

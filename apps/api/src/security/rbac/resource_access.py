@@ -156,6 +156,13 @@ class ResourceAccessChecker:
         # "you don't have permission", which a plain reason string cannot do.
         await self._enforce_org_mfa_policy(resource_uuid, config)
 
+        # Course-linked communities are the course's discussion space: only
+        # course staff and enrolled students get in, regardless of `public`.
+        if config.resource_type == "communities":
+            course_gate = await self._check_course_community_gate(resource_uuid, action, context, config)
+            if course_gate is not None:
+                return course_gate
+
         # Route to appropriate check based on action
         if action == AccessAction.READ:
             return await self._check_read_access(resource_uuid, context, config)
@@ -812,6 +819,73 @@ class ResourceAccessChecker:
 
         await enforce_org_mfa_policy(self.db_session, user_id, org_id)
         await enforce_org_auth_policy(self.db_session, user_id, org_id)
+
+    async def _check_course_community_gate(
+        self,
+        resource_uuid: str,
+        action: AccessAction,
+        context: AccessContext,
+        config: ResourceConfig,
+    ) -> Optional[AccessDecision]:
+        """
+        Gate for communities linked to a course (docs/refactor/02-discussions.md).
+
+        Returns a decision to short-circuit, or None to continue with the normal
+        rule chain (org-wide communities, staff, and enrolled students' writes).
+        """
+        community = await self._get_resource(resource_uuid, config)
+        course_id = getattr(community, "course_id", None) if community else None
+        if not isinstance(course_id, int) or not course_id:
+            return None
+
+        user_id = self._get_user_id()
+
+        def deny(reason: str) -> AccessDecision:
+            return AccessDecision(
+                allowed=False,
+                reason=reason,
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+
+        if user_id == 0:
+            return deny("Course discussions require a signed-in enrolled student")
+
+        from src.db.courses.courses import Course
+        from src.services.trail.enrollment import is_user_enrolled_in_course
+
+        course = (
+            await self.db_session.execute(select(Course).where(Course.id == course_id))
+        ).scalars().first()
+        if not course:
+            return None
+
+        is_staff = (
+            await self._is_admin_or_maintainer(resource_uuid)
+            or await self._is_resource_author(course.course_uuid)
+            or await authorization_verify_based_on_roles(
+                self.request, user_id, "update", resource_uuid, self.db_session
+            )
+        )
+        if is_staff:
+            return None
+
+        if not await is_user_enrolled_in_course(self.db_session, user_id, course_id):
+            return deny("User is not enrolled in this course")
+
+        if action == AccessAction.READ:
+            return AccessDecision(
+                allowed=True,
+                reason="User is enrolled in the community's course",
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+        # Enrolled students still need normal rights to modify the community itself.
+        return None
 
     async def _is_admin_or_maintainer(self, resource_uuid: str) -> bool:
         """Check if current user is admin/maintainer in the resource's organization."""

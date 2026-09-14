@@ -199,6 +199,26 @@ EE gate:
     ffmpeg, paths). Two are `test_orgs_router::test_create_org*`, broken by the
     earlier commit's removal of `POST /orgs/`.
 
+## Canvas-style scope (next)
+
+After single-org, the remaining org-shaped features (boards, discussions,
+course/enrollment model, admin dash SaaS surfaces) are specced in
+[`docs/refactor/`](docs/refactor/00-overview.md). That folder replaces
+`implementation_plan.md`.
+
+### Session 2 (2026-09-13)
+
+- Wrote `docs/refactor/00`–`04`.
+- Course-linked communities are now enrollment-gated in the shared RBAC
+  checker (`resource_access.py`). New helper `services/trail/enrollment.py`.
+  Tests are in `tests/security/test_course_community_access.py`. The security
+  and community suites have 25 failures, the same 25 as before the change.
+- Student nav no longer lists Communities, and `/communities` redirects to
+  `/dashboard`.
+- Dash sidebar: removed Payments, Domains/SEO/SSO, and the "Other" menu.
+- `tsc`: 78 errors, same as baseline, none in touched files. `bun` isn't
+  installed on this machine, so the web unit tests weren't run.
+
 ## How to verify locally
 
 ```bash
