@@ -263,6 +263,28 @@ its changes were kept or reversed.
 - Tooling note: Windows PowerShell 5.1 `Get-Content`/`Set-Content` mangles
   UTF-8. Use the Edit tool or Python for file rewrites.
 
+### Session 3, part 3 (2026-09-14, step 2)
+
+- Committed steps 0-1 as `1a8a36c1`.
+- Learning roles: `Activity.details.learning_role` (lesson / practice /
+  assessment), `api/services/courses/activities/learning.py`. Assignment
+  activities are practice by default; only they can be practice/assessment.
+- Presets on `create_assignment`: auto-scored, unlimited retries, no deadline,
+  percentage scores, pass at 70% (practice) / 80% (unit test), answer reveal on
+  submission / after grading.
+- Completion follows the score: `_apply_grade_and_finalize` records
+  best/last score, attempts and `passed` on `TrailStep.data`; hand-in no longer
+  completes graded work; passing sticks through retries; admin rejection resets;
+  `POST /trail/add_activity` refuses practice/assessment.
+- Web: create-assignment modal is now a Practice set / Unit test picker; both
+  assignment modals drop due date and grading type; student view shows the
+  role and pass mark.
+- Tests: new `test_learning_progress.py` (6); three tests updated for the new
+  rule; assignment/trail/certificate/activity suites 674 passed. Web `tsc` 78 =
+  baseline. Web unit tests still not run.
+- Open: auto-gradable default in the task editor; certificate gate still uses
+  current grades (see 02).
+
 ## How to verify locally
 
 ```bash

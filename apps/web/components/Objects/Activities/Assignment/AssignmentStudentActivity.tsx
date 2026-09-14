@@ -92,6 +92,15 @@ function AssignmentStudentActivity() {
   // showing a score that can never arrive.
   const isUngraded = !!assignments?.assignment_object?.ungraded;
 
+  // Practice set or unit test (docs/refactor/02-target-architecture.md).
+  const learningRole = assignments?.assignment_object?.learning_role;
+  const roleLabel = learningRole === 'assessment' ? 'Unit test' : 'Practice';
+  const passMark =
+    typeof assignments?.assignment_object?.pass_threshold_percentage === 'number' &&
+    assignments?.assignment_object?.allow_retries
+      ? assignments.assignment_object.pass_threshold_percentage
+      : null;
+
   // Model answer ("corrigé"). `has_solution` is sent even while locked so this
   // view can promise the reward; `solution` / `solution_file` are only present
   // once the server has actually unlocked them for this learner.
@@ -154,12 +163,21 @@ function AssignmentStudentActivity() {
         <div className='text-xs h-fit flex space-x-3 items-center'>
           <div className='flex gap-2 py-2 px-4 md:px-5 h-fit text-sm text-slate-700 bg-slate-100/5 rounded-full nice-shadow items-center'>
             <Backpack size={14} className="md:size-[14px]" />
-            <p className='font-semibold'>{t('activities.assignment')}</p>
+            <p className='font-semibold'>{roleLabel}</p>
           </div>
         </div>
         <div>
           <div className='flex gap-2 items-center flex-wrap justify-center'>
             <EllipsisVertical className='text-slate-400 hidden md:block' size={18} />
+            {!isUngraded && passMark !== null && (
+              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 font-semibold nice-shadow'>
+                <CheckCircle2 size={12} />
+                <span>Pass at {passMark}%{maxRetries === 0 ? ' · unlimited tries' : ''}</span>
+              </div>
+            )}
+            {/* Practice sets and unit tests have no deadline. Only an older
+                assignment that still carries one shows it, because the server
+                still enforces it. */}
             {dueDateRaw && (
               <div className='flex gap-2 items-center'>
                 <div className={`flex gap-1 md:space-x-2 text-xs items-center ${isPastDue ? 'text-rose-500' : 'text-slate-400'}`}>

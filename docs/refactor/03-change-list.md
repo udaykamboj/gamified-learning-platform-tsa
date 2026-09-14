@@ -73,25 +73,27 @@ could later become a personal scratchpad.
 
 ## D. Activities: learning role + completion
 
-- [ ] `Activity.details.learning_role` (see 02). Helper
-  `get_learning_role(activity)` in `api/services/courses/activities/` with the
-  fallback rule.
-- [ ] Authoring UI: role picker when creating an activity
-  (`web/components/Objects/Modals/Activities/Create/NewActivityModal/`).
-- [ ] `add_activity_to_trail`: for `practice`/`assessment`, don't complete on
-  visit. Complete from the assignment submit/grade path when best score ≥
-  threshold; store `best_score`/`attempts` in `TrailStep.data`.
+- [x] `Activity.details.learning_role` + `get_learning_role` /
+  `validate_learning_role` in `api/services/courses/activities/learning.py`;
+  validated in `create_activity` / `update_activity`.
+- [x] Authoring: the create-assignment modal is a "Practice set / Unit test"
+  picker (`AssignmentActivityModal.tsx`). Other activity types stay lessons.
+- [x] Completion: `record_graded_attempt` from `_apply_grade_and_finalize`;
+  submit no longer completes graded work; retry keeps a pass; reject resets;
+  `add_activity_to_trail` refuses practice/assessment. Tests:
+  `api/tests/services/test_learning_progress.py`.
 
 ## E. Assignments → practice/assessment presets
 
-- [ ] `api/services/courses/activities/assignments.py` create path: apply the
-  preset from 02 when `learning_role` is practice/assessment and the caller
-  didn't set the field.
-- [ ] Authoring (`AssignmentActivityModal.tsx`, `EditAssignmentModal.tsx`): hide
-  due date and grading type for practice/assessment; default task types to
-  auto-gradable ones.
-- [ ] Student view (`AssignmentStudentActivity.tsx`): no due date, no letter
-  grade; show score, "Try again", correct answers per preset.
+- [x] `create_assignment` applies the preset from the parent activity's role.
+- [x] Authoring: due date and grading type removed from both modals; edits save
+  `due_date = null` and `PERCENTAGE`.
+- [ ] Default task types to auto-gradable ones in the task editor
+  (`dash/assignments/[assignmentuuid]/_components/TaskEditor`). Not done.
+- [x] Student view (`AssignmentStudentActivity.tsx`): "Practice" / "Unit test"
+  label and "Pass at N%" chip. Scores already show as percent under the
+  preset; "Try again" and answer reveal already existed. The due date chip
+  only appears on older assignments that still have one (the server enforces it).
 - [ ] Dash "Assignments" → "Question review": lists items with manual-graded
   tasks only. Keep `EvaluateAssignment.tsx` for that.
 

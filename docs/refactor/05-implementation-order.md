@@ -27,7 +27,9 @@ Small, mostly UI; unblocks a clean product before deeper work.
 post on any readable course's Q&A without starting it; admin sidebar has no
 classroom tools; `admin-authorization-denial.test.mjs` passes.
 
-## Step 2: Learning roles + practice/assessment presets (03-D, 03-E)
+## Step 2: Learning roles + practice/assessment presets (03-D, 03-E) ✅ (2026-09-14)
+
+Open: auto-gradable default in the task editor; the certificate gap noted in 02. The end-to-end check below is covered by service tests, not yet clicked through in the browser.
 
 The core loop. No migration.
 

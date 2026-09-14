@@ -21,11 +21,6 @@ const textareaClass =
 const labelClass = 'text-sm font-medium text-gray-700';
 const errorClass = 'text-xs text-red-500';
 import {
-    ALargeSmall,
-    Hash,
-    Percent,
-    ThumbsUp,
-    GraduationCap,
     Check,
     Zap,
     Shield,
@@ -77,75 +72,6 @@ interface EditAssignmentModalProps {
     accessToken: string;
 }
 
-const GRADING_TYPES: {
-    value: GradingType;
-    labelKey: string;
-    descriptionKey: string;
-    icon: React.ReactNode;
-    color: string;
-    selectedBorder: string;
-    selectedBg: string;
-    illustration: string;
-}[] = [
-    {
-        value: 'ALPHABET',
-        labelKey: 'dashboard.assignments.modals.edit.form.grading_types.alphabet',
-        descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.alphabet',
-        icon: <ALargeSmall size={20} />,
-        color: 'text-violet-600',
-        selectedBorder: 'border-violet-400',
-        selectedBg: 'bg-violet-50',
-        illustration: 'A  B  C',
-    },
-    {
-        value: 'NUMERIC',
-        labelKey: 'dashboard.assignments.modals.edit.form.grading_types.numeric',
-        descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.numeric',
-        icon: <Hash size={20} />,
-        color: 'text-blue-600',
-        selectedBorder: 'border-blue-400',
-        selectedBg: 'bg-blue-50',
-        illustration: '0 — 100',
-    },
-    {
-        value: 'PERCENTAGE',
-        labelKey: 'dashboard.assignments.modals.edit.form.grading_types.percentage',
-        descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.percentage',
-        icon: <Percent size={20} />,
-        color: 'text-emerald-600',
-        selectedBorder: 'border-emerald-400',
-        selectedBg: 'bg-emerald-50',
-        illustration: '85%',
-    },
-    {
-        value: 'PASS_FAIL',
-        labelKey: 'dashboard.assignments.modals.edit.form.grading_types.pass_fail',
-        descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.pass_fail',
-        icon: <ThumbsUp size={20} />,
-        color: 'text-amber-600',
-        selectedBorder: 'border-amber-400',
-        selectedBg: 'bg-amber-50',
-        illustration: 'P / F',
-    },
-    {
-        value: 'GPA_SCALE',
-        labelKey: 'dashboard.assignments.modals.edit.form.grading_types.gpa_scale',
-        descriptionKey: 'dashboard.assignments.modals.edit.form.grading_type_descriptions.gpa_scale',
-        icon: <GraduationCap size={20} />,
-        color: 'text-rose-600',
-        selectedBorder: 'border-rose-400',
-        selectedBg: 'bg-rose-50',
-        illustration: '0.0 — 4.0',
-    },
-];
-
-// The date input speaks YYYY-MM-DD and nothing else. Values it cannot show
-// come back as '' rather than being carried invisibly through the form.
-function toDateInputValue(raw?: string | null): string {
-    const match = /^\d{4}-\d{2}-\d{2}/.exec((raw ?? '').trim());
-    return match ? match[0] : '';
-}
-
 const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
     onClose,
     assignment,
@@ -170,14 +96,6 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
         initialValues: {
             title: assignment.title || '',
             description: assignment.description || '',
-            // `<input type="date">` shows nothing for a value carrying a time
-            // component, so a stored "2026-01-01T09:00:00" would render as an
-            // empty field the teacher reads as "no deadline" — and, now that
-            // the field is optional and no longer blocks submit, quietly save
-            // the old deadline straight back. Trim it to the day the input can
-            // actually display.
-            due_date: toDateInputValue(assignment.due_date),
-            grading_type: assignment.grading_type || 'ALPHABET',
             auto_grading: assignment.auto_grading || false,
             anti_copy_paste: assignment.anti_copy_paste || false,
             show_correct_answers: assignment.show_correct_answers || false,
@@ -209,9 +127,11 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
             if (!payload.allow_retries) {
                 payload.max_retries = 0;
             }
-            // Clearing the date means "no deadline". Send null, not the empty
-            // string the input clears itself to, so the column reads as unset.
-            payload.due_date = values.due_date || null;
+            // Practice sets and unit tests have no deadline and score in
+            // percent (docs/refactor/02-target-architecture.md). Saving also
+            // brings an older assignment in line.
+            payload.due_date = null;
+            payload.grading_type = 'PERCENTAGE';
             // Formative mode owns the grading switches: an ungraded assignment
             // never auto-grades and has no answer key to reveal, so send the
             // consistent state rather than leaving stale flags in the DB that
@@ -308,36 +228,6 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                 </Form.Control>
             </Form.Field>
 
-            {/* Optional: a self-paced course has no date that means anything to
-                a learner who enrolled today. */}
-            <Form.Field name="due_date" className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                    <Form.Label className={labelClass}>
-                        {t('dashboard.assignments.modals.edit.form.due_date_label')}
-                    </Form.Label>
-                    {formik.values.due_date && (
-                        <button
-                            type="button"
-                            onClick={() => formik.setFieldValue('due_date', '', false)}
-                            className="text-[10px] font-medium text-gray-400 hover:text-gray-700 transition-colors"
-                        >
-                            {t('dashboard.assignments.modals.edit.form.due_date_clear')}
-                        </button>
-                    )}
-                </div>
-                <Form.Control asChild>
-                    <input
-                        type="date"
-                        onChange={formik.handleChange}
-                        value={formik.values.due_date}
-                        className={inputClass}
-                    />
-                </Form.Control>
-                <p className="text-[10px] text-gray-400">
-                    {t('dashboard.assignments.modals.edit.form.due_date_hint')}
-                </p>
-            </Form.Field>
-
             {/* Formative mode. Deliberately above the grading settings: turning
                 it on removes most of them, so the teacher sees the cause before
                 the effect. */}
@@ -347,55 +237,6 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                 label={t('dashboard.assignments.modals.edit.form.ungraded_label', { defaultValue: 'Formative — no grading' })}
                 description={t('dashboard.assignments.modals.edit.form.ungraded_description', { defaultValue: 'Learners hand their work in and it is never marked. No score, no pass or fail — pair it with a model answer below for self-assessment.' })}
             />
-
-            {/* Grading type */}
-            {!formik.values.ungraded && (
-            <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <p className={labelClass}>
-                        {t('dashboard.assignments.modals.edit.form.grading_type_label')}
-                    </p>
-                    <p className="text-[10px] text-gray-400">
-                        {t('dashboard.assignments.modals.edit.form.grading_type_hint')}
-                    </p>
-                </div>
-                <div className="grid grid-cols-3 gap-2.5">
-                    {GRADING_TYPES.map((gt) => {
-                        const isSelected = formik.values.grading_type === gt.value;
-                        return (
-                            <button
-                                key={gt.value}
-                                type="button"
-                                onClick={() => formik.setFieldValue('grading_type', gt.value, true)}
-                                className={`relative flex flex-col items-center text-center p-4 rounded-xl nice-shadow bg-white transition-all cursor-pointer ${
-                                    isSelected
-                                        ? `${gt.selectedBg} ring-2 ${gt.selectedBorder.replace('border-', 'ring-')}`
-                                        : 'hover:bg-gray-50/60'
-                                }`}
-                            >
-                                {isSelected && (
-                                    <div className={`absolute top-2 end-2 w-4 h-4 rounded-full flex items-center justify-center ${gt.color} bg-white nice-shadow`}>
-                                        <Check size={10} strokeWidth={3} />
-                                    </div>
-                                )}
-                                <div className={`text-lg font-mono font-bold mb-2 tracking-wider ${isSelected ? gt.color : 'text-gray-300'}`}>
-                                    {gt.illustration}
-                                </div>
-                                <div className={`mb-1 ${isSelected ? gt.color : 'text-gray-400'}`}>
-                                    {gt.icon}
-                                </div>
-                                <p className={`text-xs font-bold ${isSelected ? 'text-gray-900' : 'text-gray-500'}`}>
-                                    {t(gt.labelKey)}
-                                </p>
-                                <p className='text-[10px] text-gray-400 mt-0.5 leading-tight'>
-                                    {t(gt.descriptionKey)}
-                                </p>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-            )}
 
             {/* Grading options */}
             <div className="space-y-2">

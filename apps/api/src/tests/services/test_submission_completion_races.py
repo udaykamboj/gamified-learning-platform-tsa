@@ -64,8 +64,13 @@ class TestCourseCompletedFires:
     ):
         # The `activity` fixture is published and already linked to the course
         # via a ChapterActivity, and it's the only activity — so submitting the
-        # assignment completes the course and COURSE_COMPLETED must fire.
+        # assignment completes the course and COURSE_COMPLETED must fire. It is
+        # formative: a graded assignment completes on a passing grade instead
+        # (covered in test_learning_progress.py).
         assignment = await _assignment(db, org, course, chapter, activity)
+        assignment.ungraded = True
+        db.add(assignment)
+        await db.commit()
         trail = await _trail(db, course, regular_user)
 
         with patch(_PATCH_RBAC, new_callable=AsyncMock), \

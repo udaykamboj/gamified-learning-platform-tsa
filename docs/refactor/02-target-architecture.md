@@ -45,6 +45,10 @@ Store in the existing `Activity.details` JSON (no migration):
 ```
 
 - Missing → derive: `TYPE_ASSIGNMENT` → `practice`, everything else → `lesson`.
+- Only assignment activities can be `practice` or `assessment`, and an
+  assignment activity can't be `lesson` (400 on create/update).
+- Code: `api/services/courses/activities/learning.py`. `AssignmentRead.learning_role`
+  carries it to the student view.
 - A migration to a real column is allowed later if queries need it; don't start
   with one.
 
@@ -62,6 +66,13 @@ Store in the existing `Activity.details` JSON (no migration):
 | `grading_type` | `PERCENTAGE` (hidden) | `PERCENTAGE` (hidden) |
 | Allowed task types | auto-gradable only | auto-gradable only |
 
+Implemented as: **forced** on create (`allow_retries`, no `due_date`,
+`PERCENTAGE`, `auto_grading = not ungraded`) and **defaults** for fields the
+author didn't send (`max_retries`, `show_correct_answers`, `solution_reveal`,
+`pass_threshold_percentage`). Formative (`ungraded`) practice is still allowed
+and completes on hand-in. Edits don't re-apply the preset, but the edit modal
+always saves `due_date = null` and `PERCENTAGE`.
+
 `FILE_SUBMISSION` / `CUSTOM` / `OTHER` stay in the engine for admins, but aren't
 offered in the default student-first authoring flow. Manual grading endpoints
 stay (admin review), they're just not part of the loop.
@@ -74,8 +85,23 @@ stay (admin review), they're just not part of the loop.
 | practice | Best attempt ≥ pass threshold |
 | assessment | Best attempt ≥ pass threshold |
 
-Store the best score on `TrailStep.data` (`{"best_score": 85, "attempts": 3}`).
+Store progress on `TrailStep.data`:
+`{"best_score": 85, "last_score": 40, "attempts": 3, "passed": true}` (percent).
 `teacher_verified` and `grade` become unused (don't drop the columns).
+
+Decisions (implemented):
+- The completion write lives in `_apply_grade_and_finalize`, the one grading
+  choke point (auto on submit, manual grade, regrade after task edits), via
+  `record_graded_attempt`.
+- **Passing sticks.** A retry after passing keeps `complete`, the certificate,
+  and the enrollment status. A later lower score only changes `last_score`.
+- An admin **rejecting** a submission clears `data` and `complete`.
+- Handing in a graded assignment doesn't complete it; formative ones complete
+  on hand-in. `POST /trail/add_activity` returns 400 for practice/assessment.
+- Known gap: certificates still use each assignment's *current* grade
+  (`are_course_assignments_passed`), so a manual regrade below the pass mark can
+  revoke a certificate even though the activity stays complete. Align it with
+  `data.passed` in step 3.
 
 ## Mastery (derived, net-new)
 

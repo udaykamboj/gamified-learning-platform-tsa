@@ -69,6 +69,13 @@ from src.services.courses.activities.quiz_modes import (
     resolve_response_type,
     score_question,
 )
+from src.services.courses.activities.learning import (
+    apply_assignment_preset,
+    attempt_passed_before,
+    get_learning_role,
+    record_graded_attempt,
+    reset_attempt_progress,
+)
 from src.services.trail.trail import check_trail_presence
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
@@ -1129,6 +1136,12 @@ async def create_assignment(
     # Create Assignment
     assignment = Assignment(**assignment_object.model_dump())
 
+    # Practice sets and unit tests score themselves, allow unlimited tries, and
+    # have no deadline or letter grade (docs/refactor/02-target-architecture.md).
+    apply_assignment_preset(
+        assignment, get_learning_role(parent_activity), assignment_object.model_fields_set
+    )
+
     # Formative mode and auto-grading are contradictory: one says "never produce
     # a grade", the other says "produce one on submit". Normalize here (rather
     # than trusting the client to keep them consistent) so the submit path only
@@ -1165,7 +1178,7 @@ async def read_assignment(
     db_session: AsyncSession,
 ):
     statement = (
-        select(Assignment, Course.course_uuid, Activity.activity_uuid)
+        select(Assignment, Course.course_uuid, Activity)
         .join(Course, Course.id == Assignment.course_id)  # type: ignore
         .join(Activity, Activity.id == Assignment.activity_id)  # type: ignore
         .where(Assignment.assignment_uuid == assignment_uuid)
@@ -1178,13 +1191,14 @@ async def read_assignment(
             detail="Assignment not found",
         )
 
-    assignment, course_uuid, activity_uuid = row
+    assignment, course_uuid, activity = row
 
     await authorize_assignment_access(request, db_session, current_user, course_uuid, AccessAction.READ)
 
     result = AssignmentRead.model_validate(assignment)
     result.course_uuid = course_uuid
-    result.activity_uuid = activity_uuid
+    result.activity_uuid = activity.activity_uuid
+    result.learning_role = get_learning_role(activity).value
     # The model answer is reveal-gated: an instructor always sees it, a learner
     # only once their own submission has unlocked it.
     unlocked = await _resolve_solution_visibility(
@@ -1200,7 +1214,7 @@ async def read_assignment_from_activity_uuid(
     db_session: AsyncSession,
 ):
     statement = (
-        select(Assignment, Course.course_uuid, Activity.activity_uuid)
+        select(Assignment, Course.course_uuid, Activity)
         .join(Activity, Activity.id == Assignment.activity_id)  # type: ignore
         .join(Course, Course.id == Assignment.course_id)  # type: ignore
         .where(Activity.activity_uuid == activity_uuid)
@@ -1213,13 +1227,14 @@ async def read_assignment_from_activity_uuid(
             detail="Assignment not found",
         )
 
-    assignment, course_uuid, activity_uuid_val = row
+    assignment, course_uuid, activity = row
 
     await authorize_assignment_access(request, db_session, current_user, course_uuid, AccessAction.READ)
 
     result = AssignmentRead.model_validate(assignment)
     result.course_uuid = course_uuid
-    result.activity_uuid = activity_uuid_val
+    result.activity_uuid = activity.activity_uuid
+    result.learning_role = get_learning_role(activity).value
     # Same reveal gate as read_assignment — this is the endpoint the learner's
     # activity page actually calls, so skipping it here would leak the corrige.
     unlocked = await _resolve_solution_visibility(
@@ -3031,11 +3046,16 @@ async def create_assignment_submission(
     )
     trailstep = (await db_session.execute(statement)).scalars().first()
 
-    # Whether this submission is what completes the activity (a brand-new step,
-    # or a step that was incomplete — e.g. after a retry). Used below to fire
-    # COURSE_COMPLETED only on a genuine transition, never on a plain resubmit of
-    # an already-complete activity.
-    is_new_activity_completion = (trailstep is None) or (not trailstep.complete)
+    # Whether the activity was complete before this submission. Compared with
+    # the state after grading below, so COURSE_COMPLETED fires only on a genuine
+    # transition, never on a plain resubmit of an already-complete activity.
+    was_complete = bool(trailstep and trailstep.complete)
+
+    # Handing work in completes a formative (ungraded) assignment. A graded one
+    # (practice set, unit test) completes only when an attempt passes, which
+    # _apply_grade_and_finalize records; until then it keeps whatever an earlier
+    # passing attempt earned.
+    complete_on_hand_in = bool(assignment.ungraded) or attempt_passed_before(trailstep)
 
     if not trailstep:
         trailstep = TrailStep(
@@ -3044,7 +3064,7 @@ async def create_assignment_submission(
             course_id=course.id if course.id is not None else 0,
             trail_id=trail.id if trail.id is not None else 0,
             org_id=course.org_id,
-            complete=True,
+            complete=complete_on_hand_in,
             teacher_verified=False,
             grade="",
             user_id=user.id, # type: ignore
@@ -3055,12 +3075,7 @@ async def create_assignment_submission(
         await db_session.commit()
         await db_session.refresh(trailstep)
     else:
-        # Existing trail step — either from prior progress saves, or because
-        # the student just hit "Try again" (the retry endpoint flipped it to
-        # incomplete). Re-flip it to complete now that the assignment is
-        # back in SUBMITTED state. The first-submission branch above sets
-        # complete=True; this keeps the reuse path consistent.
-        trailstep.complete = True
+        trailstep.complete = complete_on_hand_in
         trailstep.update_date = str(datetime.now())
         db_session.add(trailstep)
         await db_session.commit()
@@ -3101,13 +3116,9 @@ async def create_assignment_submission(
                 # Reuse the list fetched just above for the auto-gradable check.
                 assignment_tasks=assignment_tasks,
             )
-            # Ensure trailstep reflects completion (create_assignment_submission
-            # above already created it with complete=True, but if one already
-            # existed from a previous state we make sure it's marked done).
-            trailstep.complete = True
-            trailstep.update_date = str(datetime.now())
-            db_session.add(trailstep)
-            await db_session.commit()
+            await db_session.refresh(trailstep)
+
+    is_new_activity_completion = bool(trailstep.complete) and not was_complete
 
     # Check if all activities in the course are completed and create certificate
     # if so. Wrapped defensively: the submission is already committed above, so a
@@ -3481,7 +3492,8 @@ async def delete_assignment_submission(
     )
     trailstep = (await db_session.execute(trailstep_statement)).scalars().first()
     if trailstep:
-        trailstep.complete = False
+        # A rejection also clears earned scores: the work wasn't accepted.
+        reset_attempt_progress(trailstep)
         trailstep.teacher_verified = False
         trailstep.grade = ""
         trailstep.update_date = str(datetime.now())
@@ -3642,15 +3654,17 @@ async def retry_assignment_submission(
         for ts in existing_submissions:
             await db_session.delete(ts)
 
-    # Mark the activity incomplete again so the student's progress bar
-    # reflects the in-flight retry rather than the (now stale) previous
-    # completion.
+    # Retrying never costs a student what they already earned: once an attempt
+    # of a graded assignment has passed, the activity stays complete (and the
+    # certificate stays) while they try for a better score. Otherwise the
+    # activity goes back to incomplete for the in-flight attempt.
     trailstep_statement = select(TrailStep).where(
         TrailStep.activity_id == assignment.activity_id,
         TrailStep.user_id == int(current_user.id),
     )
     trailstep = (await db_session.execute(trailstep_statement)).scalars().first()
-    if trailstep:
+    keeps_completion = not assignment.ungraded and attempt_passed_before(trailstep)
+    if trailstep and not keeps_completion:
         trailstep.complete = False
         trailstep.teacher_verified = False
         trailstep.grade = ""
@@ -3674,14 +3688,14 @@ async def retry_assignment_submission(
     # Revoke any course certificate previously issued. If this assignment was the
     # final activity, a new certificate is re-issued once the retry attempt is
     # graded and the course is again fully complete. Emits certificate_revoked.
-    if course.id:
+    if course.id and not keeps_completion:
         await revoke_user_certificate(
             int(current_user.id), course.id, db_session, reason="assignment_retried"
         )
 
     # The activity is reset to incomplete for this attempt — demote the
     # enrollment status so a retrying learner isn't still counted as completed.
-    if course.id:
+    if course.id and not keeps_completion:
         await sync_trailrun_status(int(current_user.id), course.id, db_session)
 
     return {
@@ -3847,6 +3861,18 @@ async def _apply_grade_and_finalize(
     db_session.add(assignment_user_submission)
     await db_session.commit()
     await db_session.refresh(assignment_user_submission)
+
+    # Every grading route (auto on submit, manual, regrade) passes through here,
+    # so this is where a graded activity becomes complete: once the best attempt
+    # passes (docs/refactor/02-target-architecture.md, completion rules).
+    await record_graded_attempt(
+        db_session,
+        activity_id=assignment.activity_id,
+        user_id=user_id,
+        percentage=float(computed["percentage"] or 0),
+        passed=bool(computed["passed"]),
+        attempt_number=int(assignment_user_submission.attempt_number or 1),
+    )
 
     # Durable audit row for the grade the STUDENT received. This is the single
     # grading choke point (both manual and auto paths), and retries reset the

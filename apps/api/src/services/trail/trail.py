@@ -246,6 +246,16 @@ async def add_activity_to_trail(
         request, db_session, user, course.course_uuid, AccessAction.READ
     )
 
+    # Practice sets and unit tests are completed by passing them, not by
+    # clicking "done" (docs/refactor/02-target-architecture.md).
+    from src.services.courses.activities.learning import SCORED_ROLES, get_learning_role
+
+    if get_learning_role(activity) in SCORED_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This activity is completed by submitting it, not by marking it done",
+        )
+
     trail = await check_trail_presence(
         org_id=course.org_id,
         user_id=user.id,

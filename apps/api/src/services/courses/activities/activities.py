@@ -19,6 +19,7 @@ import logging
 
 from src.core.ee_hooks import check_ee_activity_paid_access
 from src.security.rbac import check_resource_access, AccessAction
+from src.services.courses.activities.learning import validate_learning_role
 from src.services.courses.activities.versioning import create_activity_version
 from src.services.courses.locks import (
     batch_accessible_restricted_uuids,
@@ -66,6 +67,8 @@ async def create_activity(
         )
 
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
+
+    validate_learning_role(activity_object.activity_type, activity_object.details)
 
     # Create Activity
     activity = Activity(**activity_object.model_dump())
@@ -387,6 +390,12 @@ async def update_activity(
     # Update only the fields that were explicitly set (not default values)
     # Using model_dump(exclude_unset=True) to get only the fields that were passed in
     update_data = activity_object.model_dump(exclude_unset=True)
+
+    if 'details' in update_data or 'activity_type' in update_data:
+        validate_learning_role(
+            update_data.get('activity_type', activity.activity_type),
+            update_data.get('details', activity.details),
+        )
 
     # Create a version snapshot before updating content
     # This preserves the current state for version history.
