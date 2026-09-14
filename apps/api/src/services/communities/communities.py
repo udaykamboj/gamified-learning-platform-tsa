@@ -98,7 +98,13 @@ async def get_community(
     # RBAC check
     await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.READ)
 
-    return CommunityRead.model_validate(community.model_dump())
+    course_uuid = None
+    if community.course_id:
+        course_uuid = (
+            await db_session.execute(select(Course.course_uuid).where(Course.id == community.course_id))
+        ).scalar_one_or_none()
+
+    return CommunityRead.model_validate({**community.model_dump(), "course_uuid": course_uuid})
 
 
 async def get_communities_by_org(
@@ -200,6 +206,48 @@ async def get_communities_by_org(
     return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
 
+async def ensure_course_community(db_session: AsyncSession, course: Course) -> Community:
+    """
+    Return the course's Q&A community, creating it if missing.
+
+    Every course has exactly one (docs/refactor/03-change-list.md, section A).
+    This is a system action with no RBAC check: only course creation and the
+    backfill command call it. There is no unique constraint on
+    `community.course_id`, so don't call this from concurrent request paths. Access to the community follows the course, so
+    `public` is only a default here.
+    """
+    statement = select(Community).where(Community.course_id == course.id)
+    community = (await db_session.execute(statement)).scalars().first()
+    if community:
+        return community
+
+    now = str(datetime.now())
+    community = Community(
+        name=f"{course.name} Q&A",
+        description=f"Questions and answers about {course.name}",
+        public=True,
+        org_id=course.org_id,
+        course_id=course.id,
+        community_uuid=f"community_{uuid4()}",
+        creation_date=now,
+        update_date=now,
+    )
+    db_session.add(community)
+    await db_session.commit()
+    await db_session.refresh(community)
+    return community
+
+
+async def backfill_course_communities(db_session: AsyncSession) -> int:
+    """Create the Q&A community for every course that has none. Returns the count."""
+    has_community = select(Community.course_id).where(Community.course_id.is_not(None))
+    statement = select(Course).where(Course.id.not_in(has_community))
+    courses = (await db_session.execute(statement)).scalars().all()
+    for course in courses:
+        await ensure_course_community(db_session, course)
+    return len(courses)
+
+
 async def get_community_by_course(
     request: Request,
     course_uuid: str,
@@ -207,7 +255,10 @@ async def get_community_by_course(
     db_session: AsyncSession,
 ) -> CommunityRead | None:
     """
-    Get the community linked to a specific course.
+    Get the course's Q&A community, or None if it has none yet.
+
+    Reads never create rows: courses get their community when created, and
+    older courses through the `backfill-course-qa` CLI command.
     """
     # Get the course first
     course_statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -228,7 +279,7 @@ async def get_community_by_course(
         request, db_session, current_user, community.community_uuid, AccessAction.READ
     )
 
-    return CommunityRead.model_validate(community.model_dump())
+    return CommunityRead.model_validate({**community.model_dump(), "course_uuid": course.course_uuid})
 
 
 async def update_community(
@@ -434,6 +485,33 @@ async def get_community_user_rights(
             "has_usergroup_restriction": False,
         },
     }
+
+    # A course's Q&A follows the course: whoever can read the course can read
+    # and post. `public` and usergroups on the community don't apply.
+    if community.course_id:
+        try:
+            await check_resource_access(
+                request, db_session, current_user, community_uuid, AccessAction.READ
+            )
+            can_read = True
+        except HTTPException:
+            can_read = False
+        rights["permissions"]["read"] = can_read
+        if acting_user_id == 0:
+            return rights
+        rights["permissions"]["create_discussion"] = can_read
+        is_admin_or_maintainer = await authorization_verify_based_on_roles(
+            request, acting_user_id, "update", community_uuid, db_session
+        ) or await authorization_verify_based_on_org_admin_status(
+            request, acting_user_id, "update", community_uuid, db_session
+        )
+        if is_admin_or_maintainer:
+            rights["ownership"]["is_admin"] = True
+            rights["ownership"]["is_maintainer_role"] = True
+            rights["permissions"]["create"] = True
+            rights["permissions"]["update"] = True
+            rights["permissions"]["delete"] = True
+        return rights
 
     # Handle anonymous users
     if acting_user_id == 0:

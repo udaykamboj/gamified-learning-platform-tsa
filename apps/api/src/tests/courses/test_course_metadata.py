@@ -67,6 +67,14 @@ async def test_create_course_with_extra_metadata(
     assert row is not None
     assert row.extra_metadata == metadata
 
+    # Every new course gets its Q&A community (docs/refactor/03-change-list.md, A).
+    from src.db.communities.communities import Community
+
+    communities = (await db.execute(
+        select(Community).where(Community.course_id == row.id)
+    )).scalars().all()
+    assert len(communities) == 1
+
 
 @pytest.mark.asyncio
 async def test_update_course_sets_extra_metadata(

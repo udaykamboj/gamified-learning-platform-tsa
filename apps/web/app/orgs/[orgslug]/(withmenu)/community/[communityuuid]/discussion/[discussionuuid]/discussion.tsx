@@ -9,8 +9,8 @@ import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { EditDiscussionModal } from '@components/Objects/Modals/Communities/EditDiscussionModal'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
-import { MessageCircle } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
+import { communityParentCrumb } from '../../community'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
@@ -46,7 +46,7 @@ const DiscussionPageClient = ({
       {/* Breadcrumbs */}
       <div className="pb-4">
         <Breadcrumbs items={[
-          { label: 'Communities', href: getUriWithOrg(orgslug, '/communities'), icon: <MessageCircle size={14} /> },
+          communityParentCrumb(community, orgslug),
           { label: community.name, href: getUriWithOrg(orgslug, `/community/${community.community_uuid.replace('community_', '')}`) },
           { label: discussion.title }
         ]} />

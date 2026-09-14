@@ -153,7 +153,9 @@ const CommunityPage = async (params: any) => {
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: 'Home', url: await getServerCanonicalUrl(orgslug, '/') },
-    { name: 'Communities', url: await getServerCanonicalUrl(orgslug, '/communities') },
+    community.course_uuid
+      ? { name: 'Course', url: await getServerCanonicalUrl(orgslug, `/course/${community.course_uuid.replace('course_', '')}`) }
+      : { name: 'Courses', url: await getServerCanonicalUrl(orgslug, '/courses') },
     { name: community.name || 'Community', url: await getServerCanonicalUrl(orgslug, `/community/${communityuuid}`) },
   ])
 

@@ -1,14 +1,12 @@
 'use client'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { getUriWithOrg } from '@services/config/config'
-import { Terminal, KeyIcon, Zap, Globe, Search, Shield, LucideIcon } from 'lucide-react'
+import { Terminal, KeyIcon, Zap, LucideIcon } from 'lucide-react'
 import React, { useEffect, use } from 'react'
 import { motion } from 'motion/react'
 import OrgEditAPIAccess from '@components/Dashboard/Pages/Org/OrgEditAPIAccess/OrgEditAPIAccess'
 import OrgEditAutomations from '@components/Dashboard/Pages/Org/OrgEditAutomations/OrgEditAutomations'
-import OrgEditDomains from '@components/Dashboard/Pages/Org/OrgEditDomains/OrgEditDomains'
-import OrgEditSEO from '@components/Dashboard/Pages/Org/OrgEditSEO/OrgEditSEO'
-import OrgEditSSO from '@components/Dashboard/Pages/Org/OrgEditSSO/OrgEditSSO'
+import { redirect } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { PlanLevel, isFeatureAvailable } from '@services/plans/plans'
 import { DashTabBar, DashTabItem } from '@components/Dashboard/Shared/DashTabBar/DashTabBar'
@@ -28,9 +26,6 @@ interface TabConfig {
 const getDevTabs = (t: any): TabConfig[] => [
   { id: 'api', label: t('dashboard.organization.settings.tabs.api', { defaultValue: 'API Access' }), icon: KeyIcon, requiredPlan: 'pro' },
   { id: 'automations', label: t('dashboard.organization.settings.tabs.automations', { defaultValue: 'Automations' }), icon: Zap, requiredPlan: 'pro' },
-  { id: 'domains', label: t('dashboard.organization.settings.tabs.domains', { defaultValue: 'Domains' }), icon: Globe, requiredPlan: 'pro' },
-  { id: 'seo', label: 'SEO', icon: Search, requiredPlan: 'standard' },
-  { id: 'sso', label: t('dashboard.organization.settings.tabs.sso', { defaultValue: 'SSO' }), icon: Shield, requiredPlan: 'enterprise' },
 ]
 
 function DevelopersPage(props: { params: Promise<DevParams> }) {
@@ -38,10 +33,7 @@ function DevelopersPage(props: { params: Promise<DevParams> }) {
   const params = use(props.params)
   const [H1Label, setH1Label] = React.useState('')
   const [H2Label, setH2Label] = React.useState('')
-  // Hide tabs whose feature is unavailable in the current deployment mode — in
-  // OSS this drops the enterprise-only SSO tab (which would otherwise render a
-  // dead "upgrade" card, since getUpgradeUrl() is null for OSS). EE/SaaS keep all
-  // tabs (isFeatureAvailable returns true; per-plan gating is handled downstream).
+  // Hide tabs whose feature is unavailable in the current deployment mode.
   const DEV_TABS = getDevTabs(t).filter((tab) => isFeatureAvailable(tab.id))
 
   function handleLabels() {
@@ -51,15 +43,6 @@ function DevelopersPage(props: { params: Promise<DevParams> }) {
     } else if (params.subpage == 'automations') {
       setH1Label(t('dashboard.organization.settings.tabs.automations', { defaultValue: 'Automations' }))
       setH2Label(t('dashboard.organization.automations.webhooks_subtitle', { defaultValue: 'Connect external services with webhooks' }))
-    } else if (params.subpage == 'domains') {
-      setH1Label(t('dashboard.organization.settings.pages.domains.title', { defaultValue: 'Custom Domains' }))
-      setH2Label(t('dashboard.organization.settings.pages.domains.subtitle', { defaultValue: 'Configure custom domains for your organization' }))
-    } else if (params.subpage == 'seo') {
-      setH1Label('SEO')
-      setH2Label(t('dashboard.organization.settings.pages.seo.subtitle', { defaultValue: 'Manage search engine optimization settings' }))
-    } else if (params.subpage == 'sso') {
-      setH1Label(t('dashboard.organization.settings.pages.sso.title', { defaultValue: 'Single Sign-On' }))
-      setH2Label(t('dashboard.organization.settings.pages.sso.subtitle', { defaultValue: 'Configure SSO for your organization' }))
     }
   }
 
@@ -67,6 +50,12 @@ function DevelopersPage(props: { params: Promise<DevParams> }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     handleLabels()
   }, [params.subpage, params, t])
+
+  // Custom domains, SEO and SSO are per-tenant SaaS settings StarLab doesn't
+  // have (docs/refactor/03-change-list.md, section H). Browser-relative path.
+  if (!DEV_TABS.some((tab) => tab.id === params.subpage)) {
+    redirect('/dash')
+  }
 
   const tabs: DashTabItem[] = DEV_TABS.map((tab) => ({
     key: tab.id,
@@ -107,9 +96,6 @@ function DevelopersPage(props: { params: Promise<DevParams> }) {
       >
         {params.subpage == 'api' ? <OrgEditAPIAccess /> : ''}
         {params.subpage == 'automations' ? <OrgEditAutomations /> : ''}
-        {params.subpage == 'domains' ? <OrgEditDomains /> : ''}
-        {params.subpage == 'seo' ? <OrgEditSEO /> : ''}
-        {params.subpage == 'sso' ? <OrgEditSSO /> : ''}
       </motion.div>
     </div>
   )

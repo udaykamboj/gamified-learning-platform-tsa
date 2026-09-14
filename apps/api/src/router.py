@@ -138,12 +138,9 @@ v1_router.include_router(
     prefix="/integrations/zapier",
     tags=["integrations", "zapier"],
 )
-v1_router.include_router(
-    custom_domains.router,
-    prefix="/orgs",
-    tags=["custom-domains"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan("standard", "Custom Domains"))]
-)
+# Custom domain management (custom_domains.router) is not mounted: StarLab is
+# one platform on one domain (docs/refactor/03-change-list.md, section H).
+# Resolution stays mounted because the web tenancy/auth code still calls it.
 # Public domain resolution endpoint (no auth required)
 v1_router.include_router(
     custom_domains.public_router,

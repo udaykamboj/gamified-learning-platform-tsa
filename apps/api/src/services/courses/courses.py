@@ -692,6 +692,17 @@ async def create_course(
     # Feature usage
     await increase_feature_usage("courses", course.org_id, db_session)
 
+    # Every course gets its Q&A space. A failure here must not fail course
+    # creation: get_community_by_course creates it lazily as a fallback.
+    try:
+        from src.services.communities.communities import ensure_course_community
+
+        await ensure_course_community(db_session, course)
+    except Exception:
+        logger.exception("Could not create Q&A community for course id %s", course.id)
+        await db_session.rollback()
+        await db_session.refresh(course)
+
     await dispatch_webhooks(
         event_name="course_created",
         org_id=course.org_id,

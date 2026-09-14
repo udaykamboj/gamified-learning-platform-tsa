@@ -664,5 +664,29 @@ async def _backfill_async() -> None:
     finally:
         await async_engine.dispose()
 
+@cli.command(name="backfill-course-qa")
+def backfill_course_qa():
+    """Create the Q&A community for every course that doesn't have one yet.
+
+    New courses get theirs on creation; run this once for courses created
+    before that. Safe to run repeatedly.
+    """
+    asyncio.run(_backfill_course_qa())
+
+
+async def _backfill_course_qa() -> None:
+    from src.services.communities.communities import backfill_course_communities
+
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
+    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            created = await backfill_course_communities(db_session)
+        print(f"Created {created} course Q&A communities.")
+    finally:
+        await async_engine.dispose()
+
+
 if __name__ == "__main__":
     cli()

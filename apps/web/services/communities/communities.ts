@@ -23,6 +23,7 @@ export interface Community {
   id: number
   org_id: number
   course_id: number | null
+  course_uuid?: string | null
   community_uuid: string
   name: string
   description: string | null

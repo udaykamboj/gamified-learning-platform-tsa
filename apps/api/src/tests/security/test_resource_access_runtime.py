@@ -176,9 +176,10 @@ class TestResourceAccessRuntime:
             new_callable=AsyncMock,
             return_value=True,
         ):
-            role_decision = await checker._check_public_view_read_access("course_3", course_cfg)
-        assert role_decision.allowed is True
-        assert role_decision.via_role is True
+            # A role never unlocks an unpublished draft (only authors/admins do).
+            draft_decision = await checker._check_public_view_read_access("course_3", course_cfg)
+        assert draft_decision.allowed is False
+        assert draft_decision.via_role is False
 
         checker._is_public_and_published = AsyncMock(return_value=(False, False))
         checker._is_resource_author = AsyncMock(return_value=True)

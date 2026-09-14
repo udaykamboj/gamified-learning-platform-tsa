@@ -199,16 +199,19 @@ EE gate:
     ffmpeg, paths). Two are `test_orgs_router::test_create_org*`, broken by the
     earlier commit's removal of `POST /orgs/`.
 
-## Canvas-style scope (next)
+## Student-first scope (next)
 
-After single-org, the remaining org-shaped features (boards, discussions,
-course/enrollment model, admin dash SaaS surfaces) are specced in
-[`docs/refactor/`](docs/refactor/00-overview.md). That folder replaces
-`implementation_plan.md`.
+**Direction changed on 2026-09-14.** StarLab is a personal, student-first
+learning platform (Khan Academy's product model), not a Canvas-style classroom.
+The plan is in [`docs/refactor/`](docs/refactor/00-overview.md), which replaces
+`implementation_plan.md`. Work from
+[`05-implementation-order.md`](docs/refactor/05-implementation-order.md).
+Session 2 below followed the cancelled Canvas plan; 00-overview says which of
+its changes were kept or reversed.
 
-### Session 2 (2026-09-13)
+### Session 2 (2026-09-13, Canvas direction, partly reversed)
 
-- Wrote `docs/refactor/00`–`04`.
+- Wrote the Canvas-style `docs/refactor/00`–`04` (since replaced).
 - Course-linked communities are now enrollment-gated in the shared RBAC
   checker (`resource_access.py`). New helper `services/trail/enrollment.py`.
   Tests are in `tests/security/test_course_community_access.py`. The security
@@ -218,6 +221,47 @@ course/enrollment model, admin dash SaaS surfaces) are specced in
 - Dash sidebar: removed Payments, Domains/SEO/SSO, and the "Other" menu.
 - `tsc`: 78 errors, same as baseline, none in touched files. `bun` isn't
   installed on this machine, so the web unit tests weren't run.
+
+### Session 3 (2026-09-14, student-first reset)
+
+- Audited boards, discussions, course/activity/assignment models, trail
+  progress, roles/usergroups, and admin nav against the student-first model.
+- Rewrote `docs/refactor/` as `00-overview` + `01`–`05` (problems, target
+  architecture, change list, reuse, order). Deleted the Canvas specs.
+- Reversed the enrollment gate: course Q&A read access now mirrors course read
+  access (`_check_course_community_gate`). Tests rewritten; community and
+  discussion tests: 65 passed. Security suite: 25 failures, all pre-existing.
+- Found: public-but-unpublished courses are readable by students (Rule 4).
+  Queued in step 1.
+- Boards: student `/boards` redirects to `/dashboard`; Boards removed from dash
+  sidebar and mobile menu (`/dash/boards` still works by URL). Store removed
+  from student nav defaults.
+- Web tsc and unit tests weren't run. The web changes only remove code.
+
+### Session 3, part 2 (2026-09-14, step 1)
+
+- Draft leak closed: students can no longer read public-but-unpublished
+  courses (Rule 4 now requires published).
+- Every course has a Q&A community: created with the course. For existing
+  courses, run `python cli.py backfill-course-qa` once in `apps/api`
+  (**deploy step**).
+- Community rights follow course access; `CommunityRead.course_uuid` added;
+  Q&A breadcrumbs point to the course.
+- Admin sidebar grouped (Content / Community / People / Insights / Platform);
+  "Assignments" → "Practice & tests", "Communities" → "Q&A moderation"; billing
+  upsell and purchases link removed.
+- Payments, store, and developer domains/SEO/SSO pages redirect; custom domain
+  management API unmounted; command palette de-indexed.
+- Not done: Instructor relabel (needs a data migration; alembic has 4 heads).
+- Tests: affected API suites (communities, discussions, courses, resource
+  access, podcasts, trail) pass: 402 before the CLI change, 350 on the final
+  rerun. Security suite still 25 failures
+  (pre-existing). Two tests updated for intended behavior (draft leak; lazy
+  community creation, later reverted). Web `tsc`: 78 errors = baseline, none in touched files.
+  **Web unit tests have not run for two sessions** (no `bun` here). Run
+  `cd apps/web && bun test tests` on a machine with bun before merging.
+- Tooling note: Windows PowerShell 5.1 `Get-Content`/`Set-Content` mangles
+  UTF-8. Use the Edit tool or Python for file rewrites.
 
 ## How to verify locally
 

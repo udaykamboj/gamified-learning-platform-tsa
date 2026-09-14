@@ -1,79 +1,58 @@
-# Canvas-Style Refactor: Overview
+# Student-First Refactor: Overview
 
-> This folder replaces `implementation_plan.md` at the repo root. That file has
-> stale `/Users/udaykamboj/...` paths and asks whether to purge "org" naming.
-> Answer: **no**. Keep `org_id`, `/orgs/` routes, and `app/orgs/[orgslug]`
-> internally. Users never see them.
+> **This folder was rewritten on 2026-09-14.** The previous version (commit
+> `8cf22a29`) specced a **Canvas-style** model: the course as a classroom,
+> rosters, course-scoped boards, enrollment-gated course forums. That direction
+> is **cancelled. Do not implement it.** The old `01-boards.md`,
+> `02-discussions.md`, `03-backend-course-model.md` and `04-admin-dashboard.md`
+> were deleted; read them from git history only if you need the file refs.
 >
-> `progress.md` tracks the single-org + student/admin auth work. These docs
-> cover what comes after it.
+> Still valid and unchanged: the single-org + student/admin account work in
+> `progress.md`. Keep `org_id`, `/orgs/` routes and `app/orgs/[orgslug]`
+> internally.
 
-## The problem
+## The shift
 
-StarLab is built on LearnHouse, which is a **cluster of organizations**: many
-tenants, each owning its own courses, boards, communities, payments, domains,
-and SSO. Almost every feature is scoped to "the org."
-
-We are **one school**, and we want the app to behave like Canvas:
-
-- The **course** is the hub.
-- Students see and work inside the courses they're enrolled in.
-- Collaboration (discussions, boards) belongs to a course, not to the whole
-  platform.
-- Admins manage courses, rosters, and content, not tenants.
-
-The earlier work made the org *singular*. The pieces below are still
-*org-shaped*: they treat the whole platform as a shared space instead of a set
-of courses.
-
-## Target model
-
-```
-                  PLATFORM (the one org, resolved by get_platform_org)
-                                   │
-                 ┌─────────────────┴─────────────────┐
-              ADMINS                              STUDENTS
-      (role 1–3 / superadmin)                     (role 4)
-                 │                                   │
-                 └──────────────┬────────────────────┘
-                                │
-                             COURSES
-                                │
-      ┌──────────────┬──────────┼─────────────┬──────────────┐
-  Chapters /     Assignments  Roster       Discussions     Boards
-  Activities                (enrollment)  (1 per course)  (per course)
-```
-
-**Rule: anything collaborative is scoped to a course.** A student can only read
-or write it if they're enrolled in that course. Admins and course staff can
-always access it.
-
-## Where the flow is wrong today
-
-| Area | Doc | One-line summary |
+| | Canvas (old direction) | StarLab (new direction) |
 |---|---|---|
-| Boards | [01-boards.md](01-boards.md) | Org-wide whiteboards with invite-only membership; no link to courses |
-| Discussions | [02-discussions.md](02-discussions.md) | "Communities" are org-wide forums; course link is optional and enrollment is never checked |
-| Backend course model | [03-backend-course-model.md](03-backend-course-model.md) | No explicit enrollment/roster API; access is `public`/usergroup-based |
-| Admin dashboard | [04-admin-dashboard.md](04-admin-dashboard.md) | Still shows SaaS/tenant surfaces (payments, domains, SSO, billing upsell) |
+| Center of the app | A teacher's classroom | The student's own learning path |
+| How a student gets into a course | Teacher enrolls them (roster) | Student picks it from the catalog and starts it |
+| Content shape | Modules + assignments with due dates | Units → lessons → practice → unit test |
+| Feedback | Teacher grades a submission | Instant, auto-graded, retryable |
+| Progress | Grades in a gradebook | Completion + mastery per lesson/unit/course |
+| Collaboration | Class boards and class forums | Optional Q&A under content |
+| Admins | Run classes | Author content and run the platform |
 
-## Order of work
+Khan Academy is the reference for the **product model only**, not the UI.
 
-Do these **before** building the student dashboard and gamification. XP,
-streaks, and leaderboards all need a reliable answer to "which courses is this
-student in?"
+## Docs in this folder
 
-1. Backend course model (enrollment helper + roster API): the others depend on it.
-2. Discussions → course-scoped. *(Enrollment gate is already in; see 02.)*
-3. Boards → course-scoped (needs a schema migration).
-4. Admin dashboard cleanup (nav first, then remove dead routes/APIs).
+| Doc | Read it for |
+|---|---|
+| [01-current-problems.md](01-current-problems.md) | Audit: where the code is still classroom-shaped, with file refs |
+| [02-target-architecture.md](02-target-architecture.md) | The student-first model mapped onto LearnHouse objects |
+| [03-change-list.md](03-change-list.md) | Exact backend / web / admin changes, incl. boards and discussions decisions |
+| [04-reuse.md](04-reuse.md) | What stays as-is from LearnHouse (most of it) |
+| [05-implementation-order.md](05-implementation-order.md) | The order to do the work, with acceptance checks |
 
-## How to use these docs with Claude
+## Decisions on work already shipped (commit `8cf22a29`)
 
-Hand Claude one doc at a time: "Implement `docs/refactor/02-discussions.md`."
-Each doc has **Current state** (with file refs), **Target**, a **Change list**,
-and **Acceptance checks**. When a doc is done, tick its checks and add a log
-line to `progress.md`.
+| Shipped item | Decision |
+|---|---|
+| Course communities gated by **enrollment** (`resource_access.py::_check_course_community_gate`) | **Reversed** (2026-09-14). Gate is now "can read the course". |
+| `services/trail/enrollment.py::is_user_enrolled_in_course` | **Keep.** Useful for progress/mastery; no longer an access gate. |
+| Communities removed from student top nav, `/communities` → `/dashboard` | **Keep.** Q&A lives under content, not in a global forum list. |
+| Dash sidebar: Payments, Domains/SEO/SSO, "Other" removed | **Keep.** |
 
-Paths in these docs are relative to the repo root. `api/` means `apps/api/src/`
-and `web/` means `apps/web/`.
+## Rules for any agent working here
+
+1. Nothing a student needs should depend on a teacher, roster, class, or due date.
+2. Access to learning content = the course is published and readable (`public` +
+   optional usergroup lock). **Never** add "must be enrolled" as a content gate.
+3. Enrollment is a *personal* record ("I started this course"), created by the
+   student. It powers progress, not permissions.
+4. Reuse LearnHouse objects; add fields/tables only where the doc says so.
+5. Dashboard and gamification are **out of scope** until step 4 of
+   [05](05-implementation-order.md). `journey/` and `skills/` pages are mock data.
+
+Paths: `api/` = `apps/api/src/`, `web/` = `apps/web/`.

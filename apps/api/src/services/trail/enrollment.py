@@ -3,7 +3,9 @@ Course enrollment lookups.
 
 A TrailRun row for (user, course) is the enrollment record: it is created by
 "Start course" (add_course_to_trail) and removed when the course is dropped.
-Kept free of RBAC imports so the access checker can use it without a cycle.
+This answers "has the student started this course?" for progress and mastery.
+It is not an access gate (docs/refactor/00-overview.md). Keep it free of RBAC
+imports so security code can still use it without an import cycle.
 """
 
 from sqlmodel import select

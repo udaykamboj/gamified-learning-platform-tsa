@@ -1,6 +1,6 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { Books, FolderSimple, Headphones, Cube, ShoppingBag, MapTrifold, Star, Robot } from '@phosphor-icons/react'
+import { Books, FolderSimple, Headphones, Cube, MapTrifold, Star, Robot } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
@@ -17,12 +17,12 @@ const BUILTIN: Record<string, Builtin> = {
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
   playgrounds: { feature: 'playgrounds', link: '/playgrounds', labelKey: 'common.playgrounds', Icon: Cube },
-  store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
 }
 
 // Default order when an org has no custom menu config. Communities are not a
-// top-level item: discussions are reached from each course page.
-const DEFAULT_ORDER = ['ai_agent', 'journey', 'skills', 'courses', 'library', 'podcasts', 'playgrounds', 'store']
+// top-level item: Q&A is reached from each course page. No store: learning
+// is not sold per course.
+const DEFAULT_ORDER = ['ai_agent', 'journey', 'skills', 'courses', 'library', 'podcasts', 'playgrounds']
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()

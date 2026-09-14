@@ -14,6 +14,13 @@ import { DiscussionWithAuthor } from '@services/communities/discussions'
 import { useMediaQuery } from 'usehooks-ts'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
+// Q&A lives under its course; there is no platform-wide community list.
+export function communityParentCrumb(community: Community, orgslug: string) {
+  return community.course_uuid
+    ? { label: 'Course', href: getUriWithOrg(orgslug, `/course/${community.course_uuid.replace('course_', '')}`), icon: <MessageCircle size={14} /> }
+    : { label: 'Courses', href: getUriWithOrg(orgslug, '/courses'), icon: <MessageCircle size={14} /> }
+}
+
 interface CommunityClientProps {
   community: Community
   initialDiscussions: DiscussionWithAuthor[]
@@ -40,7 +47,7 @@ const CommunityClient = ({
         {/* Breadcrumbs */}
         <div className="pb-4">
           <Breadcrumbs items={[
-            { label: 'Communities', href: getUriWithOrg(orgslug, '/communities'), icon: <MessageCircle size={14} /> },
+            communityParentCrumb(community, orgslug),
             { label: community.name }
           ]} />
         </div>

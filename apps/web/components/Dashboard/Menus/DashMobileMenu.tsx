@@ -14,7 +14,6 @@ import {
   ChatsCircle,
   Headphones,
   ChartBar,
-  ChalkboardSimple,
   Cube,
   FolderSimple,
   List,
@@ -115,9 +114,6 @@ function DashMobileMenu() {
           {isEnabled('podcasts') && (
             <PillLink href="/dash/podcasts" icon={<Headphones size={18} weight="fill" />} active={isActive('/dash/podcasts')} className="hidden min-[510px]:flex" />
           )}
-          {isEnabled('boards') && (
-            <PillLink href="/dash/boards" icon={<ChalkboardSimple size={18} weight="fill" />} active={isActive('/dash/boards')} className="hidden min-[550px]:flex" />
-          )}
           {isEnabled('playgrounds') && (
             <PillLink href="/dash/playgrounds" icon={<Cube size={18} weight="fill" />} active={isActive('/dash/playgrounds')} className="hidden min-[590px]:flex" />
           )}
@@ -217,11 +213,10 @@ function DashMobileMenu() {
                 <PanelItem href="/dash" icon={<House size={15} weight="fill" />} label={t('common.home')} active={isActive('/dash')} onClick={close} />
                 <PanelItem href="/dash/courses" icon={<BookOpen size={15} weight="fill" />} label={t('courses.courses')} active={isActive('/dash/courses')} onClick={close} />
                 {isEnabled('folders') && <PanelItem href="/dash/library" icon={<FolderSimple size={15} weight="fill" />} label={t('library.library')} active={isActive('/dash/library')} onClick={close} />}
-                <PanelItem href="/dash/assignments" icon={<Files size={15} weight="fill" />} label={t('common.assignments')} active={isActive('/dash/assignments')} onClick={close} />
+                <PanelItem href="/dash/assignments" icon={<Files size={15} weight="fill" />} label="Practice & tests" active={isActive('/dash/assignments')} onClick={close} />
                 <PanelItem href="/dash/users/settings/users" icon={<Users size={15} weight="fill" />} label={t('common.users')} active={isActive('/dash/users')} onClick={close} />
-                {isEnabled('communities') && <PanelItem href="/dash/communities" icon={<ChatsCircle size={15} weight="fill" />} label={t('communities.title')} active={isActive('/dash/communities')} onClick={close} />}
+                {isEnabled('communities') && <PanelItem href="/dash/communities" icon={<ChatsCircle size={15} weight="fill" />} label="Q&A moderation" active={isActive('/dash/communities')} onClick={close} />}
                 {isEnabled('podcasts') && <PanelItem href="/dash/podcasts" icon={<Headphones size={15} weight="fill" />} label={t('podcasts.podcasts')} active={isActive('/dash/podcasts')} onClick={close} />}
-                {isEnabled('boards') && <PanelItem href="/dash/boards" icon={<ChalkboardSimple size={15} weight="fill" />} label="Boards" active={isActive('/dash/boards')} onClick={close} />}
                 {isEnabled('playgrounds') && <PanelItem href="/dash/playgrounds" icon={<Cube size={15} weight="fill" />} label="Playgrounds" active={isActive('/dash/playgrounds')} onClick={close} />}
                 <PanelItem href="/dash/analytics" icon={<ChartBar size={15} weight="fill" />} label="Analytics" active={isActive('/dash/analytics')} onClick={close} />
                 <PanelItem href="/dash/org/settings/general" icon={<Buildings size={15} weight="fill" />} label={t('common.organization')} active={isActive('/dash/org')} onClick={close} />

@@ -63,6 +63,8 @@ class CommunityRead(CommunityBase):
     id: int
     org_id: int = Field(default=None, foreign_key="organization.id")
     course_id: Optional[int] = Field(default=None, foreign_key="course.id")
+    # Filled on single-community reads so the UI can link back to the course.
+    course_uuid: Optional[str] = None
     community_uuid: str
     moderation_words: List[str] = []
     moderation_settings: Optional[Dict[str, Any]] = None
