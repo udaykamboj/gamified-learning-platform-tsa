@@ -172,18 +172,18 @@ class TestSessionCacheHelpers:
                 self.deleted.append(key)
 
         fake_redis = FakeRedis()
-        fake_redis.storage["session:1"] = b'{"user": {"id": 1}, "roles": []}'
+        fake_redis.storage["session:v2:1"] = b'{"user": {"id": 1}, "roles": []}'
 
         with patch("src.routers.users._get_redis_pool_client", return_value=fake_redis):
             cached = _get_session_cache(1)
             assert cached == {"user": {"id": 1}, "roles": []}
 
             _set_session_cache(1, {"user": {"id": 1}, "roles": []})
-            assert fake_redis.storage["session:1"][0] == SESSION_CACHE_TTL
-            assert '"roles": []' in fake_redis.storage["session:1"][1]
+            assert fake_redis.storage["session:v2:1"][0] == SESSION_CACHE_TTL
+            assert '"roles": []' in fake_redis.storage["session:v2:1"][1]
 
             _invalidate_session_cache(1)
-            assert fake_redis.deleted == ["session:1"]
+            assert fake_redis.deleted == ["session:v2:1"]
 
     def test_session_cache_helpers_swallow_redis_errors(self):
         class ExplodingRedis:

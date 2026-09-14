@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Literal, Optional, TYPE_CHECKING
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from sqlmodel import Field, SQLModel
@@ -126,6 +126,13 @@ class UserRoleWithOrg(BaseModel):
 class UserSession(BaseModel):
     user: UserRead
     roles: list[UserRoleWithOrg]
+    # Account type in the single-organization platform (see
+    # src/security/platform_roles.py). Computed server-side from the platform
+    # org membership; the web app routes on these instead of re-deriving them
+    # from role rights. Defaulted so a session cached before these fields
+    # existed still deserializes (and reads as the least-privileged type).
+    platform_role: Literal["admin", "student"] = "student"
+    can_manage_platform: bool = False
 
 
 class AnonymousUser(SQLModel):

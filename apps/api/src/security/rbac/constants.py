@@ -7,12 +7,18 @@ Using constants instead of magic numbers improves code maintainability and clari
 Role Hierarchy:
     ADMIN (1) - Full access to all resources and organization management
     MAINTAINER (2) - Can manage content but limited org-level permissions
-    MEMBER (3+) - Custom roles with configurable permissions
+    INSTRUCTOR (3) - Authors their own courses
+    USER (4) - The student role every public signup receives
 """
 
 # Core role IDs - these match the database seed data
 ADMIN_ROLE_ID = 1
 MAINTAINER_ROLE_ID = 2
+INSTRUCTOR_ROLE_ID = 3
+USER_ROLE_ID = 4
+
+# The role public signup assigns: a student account (see src/security/platform_roles.py).
+STUDENT_ROLE_ID = USER_ROLE_ID
 
 # Role ID sets for common checks
 ADMIN_ROLE_IDS = frozenset([ADMIN_ROLE_ID])

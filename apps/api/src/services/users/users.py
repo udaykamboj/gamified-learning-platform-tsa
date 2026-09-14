@@ -850,9 +850,15 @@ async def get_user_session(
             )
         )
 
+    from src.security.platform_roles import resolve_platform_access
+
+    access = await resolve_platform_access(int(user.id), db_session)
+
     user_session = UserSession(
         user=user,
         roles=roles,
+        platform_role=access.role,
+        can_manage_platform=access.can_manage_platform,
     )
 
     return user_session

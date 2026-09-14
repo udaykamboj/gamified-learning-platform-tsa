@@ -54,6 +54,10 @@ router = APIRouter()
 
 SESSION_CACHE_TTL = 600  # 10 minutes
 
+# v2: the payload gained platform_role / can_manage_platform. Bumping the key
+# means a pre-upgrade blob is never served as a "student" to an admin.
+SESSION_CACHE_KEY = "session:v2:{user_id}"
+
 
 def _get_session_cache(user_id: int) -> Optional[dict]:
     """Get cached session data for a user."""
@@ -61,7 +65,7 @@ def _get_session_cache(user_id: int) -> Optional[dict]:
     if r is None:
         return None
     try:
-        raw = r.get(f"session:{user_id}")
+        raw = r.get(SESSION_CACHE_KEY.format(user_id=user_id))
         if raw:
             return json.loads(raw)
     except Exception:
@@ -75,7 +79,7 @@ def _set_session_cache(user_id: int, session_data: dict) -> None:
     if r is None:
         return
     try:
-        r.setex(f"session:{user_id}", SESSION_CACHE_TTL, json.dumps(session_data))
+        r.setex(SESSION_CACHE_KEY.format(user_id=user_id), SESSION_CACHE_TTL, json.dumps(session_data))
     except Exception:
         logger.debug("Session cache write failed for user %s", user_id, exc_info=True)
 
@@ -86,7 +90,7 @@ def _invalidate_session_cache(user_id: int) -> None:
     if r is None:
         return
     try:
-        r.delete(f"session:{user_id}")
+        r.delete(SESSION_CACHE_KEY.format(user_id=user_id))
     except Exception:
         logger.debug("Session cache invalidation failed for user %s", user_id, exc_info=True)
 
@@ -125,14 +129,17 @@ async def api_get_current_user_session(
     """
     Get current user session (cached for 10 minutes).
     """
-    if not isinstance(current_user, AnonymousUser):
+    # Only a real account has a session. The cache is keyed by user id, and a
+    # superadmin API token's id is the token's row id, not a user's.
+    cacheable = isinstance(current_user, PublicUser)
+    if cacheable:
         cached = _get_session_cache(current_user.id)
         if cached:
             return UserSession(**cached)
 
     session = await get_user_session(request, db_session, current_user)
 
-    if not isinstance(current_user, AnonymousUser):
+    if cacheable:
         _set_session_cache(current_user.id, session.model_dump())
 
     return session
