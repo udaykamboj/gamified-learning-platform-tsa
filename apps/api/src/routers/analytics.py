@@ -205,7 +205,7 @@ async def _verify_org_membership(user_id: int, org_id: int, db_session: AsyncSes
 
 
 async def _verify_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> None:
-    """Verify the user has admin/maintainer role or a custom role with
+    """Verify the user has admin role or a role with
     organizations.action_update permission in the specific organization.
 
     Unlike the old 'org_x' check, this ensures admin status is scoped

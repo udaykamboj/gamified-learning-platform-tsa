@@ -30,39 +30,4 @@ export async function createRole(body: CreateOrUpdateRoleBody, access_token: str
   return res
 }
 
-export async function getRole(role_id: number | string, access_token?: string) {
-  const result = await fetch(
-    `${getAPIUrl()}roles/${role_id}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
-}
-
-export async function updateRole(
-  role_id: number | string,
-  body: CreateOrUpdateRoleBody,
-  access_token: string
-) {
-  const result = await fetch(
-    `${getAPIUrl()}roles/${role_id}`,
-    RequestBodyWithAuthHeader('PUT', body, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
-}
-
-export async function deleteRole(
-  role_id: number | string,
-  _org_id: number | string | undefined,
-  access_token: string
-) {
-  const result = await fetch(
-    `${getAPIUrl()}roles/${role_id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
-}
-
  

@@ -14,8 +14,6 @@ import PlaygroundCard from '@components/Playground/PlaygroundCard'
 import { Playground, createPlayground } from '@services/playgrounds/playgrounds'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 
@@ -33,7 +31,6 @@ export default function PlaygroundsClient({
   const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const { isAdmin: isUserAdmin } = useAdminStatus()
   const queryClient = useQueryClient()
   const { track } = useLHAnalytics('learner')
 
@@ -77,7 +74,8 @@ export default function PlaygroundsClient({
     try {
       const newPlayground = await createPlayground(
         org_id,
-        { name, access_type: 'authenticated' },
+        // Private until the student shares it.
+        { name, access_type: 'restricted' },
         access_token
       )
       setPlaygrounds((prev) => [newPlayground, ...prev])
@@ -96,13 +94,12 @@ export default function PlaygroundsClient({
 
   return (
     <>
-    <FeatureGate feature="playgrounds" orgslug={orgslug} context="public">
       <div className="w-full">
         <GeneralWrapperStyled>
           <div className="flex flex-col space-y-2 mb-2">
             <div className="flex items-center justify-between">
               <TypeOfContentTitle title={t('common.playgrounds')} type="pg" />
-              {isUserAdmin && (
+              {access_token && (
                 <button
                   onClick={openCreateModal}
                   disabled={isCreating}
@@ -153,7 +150,7 @@ export default function PlaygroundsClient({
                   key={pg.playground_uuid}
                   playground={pg}
                   orgslug={orgslug}
-                  canEdit={true}
+                  canEdit={pg.my_role === 'owner' || pg.my_role === 'editor'}
                 />
               ))}
 
@@ -174,7 +171,7 @@ export default function PlaygroundsClient({
                   <p className="text-md text-gray-400 mb-6 max-w-xs text-center">
                     {t('playgrounds.playgrounds_description')}
                   </p>
-                  {isUserAdmin && (
+                  {access_token && (
                     <button
                       onClick={openCreateModal}
                       disabled={isCreating}
@@ -206,7 +203,6 @@ export default function PlaygroundsClient({
           </div>
         </GeneralWrapperStyled>
       </div>
-    </FeatureGate>
 
     {/* Create name modal */}
     {showNameModal && (

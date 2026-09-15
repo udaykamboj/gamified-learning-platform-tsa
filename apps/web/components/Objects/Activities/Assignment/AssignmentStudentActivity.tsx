@@ -3,12 +3,12 @@ import { useAssignmentSubmission, useAssignmentTaskSubmissions } from '@componen
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAssignmentSolutionFileDir, getTaskRefFileDir } from '@services/media/media';
-import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
-import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject'
-import TaskFormObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject'
-import TaskCodeObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskCodeObject'
-import TaskShortAnswerObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskShortAnswerObject'
-import TaskNumberAnswerObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskNumberAnswerObject'
+import TaskFileObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskFileObject';
+import TaskQuizObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskQuizObject'
+import TaskFormObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskFormObject'
+import TaskCodeObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskCodeObject'
+import TaskShortAnswerObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskShortAnswerObject'
+import TaskNumberAnswerObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskNumberAnswerObject'
 import toast from 'react-hot-toast';
 import { AlarmClockOff, Backpack, BookOpenCheck, Calendar, CheckCircle2, ClipboardCheck, Download, EllipsisVertical, Info, Lock, MessageSquare, RotateCcw, XCircle } from 'lucide-react';
 import Link from 'next/link';

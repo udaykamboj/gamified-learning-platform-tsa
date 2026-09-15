@@ -31,7 +31,6 @@ class AccessDecision(BaseModel):
     """
     allowed: bool
     reason: str
-    via_usergroup: bool = False
     via_authorship: bool = False
     via_role: bool = False
     via_admin: bool = False
@@ -52,8 +51,10 @@ class ResourceConfig(BaseModel):
     resource_type: str
     uuid_prefix: str
     has_published_field: bool
-    supports_usergroups: bool
     supports_authorship: bool
+    # Signed-in platform members can read it once published. False for
+    # student-owned resources (boards), which are shared explicitly.
+    readable_by_members: bool = True
 
     # Table/model info for lookups
     model_name: Optional[str] = None

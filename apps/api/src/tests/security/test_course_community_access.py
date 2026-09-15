@@ -11,11 +11,7 @@ from sqlmodel import select
 
 from src.db.communities.communities import Community
 from src.security.rbac import AccessAction, check_resource_access
-from src.services.communities.communities import (
-    backfill_course_communities,
-    get_community_by_course,
-    get_community_user_rights,
-)
+from src.services.communities.communities import (get_community_by_course, get_community_user_rights)
 
 
 @pytest.fixture
@@ -92,15 +88,6 @@ async def test_student_cannot_read_public_draft_course(db, mock_request, course,
 async def test_reading_never_creates_a_community(db, mock_request, course, regular_user):
     assert await get_community_by_course(mock_request, course.course_uuid, regular_user, db) is None
     assert (await db.execute(select(Community))).first() is None
-
-
-@pytest.mark.asyncio
-async def test_backfill_creates_one_community_per_course(db, mock_request, course, regular_user):
-    assert await backfill_course_communities(db) == 1
-    assert await backfill_course_communities(db) == 0
-    community = await get_community_by_course(mock_request, course.course_uuid, regular_user, db)
-    assert community.course_id == course.id
-    assert community.course_uuid == course.course_uuid
 
 
 @pytest.mark.asyncio

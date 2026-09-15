@@ -36,11 +36,24 @@ async def auto_install():
         await _install_async(short=True)
         return
 
-    # Refresh global default roles (IDs 1-4) so this release's new permission
-    # keys (e.g. playgrounds, boards) land in the DB. Idempotent.
+    # Refresh the platform roles (Admin, Student) and retire teacher-era roles.
+    # Idempotent.
     try:
         async with _async_session_factory() as session:
             await install_default_elements(session)
     except Exception as e:
         logger.warning("Default-role refresh skipped (non-fatal): %s", e)
+
+    # Courses and communities are platform content kept in the repository.
+    try:
+        from src.content.catalog.sync import sync_platform_content
+
+        async with _async_session_factory() as session:
+            stats = await sync_platform_content(session)
+        logger.info(
+            "Catalog synced: %s created, %s updated, %s removed",
+            stats.created, stats.updated, stats.removed,
+        )
+    except Exception as e:
+        logger.warning("Catalog sync skipped (non-fatal): %s", e)
     logger.info("Organizations found. Skipping auto-installation")

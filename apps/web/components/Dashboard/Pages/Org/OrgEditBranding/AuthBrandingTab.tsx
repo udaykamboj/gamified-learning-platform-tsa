@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
+import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Objects/UnsplashImagePicker/UnsplashImagePicker'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 import { usePlan } from '@components/Hooks/usePlan'
 

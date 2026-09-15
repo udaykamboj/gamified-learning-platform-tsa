@@ -11,8 +11,6 @@ from sqlmodel import select
 
 from src.db.roles import Role, RoleTypeEnum
 from src.db.user_organizations import UserOrganization
-from src.db.usergroup_user import UserGroupUser
-from src.db.usergroups import UserGroup
 from src.db.users import User
 from src.services.orgs.users import (
     export_organization_users_csv,
@@ -78,22 +76,6 @@ async def _link_user(db, user_id, org_id, role_id):
     return link
 
 
-async def _make_usergroup(db, org, **overrides):
-    usergroup = UserGroup(
-        id=overrides.pop("id", None),
-        org_id=org.id,
-        name=overrides.pop("name", "UG"),
-        description=overrides.pop("description", "Desc"),
-        usergroup_uuid=overrides.pop("usergroup_uuid", "ug_test"),
-        creation_date=overrides.pop("creation_date", str(datetime.now())),
-        update_date=overrides.pop("update_date", str(datetime.now())),
-    )
-    db.add(usergroup)
-    await db.commit()
-    await db.refresh(usergroup)
-    return usergroup
-
-
 async def _streaming_response_text(response):
     chunks = []
     async for chunk in response.body_iterator:
@@ -105,87 +87,6 @@ async def _streaming_response_text(response):
 
 
 class TestOrgUsersService:
-    @pytest.mark.asyncio
-    async def test_get_organization_users_filters_sort_and_counts(
-        self, mock_request, db, org, admin_user
-    ):
-        member_role = await _make_role(db, org, id=10, name="Member", role_uuid="role_member")
-        in_group_user = await _make_user(
-            db,
-            id=20,
-            username="grouped",
-            first_name="Grouped",
-            last_name="User",
-            email="grouped@test.com",
-            email_verified=True,
-            user_uuid="user_grouped",
-        )
-        await _link_user(db, in_group_user.id, org.id, member_role.id)
-
-        out_group_user = await _make_user(
-            db,
-            id=21,
-            username="ungrouped",
-            first_name="Ungrouped",
-            last_name="User",
-            email="ungrouped@test.com",
-            email_verified=False,
-            user_uuid="user_ungrouped",
-        )
-        await _link_user(db, out_group_user.id, org.id, member_role.id)
-
-        usergroup = await _make_usergroup(db, org, id=30, name="Group A")
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=in_group_user.id,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        with patch(
-            "src.services.orgs.users.is_org_member", return_value=True
-        ), patch(
-            "src.security.superadmin.is_user_superadmin", return_value=False
-        ), patch(
-            "src.security.org_auth.is_org_admin", return_value=False
-        ):
-            with pytest.raises(Exception) as user_guard_exc:
-                await get_organization_users(mock_request, org.id, db, admin_user)
-        assert user_guard_exc.value.status_code == 403
-
-        with patch(
-            "src.services.orgs.users.is_org_member", return_value=True
-        ), patch(
-            "src.security.superadmin.is_user_superadmin", return_value=False
-        ), patch(
-            "src.security.org_auth.is_org_admin", return_value=True
-        ):
-            result = await get_organization_users(
-                mock_request,
-                org.id,
-                db,
-                admin_user,
-                page=0,
-                limit=500,
-                search="User",
-                usergroup_id=usergroup.id,
-                usergroup_filter="not_in_group",
-                sort_order="asc",
-                role_id=member_role.id,
-                status="unverified",
-            )
-
-        assert result["page"] == 1
-        assert result["limit"] == 100
-        assert result["total"] == 1
-        assert result["all_total"] == 1
-        assert result["in_group_total"] == 1
-        assert len(result["items"]) == 1
-        assert result["items"][0].user.username == "ungrouped"
 
     @pytest.mark.asyncio
     async def test_get_organization_users_lists_anonymized_members(
@@ -262,111 +163,6 @@ class TestOrgUsersService:
                 await export_organization_users_csv(mock_request, org.id, db, admin_user)
         assert admin_exc.value.status_code == 403
 
-    @pytest.mark.asyncio
-    async def test_export_organization_users_csv_success(
-        self, mock_request, db, org, admin_user
-    ):
-        member_role = await _make_role(db, org, id=12, name="Member", role_uuid="role_member2")
-        user = await _make_user(
-            db,
-            id=22,
-            username="csvuser",
-            first_name="CSV",
-            last_name="Person",
-            email="csv@test.com",
-            email_verified=False,
-            signup_method="oauth",
-            last_login_at="2024-02-03T04:05:06",
-            user_uuid="user_csv",
-        )
-        db.add(
-            UserOrganization(
-                user_id=user.id,
-                org_id=org.id,
-                role_id=member_role.id,
-                creation_date="2024-01-02T03:04:05",
-                update_date=str(datetime.now()),
-            )
-        )
-        usergroup = await _make_usergroup(db, org, id=31, name="Export Group")
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=user.id,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        with patch(
-            "src.services.orgs.users.is_org_member", return_value=True
-        ), patch(
-            "src.security.superadmin.is_user_superadmin", return_value=False
-        ), patch(
-            "src.security.org_auth.is_org_admin", return_value=True
-        ):
-            response = await export_organization_users_csv(
-                mock_request,
-                org.id,
-                db,
-                admin_user,
-                search="csv",
-                usergroup_id=usergroup.id,
-                usergroup_filter="in_group",
-                sort_order="asc",
-                role_id=member_role.id,
-                status="unverified",
-            )
-
-        csv_text = await _streaming_response_text(response)
-        assert "Name,Username,Email,Groups,Role,Joined,Email Verified,Signup Method,Last Login" in csv_text
-        assert 'CSV Person,csvuser,csv@test.com,Export Group,Member,"Jan 02, 2024",No,oauth,' in csv_text
-
-        verified_user = await _make_user(
-            db,
-            id=23,
-            username="verifieduser",
-            first_name="Verified",
-            last_name="Person",
-            email="verified@test.com",
-            email_verified=True,
-            signup_method="email",
-            user_uuid="user_verified",
-        )
-        db.add(
-            UserOrganization(
-                user_id=verified_user.id,
-                org_id=org.id,
-                role_id=member_role.id,
-                creation_date="2024-03-04T05:06:07",
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        with patch(
-            "src.services.orgs.users.is_org_member", return_value=True
-        ), patch(
-            "src.security.superadmin.is_user_superadmin", return_value=False
-        ), patch(
-            "src.security.org_auth.is_org_admin", return_value=True
-        ):
-            verified_response = await export_organization_users_csv(
-                mock_request,
-                org.id,
-                db,
-                admin_user,
-                usergroup_id=usergroup.id,
-                usergroup_filter="not_in_group",
-                sort_order="asc",
-                role_id=member_role.id,
-                status="verified",
-            )
-
-        verified_csv = await _streaming_response_text(verified_response)
-        assert "Verified Person,verifieduser,verified@test.com,,Member,\"Mar 04, 2024\",Yes,email," in verified_csv
 
     @pytest.mark.asyncio
     async def test_remove_user_and_batch_missing_org_and_missing_user(
@@ -1028,65 +824,6 @@ class TestOrgUsersService:
         missing_csv = await _streaming_response_text(missing_user_org)
         assert "Name,Username,Email" in missing_csv
 
-    @pytest.mark.asyncio
-    async def test_get_organization_users_and_export_csv(
-        self, mock_request, db, org, admin_user
-    ):
-        member_role = await _make_role(
-            db, org, id=10, name="Member", role_uuid="role_member"
-        )
-        extra_user = await _make_user(
-            db,
-            id=20,
-            username="member20",
-            first_name="Member",
-            last_name="Twenty",
-            email="member20@test.com",
-            user_uuid="user_20",
-        )
-        await _link_user(db, extra_user.id, org.id, member_role.id)
-        usergroup = await _make_usergroup(db, org, id=30, name="Group A")
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=extra_user.id,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        with patch(
-            "src.services.orgs.users.is_org_member", return_value=True
-        ), patch(
-            "src.security.superadmin.is_user_superadmin", return_value=False
-        ), patch(
-            "src.security.org_auth.is_org_admin", return_value=True
-        ):
-            result = await get_organization_users(
-                mock_request,
-                org.id,
-                db,
-                admin_user,
-                search="Member",
-                usergroup_id=usergroup.id,
-                usergroup_filter="in_group",
-                status="verified",
-            )
-            csv_response = await export_organization_users_csv(
-                mock_request,
-                org.id,
-                db,
-                admin_user,
-                search="member20",
-            )
-
-        assert result["total"] == 1
-        assert result["items"][0].user.username == "member20"
-        assert result["items"][0].usergroups[0].name == "Group A"
-        assert result["in_group_total"] == 1
-        assert "text/csv" in csv_response.media_type
 
     @pytest.mark.asyncio
     async def test_export_csv_includes_custom_signup_field_columns(

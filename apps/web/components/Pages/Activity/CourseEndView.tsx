@@ -11,7 +11,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useCourseCertification } from '@components/Hooks/useCourseCertification';
-import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
+import CertificatePreview from '@components/Objects/Certificates/CertificatePreview';
 import {
   downloadCertificateNodeAsPdf,
   certificateFileName,

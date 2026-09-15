@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUserCertificates } from '@services/courses/certifications';
-import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
+import CertificatePreview from '@components/Objects/Certificates/CertificatePreview';
 import { ArrowLeft, Download, Share2, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { getUriWithOrg } from '@services/config/config';

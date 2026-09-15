@@ -1,29 +1,15 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import ManageAccessPopover from '@components/Dashboard/Library/ManageAccessPopover'
 import { getUriWithOrg } from '@services/config/config'
-import { deleteCourseFromBackend, cloneCourse } from '@services/courses/courses'
-import { exportCourse, downloadBlob, ExportStatus } from '@services/courses/transfer'
-import { exportToast } from '@components/Objects/StyledElements/Toast/ExportToast'
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getCourseMetadata } from '@services/courses/courses'
-import { BookMinus, FilePenLine, Settings2, MoreVertical, Copy, Download, CheckSquare, Square, Lock } from 'lucide-react'
+import { CheckSquare, Square } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import React from 'react'
-import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@components/ui/dropdown-menu"
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/lib/format'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
@@ -99,55 +85,6 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
   const hasMoreAuthors = activeAuthors.length > 3
   const remainingAuthorsCount = activeAuthors.length - 3
 
-  const deleteCourse = async () => {
-    const toastId = toast.loading(t('courses.deleting_course'))
-    try {
-      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token)
-      queryClient.invalidateQueries({ queryKey: ['courses'] })
-      toast.success(t('courses.course_deleted_success'))
-    } catch (_error) {
-      toast.error(t('courses.course_deleted_error'))
-    } finally {
-      toast.dismiss(toastId)
-    }
-  }
-
-  const handleCloneCourse = async () => {
-    const toastId = toast.loading(t('courses.cloning_course'))
-    try {
-      const result = await cloneCourse(course.course_uuid, session.data?.tokens?.access_token)
-      if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ['courses'] })
-        toast.success(t('courses.course_cloned_success'))
-      } else {
-        toast.error(result.HTTPmessage || t('courses.course_cloned_error'))
-      }
-    } catch (_error) {
-      toast.error(t('courses.course_cloned_error'))
-    } finally {
-      toast.dismiss(toastId)
-    }
-  }
-
-  const handleExportCourse = async () => {
-    const toastId = exportToast.start('single', course.name)
-
-    try {
-      const blob = await exportCourse(
-        course.course_uuid,
-        session.data?.tokens?.access_token,
-        (progress, status) => {
-          exportToast.update(toastId, status as ExportStatus, progress, course.name, undefined, 'single')
-        }
-      )
-      const timestamp = new Date().toISOString().split('T')[0]
-      downloadBlob(blob, `${course.name.replace(/[^a-z0-9]/gi, '_')}-${timestamp}.zip`)
-      exportToast.complete(toastId, course.name, undefined, 'single')
-    } catch (error: any) {
-      exportToast.error(toastId, error.message || t('courses.course_exported_error'), course.name, undefined, 'single')
-    }
-  }
-
   const thumbnailImage = course.thumbnail_image
     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
     : '/empty_thumbnail.png'
@@ -172,16 +109,6 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
           )}
         </button>
       )}
-
-      {/* Options menu - visible on hover or when dropdown is open */}
-      <AdminEditOptions
-        course={course}
-        orgSlug={orgslug}
-        deleteCourse={deleteCourse}
-        cloneCourse={handleCloneCourse}
-        exportCourse={handleExportCourse}
-        isDashboard={isDashboard}
-      />
 
       <Link prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
         {/* Hidden img gives the browser a real resource hint so it can fetch the background-image early as an LCP candidate */}
@@ -282,111 +209,6 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         </div>
       </div>
     </div>
-  )
-}
-
-const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCourse, isDashboard = false }: {
-  course: Course
-  orgSlug: string
-  deleteCourse: () => Promise<void>
-  cloneCourse: () => Promise<void>
-  exportCourse: () => Promise<void>
-  isDashboard?: boolean
-}) => {
-  const { t } = useTranslation()
-  const [isOpen, setIsOpen] = React.useState(false)
-  const [accessOpen, setAccessOpen] = React.useState(false)
-
-  return (
-    <AuthenticatedClientElement
-      action="update"
-      ressourceType="courses"
-      checkMethod="roles"
-      orgId={course.org_id}
-    >
-      <div className={`absolute top-2 end-2 z-20 transition-opacity ${
-        isDashboard && !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
-      }`}>
-        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-          <DropdownMenuTrigger asChild>
-            <button aria-label="Course actions"className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
-              <MoreVertical size={18} className="text-gray-700" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52">
-            <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)} className="flex items-center cursor-pointer">
-                <FilePenLine className="me-2 h-4 w-4" /> {t('courses.edit_content')}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)} className="flex items-center cursor-pointer">
-                <Settings2 className="me-2 h-4 w-4" /> {t('common.settings')}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <ConfirmationModal
-                confirmationButtonText={t('courses.clone_course')}
-                confirmationMessage={t('courses.clone_course_confirm')}
-                dialogTitle={t('courses.clone_course_title', { name: course.name })}
-                dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
-                    <Copy className="me-2 h-4 w-4" /> {t('courses.clone_course')}
-                  </button>
-                }
-                functionToExecute={cloneCourse}
-                status="info"
-              />
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <button
-                onClick={exportCourse}
-                className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-              >
-                <Download className="me-2 h-4 w-4" /> {t('courses.export_course')}
-              </button>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <button
-                onClick={() => setAccessOpen(true)}
-                className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-              >
-                <Lock className="me-2 h-4 w-4" /> {t('library.manage_access')}
-              </button>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <ConfirmationModal
-                confirmationButtonText={t('courses.delete_course')}
-                confirmationMessage={t('courses.delete_course_confirm')}
-                dialogTitle={t('courses.delete_course_title', { name: course.name })}
-                dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                    <BookMinus className="me-2 h-4 w-4" /> {t('courses.delete_course')}
-                  </button>
-                }
-                functionToExecute={deleteCourse}
-                status="warning"
-              />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Modal
-          isDialogOpen={accessOpen}
-          onOpenChange={setAccessOpen}
-          minHeight="no-min"
-          minWidth="md"
-          dialogTitle={t('library.manage_access')}
-          dialogContent={
-            <ManageAccessPopover
-              resource_uuid={course.course_uuid}
-              resourceType="courses"
-              orgslug={orgSlug}
-            />
-          }
-        />
-      </div>
-    </AuthenticatedClientElement>
   )
 }
 

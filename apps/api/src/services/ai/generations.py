@@ -90,19 +90,6 @@ async def list_generations(
     return [AIGenerationRead.model_validate(r.model_dump()) for r in rows]
 
 
-async def get_generation(
-    db_session: AsyncSession,
-    *,
-    ai_generation_uuid: str,
-    user_id: int,
-) -> Optional[AIGenerationRead]:
-    """Fetch one generation, enforcing ownership. Returns None if missing/not owned."""
-    row = await _get_owned(db_session, ai_generation_uuid, user_id)
-    if row is None:
-        return None
-    return AIGenerationRead.model_validate(row.model_dump())
-
-
 async def delete_generation(
     db_session: AsyncSession,
     *,

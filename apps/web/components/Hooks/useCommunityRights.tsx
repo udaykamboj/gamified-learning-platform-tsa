@@ -1,26 +1,12 @@
 'use client'
-import { getCommunityRights } from '@services/communities/communities'
+import { getCommunityRights, CommunityRights } from '@services/communities/communities'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 
-export interface CommunityRights {
-  community_uuid: string
-  user_id: number
-  is_anonymous: boolean
-  permissions: {
-    read: boolean
-    create: boolean
-    update: boolean
-    delete: boolean
-    create_discussion: boolean
-  }
-  ownership: {
-    is_admin: boolean
-    is_maintainer_role: boolean
-  }
-}
+export type { CommunityRights }
 
+// Members read and post; moderators (the platform's admins) moderate.
 export function useCommunityRights(communityuuid: string) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -39,9 +25,8 @@ export function useCommunityRights(communityuuid: string) {
     hasPermission: (permission: keyof CommunityRights['permissions']) => {
       return rights?.permissions?.[permission] ?? false
     },
-    isAdmin: rights?.ownership?.is_admin ?? false,
-    isMaintainer: rights?.ownership?.is_maintainer_role ?? false,
+    isModerator: rights?.ownership?.is_moderator ?? false,
     canCreateDiscussion: rights?.permissions?.create_discussion ?? false,
-    canManageCommunity: (rights?.ownership?.is_admin || rights?.ownership?.is_maintainer_role) ?? false,
+    canManageCommunity: rights?.permissions?.moderate ?? false,
   }
 }

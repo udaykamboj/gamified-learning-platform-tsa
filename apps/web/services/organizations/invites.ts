@@ -4,10 +4,8 @@ import {
   getResponseMetadata,
 } from '@services/utils/ts/requests'
 
-export async function createInviteCode(org_id: any, access_token: any, usergroup_id?: number) {
-  const url = usergroup_id
-    ? `${getAPIUrl()}orgs/${org_id}/invites?usergroup_id=${usergroup_id}`
-    : `${getAPIUrl()}orgs/${org_id}/invites`
+export async function createInviteCode(org_id: any, access_token: any) {
+  const url = `${getAPIUrl()}orgs/${org_id}/invites`
   const result = await fetch(
     url,
     RequestBodyWithAuthHeader('POST', null, null, access_token)

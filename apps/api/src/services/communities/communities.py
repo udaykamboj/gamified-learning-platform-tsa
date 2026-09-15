@@ -1,82 +1,35 @@
+"""Communities: the platform-wide discussion spaces.
+
+Communities are platform content, like courses (docs/refactor/progress/01-plan.md,
+D8). The platform Community and each course's Q&A space are created by the
+catalog sync (``src/content/catalog/sync.py``); nobody creates, deletes or
+assigns communities from the dashboard. Every signed-in member reads and posts.
+Admins moderate: they tune moderation settings here and pin, lock or remove
+posts through the discussion and comment services.
+"""
+
+from datetime import datetime
 from typing import List, Union
 from uuid import uuid4
-from datetime import datetime
-from sqlmodel import select, and_, or_
-from sqlmodel.ext.asyncio.session import AsyncSession
-from fastapi import HTTPException, Request
 
-from src.db.users import PublicUser, AnonymousUser, APITokenUser
-from src.security.auth import resolve_acting_user_id
-from src.db.organizations import Organization
-from src.db.courses.courses import Course
-from src.security.superadmin import is_user_superadmin
+from fastapi import HTTPException, Request
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from src.db.communities.communities import (
     Community,
-    CommunityCreate,
     CommunityRead,
     CommunityUpdate,
 )
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
+from src.db.courses.courses import Course
+from src.db.users import AnonymousUser, APITokenUser, PublicUser
+from src.security.auth import resolve_acting_user_id
+from src.security.org_auth import is_org_member
 from src.security.rbac import (
-    check_resource_access,
     AccessAction,
-    authorization_verify_if_user_is_anon,
     authorization_verify_based_on_org_admin_status,
-    authorization_verify_based_on_roles,
+    check_resource_access,
 )
-
-
-async def create_community(
-    request: Request,
-    org_id: int,
-    community_object: CommunityCreate,
-    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
-    db_session: AsyncSession,
-) -> CommunityRead:
-    """
-    Create a new community in an organization.
-
-    Requires admin/maintainer role in the organization.
-    """
-    # Verify user is not anonymous
-    await authorization_verify_if_user_is_anon(current_user.id)
-
-    # Verify org exists
-    org_statement = select(Organization).where(Organization.id == org_id)
-    org = (await db_session.execute(org_statement)).scalars().first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    # Check if user has permission to create communities using role-based permissions
-    # This checks the actual database permissions (communities.action_create) instead of hardcoded role IDs
-    has_create_permission = await authorization_verify_based_on_roles(
-        request, current_user.id, "create", f"community_{org.org_uuid}", db_session
-    )
-
-    if not has_create_permission:
-        raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to create communities. Check your role permissions.",
-        )
-
-    # Create community
-    community = Community(
-        name=community_object.name,
-        description=community_object.description,
-        public=community_object.public,
-        org_id=org_id,
-        course_id=community_object.course_id,
-        community_uuid=f"community_{uuid4()}",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(community)
-    await db_session.commit()
-    await db_session.refresh(community)
-
-    return CommunityRead.model_validate(community.model_dump())
 
 
 async def get_community(
@@ -85,17 +38,13 @@ async def get_community(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
 ) -> CommunityRead:
-    """
-    Get a community by UUID.
-    """
-    # Get community
+    """Get a community by UUID."""
     statement = select(Community).where(Community.community_uuid == community_uuid)
     community = (await db_session.execute(statement)).scalars().first()
 
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
 
-    # RBAC check
     await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.READ)
 
     course_uuid = None
@@ -116,136 +65,48 @@ async def get_communities_by_org(
     limit: int = 10,
 ) -> List[CommunityRead]:
     """
-    Get paginated list of communities for an organization.
+    List the platform's communities: the platform Community first, then course Q&A.
 
+    Signed-in members see all of them. Anonymous visitors see public ones.
     SECURITY: Maximum limit enforced to prevent data dumping.
     """
-    # SECURITY: Enforce maximum limit
     limit = min(limit, 50)
     page = max(page, 1)
     offset = (page - 1) * limit
 
-    # Resolve to the token's creator for API-token callers so ownership /
-    # admin / membership checks run against a real user_id.
     acting_user_id = resolve_acting_user_id(current_user)
-
-    # For anonymous users, only show public communities
+    query = select(Community).where(Community.org_id == org_id)
     if isinstance(current_user, AnonymousUser) or acting_user_id == 0:
-        query = select(Community).where(
-            Community.org_id == org_id,
-            Community.public == True
-        )
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        query = query.where(Community.public == True)  # noqa: E712
+    elif not getattr(current_user, "is_superadmin", False) and not await is_org_member(
+        acting_user_id, org_id, db_session
+    ):
+        raise HTTPException(status_code=403, detail="You must be a member of this platform")
 
-    # Superadmins bypass admin check — they can see all communities
-    if await is_user_superadmin(acting_user_id, db_session):
-        query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
-
-    # Check if user has admin-level permissions (can read all communities)
-    # First check role-based permissions, then fall back to org admin status.
-    # NOTE: the RBAC helpers resolve the target org by UUID, so we must pass the
-    # organization's org_uuid (e.g. "org_<uuid>"), not the numeric org_id.
-    # Passing "org_<int>"/"community_<int>" never resolves an org, which made
-    # both checks silently return False and dropped org admins/moderators into
-    # the restricted member view (they could not see private communities).
-    org_lookup = (
-        await db_session.execute(select(Organization).where(Organization.id == org_id))
-    ).scalars().first()
-    if not org_lookup:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    has_admin_read = await authorization_verify_based_on_roles(
-        request, acting_user_id, "update", f"community_{org_lookup.org_uuid}", db_session
-    )
-    is_admin_or_maintainer = has_admin_read or await authorization_verify_based_on_org_admin_status(
-        request, acting_user_id, "read", org_lookup.org_uuid, db_session
-    )
-    # ``org_lookup.org_uuid`` already carries the "org_" prefix expected by the
-    # RBAC org resolver, so it is passed through unchanged above.
-
-    if is_admin_or_maintainer:
-        # Admins see all communities
-        query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
-
-    # For regular users, use a subquery approach to avoid DISTINCT with JSON columns
-    # Get IDs of communities the user has access to
-    accessible_community_ids_query = (
-        select(Community.id)
-        .where(Community.org_id == org_id)
-        .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Community.community_uuid)
-        .outerjoin(UserGroupUser, and_(
-            UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-            UserGroupUser.user_id == acting_user_id
-        ))
-        .where(or_(
-            Community.public == True,
-            UserGroupResource.resource_uuid.is_(None),  # Not in any UserGroup
-            UserGroupUser.user_id == acting_user_id,  # User in linked UserGroup
-        ))
-        .distinct()
-    )
-
-    # Now select full communities using the IDs
+    # Course-less (platform) communities first, newest course Q&A after.
     query = (
-        select(Community)
-        .where(Community.id.in_(accessible_community_ids_query))
-        .order_by(Community.creation_date.desc())
+        query.order_by(Community.course_id.is_not(None), Community.creation_date.desc())  # type: ignore
         .offset(offset)
         .limit(limit)
     )
-
     communities = (await db_session.execute(query)).scalars().all()
-    return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
+    course_ids = [c.course_id for c in communities if c.course_id]
+    course_uuids: dict[int, str] = {}
+    if course_ids:
+        rows = (
+            await db_session.execute(
+                select(Course.id, Course.course_uuid).where(Course.id.in_(course_ids))  # type: ignore
+            )
+        ).all()
+        course_uuids = {row[0]: row[1] for row in rows}
 
-async def ensure_course_community(db_session: AsyncSession, course: Course) -> Community:
-    """
-    Return the course's Q&A community, creating it if missing.
-
-    Every course has exactly one (docs/refactor/03-change-list.md, section A).
-    This is a system action with no RBAC check: only course creation and the
-    backfill command call it. There is no unique constraint on
-    `community.course_id`, so don't call this from concurrent request paths. Access to the community follows the course, so
-    `public` is only a default here.
-    """
-    statement = select(Community).where(Community.course_id == course.id)
-    community = (await db_session.execute(statement)).scalars().first()
-    if community:
-        return community
-
-    now = str(datetime.now())
-    community = Community(
-        name=f"{course.name} Q&A",
-        description=f"Questions and answers about {course.name}",
-        public=True,
-        org_id=course.org_id,
-        course_id=course.id,
-        community_uuid=f"community_{uuid4()}",
-        creation_date=now,
-        update_date=now,
-    )
-    db_session.add(community)
-    await db_session.commit()
-    await db_session.refresh(community)
-    return community
-
-
-async def backfill_course_communities(db_session: AsyncSession) -> int:
-    """Create the Q&A community for every course that has none. Returns the count."""
-    has_community = select(Community.course_id).where(Community.course_id.is_not(None))
-    statement = select(Course).where(Course.id.not_in(has_community))
-    courses = (await db_session.execute(statement)).scalars().all()
-    for course in courses:
-        await ensure_course_community(db_session, course)
-    return len(courses)
+    return [
+        CommunityRead.model_validate(
+            {**c.model_dump(), "course_uuid": course_uuids.get(c.course_id) if c.course_id else None}
+        )
+        for c in communities
+    ]
 
 
 async def get_community_by_course(
@@ -254,27 +115,19 @@ async def get_community_by_course(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
 ) -> CommunityRead | None:
-    """
-    Get the course's Q&A community, or None if it has none yet.
-
-    Reads never create rows: courses get their community when created, and
-    older courses through the `backfill-course-qa` CLI command.
-    """
-    # Get the course first
+    """Get the course's Q&A community, or None if the catalog hasn't synced one."""
     course_statement = select(Course).where(Course.course_uuid == course_uuid)
     course = (await db_session.execute(course_statement)).scalars().first()
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # Find community linked to this course
     community_statement = select(Community).where(Community.course_id == course.id)
     community = (await db_session.execute(community_statement)).scalars().first()
 
     if not community:
         return None
 
-    # Check if user can read the community
     await check_resource_access(
         request, db_session, current_user, community.community_uuid, AccessAction.READ
     )
@@ -290,27 +143,19 @@ async def update_community(
     db_session: AsyncSession,
 ) -> CommunityRead:
     """
-    Update a community.
+    Update a community's moderation rules (banned words, posting limits).
 
-    Requires admin/maintainer role.
+    Admins only. The community's name, description and visibility are platform
+    content owned by the catalog, so they are not editable here.
     """
-    # Get community
     statement = select(Community).where(Community.community_uuid == community_uuid)
     community = (await db_session.execute(statement)).scalars().first()
 
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
 
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
+    await require_community_moderator(request, community, current_user, db_session)
 
-    # Update fields
-    if community_object.name is not None:
-        community.name = community_object.name
-    if community_object.description is not None:
-        community.description = community_object.description
-    if community_object.public is not None:
-        community.public = community_object.public
     if community_object.moderation_words is not None:
         community.moderation_words = community_object.moderation_words
     if community_object.moderation_settings is not None:
@@ -325,121 +170,30 @@ async def update_community(
     return CommunityRead.model_validate(community.model_dump())
 
 
-async def delete_community(
+async def is_community_moderator(
     request: Request,
-    community_uuid: str,
+    community: Community,
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
-) -> dict:
-    """
-    Delete a community.
-
-    Requires admin/maintainer role.
-    """
-    # Get community
-    statement = select(Community).where(Community.community_uuid == community_uuid)
-    community = (await db_session.execute(statement)).scalars().first()
-
-    if not community:
-        raise HTTPException(status_code=404, detail="Community not found")
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.DELETE)
-
-    await db_session.delete(community)
-    await db_session.commit()
-
-    return {"detail": "Community deleted"}
-
-
-async def link_community_to_course(
-    request: Request,
-    community_uuid: str,
-    course_uuid: str,
-    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
-    db_session: AsyncSession,
-) -> CommunityRead:
-    """
-    Link a community to a course.
-
-    Requires admin/maintainer role.
-    """
-    # Get community
-    statement = select(Community).where(Community.community_uuid == community_uuid)
-    community = (await db_session.execute(statement)).scalars().first()
-
-    if not community:
-        raise HTTPException(status_code=404, detail="Community not found")
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
-
-    # Get the course
-    course_statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = (await db_session.execute(course_statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    # Check if course belongs to same org
-    if course.org_id != community.org_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Course must belong to the same organization as the community",
-        )
-
-    # Check if another community is already linked to this course
-    existing_statement = select(Community).where(
-        Community.course_id == course.id,
-        Community.id != community.id
+) -> bool:
+    """Moderators are the platform's admins (spec: "moderators should just be admins")."""
+    if isinstance(current_user, (AnonymousUser, APITokenUser)):
+        return False
+    if getattr(current_user, "is_superadmin", False):
+        return True
+    return await authorization_verify_based_on_org_admin_status(
+        request, current_user.id, "update", community.community_uuid, db_session
     )
-    existing = (await db_session.execute(existing_statement)).scalars().first()
-
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="This course already has a linked community",
-        )
-
-    community.course_id = course.id
-    community.update_date = str(datetime.now())
-
-    db_session.add(community)
-    await db_session.commit()
-    await db_session.refresh(community)
-
-    return CommunityRead.model_validate(community.model_dump())
 
 
-async def unlink_community_from_course(
+async def require_community_moderator(
     request: Request,
-    community_uuid: str,
+    community: Community,
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
-) -> CommunityRead:
-    """
-    Unlink a community from its course.
-
-    Requires admin/maintainer role.
-    """
-    # Get community
-    statement = select(Community).where(Community.community_uuid == community_uuid)
-    community = (await db_session.execute(statement)).scalars().first()
-
-    if not community:
-        raise HTTPException(status_code=404, detail="Community not found")
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
-
-    community.course_id = None
-    community.update_date = str(datetime.now())
-
-    db_session.add(community)
-    await db_session.commit()
-    await db_session.refresh(community)
-
-    return CommunityRead.model_validate(community.model_dump())
+) -> None:
+    if not await is_community_moderator(request, community, current_user, db_session):
+        raise HTTPException(status_code=403, detail="Only moderators can do this")
 
 
 async def get_community_user_rights(
@@ -448,123 +202,86 @@ async def get_community_user_rights(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
 ) -> dict:
-    """
-    Get detailed user rights for a specific community.
-
-    Returns comprehensive rights information for UI feature toggling.
-    """
-    # Check if community exists
+    """Rights for UI feature toggling: members read and post, admins moderate."""
     statement = select(Community).where(Community.community_uuid == community_uuid)
     community = (await db_session.execute(statement)).scalars().first()
 
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
 
-    # API tokens report rights under their creator's identity.
     acting_user_id = resolve_acting_user_id(current_user)
 
-    # Initialize rights object
     rights = {
         "community_uuid": community_uuid,
         "user_id": acting_user_id,
         "is_anonymous": acting_user_id == 0,
         "permissions": {
             "read": False,
-            "create": False,
-            "update": False,
-            "delete": False,
             "create_discussion": False,
+            "moderate": False,
         },
         "ownership": {
-            "is_admin": False,
-            "is_maintainer_role": False,
-        },
-        "access": {
-            "via_public": False,
-            "via_usergroups": [],
-            "has_usergroup_restriction": False,
+            "is_moderator": False,
         },
     }
 
-    # A course's Q&A follows the course: whoever can read the course can read
-    # and post. `public` and usergroups on the community don't apply.
-    if community.course_id:
-        try:
-            await check_resource_access(
-                request, db_session, current_user, community_uuid, AccessAction.READ
-            )
-            can_read = True
-        except HTTPException:
-            can_read = False
-        rights["permissions"]["read"] = can_read
-        if acting_user_id == 0:
-            return rights
-        rights["permissions"]["create_discussion"] = can_read
-        is_admin_or_maintainer = await authorization_verify_based_on_roles(
-            request, acting_user_id, "update", community_uuid, db_session
-        ) or await authorization_verify_based_on_org_admin_status(
-            request, acting_user_id, "update", community_uuid, db_session
-        )
-        if is_admin_or_maintainer:
-            rights["ownership"]["is_admin"] = True
-            rights["ownership"]["is_maintainer_role"] = True
-            rights["permissions"]["create"] = True
-            rights["permissions"]["update"] = True
-            rights["permissions"]["delete"] = True
-        return rights
-
-    # Handle anonymous users
-    if acting_user_id == 0:
-        if community.public:
-            rights["permissions"]["read"] = True
-            rights["access"]["via_public"] = True
-        return rights
-
-    # Check community access method
-    rights["access"]["via_public"] = community.public
-
-    # Check UserGroups access
-    usergroup_stmt = select(UserGroupResource).where(
-        UserGroupResource.resource_uuid == community_uuid
-    )
-    usergroup_resources = (await db_session.execute(usergroup_stmt)).scalars().all()
-
-    if usergroup_resources:
-        rights["access"]["has_usergroup_restriction"] = True
-        usergroup_ids = [ugr.usergroup_id for ugr in usergroup_resources]
-
-        membership_stmt = select(UserGroupUser).where(
-            UserGroupUser.usergroup_id.in_(usergroup_ids),
-            UserGroupUser.user_id == acting_user_id
-        )
-        user_memberships = (await db_session.execute(membership_stmt)).scalars().all()
-        rights["access"]["via_usergroups"] = [m.usergroup_id for m in user_memberships]
-
-    # Check admin/maintainer role using role-based permissions
-    has_update_permission = await authorization_verify_based_on_roles(
-        request, acting_user_id, "update", community_uuid, db_session
-    )
-    is_admin_or_maintainer = has_update_permission or await authorization_verify_based_on_org_admin_status(
-        request, acting_user_id, "update", community_uuid, db_session
-    )
-
-    # Check if user has access via public, UserGroups, or admin status
-    has_access = (
-        community.public or
-        not rights["access"]["has_usergroup_restriction"] or
-        len(rights["access"]["via_usergroups"]) > 0 or
-        is_admin_or_maintainer
-    )
-
-    if has_access:
+    try:
+        await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.READ)
         rights["permissions"]["read"] = True
-        rights["permissions"]["create_discussion"] = True
+    except HTTPException:
+        return rights
 
-    if is_admin_or_maintainer:
-        rights["ownership"]["is_admin"] = True
-        rights["ownership"]["is_maintainer_role"] = True
-        rights["permissions"]["create"] = True
-        rights["permissions"]["update"] = True
-        rights["permissions"]["delete"] = True
+    if acting_user_id == 0:
+        return rights
+
+    rights["permissions"]["create_discussion"] = True
+    if await is_community_moderator(request, community, current_user, db_session):
+        rights["permissions"]["moderate"] = True
+        rights["ownership"]["is_moderator"] = True
 
     return rights
+
+
+async def ensure_community(
+    db_session: AsyncSession,
+    *,
+    org_id: int,
+    community_uuid: str,
+    name: str,
+    description: str,
+    course_id: int | None = None,
+) -> Community:
+    """Create or refresh a platform community. Used by the catalog sync only."""
+    community = (
+        await db_session.execute(select(Community).where(Community.community_uuid == community_uuid))
+    ).scalars().first()
+    now = str(datetime.now())
+    if community is None:
+        # A course Q&A created before the catalog existed keeps its posts.
+        if course_id is not None:
+            community = (
+                await db_session.execute(select(Community).where(Community.course_id == course_id))
+            ).scalars().first()
+        if community is None:
+            community = Community(
+                community_uuid=community_uuid or f"community_{uuid4()}",
+                org_id=org_id,
+                creation_date=now,
+                name=name,
+            )
+    changed = False
+    for field, value in (
+        ("name", name),
+        ("description", description),
+        ("public", True),
+        ("org_id", org_id),
+        ("course_id", course_id),
+    ):
+        if getattr(community, field) != value:
+            setattr(community, field, value)
+            changed = True
+    if changed or community.id is None:
+        community.update_date = now
+        db_session.add(community)
+        await db_session.flush()
+    return community

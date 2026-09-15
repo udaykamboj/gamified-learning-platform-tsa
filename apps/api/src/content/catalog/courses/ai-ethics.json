@@ -1,0 +1,92 @@
+{
+  "slug": "ai-ethics",
+  "order": 3,
+  "name": "Ethics & Bias",
+  "description": "Use AI responsibly: fairness, misinformation and honesty.",
+  "about": "AI tools can repeat unfair patterns and produce convincing mistakes. This course helps you question AI output, spot bias and use AI honestly in your own work.",
+  "learnings": "Spot bias in AI output; verify claims before sharing; use AI honestly in schoolwork",
+  "tags": "ai,ethics,bias",
+  "chapters": [
+    {
+      "slug": "eth-bias",
+      "name": "Bias",
+      "description": "Where unfairness comes from.",
+      "activities": [
+        {
+          "slug": "eth-bias-sources",
+          "name": "Where bias comes from",
+          "kind": "document",
+          "body": [
+            "h2:Unfair examples, unfair model",
+            "p:When training data over-represents some people and under-represents others, the model's predictions can be worse for the people it rarely saw.",
+            {"info": "Ask who is missing from the data before trusting a prediction about them."}
+          ]
+        },
+        {
+          "slug": "eth-verify",
+          "name": "Verify before you share",
+          "kind": "document",
+          "body": [
+            "h2:Check the claim, not the confidence",
+            {"ol": ["Find the original source.", "Compare with a second trusted source.", "Say clearly when something came from AI."]},
+            {"quiz": {
+              "q": "An AI tool gives a surprising statistic. What do you do first?",
+              "a": [["Look for the original source", true], ["Share it because it sounded confident", false]]
+            }}
+          ]
+        },
+        {
+          "slug": "eth-practice",
+          "name": "Practice: responsible use",
+          "kind": "assignment",
+          "assignment": {
+            "role": "practice",
+            "title": "Responsible use",
+            "description": "Decide what the responsible choice is.",
+            "tasks": [
+              {
+                "slug": "eth-practice-q1",
+                "title": "Choices",
+                "description": "Choose the best option.",
+                "hint": "Think about fairness and honesty.",
+                "questions": [
+                  {"q": "Is it honest to hand in AI-written work as only your own?", "a": [["No, say how you used AI", true], ["Yes, nobody will know", false]]},
+                  {"q": "A model works badly for a group it rarely saw. Why?", "a": [["That group was under-represented in training data", true], ["The group is harder to understand", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "eth-unit-test",
+      "name": "Unit test",
+      "description": "Show what you know.",
+      "activities": [
+        {
+          "slug": "eth-unit-test-1",
+          "name": "Unit test: Ethics & Bias",
+          "kind": "assignment",
+          "assignment": {
+            "role": "assessment",
+            "title": "Ethics & Bias unit test",
+            "description": "Pass with 80% to complete the course.",
+            "tasks": [
+              {
+                "slug": "eth-test-q1",
+                "title": "Ethics",
+                "description": "Answer every question.",
+                "hint": "",
+                "questions": [
+                  {"q": "What is a common source of AI bias?", "a": [["Unbalanced training data", true], ["Too much electricity", false]]},
+                  {"q": "Before sharing an AI claim you should…", "a": [["Verify it with a trusted source", true], ["Trust it if it sounds confident", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

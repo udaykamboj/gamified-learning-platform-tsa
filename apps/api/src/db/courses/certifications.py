@@ -52,10 +52,6 @@ class CertificateUser(CertificateUserBase, table=True):
     created_at: str = ""
     updated_at: str = ""
 
-class CertificateUserCreate(SQLModel):
-    user_id: int
-    certification_id: int
-    user_certification_uuid: str
 
 class CertificateUserRead(SQLModel):
     id: int
@@ -65,8 +61,4 @@ class CertificateUserRead(SQLModel):
     created_at: str
     updated_at: str
 
-class CertificateUserUpdate(SQLModel):
-    user_id: Optional[int] = None
-    certification_id: Optional[int] = None
-    user_certification_uuid: Optional[str] = None
 

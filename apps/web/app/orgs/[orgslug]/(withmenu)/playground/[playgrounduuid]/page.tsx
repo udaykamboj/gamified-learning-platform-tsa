@@ -31,15 +31,13 @@ export default async function PlaygroundViewPage({ params }: { params: PageParam
     notFound()
   }
 
-  if (!playground.published && !access_token) {
-    notFound()
-  }
-
+  // The API decides who can open it (owner, people it's shared with, or
+  // anyone with the link); only the owner and shared editors can edit.
   return (
     <PlaygroundViewClient
       playground={playground}
       orgslug={orgslug}
-      canEdit={!!access_token}
+      canEdit={playground.my_role === 'owner' || playground.my_role === 'editor'}
     />
   )
 }

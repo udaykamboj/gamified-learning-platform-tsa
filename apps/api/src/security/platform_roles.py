@@ -1,19 +1,17 @@
 """Account types for the single-organization platform.
 
-Every account is exactly one of two types, derived from the existing LearnHouse
-role model rather than a new column:
+Every account is exactly one of two types, derived from the role model rather
+than a new column (docs/refactor/progress/00-requirements.md, R1/R2):
 
-* ``admin``   — a platform superadmin, or a member of the platform org whose
-  role grants ``dashboard.action_access`` (the seeded Admin, Maintainer and
-  Instructor roles, or a custom staff role). Admins manage courses, content and
-  students.
+* ``admin``   — a platform superadmin, or a member of the platform org holding
+  the Admin role (id 1). Admins run and monitor the platform and moderate the
+  community. They do not author courses or control a student's learning.
 * ``student`` — everyone else. Public signup always produces this (the seeded
   "User" role, id 4).
 
-On top of that, ``can_manage_platform`` marks the admins allowed into the
-platform console (user promotion/demotion, platform overview): superadmins and
-members holding the Admin role (id 1). Maintainers and Instructors are admins
-who only get course management.
+There is no teacher tier: Maintainer, Instructor and custom staff roles are
+retired by ``services/setup/setup.py::retire_teacher_roles``. Every admin can
+use the platform console, so ``can_manage_platform`` equals ``is_admin``.
 
 Only memberships in the platform org count. A role in any other organization
 row (for example a leftover demo org) never makes someone an admin.
@@ -92,12 +90,11 @@ async def resolve_platform_access(user_id: int, db_session: AsyncSession) -> Pla
             ).scalars().all()
         )
 
-    has_staff_role = any(role_grants_dashboard_access(r) for r in roles)
-    holds_admin_role = any(r.id == ADMIN_ROLE_ID for r in roles)
+    is_admin = is_superadmin or any(r.id == ADMIN_ROLE_ID for r in roles)
 
     return PlatformAccess(
-        role="admin" if (is_superadmin or has_staff_role) else "student",
-        can_manage_platform=is_superadmin or holds_admin_role,
+        role="admin" if is_admin else "student",
+        can_manage_platform=is_admin,
         is_superadmin=is_superadmin,
         platform_org_id=int(platform_org.id) if platform_org is not None and platform_org.id is not None else None,
         role_ids=tuple(int(r.id) for r in roles if r.id is not None),
@@ -151,8 +148,7 @@ async def require_platform_admin(
 ):
     """Dependency: the caller may use the platform console.
 
-    Superadmins and members holding the Admin role. Students, Maintainers and
-    Instructors get 403.
+    Superadmins and members holding the Admin role. Students get 403.
     """
     user = await _require_session_user(current_user)
     access = await resolve_platform_access(int(user.id), db_session)

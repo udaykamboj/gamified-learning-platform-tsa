@@ -1,7 +1,6 @@
 from typing import List, Literal, Optional, Union
-from fastapi import APIRouter, Depends, Request, UploadFile, Query, Path, HTTPException, status
+from fastapi import APIRouter, Depends, Request, UploadFile, Query, Path, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
-from src.security.superadmin import is_user_superadmin
 from src.db.users import AnonymousUser, PublicUser
 from src.core.events.database import get_db_session
 from src.services.orgs.invites import (
@@ -10,22 +9,18 @@ from src.services.orgs.invites import (
     get_invite_code,
     get_invite_codes,
 )
-from src.services.orgs.join import JoinOrg, join_org
 from src.services.orgs.users import (
     export_organization_users_csv,
     get_list_of_invited_users,
     get_organization_users,
     invite_batch_users,
-    leave_org,
     remove_all_users_from_org,
     remove_batch_users_from_org,
     remove_invited_user,
     remove_user_from_org,
     update_user_role,
 )
-from src.db.organization_config import OrganizationConfigBase
 from src.db.organizations import (
-    OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
@@ -38,7 +33,6 @@ from src.security.platform_roles import require_platform_admin
 
 
 from src.services.orgs.orgs import (
-    delete_org,
     wipe_org_content,
     get_organization_by_uuid,
     get_organization_by_slug,
@@ -122,8 +116,6 @@ async def api_export_org_users(
     request: Request,
     org_id: int,
     search: str = "",
-    usergroup_id: Optional[int] = Query(default=None),
-    usergroup_filter: Optional[Literal["in_group", "not_in_group"]] = Query(default=None),
     sort_order: Optional[Literal["asc", "desc"]] = Query(default="desc"),
     role_id: Optional[int] = Query(default=None),
     status: Optional[Literal["verified", "unverified"]] = Query(default=None),
@@ -135,7 +127,7 @@ async def api_export_org_users(
     """
     return await export_organization_users_csv(
         request, org_id, db_session, current_user, search,
-        usergroup_id, usergroup_filter, sort_order or "desc", role_id, status,
+        sort_order or "desc", role_id, status,
     )
 
 
@@ -160,8 +152,6 @@ async def api_get_org_users(
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=20, ge=1, le=100, description="Items per page (max 100)"),
     search: str = "",
-    usergroup_id: Optional[int] = Query(default=None, description="Filter by usergroup membership"),
-    usergroup_filter: Optional[Literal["in_group", "not_in_group"]] = Query(default=None, description="Membership filter: 'in_group' or 'not_in_group'"),
     sort_order: Optional[Literal["asc", "desc"]] = Query(default="desc", description="Sort order for join date"),
     role_id: Optional[int] = Query(default=None, description="Filter by role ID"),
     status: Optional[Literal["verified", "unverified"]] = Query(default=None, description="Filter by verification status"),
@@ -178,7 +168,7 @@ async def api_get_org_users(
     """
     return await get_organization_users(
         request, org_id, db_session, current_user, page, limit, search,
-        usergroup_id, usergroup_filter, sort_order or "desc", role_id, status,
+        sort_order or "desc", role_id, status,
     )
 
 
@@ -1007,25 +997,24 @@ async def api_upload_org_og_image(
 @router.post(
     "/{org_id}/invites",
     summary="Create an invite code",
-    description="Create a new invite code for the organization, optionally linked to a usergroup.",
+    description="Create a new invite code for the organization.",
     responses={
         200: {"description": "Invite code created."},
         401: {"description": "Not authenticated"},
         403: {"description": "Caller is not an organization administrator"},
-        404: {"description": "Organization or usergroup not found"},
+        404: {"description": "Organization not found"},
     },
 )
 async def api_create_invite_code(
     request: Request,
     org_id: int,
-    usergroup_id: Optional[int] = None,
     current_user: PublicUser = Depends(get_current_user),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
-    Create invite code, optionally linked to a usergroup
+    Create invite code
     """
-    return await create_invite_code(request, org_id, current_user, db_session, usergroup_id)
+    return await create_invite_code(request, org_id, current_user, db_session)
 
 
 @router.get(

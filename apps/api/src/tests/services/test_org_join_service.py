@@ -10,7 +10,6 @@ from sqlmodel import select
 
 from src.db.organization_config import OrganizationConfig
 from src.db.user_organizations import UserOrganization
-from src.db.usergroups import UserGroup
 from src.db.users import User
 from src.services.orgs.join import JoinOrg, join_org
 
@@ -57,22 +56,6 @@ async def _make_org_config(db, org, signup_mode="open", version="1.0"):
     await db.commit()
     await db.refresh(org_config)
     return org_config
-
-
-async def _make_usergroup(db, org, **overrides):
-    usergroup = UserGroup(
-        id=overrides.pop("id", None),
-        org_id=org.id,
-        name=overrides.pop("name", "Invite Group"),
-        description=overrides.pop("description", "Invite group"),
-        usergroup_uuid=overrides.pop("usergroup_uuid", "ug_join"),
-        creation_date=overrides.pop("creation_date", str(datetime.now())),
-        update_date=overrides.pop("update_date", str(datetime.now())),
-    )
-    db.add(usergroup)
-    await db.commit()
-    await db.refresh(usergroup)
-    return usergroup
 
 
 class TestOrgJoinService:
@@ -177,39 +160,6 @@ class TestOrgJoinService:
         assert exc_info.value.status_code == 404
         mock_limits.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def test_join_org_invite_only_success_with_usergroup(
-        self, mock_request, db, org
-    ):
-        user = await _make_user(db, id=12, user_uuid="user_12")
-        usergroup = await _make_usergroup(db, org, id=22)
-        await _make_org_config(db, org, signup_mode="inviteOnly", version="2.0")
-
-        with patch(
-            "src.services.orgs.join.check_limits_with_usage"
-        ), patch(
-            "src.services.orgs.join.get_org_join_mechanism",
-            new=AsyncMock(return_value="inviteOnly"),
-        ), patch(
-            "src.services.orgs.join.get_invite_code",
-            new=AsyncMock(return_value={"usergroup_id": usergroup.id}),
-        ), patch(
-            "src.services.orgs.join.add_users_to_usergroup",
-            new=AsyncMock(),
-        ) as mock_add_users, patch(
-            "src.services.orgs.join.increase_feature_usage"
-        ), patch(
-            "src.routers.users._invalidate_session_cache"
-        ):
-            result = await join_org(
-                mock_request,
-                JoinOrg(org_id=org.id, user_id=user.id, invite_code="ABC12345"),
-                user,
-                db,
-            )
-
-        assert result == "Great, You're part of the Organization"
-        mock_add_users.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_join_org_failure_branches(

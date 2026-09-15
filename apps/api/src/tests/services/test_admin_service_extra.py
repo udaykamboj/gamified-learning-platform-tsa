@@ -31,21 +31,7 @@ from src.db.trail_steps import TrailStep
 from src.db.trails import Trail
 from src.db.user_organizations import UserOrganization
 from src.db.users import APITokenUser, User
-from src.services.admin.admin import (
-    _validate_magic_link_redirect,
-    anonymize_user,
-    award_certificate,
-    bulk_unenroll_users,
-    change_user_role,
-    complete_course,
-    consume_magic_link_token,
-    get_course_analytics,
-    list_course_enrollments,
-    remove_user_from_org_admin,
-    revoke_certificate,
-    uncomplete_activity,
-    update_user_profile,
-)
+from src.services.admin.admin import (anonymize_user, get_course_analytics, list_course_enrollments, remove_user_from_org_admin, update_user_profile)
 
 
 # ---------------------------------------------------------------------------
@@ -165,67 +151,9 @@ async def _create_trail_run(db, user: User, course: Course, org) -> TrailRun:
 # ---------------------------------------------------------------------------
 
 
-def test_validate_magic_link_redirect_whitespace_returns_none():
-    result = _validate_magic_link_redirect("   ")
-    assert result is None
-
-
-def test_validate_magic_link_redirect_accepts_same_origin_path():
-    assert _validate_magic_link_redirect("/dashboard") == "/dashboard"
-    assert _validate_magic_link_redirect("/course/foo?x=1") == "/course/foo?x=1"
-
-
-def test_validate_magic_link_redirect_returns_none_for_empty_and_none():
-    assert _validate_magic_link_redirect(None) is None
-    assert _validate_magic_link_redirect("") is None
-
-
-@pytest.mark.parametrize(
-    "redirect_to",
-    [
-        "/\\evil.com",        # backslash-prefixed -> treated as protocol-relative
-        "//evil.com",          # protocol-relative
-        "https://evil.com",    # absolute external URL with scheme
-        "http://evil.com",
-        "javascript:alert(1)",  # scheme without leading slash
-        "evil.com",            # does not start with '/'
-    ],
-)
-def test_validate_magic_link_redirect_rejects_open_redirects(redirect_to):
-    with pytest.raises(HTTPException) as exc_info:
-        _validate_magic_link_redirect(redirect_to)
-    assert exc_info.value.status_code == 400
-
-
 # ---------------------------------------------------------------------------
 # Lines 986, 995 — consume_magic_link_token
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_consume_magic_link_token_incomplete_payload_raises_410(db):
-    """Line 986: payload has purpose=magic_link but no sub → 410."""
-    with patch("src.security.auth.decode_jwt") as mock_decode:
-        mock_decode.return_value = {"purpose": "magic_link", "org_id": 1}
-        with pytest.raises(HTTPException) as exc_info:
-            await consume_magic_link_token("fake-token", db)
-    assert exc_info.value.status_code == 410
-    assert "incomplete" in exc_info.value.detail.lower()
-
-
-@pytest.mark.asyncio
-async def test_consume_magic_link_token_ghost_user_raises_410(db):
-    """Line 995: valid sub + org_id but user doesn't exist in DB → 410."""
-    with patch("src.security.auth.decode_jwt") as mock_decode:
-        mock_decode.return_value = {
-            "sub": "ghost@nonexistent.com",
-            "purpose": "magic_link",
-            "org_id": 1,
-        }
-        with pytest.raises(HTTPException) as exc_info:
-            await consume_magic_link_token("fake-token", db)
-    assert exc_info.value.status_code == 410
-    assert "no longer exists" in exc_info.value.detail.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -247,81 +175,9 @@ async def test_list_course_enrollments_course_not_found(db, org):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
-async def test_award_certificate_course_not_found(db, org, user_role):
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=50, username="awardee", email="awardee@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    mock_request = object()
-    with pytest.raises(HTTPException) as exc_info:
-        await award_certificate(token_user, user.id, "no-such-course", mock_request, db)
-    assert exc_info.value.status_code == 404
-    assert "course not found" in exc_info.value.detail.lower()
-
-
 # ---------------------------------------------------------------------------
 # Lines 1276, 1282 — revoke_certificate boundary checks
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_revoke_certificate_certifications_row_missing_raises_404(db, org, course, user_role):
-    """Line 1276: cert_user exists but Certifications row doesn't → 404."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=51, username="revokee1", email="revokee1@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    # Create a CertificateUser that points to a certification_id that doesn't exist
-    # We do this via a raw insert to avoid FK enforcement on SQLite
-    cu = CertificateUser(
-        id=30,
-        user_id=user.id,
-        certification_id=999,  # no matching Certifications row
-        user_certification_uuid="orphan-cert-user-uuid",
-        created_at=str(datetime.now()),
-        updated_at=str(datetime.now()),
-    )
-    db.add(cu)
-    await db.commit()
-
-    with patch("src.services.admin.admin.dispatch_webhooks", new_callable=AsyncMock):
-        with pytest.raises(HTTPException) as exc_info:
-            await revoke_certificate(token_user, user.id, "orphan-cert-user-uuid", db)
-    assert exc_info.value.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_revoke_certificate_course_wrong_org_raises_404(db, org, course, user_role):
-    """Line 1282: course.org_id != token_user.org_id → 404."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=52, username="revokee2", email="revokee2@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    # Create a course that belongs to a *different* org (id=999)
-    other_course = Course(
-        id=50,
-        name="Other Org Course",
-        description="A course from another org",
-        public=True,
-        published=True,
-        open_to_contributors=False,
-        org_id=999,
-        course_uuid="course_other_org",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(other_course)
-    await db.commit()
-    await db.refresh(other_course)
-
-    cert = await _create_certification(db, other_course, cert_id=11)
-    await _create_certificate_user(db, cert, user, cu_id=31, uuid="wrong-org-cert-uuid")
-
-    with patch("src.services.admin.admin.dispatch_webhooks", new_callable=AsyncMock):
-        with pytest.raises(HTTPException) as exc_info:
-            await revoke_certificate(token_user, user.id, "wrong-org-cert-uuid", db)
-    assert exc_info.value.status_code == 404
 
 
 # ---------------------------------------------------------------------------
@@ -399,78 +255,14 @@ async def test_update_user_profile_invalidate_cache_raises_is_swallowed(db, org,
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
-async def test_change_user_role_role_wrong_org_raises_403(db, org, user_role):
-    """Line 1529: role.org_id != token_user.org_id → 403."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=80, username="rolechange80", email="rolechange80@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    # Create a role that belongs to a different org (999)
-    foreign_role = Role(
-        id=200,
-        name="Foreign Role",
-        org_id=999,
-        role_type=RoleTypeEnum.TYPE_ORGANIZATION,
-        role_uuid="role_foreign",
-        rights={},
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(foreign_role)
-    await db.commit()
-
-    with pytest.raises(HTTPException) as exc_info:
-        await change_user_role(token_user, user.id, foreign_role.id, db)
-    assert exc_info.value.status_code == 403
-    assert "does not belong to this organization" in exc_info.value.detail.lower()
-
-
 # ---------------------------------------------------------------------------
 # Lines 1561-1562 — change_user_role _invalidate_session_cache swallowed
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
-async def test_change_user_role_invalidate_cache_raises_is_swallowed(db, org, admin_role, user_role):
-    """Lines 1561-1562: _invalidate_session_cache raises → swallowed, role updated."""
-    token_user = _make_token_user(org.id)
-
-    # The token's creator (created_by_user_id=1) must still be a member of the
-    # org for the token to assign roles (defense-in-depth guard).
-    creator = await _create_user(db, user_id=1, username="creator1", email="creator1@test.com")
-    await _add_user_to_org(db, creator, org, role_id=admin_role.id)
-
-    # Need at least two admins so we can demote without triggering last-admin guard
-    admin1 = await _create_user(db, user_id=81, username="admin81", email="admin81@test.com")
-    await _add_user_to_org(db, admin1, org, role_id=admin_role.id)
-    admin2 = await _create_user(db, user_id=82, username="admin82", email="admin82@test.com")
-    await _add_user_to_org(db, admin2, org, role_id=admin_role.id)
-
-    with patch("src.routers.users._invalidate_session_cache", side_effect=RuntimeError("cache fail")):
-        result = await change_user_role(token_user, admin1.id, user_role.id, db)
-
-    assert result["user_id"] == admin1.id
-    assert result["role_id"] == user_role.id
-
-
 # ---------------------------------------------------------------------------
 # Line 1836 — bulk_unenroll_users user with no TrailRun → not_enrolled
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_bulk_unenroll_users_user_not_enrolled_goes_to_not_enrolled(db, org, course, user_role):
-    """Line 1836: user_id with no TrailRun → appended to not_enrolled."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=90, username="unenroll90", email="unenroll90@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    # Do NOT create a TrailRun for this user — they are not enrolled
-    result = await bulk_unenroll_users(token_user, course.course_uuid, [user.id], db)
-
-    assert user.id in result["not_enrolled"]
-    assert user.id not in result["unenrolled"]
 
 
 # ---------------------------------------------------------------------------
@@ -541,178 +333,9 @@ async def test_remove_user_from_org_admin_no_membership_row_raises_404(db, org):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
-async def test_change_user_role_no_membership_row_raises_404(db, org, user_role):
-    """Line 1538: _get_user_in_org succeeds but UserOrganization row missing."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=121, username="orphan121", email="orphan121@test.com")
-
-    with patch("src.services.admin.admin._get_user_in_org", return_value=user):
-        with pytest.raises(HTTPException) as exc_info:
-            await change_user_role(token_user, user.id, user_role.id, db)
-
-    assert exc_info.value.status_code == 404
-    assert "User not in org" in exc_info.value.detail
-
-
 # ---------------------------------------------------------------------------
 # Line 1836 — bulk_unenroll_users: enrolled user with TrailSteps gets steps
 # deleted (the db_session.delete(step) branch).
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
-async def test_bulk_unenroll_users_enrolled_user_with_steps_deleted(db, org, course, user_role, activity):
-    """Line 1836: user IS enrolled with TrailRun and TrailSteps, steps deleted."""
-    from sqlmodel import select as sql_select
-
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=122, username="enrolled122", email="enrolled122@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    trail = Trail(
-        org_id=org.id,
-        user_id=user.id,
-        trail_uuid="trail_enrolled122",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(trail)
-    await db.commit()
-    await db.refresh(trail)
-
-    trail_run = TrailRun(
-        trail_id=trail.id,
-        course_id=course.id,
-        org_id=org.id,
-        user_id=user.id,
-        status=StatusEnum.STATUS_IN_PROGRESS,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(trail_run)
-    await db.commit()
-    await db.refresh(trail_run)
-
-    step = TrailStep(
-        complete=True,
-        teacher_verified=False,
-        grade="",
-        data={},
-        trailrun_id=trail_run.id,
-        trail_id=trail.id,
-        activity_id=activity.id,
-        course_id=course.id,
-        org_id=org.id,
-        user_id=user.id,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(step)
-    await db.commit()
-    await db.refresh(step)
-    step_id = step.id
-
-    result = await bulk_unenroll_users(token_user, course.course_uuid, [user.id], db)
-
-    assert user.id in result["unenrolled"]
-    assert user.id not in result["not_enrolled"]
-    remaining = (await db.execute(sql_select(TrailStep).where(TrailStep.id == step_id))).scalars().first()
-    assert remaining is None
-
-
-@pytest.mark.asyncio
-async def test_complete_course_marks_trailrun_completed(db, org, course, user_role, activity, mock_request):
-    """complete_course must flip the enrollment (TrailRun.status) to
-    STATUS_COMPLETED so analytics/enrollment counts reflect the completion."""
-    from sqlmodel import select as sql_select
-
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=222, username="complete222", email="complete222@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    await complete_course(mock_request, token_user, user.id, course.course_uuid, db)
-
-    # Status must flip regardless of whether a certificate is configured — the
-    # enrollment/analytics count reads from TrailRun.status, not the cert.
-    trailrun = (await db.execute(
-        sql_select(TrailRun).where(TrailRun.course_id == course.id, TrailRun.user_id == user.id)
-    )).scalars().first()
-    assert trailrun is not None
-    assert trailrun.status == StatusEnum.STATUS_COMPLETED
-
-
-@pytest.mark.asyncio
-async def test_complete_course_reports_completed_without_certification(
-    db, org, course, user_role, activity, mock_request
-):
-    """M9: course_completed must reflect actual completion, not the
-    certificate-create return value. A course with no certification is still
-    'completed' (and certificate_awarded is False)."""
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=224, username="complete224", email="complete224@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    result = await complete_course(mock_request, token_user, user.id, course.course_uuid, db)
-
-    assert result["course_completed"] is True
-    assert result["certificate_awarded"] is False
-
-
-@pytest.mark.asyncio
-async def test_uncomplete_activity_demotes_completed_trailrun(db, org, course, user_role, activity):
-    """uncomplete_activity must demote a previously-completed enrollment back to
-    STATUS_IN_PROGRESS once the course is no longer fully completed."""
-    from sqlmodel import select as sql_select
-
-    token_user = _make_token_user(org.id)
-    user = await _create_user(db, user_id=223, username="uncomplete223", email="uncomplete223@test.com")
-    await _add_user_to_org(db, user, org, role_id=user_role.id)
-
-    trail = Trail(
-        org_id=org.id,
-        user_id=user.id,
-        trail_uuid="trail_uncomplete223",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(trail)
-    await db.commit()
-    await db.refresh(trail)
-
-    trail_run = TrailRun(
-        trail_id=trail.id,
-        course_id=course.id,
-        org_id=org.id,
-        user_id=user.id,
-        status=StatusEnum.STATUS_COMPLETED,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(trail_run)
-    await db.commit()
-    await db.refresh(trail_run)
-
-    step = TrailStep(
-        complete=True,
-        teacher_verified=False,
-        grade="",
-        data={},
-        trailrun_id=trail_run.id,
-        trail_id=trail.id,
-        activity_id=activity.id,
-        course_id=course.id,
-        org_id=org.id,
-        user_id=user.id,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(step)
-    await db.commit()
-
-    await uncomplete_activity(token_user, user.id, activity.activity_uuid, db)
-
-    refreshed = (await db.execute(
-        sql_select(TrailRun).where(TrailRun.id == trail_run.id)
-    )).scalars().first()
-    assert refreshed.status == StatusEnum.STATUS_IN_PROGRESS

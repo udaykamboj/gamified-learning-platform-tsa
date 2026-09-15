@@ -1,33 +1,25 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Globe, Users, X, SquareUserRound } from 'lucide-react'
+import { Globe, Users } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { apiFetch } from '@services/utils/ts/requests'
 import { updateBoard } from '@services/boards/boards'
-import { getUserGroups, linkResourcesToUserGroup, unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import toast from 'react-hot-toast'
-import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 
 interface BoardAccessTabProps {
   board: any
   boardUuid: string
-  orgId: number
   boardKey: string | null
 }
 
-// Inline key for usergroups linked to a specific board resource
-const boardResourceUserGroupsKey = (boardUuid: string, orgId: number) =>
-  ['usergroups', 'resource', boardUuid, orgId] as const
-
-function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabProps) {
+// A board is private to its owner and the members they add (Members tab), or
+// public to anyone with the link. There is no group-based access.
+function BoardAccessTab({ board, boardUuid, boardKey: _boardKey }: BoardAccessTabProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -36,18 +28,10 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
 
   const [isPublic, setIsPublic] = useState<boolean>(board.public ?? true)
   const [isSaving, setIsSaving] = useState(false)
-  const [userGroupModal, setUserGroupModal] = useState(false)
 
   useEffect(() => {
     setIsPublic(board.public ?? true)
   }, [board.public])
-
-  const { data: usergroups } = useQuery({
-    queryKey: boardResourceUserGroupsKey(boardUuid, org?.id),
-    queryFn: () => apiFetch(`${getAPIUrl()}usergroups/resource/${boardUuid}?org_id=${org.id}`, access_token),
-    enabled: !isPublic && !!boardUuid && !!org?.id && !!access_token,
-    staleTime: 60_000,
-  })
 
   const handleSetAccess = async (value: boolean) => {
     setIsSaving(true)
@@ -62,20 +46,6 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
       toast.error(t('boards.access.access_update_error'))
     } finally {
       setIsSaving(false)
-    }
-  }
-
-  const removeUserGroupLink = async (usergroup_id: number) => {
-    try {
-      const res = await unLinkResourcesToUserGroup(usergroup_id, boardUuid, orgId, access_token)
-      if (res.status === 200) {
-        toast.success(t('boards.access.user_group_unlinked'))
-        queryClient.invalidateQueries({ queryKey: boardResourceUserGroupsKey(boardUuid, org.id) })
-      } else {
-        toast.error(`${t('boards.access.unlink_error')}${res.data?.detail || 'Unknown error'}`)
-      }
-    } catch {
-      toast.error(t('boards.access.unlink_error_generic'))
     }
   }
 
@@ -136,163 +106,6 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
           />
         </div>
 
-        {/* UserGroups Section (shown when private) */}
-        {!isPublic && (
-          <>
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-              <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.access.user_groups')}</h1>
-              <h2 className="text-gray-500 text-xs sm:text-sm">
-                {t('boards.access.user_groups_description')}
-              </h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="table-auto w-full text-start whitespace-nowrap rounded-md overflow-hidden">
-                <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-                  <tr className="font-bolder text-sm">
-                    <th className="py-3 px-4">{t('boards.name')}</th>
-                    <th className="py-3 px-4">{t('boards.access.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="mt-5 bg-white rounded-md">
-                  {usergroups?.map((usergroup: any) => (
-                    <tr key={usergroup.id} className="border-b border-gray-100 text-sm">
-                      <td className="py-3 px-4">{usergroup.name}</td>
-                      <td className="py-3 px-4">
-                        <ConfirmationModal
-                          confirmationButtonText={t('boards.access.unlink')}
-                          confirmationMessage={t('boards.access.unlink_confirm')}
-                          dialogTitle={t('boards.access.unlink_user_group')}
-                          dialogTrigger={
-                            <button className="me-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                              <X className="w-4 h-4" />
-                              <span>{t('boards.access.unlink')}</span>
-                            </button>
-                          }
-                          functionToExecute={() => removeUserGroupLink(usergroup.id)}
-                          status="warning"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                  {(!usergroups || usergroups.length === 0) && (
-                    <tr>
-                      <td colSpan={2} className="py-6 px-4 text-center text-gray-400 text-sm">
-                        {t('boards.access.no_user_groups')}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex flex-row-reverse mt-3 me-2">
-              <Modal
-                isDialogOpen={userGroupModal}
-                onOpenChange={() => setUserGroupModal(!userGroupModal)}
-                minHeight="no-min"
-                minWidth="md"
-                dialogContent={
-                  <LinkUserGroupToBoard
-                    boardUuid={boardUuid}
-                    orgId={orgId}
-                    accessToken={access_token}
-                    setModalOpen={setUserGroupModal}
-                  />
-                }
-                dialogTitle={t('boards.access.link_to_user_group')}
-                dialogDescription={t('boards.access.link_to_user_group_description')}
-                dialogTrigger={
-                  <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-xs sm:text-sm text-green-100">
-                    <SquareUserRound className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>{t('boards.access.link_to_usergroup_btn')}</span>
-                  </button>
-                }
-              />
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function LinkUserGroupToBoard({ boardUuid, orgId, accessToken, setModalOpen }: {
-  boardUuid: string
-  orgId: number
-  accessToken: string
-  setModalOpen: (open: boolean) => void
-}) {
-  const { t } = useTranslation()
-  const org = useOrg() as any
-  const queryClient = useQueryClient()
-
-  const { data: usergroups } = useQuery({
-    queryKey: queryKeys.usergroups.list(org?.id),
-    queryFn: () => getUserGroups(org.id, accessToken),
-    select: (res: any) => res?.data ?? res,
-    enabled: !!org?.id && !!accessToken,
-    staleTime: 60_000,
-  })
-
-  const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (usergroups && usergroups.length > 0) {
-      setSelectedUserGroup(usergroups[0].id)
-    }
-  }, [usergroups])
-
-  const handleLink = async () => {
-    if (!selectedUserGroup) return
-    const res = await linkResourcesToUserGroup(selectedUserGroup, boardUuid, orgId, accessToken)
-    if (res.status === 200) {
-      setModalOpen(false)
-      toast.success(t('boards.access.user_group_linked'))
-      queryClient.invalidateQueries({ queryKey: ['usergroups', 'resource', boardUuid, org?.id] })
-    } else {
-      toast.error(`${t('boards.access.link_error')}${res.data?.detail || 'Unknown error'}`)
-    }
-  }
-
-  return (
-    <div className="flex flex-col space-y-1">
-      <div className="p-4 flex-row flex justify-between items-center">
-        {usergroups?.length >= 1 ? (
-          <div className="py-1">
-            <span className="px-3 text-gray-400 font-bold rounded-full py-1 bg-gray-100 mx-3">
-              {t('boards.access.user_group')}
-            </span>
-            <select
-              onChange={(e) => setSelectedUserGroup(Number(e.target.value))}
-              defaultValue={selectedUserGroup ?? undefined}
-            >
-              {usergroups.map((group: any) => (
-                <option key={group.id} value={group.id}>{group.name}</option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="flex space-x-3 items-center">
-            <span className="px-3 text-yellow-700 font-bold rounded-full py-1 mx-3">
-              {t('boards.access.no_user_groups_available')}
-            </span>
-            <Link
-              className="px-3 text-blue-700 font-bold rounded-full py-1 bg-blue-100 mx-1"
-              target="_blank"
-              href={getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')}
-            >
-              {t('boards.access.create_user_group')}
-            </Link>
-          </div>
-        )}
-        <div className="py-3">
-          <button
-            onClick={handleLink}
-            disabled={!selectedUserGroup}
-            className="bg-green-700 text-white font-bold px-4 py-2 rounded-md shadow-sm disabled:opacity-50"
-          >
-            {t('boards.access.link')}
-          </button>
-        </div>
       </div>
     </div>
   )

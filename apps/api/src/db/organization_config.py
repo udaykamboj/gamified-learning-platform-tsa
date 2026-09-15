@@ -20,11 +20,6 @@ class MemberOrgConfig(BaseModel):
     limit: int = 10
 
 
-class UserGroupOrgConfig(BaseModel):
-    enabled: bool = True
-    limit: int = 10
-
-
 class StorageOrgConfig(BaseModel):
     enabled: bool = True
     limit: int = 10
@@ -93,7 +88,6 @@ class PlaygroundsOrgConfig(BaseModel):
 class OrgFeatureConfig(BaseModel):
     courses: CourseOrgConfig = CourseOrgConfig()
     members: MemberOrgConfig = MemberOrgConfig()
-    usergroups: UserGroupOrgConfig = UserGroupOrgConfig()
     storage: StorageOrgConfig = StorageOrgConfig()
     ai: AIOrgConfig = AIOrgConfig()
     assignments: AssignmentOrgConfig = AssignmentOrgConfig()

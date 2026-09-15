@@ -1,16 +1,13 @@
 'use client'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { getUriWithOrg } from '@services/config/config'
-import { Image as ImageIcon, Link2, Shield, MessagesSquare, Users } from 'lucide-react'
-import React, { useEffect, use } from 'react'
+import { Shield, MessagesSquare, Eye } from 'lucide-react'
+import Link from 'next/link'
+import React, { use } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { CommunityProvider, useCommunity } from '@components/Contexts/CommunityContext'
-import CommunityEditGeneral from '@components/Dashboard/Pages/Community/CommunityEditGeneral'
-import CommunityEditThumbnail from '@components/Dashboard/Pages/Community/CommunityEditThumbnail'
-import CommunityEditCourse from '@components/Dashboard/Pages/Community/CommunityEditCourse'
 import CommunityEditModeration from '@components/Dashboard/Pages/Community/CommunityEditModeration'
-import CommunityEditAccess from '@components/Dashboard/Pages/Community/CommunityEditAccess'
 import { DashTabBar, DashTabItem } from '@components/Dashboard/Shared/DashTabBar/DashTabBar'
 
 export type CommunityParams = {
@@ -19,74 +16,22 @@ export type CommunityParams = {
   communityuuid: string
 }
 
+// A community's moderation rules. The community itself (name, description,
+// course link) is platform content, so there is nothing else to edit here.
 function CommunitySettingsContent({ params }: { params: CommunityParams }) {
   const { t } = useTranslation()
   const communityState = useCommunity()
   const community = communityState?.community
 
-  const [H1Label, setH1Label] = React.useState('')
-  const [H2Label, setH2Label] = React.useState('')
-
-  function handleLabels() {
-    if (params.subpage === 'general') {
-      setH1Label(t('dashboard.courses.communities.settings.general.title'))
-      setH2Label(t('dashboard.courses.communities.settings.general.subtitle'))
-    } else if (params.subpage === 'thumbnail') {
-      setH1Label(t('dashboard.courses.communities.settings.thumbnail.title'))
-      setH2Label(t('dashboard.courses.communities.settings.thumbnail.subtitle'))
-    } else if (params.subpage === 'access') {
-      setH1Label(t('dashboard.courses.communities.settings.access.title'))
-      setH2Label(t('dashboard.courses.communities.settings.access.subtitle'))
-    } else if (params.subpage === 'course') {
-      setH1Label(t('dashboard.courses.communities.settings.course.title'))
-      setH2Label(t('dashboard.courses.communities.settings.course.subtitle'))
-    } else if (params.subpage === 'moderation') {
-      setH1Label(t('dashboard.courses.communities.settings.moderation.title'))
-      setH2Label(t('dashboard.courses.communities.settings.moderation.subtitle'))
-    }
-  }
-
-  useEffect(() => {
-    handleLabels()
-  }, [params.subpage, t])
-
   if (!community) return null
 
   const tabs: DashTabItem[] = [
-    {
-      key: 'general',
-      label: t('dashboard.courses.communities.settings.tabs.general'),
-      icon: <MessagesSquare size={16} />,
-      href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/general`,
-      active: params.subpage === 'general',
-    },
-    {
-      key: 'thumbnail',
-      label: t('dashboard.courses.communities.settings.tabs.thumbnail'),
-      icon: <ImageIcon size={16} />,
-      href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/thumbnail`,
-      active: params.subpage === 'thumbnail',
-    },
-    {
-      key: 'access',
-      label: t('dashboard.courses.communities.settings.tabs.access'),
-      icon: <Users size={16} />,
-      href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/access`,
-      active: params.subpage === 'access',
-    },
-    {
-      key: 'course',
-      label: t('dashboard.courses.communities.settings.tabs.course'),
-      icon: <Link2 size={16} />,
-      href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/course`,
-      active: params.subpage === 'course',
-    },
     {
       key: 'moderation',
       label: t('dashboard.courses.communities.settings.tabs.moderation'),
       icon: <Shield size={16} />,
       href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/moderation`,
-      active: params.subpage === 'moderation',
+      active: true,
     },
   ]
 
@@ -95,15 +40,26 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
       <div className="ps-4 pe-4 sm:ps-10 sm:pe-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
         <div className="pt-6 pb-4">
           <Breadcrumbs items={[
-            { label: t('dashboard.courses.communities.title'), href: '/dash/communities', icon: <MessagesSquare size={14} /> },
+            { label: 'Community moderation', href: '/dash/communities', icon: <MessagesSquare size={14} /> },
             { label: community.name }
           ]} />
         </div>
-        <div className="my-2 py-2">
+        <div className="my-2 py-2 flex items-center justify-between gap-4">
           <div className="w-full flex flex-col space-y-1 min-w-0">
-            <div className="pt-3 flex font-bold text-3xl sm:text-4xl tracking-tighter truncate">{H1Label}</div>
-            <div className="flex font-medium text-gray-400 text-md truncate">{H2Label}</div>
+            <div className="pt-3 flex font-bold text-3xl sm:text-4xl tracking-tighter truncate">
+              {t('dashboard.courses.communities.settings.moderation.title')}
+            </div>
+            <div className="flex font-medium text-gray-400 text-md truncate">
+              {t('dashboard.courses.communities.settings.moderation.subtitle')}
+            </div>
           </div>
+          <Link
+            href={getUriWithOrg(params.orgslug, `/community/${params.communityuuid}`)}
+            className="shrink-0 px-3.5 py-2 text-sm font-semibold text-neutral-600 bg-neutral-50/70 hover:bg-neutral-100/70 rounded-lg ring-1 ring-neutral-200/60 transition-colors flex items-center space-x-2"
+          >
+            <Eye className="w-4 h-4" />
+            <span className="hidden sm:inline">View community</span>
+          </Link>
         </div>
         <DashTabBar tabs={tabs} />
       </div>
@@ -115,11 +71,7 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
         className="flex-1 overflow-y-auto"
       >
-        {params.subpage === 'general' && <CommunityEditGeneral />}
-        {params.subpage === 'thumbnail' && <CommunityEditThumbnail />}
-        {params.subpage === 'access' && <CommunityEditAccess />}
-        {params.subpage === 'course' && <CommunityEditCourse />}
-        {params.subpage === 'moderation' && <CommunityEditModeration />}
+        <CommunityEditModeration />
       </motion.div>
     </div>
   )

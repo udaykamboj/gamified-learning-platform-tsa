@@ -15,25 +15,24 @@ import {
   CircleNotch,
 } from '@phosphor-icons/react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { apiFetch } from '@services/utils/ts/requests'
-import { getUserGroups } from '@services/usergroups/usergroups'
+import { useRouter } from 'next/navigation'
 import {
+  deletePlayground,
   updatePlayground,
   updatePlaygroundThumbnail,
-  addUserGroupToPlayground,
-  removeUserGroupFromPlayground,
+  getPlaygroundShares,
+  sharePlayground,
+  unsharePlayground,
   Playground,
   PlaygroundAccessType,
 } from '@services/playgrounds/playgrounds'
 import { getPlaygroundThumbnailMediaDirectory } from '@services/media/media'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
+import UnsplashImagePicker from '@components/Objects/UnsplashImagePicker/UnsplashImagePicker'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 import toast from 'react-hot-toast'
-import Link from 'next/link'
 
 type Tab = 'general' | 'access' | 'thumbnail'
 
@@ -56,7 +55,7 @@ export default function PlaygroundOptionsModal({
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'general', label: 'General', icon: <TextT size={14} weight="bold" /> },
-    { id: 'access', label: 'Access', icon: <ShieldCheck size={14} weight="bold" /> },
+    { id: 'access', label: 'Sharing', icon: <ShieldCheck size={14} weight="bold" /> },
     { id: 'thumbnail', label: 'Thumbnail', icon: <Image size={14} weight="bold" /> },
   ]
 
@@ -99,7 +98,6 @@ export default function PlaygroundOptionsModal({
               <AccessTab
                 playground={playground}
                 orgslug={orgslug}
-                orgId={playground.org_id}
                 onUpdated={onUpdated}
               />
             )}
@@ -139,6 +137,22 @@ function GeneralTab({
 
   const hasChanges =
     name !== playground.name || description !== (playground.description || '')
+
+  const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete "${playground.name}"? This can't be undone.`)) return
+    setIsDeleting(true)
+    try {
+      await deletePlayground(playground.playground_uuid, access_token)
+      queryClient.invalidateQueries({ queryKey: queryKeys.playgrounds.list(orgslug) })
+      toast.success('Playground deleted')
+      router.push('/playgrounds')
+    } catch {
+      toast.error('Failed to delete playground')
+      setIsDeleting(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!name.trim()) return
@@ -202,6 +216,21 @@ function GeneralTab({
           </button>
         </div>
       )}
+
+      {playground.my_role === 'owner' && (
+        <div className="pt-6 border-t border-gray-100 space-y-2">
+          <p className="text-sm font-bold text-gray-800">Delete playground</p>
+          <p className="text-xs text-gray-400">This removes the playground for you and everyone you shared it with.</p>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold transition-all disabled:opacity-50"
+          >
+            <X size={14} weight="bold" />
+            {isDeleting ? 'Deleting…' : 'Delete playground'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -210,32 +239,33 @@ function GeneralTab({
 function AccessTab({
   playground,
   orgslug,
-  orgId,
   onUpdated,
 }: {
   playground: Playground
   orgslug: string
-  orgId: number
   onUpdated: (_p: Playground) => void
 }) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const isOwner = playground.my_role === 'owner'
 
   const queryClient = useQueryClient()
   const [accessType, setAccessType] = useState<PlaygroundAccessType>(playground.access_type)
   const [isSaving, setIsSaving] = useState(false)
-  const [linkModalOpen, setLinkModalOpen] = useState(false)
+  const [identifier, setIdentifier] = useState('')
+  const [shareRole, setShareRole] = useState<'viewer' | 'editor'>('viewer')
+  const [isSharing, setIsSharing] = useState(false)
 
-  // Correct endpoint: GET /playgrounds/{uuid}/usergroups
-  const { data: usergroups } = useQuery({
-    queryKey: [...queryKeys.playgrounds.detail(playground.playground_uuid), 'usergroups'],
-    queryFn: () => apiFetch(`${getAPIUrl()}playgrounds/${playground.playground_uuid}/usergroups`, access_token),
-    enabled: !!access_token && accessType === 'restricted',
+  const sharesKey = [...queryKeys.playgrounds.detail(playground.playground_uuid), 'shares']
+  const { data: shares } = useQuery({
+    queryKey: sharesKey,
+    queryFn: () => getPlaygroundShares(playground.playground_uuid, access_token),
+    enabled: !!access_token,
     staleTime: 60_000,
   })
 
   const handleSetAccess = async (type: PlaygroundAccessType) => {
-    if (type === accessType || isSaving) return
+    if (!isOwner || type === accessType || isSaving) return
     setIsSaving(true)
     const previous = accessType
     setAccessType(type)
@@ -257,15 +287,29 @@ function AccessTab({
     }
   }
 
-  // Uses dedicated playground endpoint: DELETE /playgrounds/{uuid}/usergroups/{ug_uuid}
-  const removeUserGroup = async (usergroupUuid: string) => {
+  const handleShare = async () => {
+    const value = identifier.trim()
+    if (!value || isSharing) return
+    setIsSharing(true)
     try {
-      await removeUserGroupFromPlayground(playground.playground_uuid, usergroupUuid, access_token)
-      toast.success('User group removed')
-      queryClient.invalidateQueries({ queryKey: [...queryKeys.playgrounds.detail(playground.playground_uuid), 'usergroups'] })
-      queryClient.invalidateQueries({ queryKey: queryKeys.playgrounds.detail(playground.playground_uuid) })
+      await sharePlayground(playground.playground_uuid, value, shareRole, access_token)
+      setIdentifier('')
+      toast.success('Playground shared')
+      queryClient.invalidateQueries({ queryKey: sharesKey })
+    } catch (err: any) {
+      toast.error(err?.detail || err?.message || 'Could not share with that person')
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  const handleUnshare = async (userId: number) => {
+    try {
+      await unsharePlayground(playground.playground_uuid, userId, access_token)
+      toast.success('Removed')
+      queryClient.invalidateQueries({ queryKey: sharesKey })
     } catch {
-      toast.error('Failed to remove user group')
+      toast.error('Failed to remove')
     }
   }
 
@@ -276,34 +320,36 @@ function AccessTab({
     description: string
   }[] = [
     {
-      type: 'public',
-      icon: <Globe size={22} weight="duotone" className="text-green-500" />,
-      label: 'Public',
-      description: 'Anyone on the internet can view this playground.',
+      type: 'restricted',
+      icon: <Lock size={22} weight="duotone" className="text-amber-500" />,
+      label: 'Private',
+      description: 'Only you and the people you share it with.',
     },
     {
       type: 'authenticated',
       icon: <Users size={22} weight="duotone" className="text-sky-500" />,
-      label: 'Members only',
-      description: 'Only signed-in members of your organization can view.',
+      label: 'Anyone signed in with the link',
+      description: 'Any signed-in member who has the link can open it.',
     },
     {
-      type: 'restricted',
-      icon: <Lock size={22} weight="duotone" className="text-amber-500" />,
-      label: 'Restricted',
-      description: 'Only specific user groups you select can view.',
+      type: 'public',
+      icon: <Globe size={22} weight="duotone" className="text-green-500" />,
+      label: 'Public',
+      description: 'Anyone on the internet with the link can open it.',
     },
   ]
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-gray-900 mb-0.5">Access control</h2>
-        <p className="text-xs text-gray-400">Choose who can view this playground.</p>
+        <h2 className="text-base font-bold text-gray-900 mb-0.5">Sharing</h2>
+        <p className="text-xs text-gray-400">
+          {isOwner ? 'Choose who can open this playground.' : 'Only the owner can change who can open this playground.'}
+        </p>
       </div>
 
       {/* Access type cards */}
-      <div className={`space-y-2 ${isSaving ? 'opacity-60 pointer-events-none' : ''}`}>
+      <div className={`space-y-2 ${isSaving || !isOwner ? 'opacity-60 pointer-events-none' : ''}`}>
         {ACCESS_OPTIONS.map((opt) => {
           const active = accessType === opt.type
           return (
@@ -333,81 +379,80 @@ function AccessTab({
         })}
       </div>
 
-      {/* User groups — only for restricted */}
-      {accessType === 'restricted' && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-bold text-gray-800">User groups</p>
-              <p className="text-xs text-gray-400">Groups that can access this playground</p>
-            </div>
-            <Modal
-              isDialogOpen={linkModalOpen}
-              onOpenChange={setLinkModalOpen}
-              minWidth="no-min"
-              minHeight="no-min"
-              dialogTitle="Link user group"
-              dialogDescription="Select a user group to grant access to this playground."
-              dialogContent={
-                <LinkUserGroupForm
-                  playgroundUuid={playground.playground_uuid}
-                  orgId={orgId}
-                  orgslug={orgslug}
-                  accessToken={access_token}
-                  onDone={() => setLinkModalOpen(false)}
-                />
-              }
-              dialogTrigger={
-                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-900 text-white text-xs font-black nice-shadow transition-all">
-                  <Plus size={12} weight="bold" />
-                  Add group
-                </button>
-              }
-            />
-          </div>
+      {/* People */}
+      <div className="space-y-3">
+        <div>
+          <p className="text-sm font-bold text-gray-800">People</p>
+          <p className="text-xs text-gray-400">People you shared this playground with</p>
+        </div>
 
-          <div className="rounded-xl border border-gray-100 overflow-hidden">
-            {!usergroups || usergroups.length === 0 ? (
-              <div className="py-8 text-center">
-                <Lock size={20} className="text-gray-300 mx-auto mb-2" />
-                <p className="text-xs text-gray-400">No user groups linked yet</p>
-                <Link
-                  href={getUriWithOrg(orgslug, '/dash/users/settings/usergroups')}
-                  target="_blank"
-                  className="text-xs text-sky-600 hover:underline mt-1 inline-block"
-                >
-                  Manage user groups →
-                </Link>
-              </div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="text-start px-4 py-2.5 text-xs font-semibold text-gray-500">Group</th>
-                    <th className="px-4 py-2.5" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {usergroups.map((ug: any) => (
-                    <tr key={ug.usergroup_uuid} className="border-b border-gray-50 last:border-0">
-                      <td className="px-4 py-3 font-medium text-gray-800">{ug.name}</td>
-                      <td className="px-4 py-3 text-end">
+        {isOwner && (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleShare() }}
+              placeholder="Username or email"
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            />
+            <select
+              value={shareRole}
+              onChange={(e) => setShareRole(e.target.value as 'viewer' | 'editor')}
+              className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            >
+              <option value="viewer">Can view</option>
+              <option value="editor">Can edit</option>
+            </select>
+            <button
+              onClick={handleShare}
+              disabled={!identifier.trim() || isSharing}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-900 text-white text-xs font-black nice-shadow transition-all disabled:opacity-50"
+            >
+              <Plus size={12} weight="bold" />
+              Share
+            </button>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-gray-100 overflow-hidden">
+          {!shares || shares.length === 0 ? (
+            <div className="py-8 text-center">
+              <Lock size={20} className="text-gray-300 mx-auto mb-2" />
+              <p className="text-xs text-gray-400">Not shared with anyone yet</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-start px-4 py-2.5 text-xs font-semibold text-gray-500">Person</th>
+                  <th className="text-start px-4 py-2.5 text-xs font-semibold text-gray-500">Access</th>
+                  <th className="px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                {shares.map((share) => (
+                  <tr key={share.user_id} className="border-b border-gray-50 last:border-0">
+                    <td className="px-4 py-3 font-medium text-gray-800">@{share.username}</td>
+                    <td className="px-4 py-3 text-gray-500">{share.role === 'editor' ? 'Can edit' : 'Can view'}</td>
+                    <td className="px-4 py-3 text-end">
+                      {isOwner && (
                         <button
-                          onClick={() => removeUserGroup(ug.usergroup_uuid)}
+                          onClick={() => handleUnshare(share.user_id)}
                           className="flex items-center gap-1 ms-auto h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition-all"
                         >
                           <X size={11} weight="bold" />
                           Remove
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -573,93 +618,6 @@ function ThumbnailTab({
           onClose={() => setShowUnsplash(false)}
         />
       )}
-    </div>
-  )
-}
-
-/* ── Link user group form ── */
-function LinkUserGroupForm({
-  playgroundUuid,
-  orgId,
-  orgslug,
-  accessToken,
-  onDone,
-}: {
-  playgroundUuid: string
-  orgId: number
-  orgslug: string
-  accessToken: string
-  onDone: () => void
-}) {
-  const queryClient = useQueryClient()
-  const { data: allGroups } = useQuery({
-    queryKey: queryKeys.usergroups.list(orgId),
-    queryFn: () => getUserGroups(orgId, accessToken),
-    select: (res: any) => res?.data ?? res,
-    enabled: !!accessToken && !!orgId,
-    staleTime: 60_000,
-  })
-  // Store usergroup_uuid (string) — needed by the playground endpoint
-  const [selected, setSelected] = useState<string>('')
-
-  useEffect(() => {
-    if (allGroups?.length > 0) setSelected(allGroups[0].usergroup_uuid)
-  }, [allGroups])
-
-  const handleLink = async () => {
-    if (!selected) return
-    try {
-      // Correct endpoint: POST /playgrounds/{uuid}/usergroups/{ug_uuid}
-      await addUserGroupToPlayground(playgroundUuid, selected, accessToken)
-      toast.success('User group linked')
-      queryClient.invalidateQueries({ queryKey: [...queryKeys.playgrounds.detail(playgroundUuid), 'usergroups'] })
-      queryClient.invalidateQueries({ queryKey: queryKeys.playgrounds.detail(playgroundUuid) })
-      onDone()
-    } catch {
-      toast.error('Failed to link user group')
-    }
-  }
-
-  if (!allGroups) {
-    return <div className="py-4 text-center text-sm text-gray-400">Loading…</div>
-  }
-
-  if (allGroups.length === 0) {
-    return (
-      <div className="py-6 text-center space-y-2">
-        <p className="text-sm text-gray-500">No user groups available.</p>
-        <Link
-          href={getUriWithOrg(orgslug, '/dash/users/settings/usergroups')}
-          target="_blank"
-          className="text-sm text-sky-600 hover:underline"
-        >
-          Create a user group →
-        </Link>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-      >
-        {allGroups.map((g: any) => (
-          <option key={g.usergroup_uuid} value={g.usergroup_uuid}>{g.name}</option>
-        ))}
-      </select>
-      <div className="flex justify-end">
-        <button
-          onClick={handleLink}
-          disabled={!selected}
-          className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-black nice-shadow transition-all disabled:opacity-50"
-        >
-          <Plus size={14} weight="bold" />
-          Link group
-        </button>
-      </div>
     </div>
   )
 }

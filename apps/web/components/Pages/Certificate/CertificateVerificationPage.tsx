@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { getCertificateByUuid } from '@services/courses/certifications';
-import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
+import CertificatePreview from '@components/Objects/Certificates/CertificatePreview';
 import { Shield, CheckCircle, XCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getUriWithOrg, getAbsoluteUriWithOrg } from '@services/config/config';

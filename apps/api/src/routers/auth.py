@@ -649,9 +649,6 @@ async def third_party_login(
     import redis as _redis
     _logger = logging.getLogger(__name__)
 
-    # Usergroup to attach the user to after sign-in, when they joined through an
-    # invite code that is linked to one (mirrors create_user_with_invite).
-    _invite_usergroup_id = None
     # Pending email invite to mark as consumed once the user actually joins.
     _consume_invite_key = None
 
@@ -747,7 +744,6 @@ async def third_party_login(
                     _code_data = None
                 if _code_data:
                     _authorized = True
-                    _invite_usergroup_id = _code_data.get("usergroup_id")
 
             # 2. Or a pending invite sent to this address from the org dashboard.
             if not _authorized:
@@ -811,28 +807,8 @@ async def third_party_login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Finish the invite the same way the form signup does: attach the usergroup
-    # the invite code is linked to, and stop showing the invite as pending.
-    # Neither of these ran on the OAuth path before, so a user invited by email
-    # stayed "pending" in the org's member list after joining, and an invite code
-    # carrying a usergroup silently didn't apply it.
-    if _invite_usergroup_id and user.id is not None:
-        from src.db.users import InternalUser
-        from src.services.users.usergroups import add_users_to_usergroup
-
-        try:
-            await add_users_to_usergroup(
-                request,
-                db_session,
-                InternalUser(id=0),
-                int(_invite_usergroup_id),
-                str(user.id),
-            )
-        except Exception:
-            # The account exists and is in the org; a usergroup failure must not
-            # turn a completed sign-in into an error.
-            _logger.warning("Could not attach OAuth user to invite usergroup")
-
+    # Finish the invite the same way the form signup does: stop showing the
+    # invite as pending once the user has joined.
     if _consume_invite_key:
         _r = None
         try:

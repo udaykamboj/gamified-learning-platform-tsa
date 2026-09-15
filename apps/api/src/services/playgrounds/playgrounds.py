@@ -1,178 +1,177 @@
-from typing import List
-from uuid import uuid4
+"""Playgrounds: the student's own AI workspaces.
+
+Any signed-in member creates as many as they want, renames, edits and deletes
+their own, keeps them private or shares them with specific people
+(docs/refactor/progress/00-requirements.md, R12). Nobody provisions playgrounds
+and admins have no special access to a student's playground.
+
+Access:
+- owner: everything
+- shared editor: open, generate, rename and edit content
+- shared viewer: open
+- access_type AUTHENTICATED / PUBLIC: anyone signed in / anyone with the link can open it
+"""
+
 from datetime import datetime, timezone
+from typing import List, Optional
+from uuid import uuid4
+
 from fastapi import HTTPException, Request, UploadFile
-from sqlmodel import select
+from sqlmodel import func, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from src.db.courses.courses import Course
+from src.db.organizations import Organization
 from src.db.playgrounds import (
     Playground,
+    PlaygroundAccessType,
     PlaygroundCreate,
     PlaygroundRead,
+    PlaygroundShare,
+    PlaygroundShareCreate,
+    PlaygroundShareRead,
+    PlaygroundShareRole,
     PlaygroundUpdate,
-    PlaygroundAccessType,
 )
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
-from src.db.users import PublicUser, AnonymousUser, APITokenUser, User
-from src.security.auth import resolve_acting_user_id
-from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
-from src.db.courses.courses import Course
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
-from src.security.superadmin import is_user_superadmin
+from src.db.users import AnonymousUser, APITokenUser, PublicUser, User
+from src.security.auth import resolve_acting_user_id
 from src.services.utils.upload_content import upload_file
 from src.services.webhooks.dispatch import dispatch_webhooks
 
-
-_SUPERADMIN_PLAYGROUND_RIGHTS = {
-    "action_create": True,
-    "action_read": True,
-    "action_read_own": True,
-    "action_update": True,
-    "action_update_own": True,
-    "action_delete": True,
-    "action_delete_own": True,
-}
+OWNER = "owner"
 
 
-async def _playground_to_read(playground: Playground, db_session: AsyncSession) -> PlaygroundRead:
-    """Convert a Playground model to PlaygroundRead, enriching with org_uuid, org_slug, and author info."""
-    read = PlaygroundRead.model_validate(playground)
-    org = (await db_session.execute(select(Organization).where(Organization.id == playground.org_id))).scalars().first()
-    if org:
-        read.org_uuid = org.org_uuid
-        read.org_slug = org.slug
-    if playground.created_by:
-        author = (await db_session.execute(select(User).where(User.id == playground.created_by))).scalars().first()
-        if author:
-            read.author_username = author.username
-            read.author_first_name = author.first_name
-            read.author_last_name = author.last_name
-            read.author_user_uuid = author.user_uuid
-            read.author_avatar_image = author.avatar_image
-    return read
+def _now() -> str:
+    return datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
 
-async def _get_user_rights(
-    user_id: int,
-    org_id: int,
-    db_session: AsyncSession,
-) -> dict:
-    # Superadmins administer every tenant from the platform panel; they don't
-    # need an org membership row.
-    if await is_user_superadmin(user_id, db_session):
-        return {"playgrounds": dict(_SUPERADMIN_PLAYGROUND_RIGHTS)}
-
-    statement = (
-        select(UserOrganization)
-        .where(UserOrganization.user_id == user_id)
-        .where(UserOrganization.org_id == org_id)
-    )
-    user_org = (await db_session.execute(statement)).scalars().first()
-    if not user_org:
-        return {}
-
-    # The caller is a confirmed member — subject to the org's 2FA policy. Every
-    # mutating playground gate (create/update/delete/duplicate and the usergroup
-    # ops) resolves rights through here, so enforcing once closes the whole set
-    # of write paths against a member who is past their two-factor deadline.
-    from src.security.org_auth import enforce_org_mfa
-
-    await enforce_org_mfa(user_id, org_id, db_session)
-
-    from src.db.roles import Role
-    role = (await db_session.execute(select(Role).where(Role.id == user_org.role_id))).scalars().first()
-    if not role or not role.rights:
-        return {}
-
-    rights = role.rights
-    if isinstance(rights, dict):
-        return rights
-    return rights.model_dump() if hasattr(rights, "model_dump") else {}
+async def _get_playground_or_404(playground_uuid: str, db_session: AsyncSession) -> Playground:
+    playground = (await db_session.execute(
+        select(Playground).where(Playground.playground_uuid == playground_uuid)
+    )).scalars().first()
+    if not playground:
+        raise HTTPException(status_code=404, detail="Playground not found")
+    return playground
 
 
-async def _enforce_member_mfa(user_id: int, org_id: int, db_session: AsyncSession) -> None:
-    """Apply the org's "require two-factor" policy — but only to actual members.
-
-    Playgrounds are also served to non-members and anonymous users (PUBLIC /
-    AUTHENTICATED access types), and the org 2FA policy governs *members* of the
-    org, not passers-by. Without the membership gate, an authenticated non-member
-    with no second factor would be wrongly blocked from an org's public
-    playgrounds, because :func:`evaluate_mfa_compliance` falls back to the policy
-    anchor when there is no membership row. Superadmins carry no membership row
-    and are exempt inside the policy layer anyway, so skipping them here is safe.
-    """
-    membership = (
-        await db_session.execute(
-            select(UserOrganization).where(
-                UserOrganization.user_id == user_id,
-                UserOrganization.org_id == org_id,
-            )
+async def _require_member(user_id: int, org_id: int, db_session: AsyncSession) -> None:
+    """The caller must belong to the platform; also applies its 2FA policy."""
+    membership = (await db_session.execute(
+        select(UserOrganization).where(
+            UserOrganization.user_id == user_id,
+            UserOrganization.org_id == org_id,
         )
-    ).scalars().first()
+    )).scalars().first()
     if membership is None:
-        return
+        raise HTTPException(status_code=403, detail="You must be a member of this platform")
     from src.security.org_auth import enforce_org_mfa
 
     await enforce_org_mfa(user_id, org_id, db_session)
 
 
-async def _is_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> bool:
-    statement = (
-        select(UserOrganization)
-        .where(UserOrganization.user_id == user_id)
-        .where(UserOrganization.org_id == org_id)
-    )
-    user_org = (await db_session.execute(statement)).scalars().first()
-    if not user_org:
-        return False
-    return user_org.role_id in ADMIN_OR_MAINTAINER_ROLE_IDS
-
-
-async def _user_in_playground_usergroup(
-    user_id: int, playground_uuid: str, db_session: AsyncSession
-) -> bool:
-    usergroup_stmt = select(UserGroupResource).where(
-        UserGroupResource.resource_uuid == playground_uuid
-    )
-    ugrs = (await db_session.execute(usergroup_stmt)).scalars().all()
-    if not ugrs:
-        return False
-
-    usergroup_ids = [ugr.usergroup_id for ugr in ugrs]
-    membership_stmt = select(UserGroupUser).where(
-        UserGroupUser.usergroup_id.in_(usergroup_ids),
-        UserGroupUser.user_id == user_id,
-    )
-    return (await db_session.execute(membership_stmt)).scalars().first() is not None
+async def get_playground_role(
+    playground: Playground,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> Optional[str]:
+    """The caller's relation to the playground: owner, editor, viewer or None."""
+    if isinstance(current_user, AnonymousUser):
+        return None
+    user_id = resolve_acting_user_id(current_user)
+    if playground.created_by == user_id:
+        return OWNER
+    share = (await db_session.execute(
+        select(PlaygroundShare).where(
+            PlaygroundShare.playground_id == playground.id,
+            PlaygroundShare.user_id == user_id,
+        )
+    )).scalars().first()
+    return share.role if share else None
 
 
 async def _check_read_access(
     playground: Playground,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
-) -> None:
-    """Raise 403 if current_user cannot read this playground."""
+) -> Optional[str]:
+    """Raise unless the caller can open the playground. Returns their role."""
+    role = await get_playground_role(playground, current_user, db_session)
+    if role is not None:
+        return role
     if playground.access_type == PlaygroundAccessType.PUBLIC:
-        return
-
+        return None
     if isinstance(current_user, AnonymousUser):
         raise HTTPException(status_code=401, detail="Authentication required")
-
     if playground.access_type == PlaygroundAccessType.AUTHENTICATED:
-        return
+        return None
+    # Private playgrounds don't reveal they exist.
+    raise HTTPException(status_code=404, detail="Playground not found")
 
-    # RESTRICTED
-    acting_user_id = resolve_acting_user_id(current_user)
-    if await _is_org_admin(acting_user_id, playground.org_id, db_session):
-        return
-    if playground.created_by == acting_user_id:
-        return
-    if await _user_in_playground_usergroup(acting_user_id, playground.playground_uuid, db_session):
-        return
 
-    raise HTTPException(status_code=403, detail="Access denied to this playground")
+async def require_playground_editor(
+    playground: Playground,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> str:
+    """Owner or shared editor. Used by edits and AI generation."""
+    role = await get_playground_role(playground, current_user, db_session)
+    if role in (OWNER, PlaygroundShareRole.EDITOR.value):
+        return role
+    if role is None:
+        await _check_read_access(playground, current_user, db_session)
+    raise HTTPException(status_code=403, detail="You can't edit this playground")
+
+
+async def _require_owner(
+    playground: Playground,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> None:
+    role = await get_playground_role(playground, current_user, db_session)
+    if role == OWNER:
+        return
+    if role is None:
+        await _check_read_access(playground, current_user, db_session)
+    raise HTTPException(status_code=403, detail="Only the owner can do this")
+
+
+async def _to_read(
+    playground: Playground,
+    db_session: AsyncSession,
+    my_role: Optional[str] = None,
+    org: Optional[Organization] = None,
+    author: Optional[User] = None,
+) -> PlaygroundRead:
+    read = PlaygroundRead.model_validate(playground)
+    if org is None:
+        org = (await db_session.execute(
+            select(Organization).where(Organization.id == playground.org_id)
+        )).scalars().first()
+    if org:
+        read.org_uuid = org.org_uuid
+        read.org_slug = org.slug
+    if author is None and playground.created_by:
+        author = (await db_session.execute(
+            select(User).where(User.id == playground.created_by)
+        )).scalars().first()
+    if author:
+        read.author_username = author.username
+        read.author_first_name = author.first_name
+        read.author_last_name = author.last_name
+        read.author_user_uuid = author.user_uuid
+        read.author_avatar_image = author.avatar_image
+    read.my_role = my_role
+    return read
+
+
+async def _resolve_course_id(course_uuid: Optional[str], org_id: int, db_session: AsyncSession) -> Optional[int]:
+    if not course_uuid:
+        return None
+    course = (await db_session.execute(
+        select(Course).where(Course.course_uuid == course_uuid)
+    )).scalars().first()
+    return course.id if course and course.org_id == org_id else None
 
 
 async def create_playground(
@@ -182,32 +181,16 @@ async def create_playground(
     current_user: PublicUser,
     db_session: AsyncSession,
 ) -> PlaygroundRead:
-    # Verify org exists
     org = (await db_session.execute(select(Organization).where(Organization.id == org_id))).scalars().first()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
+    if isinstance(current_user, (AnonymousUser, APITokenUser)):
+        raise HTTPException(status_code=401, detail="Sign in to create a playground")
 
-    # Check rights. Resolve the real acting user id: an API token authenticates
-    # as APITokenUser whose .id is the token id (often 0), not a user id. Using
-    # current_user.id directly would (a) make every rights/ownership check fail
-    # for token callers and (b) store the token id as created_by, which is a FK
-    # to user.id — corrupting the author reference.
     acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    if not pg_rights.get("action_create", False):
-        raise HTTPException(status_code=403, detail="Insufficient permissions to create playgrounds")
+    await _require_member(acting_user_id, org_id, db_session)
 
-    # Resolve course_id if course_uuid provided
-    course_id = None
-    if playground_data.course_uuid:
-        course = (await db_session.execute(
-            select(Course).where(Course.course_uuid == playground_data.course_uuid)
-        )).scalars().first()
-        if course and course.org_id == org_id:
-            course_id = course.id
-
-    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    now = _now()
     playground = Playground(
         name=playground_data.name,
         description=playground_data.description,
@@ -218,7 +201,7 @@ async def create_playground(
         html_content=playground_data.html_content,
         org_id=org_id,
         playground_uuid=str(uuid4()),
-        course_id=course_id,
+        course_id=await _resolve_course_id(playground_data.course_uuid, org_id, db_session),
         created_by=acting_user_id,
         creation_date=now,
         update_date=now,
@@ -237,7 +220,7 @@ async def create_playground(
         },
     )
 
-    return await _playground_to_read(playground, db_session)
+    return await _to_read(playground, db_session, my_role=OWNER, org=org)
 
 
 async def get_playground(
@@ -246,34 +229,9 @@ async def get_playground(
     current_user: PublicUser | AnonymousUser,
     db_session: AsyncSession,
 ) -> PlaygroundRead:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    await _check_read_access(playground, current_user, db_session)
-
-    if not isinstance(current_user, AnonymousUser):
-        await _enforce_member_mfa(
-            resolve_acting_user_id(current_user), playground.org_id, db_session
-        )
-
-    # Unpublished (draft) playgrounds must never be exposed by uuid to anyone
-    # other than the owner or an org admin. _check_read_access only validates
-    # access_type, so without this guard a draft PUBLIC/AUTHENTICATED playground
-    # would be readable by anonymous/any authenticated user via its uuid — the
-    # same content list_org_playgrounds deliberately hides.
-    if not playground.published:
-        if isinstance(current_user, AnonymousUser):
-            raise HTTPException(status_code=404, detail="Playground not found")
-        acting_user_id = resolve_acting_user_id(current_user)
-        if playground.created_by != acting_user_id and not await _is_org_admin(
-            acting_user_id, playground.org_id, db_session
-        ):
-            raise HTTPException(status_code=404, detail="Playground not found")
-
-    return await _playground_to_read(playground, db_session)
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    role = await _check_read_access(playground, current_user, db_session)
+    return await _to_read(playground, db_session, my_role=role)
 
 
 async def list_org_playgrounds(
@@ -282,103 +240,42 @@ async def list_org_playgrounds(
     current_user: PublicUser | AnonymousUser,
     db_session: AsyncSession,
 ) -> List[PlaygroundRead]:
-    playgrounds = (await db_session.execute(
-        select(Playground).where(Playground.org_id == org_id)
-    )).scalars().all()
-    if not playgrounds:
+    """The caller's playgrounds: owned and shared with them, most recent first."""
+    if isinstance(current_user, AnonymousUser):
         return []
+    user_id = resolve_acting_user_id(current_user)
+    await _require_member(user_id, org_id, db_session)
 
-    is_anon = isinstance(current_user, AnonymousUser)
-    # An API token's .id is the token id, not a user id; resolve to the real
-    # acting user so ownership/admin visibility checks below evaluate correctly.
-    user_id = None if is_anon else resolve_acting_user_id(current_user)
-
-    if not is_anon:
-        await _enforce_member_mfa(user_id, org_id, db_session)
-
-    is_admin = False if is_anon else await _is_org_admin(user_id, org_id, db_session)
-
-    # Batch resolve usergroup access for RESTRICTED playgrounds (only needed for
-    # authenticated non-admin non-owner users).
-    accessible_restricted_uuids: set[str] = set()
-    if not is_anon and not is_admin:
-        restricted_uuids = [
-            pg.playground_uuid
-            for pg in playgrounds
-            if pg.access_type == PlaygroundAccessType.RESTRICTED
-            and pg.created_by != user_id
-        ]
-        if restricted_uuids:
-            ugrs = (await db_session.execute(
-                select(
-                    UserGroupResource.resource_uuid,
-                    UserGroupResource.usergroup_id,
-                ).where(UserGroupResource.resource_uuid.in_(restricted_uuids))
-            )).all()
-            if ugrs:
-                ug_ids = list({row[1] for row in ugrs})
-                member_ug_ids = set(
-                    (await db_session.execute(
-                        select(UserGroupUser.usergroup_id).where(
-                            UserGroupUser.usergroup_id.in_(ug_ids),
-                            UserGroupUser.user_id == user_id,
-                        )
-                    )).scalars().all()
-                )
-                for resource_uuid, ug_id in ugrs:
-                    if ug_id in member_ug_ids:
-                        accessible_restricted_uuids.add(resource_uuid)
-
-    allowed: list[Playground] = []
-    for pg in playgrounds:
-        if pg.access_type == PlaygroundAccessType.AUTHENTICATED and is_anon:
-            continue
-        if pg.access_type == PlaygroundAccessType.RESTRICTED:
-            if is_anon:
-                continue
-            if (
-                not is_admin
-                and pg.created_by != user_id
-                and pg.playground_uuid not in accessible_restricted_uuids
-            ):
-                continue
-
-        if not pg.published:
-            if is_anon:
-                continue
-            if not is_admin and pg.created_by != user_id:
-                continue
-
-        allowed.append(pg)
-
-    if not allowed:
+    rows = (await db_session.execute(
+        select(Playground, PlaygroundShare.role)
+        .outerjoin(
+            PlaygroundShare,
+            (PlaygroundShare.playground_id == Playground.id) & (PlaygroundShare.user_id == user_id),
+        )
+        .where(Playground.org_id == org_id)
+        .where(or_(Playground.created_by == user_id, PlaygroundShare.user_id == user_id))
+        .order_by(Playground.update_date.desc())  # type: ignore[attr-defined]
+    )).all()
+    if not rows:
         return []
 
     org = (await db_session.execute(select(Organization).where(Organization.id == org_id))).scalars().first()
-    author_ids = {pg.created_by for pg in allowed if pg.created_by}
-    authors_map: dict[int, User] = {}
-    if author_ids:
-        authors = (await db_session.execute(
-            select(User).where(User.id.in_(author_ids))
-        )).scalars().all()
-        authors_map = {u.id: u for u in authors}
+    author_ids = {pg.created_by for pg, _ in rows if pg.created_by}
+    authors = {
+        u.id: u
+        for u in (await db_session.execute(select(User).where(User.id.in_(author_ids)))).scalars().all()  # type: ignore[attr-defined]
+    } if author_ids else {}
 
-    result: List[PlaygroundRead] = []
-    for pg in allowed:
-        read = PlaygroundRead.model_validate(pg)
-        if org:
-            read.org_uuid = org.org_uuid
-            read.org_slug = org.slug
-        author = authors_map.get(pg.created_by) if pg.created_by else None
-        if author:
-            read.author_username = author.username
-            read.author_first_name = author.first_name
-            read.author_last_name = author.last_name
-            read.author_user_uuid = author.user_uuid
-            read.author_avatar_image = author.avatar_image
-        result.append(read)
-
-    return result
+    return [
+        await _to_read(
+            pg,
+            db_session,
+            my_role=OWNER if pg.created_by == user_id else share_role,
+            org=org,
+            author=authors.get(pg.created_by),
+        )
+        for pg, share_role in rows
+    ]
 
 
 async def update_playground(
@@ -388,47 +285,25 @@ async def update_playground(
     current_user: PublicUser,
     db_session: AsyncSession,
 ) -> PlaygroundRead:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-
-    is_owner = playground.created_by == acting_user_id
-    can_update = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_update:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to update playground")
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    role = await require_playground_editor(playground, current_user, db_session)
 
     update_data = playground_data.model_dump(exclude_unset=True)
+    # Who can open it is the owner's decision.
+    if role != OWNER and ({"access_type", "published"} & update_data.keys()):
+        raise HTTPException(status_code=403, detail="Only the owner can change who can open this playground")
 
-    # Resolve course_id if course_uuid changed
     if "course_uuid" in update_data:
-        new_course_uuid = update_data.get("course_uuid")
-        if new_course_uuid:
-            course = (await db_session.execute(
-                select(Course).where(Course.course_uuid == new_course_uuid)
-            )).scalars().first()
-            if course and course.org_id == playground.org_id:
-                playground.course_id = course.id
-            else:
-                playground.course_id = None
-        else:
-            playground.course_id = None
+        playground.course_id = await _resolve_course_id(update_data.get("course_uuid"), playground.org_id, db_session)
 
     for key, value in update_data.items():
         setattr(playground, key, value)
 
-    playground.update_date = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    playground.update_date = _now()
     db_session.add(playground)
     await db_session.commit()
     await db_session.refresh(playground)
-    return await _playground_to_read(playground, db_session)
+    return await _to_read(playground, db_session, my_role=role)
 
 
 async def delete_playground(
@@ -437,31 +312,8 @@ async def delete_playground(
     current_user: PublicUser,
     db_session: AsyncSession,
 ) -> dict:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-
-    is_owner = playground.created_by == acting_user_id
-    can_delete = pg_rights.get("action_delete", False) or (
-        is_owner and pg_rights.get("action_delete_own", False)
-    )
-    if not can_delete:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to delete playground")
-
-    # Remove usergroup associations
-    ugrs = (await db_session.execute(
-        select(UserGroupResource).where(
-            UserGroupResource.resource_uuid == playground_uuid
-        )
-    )).scalars().all()
-    for ugr in ugrs:
-        await db_session.delete(ugr)
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    await _require_owner(playground, current_user, db_session)
 
     await db_session.delete(playground)
     await db_session.commit()
@@ -474,24 +326,20 @@ async def duplicate_playground(
     current_user: PublicUser,
     db_session: AsyncSession,
 ) -> PlaygroundRead:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
+    """Copy a playground the caller can open into a new private one they own."""
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    await _check_read_access(playground, current_user, db_session)
+    if isinstance(current_user, (AnonymousUser, APITokenUser)):
+        raise HTTPException(status_code=401, detail="Sign in to copy a playground")
     acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    if not pg_rights.get("action_create", False):
-        raise HTTPException(status_code=403, detail="Insufficient permissions to create playgrounds")
+    await _require_member(acting_user_id, playground.org_id, db_session)
 
-    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    now = _now()
     new_playground = Playground(
         name=f"{playground.name} (Copy)",
         description=playground.description,
         thumbnail_image=None,
-        access_type=playground.access_type,
+        access_type=PlaygroundAccessType.RESTRICTED,
         published=False,
         course_uuid=playground.course_uuid,
         html_content=playground.html_content,
@@ -505,103 +353,7 @@ async def duplicate_playground(
     db_session.add(new_playground)
     await db_session.commit()
     await db_session.refresh(new_playground)
-    return await _playground_to_read(new_playground, db_session)
-
-
-async def add_usergroup_to_playground(
-    request: Request,
-    playground_uuid: str,
-    usergroup_uuid: str,
-    current_user: PublicUser,
-    db_session: AsyncSession,
-) -> dict:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == acting_user_id
-    can_update = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_update:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-
-    from src.db.usergroups import UserGroup
-    ug = (await db_session.execute(
-        select(UserGroup).where(UserGroup.usergroup_uuid == usergroup_uuid)
-    )).scalars().first()
-    if not ug:
-        raise HTTPException(status_code=404, detail="User group not found")
-
-    existing = (await db_session.execute(
-        select(UserGroupResource).where(
-            UserGroupResource.resource_uuid == playground_uuid,
-            UserGroupResource.usergroup_id == ug.id,
-        )
-    )).scalars().first()
-    if existing:
-        return {"detail": "User group already has access"}
-
-    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-    ugr = UserGroupResource(
-        usergroup_id=ug.id,
-        resource_uuid=playground_uuid,
-        org_id=playground.org_id,
-        creation_date=now,
-        update_date=now,
-    )
-    db_session.add(ugr)
-    await db_session.commit()
-    return {"detail": "User group added to playground"}
-
-
-async def remove_usergroup_from_playground(
-    request: Request,
-    playground_uuid: str,
-    usergroup_uuid: str,
-    current_user: PublicUser,
-    db_session: AsyncSession,
-) -> dict:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == acting_user_id
-    can_update = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_update:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-
-    from src.db.usergroups import UserGroup
-    ug = (await db_session.execute(
-        select(UserGroup).where(UserGroup.usergroup_uuid == usergroup_uuid)
-    )).scalars().first()
-    if not ug:
-        raise HTTPException(status_code=404, detail="User group not found")
-
-    ugr = (await db_session.execute(
-        select(UserGroupResource).where(
-            UserGroupResource.resource_uuid == playground_uuid,
-            UserGroupResource.usergroup_id == ug.id,
-        )
-    )).scalars().first()
-    if not ugr:
-        raise HTTPException(status_code=404, detail="User group not associated with playground")
-
-    await db_session.delete(ugr)
-    await db_session.commit()
-    return {"detail": "User group removed from playground"}
+    return await _to_read(new_playground, db_session, my_role=OWNER)
 
 
 async def update_playground_thumbnail(
@@ -611,21 +363,8 @@ async def update_playground_thumbnail(
     db_session: AsyncSession,
     thumbnail_file: UploadFile | None = None,
 ) -> PlaygroundRead:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == acting_user_id
-    can_update = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_update:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to update playground")
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    role = await require_playground_editor(playground, current_user, db_session)
 
     org = (await db_session.execute(select(Organization).where(Organization.id == playground.org_id))).scalars().first()
     if not org:
@@ -644,61 +383,112 @@ async def update_playground_thumbnail(
     )
 
     playground.thumbnail_image = name_in_disk
-    playground.update_date = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    playground.update_date = _now()
     db_session.add(playground)
     await db_session.commit()
     await db_session.refresh(playground)
-    return await _playground_to_read(playground, db_session)
+    return await _to_read(playground, db_session, my_role=role, org=org)
 
 
-async def get_playground_usergroups(
+# ── Sharing ────────────────────────────────────────────────────────────────
+
+
+async def list_playground_shares(
     request: Request,
     playground_uuid: str,
-    current_user: PublicUser | AnonymousUser,
+    current_user: PublicUser,
     db_session: AsyncSession,
-) -> List[dict]:
-    playground = (await db_session.execute(
-        select(Playground).where(Playground.playground_uuid == playground_uuid)
-    )).scalars().first()
-    if not playground:
-        raise HTTPException(status_code=404, detail="Playground not found")
-
-    # This listing is the playground's access-control configuration — cohort
-    # names, descriptions, and the very usergroup uuids that
-    # add_usergroup_to_playground consumes — so it is gated exactly like the
-    # mutations that manage it, not like a public read of the playground.
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
-
+) -> List[PlaygroundShareRead]:
+    playground = await _get_playground_or_404(playground_uuid, db_session)
     await _check_read_access(playground, current_user, db_session)
 
-    acting_user_id = resolve_acting_user_id(current_user)
-    rights = await _get_user_rights(acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == acting_user_id
-    can_manage = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_manage:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    rows = (await db_session.execute(
+        select(PlaygroundShare, User)
+        .join(User, User.id == PlaygroundShare.user_id)
+        .where(PlaygroundShare.playground_id == playground.id)
+        .order_by(PlaygroundShare.id)
+    )).all()
+    return [_share_read(share, user) for share, user in rows]
 
-    ugrs = (await db_session.execute(
-        select(UserGroupResource).where(
-            UserGroupResource.resource_uuid == playground_uuid
+
+async def share_playground(
+    request: Request,
+    playground_uuid: str,
+    share_data: PlaygroundShareCreate,
+    current_user: PublicUser,
+    db_session: AsyncSession,
+) -> PlaygroundShareRead:
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    await _require_owner(playground, current_user, db_session)
+
+    identifier = share_data.identifier.strip()
+    target = (await db_session.execute(
+        select(User)
+        .join(UserOrganization, UserOrganization.user_id == User.id)
+        .where(UserOrganization.org_id == playground.org_id)
+        .where(or_(
+            func.lower(User.username) == identifier.lower(),
+            func.lower(User.email) == identifier.lower(),
+        ))
+    )).scalars().first()
+    if not target:
+        raise HTTPException(status_code=404, detail="No one on the platform has that username or email")
+    if target.id == playground.created_by:
+        raise HTTPException(status_code=400, detail="You already own this playground")
+
+    share = (await db_session.execute(
+        select(PlaygroundShare).where(
+            PlaygroundShare.playground_id == playground.id,
+            PlaygroundShare.user_id == target.id,
         )
-    )).scalars().all()
+    )).scalars().first()
+    if share is None:
+        share = PlaygroundShare(
+            playground_id=playground.id,
+            user_id=target.id,
+            creation_date=_now(),
+        )
+    share.role = share_data.role.value
+    db_session.add(share)
+    await db_session.commit()
+    await db_session.refresh(share)
+    return _share_read(share, target)
 
-    result = []
-    from src.db.usergroups import UserGroup
-    for ugr in ugrs:
-        ug = (await db_session.execute(select(UserGroup).where(UserGroup.id == ugr.usergroup_id))).scalars().first()
-        if ug:
-            result.append(
-                {
-                    "usergroup_id": ug.id,
-                    "usergroup_uuid": ug.usergroup_uuid,
-                    "name": ug.name,
-                    "description": ug.description,
-                }
-            )
-    return result
+
+async def unshare_playground(
+    request: Request,
+    playground_uuid: str,
+    user_id: int,
+    current_user: PublicUser,
+    db_session: AsyncSession,
+) -> dict:
+    """The owner removes someone, or a person removes themselves."""
+    playground = await _get_playground_or_404(playground_uuid, db_session)
+    acting_user_id = resolve_acting_user_id(current_user)
+    if acting_user_id != user_id:
+        await _require_owner(playground, current_user, db_session)
+
+    share = (await db_session.execute(
+        select(PlaygroundShare).where(
+            PlaygroundShare.playground_id == playground.id,
+            PlaygroundShare.user_id == user_id,
+        )
+    )).scalars().first()
+    if not share:
+        raise HTTPException(status_code=404, detail="This playground isn't shared with that person")
+    await db_session.delete(share)
+    await db_session.commit()
+    return {"detail": "Share removed"}
+
+
+def _share_read(share: PlaygroundShare, user: User) -> PlaygroundShareRead:
+    return PlaygroundShareRead(
+        user_id=share.user_id,
+        role=share.role,
+        username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        avatar_image=user.avatar_image,
+        user_uuid=user.user_uuid,
+        creation_date=share.creation_date,
+    )

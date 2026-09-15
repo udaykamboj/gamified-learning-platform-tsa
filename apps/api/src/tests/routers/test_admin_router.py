@@ -10,7 +10,6 @@ from httpx import ASGITransport, AsyncClient
 from src.core.events.database import get_db_session
 from src.db.trails import TrailRead
 from src.db.users import APITokenUser, UserRead
-from src.db.usergroups import UserGroupRead
 from src.routers.admin import router as admin_router
 from src.security.auth import get_current_user
 
@@ -91,20 +90,6 @@ def _mock_user(**overrides) -> UserRead:
     )
     data.update(overrides)
     return UserRead(**data)
-
-
-def _mock_usergroup(**overrides) -> UserGroupRead:
-    data = dict(
-        id=5,
-        org_id=1,
-        usergroup_uuid="usergroup_1",
-        name="Cohort A",
-        description="",
-        creation_date="2024-01-01",
-        update_date="2024-01-01",
-    )
-    data.update(overrides)
-    return UserGroupRead(**data)
 
 
 @contextmanager
@@ -499,118 +484,6 @@ class TestAdminRouter:
         assert response.status_code == 200
         assert response.json()["detail"] == "Revoked"
 
-    async def test_usergroup_crud_and_membership(self, client, api_user):
-        """create/delete usergroup, add/remove members, list members and groups."""
-        with _admin_context(api_user), patch(
-            "src.routers.admin.create_usergroup",
-            new_callable=AsyncMock,
-            return_value=_mock_usergroup(name="New Cohort"),
-        ):
-            response = await client.post(
-                "/api/v1/admin/acme/usergroups",
-                json={"name": "New Cohort", "description": ""},
-            )
-        assert response.status_code == 200
-        assert response.json()["name"] == "New Cohort"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.delete_usergroup",
-            new_callable=AsyncMock,
-            return_value={"detail": "Deleted", "usergroup_uuid": "usergroup_1"},
-        ):
-            response = await client.delete("/api/v1/admin/acme/usergroups/usergroup_1")
-        assert response.status_code == 200
-        assert response.json()["usergroup_uuid"] == "usergroup_1"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.add_usergroup_member",
-            new_callable=AsyncMock,
-            return_value={
-                "detail": "Added",
-                "usergroup_uuid": "usergroup_1",
-                "user_id": 2,
-            },
-        ):
-            response = await client.post(
-                "/api/v1/admin/acme/usergroups/usergroup_1/members/2"
-            )
-        assert response.status_code == 200
-        assert response.json()["detail"] == "Added"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.remove_usergroup_member",
-            new_callable=AsyncMock,
-            return_value={
-                "detail": "Removed",
-                "usergroup_uuid": "usergroup_1",
-                "user_id": 2,
-            },
-        ):
-            response = await client.delete(
-                "/api/v1/admin/acme/usergroups/usergroup_1/members/2"
-            )
-        assert response.status_code == 200
-        assert response.json()["detail"] == "Removed"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.list_usergroup_members",
-            new_callable=AsyncMock,
-            return_value=[
-                {
-                    "user": {"id": 2, "user_uuid": "user_2"},
-                    "added_at": "2024-01-01",
-                }
-            ],
-        ):
-            response = await client.get(
-                "/api/v1/admin/acme/usergroups/usergroup_1/members"
-            )
-        assert response.status_code == 200
-        assert response.json()[0]["user"]["user_uuid"] == "user_2"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.get_user_groups",
-            new_callable=AsyncMock,
-            return_value=[
-                {
-                    "usergroup": {"id": 5, "usergroup_uuid": "usergroup_1", "name": "Cohort A"},
-                    "added_at": "2024-01-01",
-                }
-            ],
-        ):
-            response = await client.get("/api/v1/admin/acme/users/2/groups")
-        assert response.status_code == 200
-        assert response.json()[0]["usergroup"]["usergroup_uuid"] == "usergroup_1"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.add_course_to_usergroup",
-            new_callable=AsyncMock,
-            return_value={
-                "detail": "Linked",
-                "usergroup_uuid": "usergroup_1",
-                "course_uuid": "course_1",
-            },
-        ):
-            response = await client.post(
-                "/api/v1/admin/acme/usergroups/usergroup_1/courses/course_1"
-            )
-        assert response.status_code == 200
-        assert response.json()["course_uuid"] == "course_1"
-
-        with _admin_context(api_user), patch(
-            "src.routers.admin.remove_course_from_usergroup",
-            new_callable=AsyncMock,
-            return_value={
-                "detail": "Unlinked",
-                "usergroup_uuid": "usergroup_1",
-                "course_uuid": "course_1",
-            },
-        ):
-            response = await client.delete(
-                "/api/v1/admin/acme/usergroups/usergroup_1/courses/course_1"
-            )
-        assert response.status_code == 200
-        assert response.json()["detail"] == "Unlinked"
 
     async def test_gdpr_export_and_anonymize(self, client, api_user):
         with _admin_context(api_user), patch(

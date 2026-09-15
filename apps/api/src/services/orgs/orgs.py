@@ -2,7 +2,6 @@ import json
 import logging
 from datetime import datetime
 from typing import Literal, Optional
-from uuid import uuid4
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.organization_config import (
@@ -18,7 +17,6 @@ from src.db.users import AnonymousUser, APITokenUser, InternalUser, PublicUser
 from src.db.user_organizations import UserOrganization
 from src.db.organizations import (
     Organization,
-    OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
@@ -26,7 +24,6 @@ from fastapi import HTTPException, UploadFile, status, Request
 
 from src.services.orgs.uploads import upload_org_logo, upload_org_preview, upload_org_thumbnail, upload_org_landing_content, upload_org_auth_background, upload_org_og_image, upload_org_favicon
 from src.db.organization_config import AuthBrandingConfig, SeoOrgConfig
-from src.core.ee_hooks import is_multi_org_allowed
 from src.services.webhooks.dispatch import dispatch_webhooks
 
 

@@ -77,7 +77,7 @@ class UserReadPublic(SQLModel):
     """User model for public-facing endpoints — excludes sensitive fields.
 
     SECURITY: This is the view returned to *any* authenticated user when they
-    look up *another* user (by id/uuid/username, or via usergroup member lists).
+    look up *another* user (by id/uuid/username).
     It must therefore NOT inherit from ``UserBase``, because ``UserBase`` (and
     ``UserRead``) expose PII / internal fields — ``email``, ``signup_method``,
     ``is_superadmin``, ``extra_metadata`` — that would leak to anyone who can

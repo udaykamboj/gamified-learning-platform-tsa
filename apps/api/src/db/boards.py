@@ -77,7 +77,9 @@ class BoardRead(BoardBase):
 
 
 class BoardMemberCreate(SQLModel):
-    user_id: int
+    # Either a user id, or the username/email the student typed.
+    user_id: Optional[int] = None
+    identifier: Optional[str] = None
     role: str = BoardMemberRole.EDITOR
 
 

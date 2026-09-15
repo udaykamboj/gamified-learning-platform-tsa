@@ -124,7 +124,7 @@ async def get_image_block(
         request, db_session, current_user, course.course_uuid, AccessAction.READ
     )
 
-    # Belt-and-braces cross-tenant check: the RBAC "no usergroup linked" rule
+    # Belt-and-braces cross-tenant check: the RBAC "signed-in platform member" rule
     # grants access to any authenticated user, which is too permissive for
     # private course media. For non-public courses, additionally require the
     # caller to be a member of the owning org. Public+published content stays

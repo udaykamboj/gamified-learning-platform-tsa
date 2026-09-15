@@ -269,18 +269,12 @@ async def add_activity_to_trail(
     )
     trailrun = (await db_session.execute(statement)).scalars().first()
 
+    # Progress belongs to courses the student enrolled in themselves
+    # (docs/refactor/progress/00-requirements.md, R8).
     if not trailrun:
-        trailrun = TrailRun(
-            trail_id=trail.id if trail.id is not None else 0,
-            course_id=course.id if course.id is not None else 0,
-            org_id=course.org_id,
-            user_id=user.id,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-        )
-        db_session.add(trailrun)
-        await db_session.commit()
-        await db_session.refresh(trailrun)
+        from src.services.courses.locks import require_enrollment
+
+        await require_enrollment(course.id, course.org_id, user, db_session)
 
     statement = select(TrailStep).where(
         TrailStep.trailrun_id == trailrun.id, TrailStep.activity_id == activity.id, TrailStep.user_id == user.id
@@ -495,15 +489,14 @@ async def add_course_to_trail(
             status_code=status.HTTP_400_BAD_REQUEST, detail="TrailRun already exists"
         )
 
-    statement = select(Trail).where(
-        Trail.org_id == course.org_id, Trail.user_id == user.id
+    # Enrolling is the student's own action; their trail is created on first use.
+    trail = await check_trail_presence(
+        org_id=course.org_id,
+        user_id=user.id,
+        request=request,
+        user=user,
+        db_session=db_session,
     )
-    trail = (await db_session.execute(statement)).scalars().first()
-
-    if not trail:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Trail not found"
-        )
 
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.course_id == course.id, TrailRun.user_id == user.id

@@ -15,7 +15,6 @@ from src.db.courses.courses import CourseRead, FullCourseRead, ThumbnailType
 from src.routers.courses.courses import BatchExportRequest, ImportRequest, router as courses_router
 from src.security.auth import get_current_user
 from src.security.features_utils.dependencies import require_courses_feature
-from src.services.courses.transfer.models import ImportAnalysisResponse, ImportCourseInfo, ImportCourseResult, ImportResult
 
 
 # ---------------------------------------------------------------------------
@@ -213,52 +212,6 @@ class TestImportExportEndpoints:
             if os.path.exists(zip_path):
                 os.unlink(zip_path)
 
-    async def test_analyze_import_package(self, client):
-        mock_result = ImportAnalysisResponse(
-            temp_id="temp_1",
-            version="1.0.0",
-            courses=[ImportCourseInfo(course_uuid="course_test", name="Course")],
-        )
-        with patch(
-            "src.routers.courses.courses.analyze_import_package",
-            new_callable=AsyncMock,
-            return_value=mock_result,
-        ):
-            response = await client.post(
-                "/api/v1/courses/import/analyze?org_id=1",
-                files={"zip_file": ("courses.zip", b"zip-content", "application/zip")},
-            )
-
-        assert response.status_code == 200
-        assert response.json()["temp_id"] == "temp_1"
-
-    async def test_import_courses(self, client):
-        mock_result = ImportResult(
-            total_courses=1,
-            successful=1,
-            failed=0,
-            courses=[
-                ImportCourseResult(
-                    original_uuid="course_old",
-                    new_uuid="course_new",
-                    name="Imported Course",
-                    success=True,
-                )
-            ],
-        )
-        with patch(
-            "src.routers.courses.courses.import_courses",
-            new_callable=AsyncMock,
-            return_value=mock_result,
-        ):
-            response = await client.post(
-                "/api/v1/courses/import?org_id=1",
-                json={"temp_id": "temp_1", "course_uuids": ["course_old"]},
-            )
-
-        assert response.status_code == 200
-        assert response.json()["successful"] == 1
-        assert response.json()["failed"] == 0
 
     async def test_export_single_course(self, client):
         zip_path = _temp_zip_file()

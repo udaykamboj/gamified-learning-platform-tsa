@@ -1,7 +1,6 @@
 import logging
 import secrets
 from typing import List
-from uuid import uuid4
 from datetime import datetime
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -9,9 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from src.db.courses.certifications import (
     Certifications,
-    CertificationCreate,
     CertificationRead,
-    CertificationUpdate,
     CertificateUser,
     CertificateUserRead,
 )
@@ -33,44 +30,6 @@ logger = logging.getLogger(__name__)
 ####################################################
 # CRUD
 ####################################################
-
-
-async def create_certification(
-    request: Request,
-    certification_object: CertificationCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> CertificationRead:
-    """Create a new certification for a course"""
-    
-    # Check if course exists
-    statement = select(Course).where(Course.id == certification_object.course_id)
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=404,
-            detail="Course not found",
-        )
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
-
-    # Create certification
-    certification = Certifications(
-        course_id=certification_object.course_id,
-        config=certification_object.config or {},
-        certification_uuid=str(f"certification_{uuid4()}"),
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    # Insert certification in DB
-    db_session.add(certification)
-    await db_session.commit()
-    await db_session.refresh(certification)
-
-    return CertificationRead(**certification.model_dump())
 
 
 async def get_certification(
@@ -132,116 +91,6 @@ async def get_certifications_by_course(
     certifications = (await db_session.execute(statement)).scalars().all()
 
     return [CertificationRead(**certification.model_dump()) for certification in certifications]
-
-
-async def update_certification(
-    request: Request,
-    certification_uuid: str,
-    certification_object: CertificationUpdate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> CertificationRead:
-    """Update a certification"""
-    
-    statement = select(Certifications).where(Certifications.certification_uuid == certification_uuid)
-    certification = (await db_session.execute(statement)).scalars().first()
-
-    if not certification:
-        raise HTTPException(
-            status_code=404,
-            detail="Certification not found",
-        )
-
-    # Get course for RBAC check
-    statement = select(Course).where(Course.id == certification.course_id)
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=404,
-            detail="Course not found",
-        )
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
-
-    # Update only the fields that were passed in
-    for var, value in vars(certification_object).items():
-        if value is not None:
-            setattr(certification, var, value)
-
-    # Update the update_date
-    certification.update_date = str(datetime.now())
-
-    db_session.add(certification)
-    await db_session.commit()
-    await db_session.refresh(certification)
-
-    return CertificationRead(**certification.model_dump())
-
-
-async def delete_certification(
-    request: Request,
-    certification_uuid: str,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> dict:
-    """Delete a certification"""
-    
-    statement = select(Certifications).where(Certifications.certification_uuid == certification_uuid)
-    certification = (await db_session.execute(statement)).scalars().first()
-
-    if not certification:
-        raise HTTPException(
-            status_code=404,
-            detail="Certification not found",
-        )
-
-    # Get course for RBAC check
-    statement = select(Course).where(Course.id == certification.course_id)
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=404,
-            detail="Course not found",
-        )
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
-
-    # CertificateUser.certification_id is declared ON DELETE CASCADE, so deleting
-    # the template also destroys every certificate ever awarded from it — the
-    # learners' "my certificates" list empties and every verification link they
-    # shared, including the QR code printed on already-downloaded PDFs, starts
-    # reporting the certificate as revoked. That is irreversible: re-creating the
-    # template mints a new id, and nothing re-issues to past graduates.
-    #
-    # Refuse instead. Awarded certificates must be revoked deliberately, one at a
-    # time, through revoke_user_certificate — which also emits the revocation
-    # analytics and webhooks that a silent cascade skips entirely.
-    awarded_count = (await db_session.execute(
-        select(func.count(CertificateUser.id)).where(
-            CertificateUser.certification_id == certification.id
-        )
-    )).scalar_one()
-
-    if awarded_count:
-        raise HTTPException(
-            status_code=409,
-            detail=(
-                f"This certification has {awarded_count} awarded "
-                f"certificate{'s' if awarded_count != 1 else ''}. Deleting it would "
-                "permanently destroy them and break the verification links their "
-                "holders have shared. Disable the certification instead, or revoke "
-                "the certificates individually first."
-            ),
-        )
-
-    await db_session.delete(certification)
-    await db_session.commit()
-
-    return {"detail": "Certification deleted successfully"}
 
 
 ####################################################

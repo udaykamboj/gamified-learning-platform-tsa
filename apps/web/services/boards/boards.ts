@@ -62,7 +62,8 @@ export async function deleteBoard(boardUuid: string, access_token: string) {
 
 export async function addBoardMember(
   boardUuid: string,
-  data: { user_id: number; role?: string },
+  // Share with someone by user id, or by the username/email the student typed.
+  data: { user_id?: number; identifier?: string; role?: string },
   access_token: string
 ) {
   const result = await fetch(

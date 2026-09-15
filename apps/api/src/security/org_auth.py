@@ -14,7 +14,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.user_organizations import UserOrganization
 from src.db.roles import Role
 from src.security.superadmin import is_user_superadmin
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+from src.security.rbac.constants import ADMIN_ROLE_IDS
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +52,12 @@ async def is_org_member(user_id: int, org_id: int, db_session: AsyncSession) -> 
 
 
 async def is_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> bool:
-    """Check if user is an admin/maintainer of the org (or a superadmin)."""
+    """Check if user is an admin of the org (or a superadmin)."""
     if await is_user_superadmin(user_id, db_session):
         logger.debug("Superadmin bypass: user %s accessed org %s", user_id, org_id)
         return True
     user_org = await get_user_org(user_id, org_id, db_session)
-    return user_org is not None and user_org.role_id in ADMIN_OR_MAINTAINER_ROLE_IDS
+    return user_org is not None and user_org.role_id in ADMIN_ROLE_IDS
 
 
 async def get_user_org_role(user_id: int, org_id: int, db_session: AsyncSession) -> Optional[Role]:
@@ -105,11 +105,11 @@ async def require_org_membership(user_id: int, org_id: int, db_session: AsyncSes
 
 
 async def require_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> None:
-    """Raise 403 if user is not an org admin/maintainer and not a superadmin."""
+    """Raise 403 if user is not an org admin and not a superadmin."""
     if not await is_org_admin(user_id, org_id, db_session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only organization administrators and maintainers can perform this action",
+            detail="Only organization administrators can perform this action",
         )
     await enforce_org_mfa(user_id, org_id, db_session)
 
@@ -120,7 +120,7 @@ async def require_org_role_permission(
     db_session: AsyncSession,
     resource: str,
     action: str,
-    fallback_role_ids: frozenset = ADMIN_OR_MAINTAINER_ROLE_IDS,
+    fallback_role_ids: frozenset = ADMIN_ROLE_IDS,
 ) -> None:
     """
     Check that the user has a specific permission via their org role's rights dict.
@@ -160,7 +160,7 @@ async def require_org_role_permission(
         if role.id not in fallback_role_ids:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin or Maintainer role required for this action",
+                detail="Admin role required for this action",
             )
 
     # Applied last, once the role permission itself has passed. Running it

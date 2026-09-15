@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
-import { BookOpenCheck, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Edit2, Loader2, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon } from 'lucide-react'
+import { BookOpenCheck, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Loader2, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity'
 import { usePathname, useRouter } from 'next/navigation'
@@ -26,7 +26,6 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useMediaQuery, useWindowSize } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown'
 import ActivityShareDropdown from '@components/Pages/Activity/ActivityShareDropdown'
@@ -254,7 +253,6 @@ function ActivityClient(props: ActivityClientProps) {
   const [_markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
   const [isFocusMode, setIsFocusMode] = React.useState(false);
   const isInitialRender = useRef(true);
-  const { contributorStatus } = useContributorStatus(courseuuid);
   const router = useRouter();
 
   const { track } = useLHAnalytics('learner')
@@ -507,11 +505,11 @@ function ActivityClient(props: ActivityClientProps) {
             <Lock className="text-rose-500" size={24} />
           </div>
           <h1 className="text-xl font-semibold text-gray-900 mb-2">
-            {t('course.locked_title', 'This activity is locked')}
+            {isAuthenticated ? 'Enroll to start this course' : t('course.locked_title', 'This activity is locked')}
           </h1>
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
             {isAuthenticated
-              ? t('course.locked_restricted', 'You need to be a member of the right user group to access this. Ask a course admin to add you.')
+              ? 'Enroll in this course from the course page or Skills to open its lessons, practice sets and tests.'
               : t('course.locked_auth_required', 'You need to sign in to access this activity.')}
           </p>
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
@@ -521,6 +519,14 @@ function ActivityClient(props: ActivityClientProps) {
                 className="inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
               >
                 {t('auth.sign_in', 'Sign in')}
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link
+                href={getUriWithOrg(orgslug, '/skills')}
+                className="inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
+              >
+                Browse Skills
               </Link>
             )}
             <Link
@@ -950,15 +956,6 @@ function ActivityClient(props: ActivityClientProps) {
                                       orgslug={orgslug}
                                       trailData={trailData}
                                     />
-                                    {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (
-                                      <Link
-                                        href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}/activity/${activityid}/edit`}
-                                        className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
-                                      >
-                                        <Edit2 size={17} />
-                                        <span className="text-xs font-bold">{t('courses.contribute')}</span>
-                                      </Link>
-                                    )}
                                   </>
                                 )}
                               </AuthenticatedClientElement>

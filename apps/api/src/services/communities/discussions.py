@@ -64,6 +64,28 @@ def calculate_hot_score(upvotes: int, creation_date: str) -> float:
     return (upvotes - 1) / pow(hours + BASE_HOURS, GRAVITY)
 
 
+async def require_linkable_board(
+    board_uuid: str,
+    community: Community,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: AsyncSession,
+) -> None:
+    """Only a board's owner or an editor can link it into a discussion."""
+    from src.db.boards import Board, BoardMember, BoardMemberRole
+
+    board = (await db_session.execute(select(Board).where(Board.board_uuid == board_uuid))).scalars().first()
+    if not board or board.org_id != community.org_id:
+        raise HTTPException(status_code=404, detail="Board not found")
+    member = (await db_session.execute(
+        select(BoardMember).where(
+            BoardMember.board_id == board.id,
+            BoardMember.user_id == current_user.id,
+        )
+    )).scalars().first()
+    if not member or member.role not in (BoardMemberRole.OWNER, BoardMemberRole.EDITOR):
+        raise HTTPException(status_code=403, detail="You can only link boards you own or edit")
+
+
 def validate_label(label: str) -> str:
     """Validate that the label is a valid discussion label."""
     valid_labels = {label_def["id"] for label_def in DISCUSSION_LABELS}
@@ -81,6 +103,7 @@ async def create_discussion(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
     emoji: Optional[str] = None,
+    board_uuid: Optional[str] = None,
 ) -> DiscussionReadWithVoteStatus:
     """
     Create a new discussion in a community.
@@ -114,6 +137,9 @@ async def create_discussion(
     # Validate label
     validated_label = validate_label(label)
 
+    if board_uuid:
+        await require_linkable_board(board_uuid, community, current_user, db_session)
+
     # Create discussion
     discussion = Discussion(
         title=title,
@@ -127,6 +153,7 @@ async def create_discussion(
         upvote_count=1,  # Author's auto-upvote
         is_pinned=False,
         is_locked=False,
+        board_uuid=board_uuid or None,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -428,6 +455,12 @@ async def update_discussion(
     if discussion_object.emoji is not None:
         # Allow setting emoji to empty string to clear it
         discussion.emoji = discussion_object.emoji if discussion_object.emoji else None
+    if discussion_object.board_uuid is not None:
+        if discussion_object.board_uuid and discussion_object.board_uuid != discussion.board_uuid:
+            if not is_author:
+                raise HTTPException(status_code=403, detail="Only the author can link a board")
+            await require_linkable_board(discussion_object.board_uuid, community, current_user, db_session)
+        discussion.board_uuid = discussion_object.board_uuid or None
 
     # Increment edit count for authors
     if is_author:
@@ -466,7 +499,7 @@ async def pin_discussion(
     """
     Pin or unpin a discussion.
 
-    Requires community admin or maintainer role. Authors cannot pin.
+    Requires community moderator (admin) role. Authors cannot pin.
     """
     acting_user_id = resolve_acting_user_id(current_user)
     await authorization_verify_if_user_is_anon(acting_user_id)
@@ -535,7 +568,7 @@ async def lock_discussion(
     """
     Lock or unlock a discussion.
 
-    Requires community admin or maintainer role. Authors cannot lock.
+    Requires community moderator (admin) role. Authors cannot lock.
     """
     acting_user_id = resolve_acting_user_id(current_user)
     await authorization_verify_if_user_is_anon(acting_user_id)

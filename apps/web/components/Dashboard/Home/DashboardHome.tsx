@@ -2,7 +2,6 @@
 import React from 'react'
 import Link from 'next/link'
 import {
-  PlusCircle,
   ChartBar,
   GearSix,
   Users,
@@ -18,9 +17,9 @@ import { OrgUsageResponse, orgUsageFetcher } from '@services/orgs/usage'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { usePlan } from '@components/Hooks/usePlan'
 import QuickStats from './QuickStats'
-import RecentCourses from './RecentCourses'
+import PopularCourses from './PopularCourses'
 import RecentMembers from './RecentMembers'
-import ContentOverview from './ContentOverview'
+import PlatformOverview from './PlatformOverview'
 import UsageOverview from './UsageOverview'
 
 const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
@@ -74,11 +73,11 @@ export default function DashboardHome() {
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Link
-                href="/dash/courses?new=true"
+                href="/dash/courses"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors"
               >
-                <PlusCircle size={14} weight="bold" />
-                {t('dashboard.home.create_course')}
+                <BookOpen size={14} weight="bold" />
+                Course monitoring
               </Link>
               <Link
                 href="/dash/analytics"
@@ -106,13 +105,13 @@ export default function DashboardHome() {
 
           <AdminAuthorization authorizationMode="component">
             <div className="space-y-6">
-              {/* Content counts row */}
-              <ContentOverview />
+              {/* Platform numbers */}
+              <PlatformOverview />
 
               {/* Main grid: courses + members + usage */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                  <RecentCourses />
+                  <PopularCourses />
                   <RecentMembers />
                 </div>
                 <div className="space-y-6">

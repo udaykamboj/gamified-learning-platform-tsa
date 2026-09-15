@@ -46,15 +46,8 @@ class Community(CommunityBase, table=True):
     update_date: str = ""
 
 
-class CommunityCreate(CommunityBase):
-    org_id: int = Field(default=None, foreign_key="organization.id")
-    course_id: Optional[int] = Field(default=None, foreign_key="course.id")
-
-
 class CommunityUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    public: Optional[bool] = None
+    """Moderation rules only: communities themselves are platform content."""
     moderation_words: Optional[List[str]] = None
     moderation_settings: Optional[Dict[str, Any]] = None
 

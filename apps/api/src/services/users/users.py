@@ -6,7 +6,7 @@ from typing import Literal
 from uuid import uuid4
 from fastapi import HTTPException, Request, UploadFile, status
 import redis
-from sqlmodel import select, func
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from config.config import get_starlab_config
 from src.security.features_utils.usage import (
@@ -14,7 +14,6 @@ from src.security.features_utils.usage import (
     increase_feature_usage,
 )
 from src.core.deployment_mode import get_deployment_mode
-from src.services.users.usergroups import add_users_to_usergroup
 from src.services.users.emails import (
     send_account_creation_email,
 )
@@ -30,7 +29,6 @@ from src.db.organizations import Organization, OrganizationRead
 from src.services.orgs.orgs import get_org_default_language, resolve_org_sender_name
 from src.db.users import (
     AnonymousUser,
-    InternalUser,
     PublicUser,
     User,
     UserCreate,
@@ -42,7 +40,6 @@ from src.db.users import (
     UserUpdatePassword,
 )
 from src.db.user_organizations import UserOrganization
-from src.security.rbac.constants import ADMIN_ROLE_ID
 from src.security.security import security_hash_password, security_verify_password
 from src.services.security.password_validation import validate_password_complexity
 from src.services.security.profile_validation import validate_profile_fields
@@ -367,17 +364,6 @@ async def create_user_with_invite(
 
 
     user = await create_user(request, db_session, current_user, user_object, org_id, signup_provider="invite")
-
-    # Check if invite code contains UserGroup
-    if inviteCode.get("usergroup_id"): # type: ignore
-        # Add user to UserGroup
-        await add_users_to_usergroup(
-            request,
-            db_session,
-            InternalUser(id=0),
-            int(inviteCode.get("usergroup_id")), # type: ignore / Convert to int since usergroup_id is expected to be int
-            str(user.id),
-        )
 
     # NOTE: members usage is already incremented inside create_user(); do not
     # increment again here or every invited signup double-counts the member quota.

@@ -33,6 +33,12 @@ export default async function EditPlaygroundPage({ params }: { params: PageParam
     notFound()
   }
 
+  // Owners and people it's shared with as editors work in the editor;
+  // everyone else who can open it gets the read-only view.
+  if (playground.my_role !== 'owner' && playground.my_role !== 'editor') {
+    redirect(`/playground/${playground.playground_uuid}`)
+  }
+
   let orgCourses: { course_uuid: string; name: string }[] = []
   if (playground.org_slug) {
     try {

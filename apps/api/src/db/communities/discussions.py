@@ -40,6 +40,9 @@ class Discussion(DiscussionBase, table=True):
     edit_count: int = 0
     is_pinned: bool = Field(default=False, sa_column=Column(Boolean, default=False))
     is_locked: bool = Field(default=False, sa_column=Column(Boolean, default=False))
+    # A board the author linked so people in the discussion can work on it
+    # together (docs/refactor/progress/00-requirements.md, R13/R14).
+    board_uuid: Optional[str] = Field(default=None, sa_column=Column(String(100), nullable=True, index=True))
     creation_date: str = ""
     update_date: str = ""
 
@@ -59,6 +62,8 @@ class DiscussionUpdate(SQLModel):
     content: Optional[str] = None
     label: Optional[str] = None
     emoji: Optional[str] = None
+    # "" unlinks the board.
+    board_uuid: Optional[str] = None
 
 
 class DiscussionPinUpdate(SQLModel):
@@ -83,6 +88,7 @@ class DiscussionRead(SQLModel):
     edit_count: int = 0
     is_pinned: bool = False
     is_locked: bool = False
+    board_uuid: Optional[str] = None
     creation_date: str
     update_date: str
 

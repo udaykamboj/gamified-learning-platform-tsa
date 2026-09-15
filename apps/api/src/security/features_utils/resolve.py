@@ -12,8 +12,12 @@ from src.security.features_utils.plans import (
 )
 
 
-# Features that are always on (no admin toggle — cannot be disabled)
-ALWAYS_ON_FEATURES = {"courses", "usergroups", "assignments"}
+# Features that are always on (no admin toggle — cannot be disabled). Student
+# tools belong here: nobody enables them for a student
+# (docs/refactor/progress/00-requirements.md, R16/R17).
+ALWAYS_ON_FEATURES = {
+    "courses", "assignments", "boards", "playgrounds", "communities", "podcasts",
+}
 
 # Always-on features that have plan-based limits (not unlimited)
 # These are always enabled but their limit comes from the plan config
@@ -23,8 +27,8 @@ ALWAYS_ON_WITH_LIMITS = {"courses"}
 ALL_FEATURES = [
     "ai", "analytics", "api", "assignments", "audit_logs", "boards", "collaboration",
     "folders", "communities", "courses",
-    "members", "payments", "playgrounds", "podcasts", "roles", "scorm",
-    "sso", "usergroups", "versioning",
+    "members", "payments", "playgrounds", "podcasts", "scorm",
+    "sso", "versioning",
 ]
 
 

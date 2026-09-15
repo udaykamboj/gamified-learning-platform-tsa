@@ -1,39 +1,123 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getBoardThumbnailMediaDirectory } from '@services/media/media'
-import Link from 'next/link'
-import { Search, X, Users } from 'lucide-react'
+import { Search, X, Users, Globe, Lock, MoreVertical, Settings2, Eye, Trash2, CheckSquare, Square, Copy } from 'lucide-react'
 import { ChalkboardSimple } from '@phosphor-icons/react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getUriWithOrg } from '@services/config/config'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/query/keys'
+import { createBoard, deleteBoard, duplicateBoard, getBoards } from '@services/boards/boards'
+import { getBoardThumbnailMediaDirectory } from '@services/media/media'
+import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
+import Link from 'next/link'
+import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@components/ui/dropdown-menu"
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
 
-interface BoardsPublicClientProps {
-  orgslug: string
+interface BoardListClientProps {
   org_id: number
-  initialBoards: any[]
+  orgslug: string
 }
 
-export default function BoardsPublicClient({
-  orgslug,
-  initialBoards,
-}: BoardsPublicClientProps) {
+function CreateBoardForm({ onCreated, orgId, accessToken }: {
+  onCreated: () => void
+  orgId: number
+  accessToken: string
+}) {
+  const { t } = useTranslation()
+  const { track } = useLHAnalytics('dashboard')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+    try {
+      await createBoard(orgId, { name, description }, accessToken)
+      track(AnalyticsEvent.BoardCreated, { has_description: !!description.trim() })
+      toast.success(t('boards.board_created'))
+      setName('')
+      setDescription('')
+      onCreated()
+    } catch {
+      toast.error(t('boards.board_created_error'))
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 p-1">
+      <div>
+        <label className="text-sm font-medium text-gray-700">{t('boards.name')}</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          placeholder={t('boards.name_placeholder')}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-gray-700">{t('boards.description')}</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          placeholder={t('boards.description_placeholder')}
+          rows={3}
+        />
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={!name.trim()}
+          className="rounded-lg bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-gray-800 transition-colors"
+        >
+          {t('boards.create_board')}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+/**
+ * My boards: the boards a student owns or was added to. Anyone signed in can
+ * create as many as they want; each board is private until its owner shares it
+ * (docs/refactor/progress/00-requirements.md, R13).
+ */
+export default function BoardListClient({ org_id, orgslug }: BoardListClientProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const queryClient = useQueryClient()
 
-  // Filter out private boards for public view
-  const allBoards = useMemo(() => {
-    return (initialBoards || []).filter((board: any) => board.public !== false)
-  }, [initialBoards])
+  const currentUserId = session?.data?.user?.id
 
-  // Search state
+  const [createModalOpen, setCreateModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set())
+
+  const { data: boards, isLoading } = useQuery({
+    queryKey: queryKeys.boards.list(orgslug),
+    queryFn: () => getBoards(org_id, access_token),
+    enabled: !!access_token && !!org_id,
+    staleTime: 60_000,
+  })
+
+  const allBoards = boards || []
 
   const filteredBoards = useMemo(() => {
     if (!searchQuery.trim()) return allBoards
@@ -47,7 +131,7 @@ export default function BoardsPublicClient({
     totalPages,
     paginatedItems: paginatedBoards,
     pageNumbers,
-    goToPage,
+    goToPage: goToCatalogPage,
     resetPage,
   } = useCatalogPagination(filteredBoards)
 
@@ -55,25 +139,131 @@ export default function BoardsPublicClient({
     resetPage()
   }, [searchQuery, resetPage])
 
-  return (
-    <FeatureGate feature="boards" orgslug={orgslug} context="public">
-    <div className="w-full">
-      <GeneralWrapperStyled>
-        <div className="flex flex-col space-y-2 mb-2">
-          <div className="flex items-center justify-between">
-            <TypeOfContentTitle title={t('common.boards')} type="board" />
-          </div>
+  const handleCreated = () => {
+    setCreateModalOpen(false)
+    queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+  }
 
-          {/* Search */}
-          {allBoards.length > 0 && (
-            <div className="relative w-full sm:w-80 mb-4">
+  const toggleBoardSelection = (boardUuid: string) => {
+    const newSelection = new Set(selectedBoards)
+    if (newSelection.has(boardUuid)) {
+      newSelection.delete(boardUuid)
+    } else {
+      newSelection.add(boardUuid)
+    }
+    setSelectedBoards(newSelection)
+  }
+
+  const selectAllBoards = () => {
+    const allBoardUuids = paginatedBoards.map((board: any) => board.board_uuid)
+    setSelectedBoards(new Set(allBoardUuids))
+  }
+
+  const clearSelection = () => {
+    setSelectedBoards(new Set())
+  }
+
+  const bulkDeleteBoards = async () => {
+    const toastId = toast.loading(t('boards.deleting_boards', { count: selectedBoards.size }))
+    let successCount = 0
+    let errorCount = 0
+
+    for (const boardUuid of selectedBoards) {
+      try {
+        await deleteBoard(boardUuid, access_token)
+        successCount++
+      } catch {
+        errorCount++
+      }
+    }
+
+    toast.dismiss(toastId)
+    if (errorCount === 0) {
+      toast.success(t('boards.boards_deleted_success', { count: successCount }))
+    } else {
+      toast.error(t('boards.boards_deleted_partial', { success: successCount, error: errorCount }))
+    }
+
+    clearSelection()
+    queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+  }
+
+  const handleDeleteBoard = async (boardUuid: string) => {
+    const toastId = toast.loading(t('boards.deleting_board'))
+    try {
+      await deleteBoard(boardUuid, access_token)
+      queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+      toast.success(t('boards.board_deleted_success'))
+    } catch {
+      toast.error(t('boards.board_deleted_error'))
+    } finally {
+      toast.dismiss(toastId)
+    }
+  }
+
+  const handleDuplicateBoard = async (boardUuid: string) => {
+    const toastId = toast.loading(t('boards.duplicating_board'))
+    try {
+      await duplicateBoard(boardUuid, access_token)
+      queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+      toast.success(t('boards.board_duplicated_success'))
+    } catch {
+      toast.error(t('boards.board_duplicated_error'))
+    } finally {
+      toast.dismiss(toastId)
+    }
+  }
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      goToCatalogPage(page)
+      setSelectedBoards(new Set())
+    }
+  }
+
+  return (
+    <>
+      <div className="h-full w-full bg-[#f8f8f8] ps-4 pe-4 sm:ps-10 sm:pe-10">
+        <div className="mb-6 pt-6">
+          <Breadcrumbs items={[
+            { label: t('boards.boards'), href: '/boards', icon: <ChalkboardSimple size={14} /> }
+          ]} />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-3xl font-bold mb-4 sm:mb-0">{t('boards.boards')}</h1>
+            </div>
+            <Modal
+              isDialogOpen={createModalOpen}
+              onOpenChange={setCreateModalOpen}
+              dialogTitle={t('boards.create_new_board')}
+              dialogDescription={t('boards.create_new_board_description')}
+              dialogContent={
+                <CreateBoardForm
+                  onCreated={handleCreated}
+                  orgId={org_id}
+                  accessToken={access_token}
+                />
+              }
+              dialogTrigger={
+                <button className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105">
+                  <div>{t('boards.new_board')}</div>
+                  <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                </button>
+              }
+            />
+          </div>
+        </div>
+
+        {/* Search and Bulk Actions */}
+        {allBoards.length > 0 && (
+          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:w-80">
               <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label={t('boards.search_placeholder', 'Search boards...')}
-                placeholder={t('boards.search_placeholder', 'Search boards...')}
+                placeholder={t('boards.search_placeholder')}
                 className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
               />
               {searchQuery && (
@@ -85,95 +275,212 @@ export default function BoardsPublicClient({
                 </button>
               )}
             </div>
-          )}
 
-          {/* Search Results Info */}
-          {searchQuery && (
-            <div className="mb-2 text-sm text-gray-500">
-              {filteredBoards.length} {t('common.results', 'result')}{filteredBoards.length !== 1 ? 's' : ''} {t('common.for', 'for')} &quot;{searchQuery}&quot;
-            </div>
-          )}
+            {/* Bulk Actions */}
+            {selectedBoards.size > 0 && (
+              <div className="flex items-center gap-2 ms-auto">
+                <span className="text-sm font-medium text-gray-500 px-2">
+                  {t('boards.selected_count', { count: selectedBoards.size })}
+                </span>
+                <button
+                  onClick={selectAllBoards}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                >
+                  <span>{t('boards.select_all')}</span>
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  <span>{t('boards.clear_selection')}</span>
+                </button>
+                <ConfirmationModal
+                  confirmationButtonText={t('boards.delete_selected')}
+                  confirmationMessage={t('boards.delete_selected_confirm', { count: selectedBoards.size })}
+                  dialogTitle={t('boards.delete_boards_title')}
+                  dialogTrigger={
+                    <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white nice-shadow rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('boards.delete_selected')}</span>
+                    </button>
+                  }
+                  functionToExecute={bulkDeleteBoards}
+                  status="warning"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
+        {/* Search Results Info */}
+        {searchQuery && (
+          <div className="mb-4 text-sm text-gray-500">
+            {filteredBoards.length !== 1
+              ? t('boards.pagination.results_plural', { count: filteredBoards.length, query: searchQuery })
+              : t('boards.pagination.results', { count: filteredBoards.length, query: searchQuery })}
+          </div>
+        )}
+
+        {/* Loading */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse rounded-xl bg-white nice-shadow overflow-hidden">
+                <div className="aspect-video bg-gray-200" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {paginatedBoards.map((board: any) => (
-              <PublicBoardCard key={board.board_uuid} board={board} orgUuid={org?.org_uuid} fromSearch={!!searchQuery.trim()} />
+              <BoardCard
+                key={board.board_uuid}
+                board={board}
+                orgslug={orgslug}
+                orgUuid={org?.org_uuid}
+                isOwner={board.created_by === currentUserId}
+                isSelected={selectedBoards.has(board.board_uuid)}
+                onToggleSelect={toggleBoardSelection}
+                onDuplicate={handleDuplicateBoard}
+                onDelete={handleDeleteBoard}
+              />
             ))}
 
             {/* No search results */}
             {filteredBoards.length === 0 && searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
-                <Search className="w-12 h-12 text-gray-300 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-600 mb-2">
-                  {t('boards.no_search_results', 'No boards found')}
-                </h2>
-                <p className="text-gray-400">
-                  {t('boards.try_different_search', 'Try a different search term')}
-                </p>
+              <div className="col-span-full flex justify-center items-center py-8">
+                <div className="text-center">
+                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('boards.no_boards_found')}</h2>
+                  <p className="text-gray-400">{t('boards.try_different_search')}</p>
+                </div>
               </div>
             )}
 
             {/* Empty state */}
             {allBoards.length === 0 && !searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-white rounded-full nice-shadow mb-4">
-                  <ChalkboardSimple size={32} className="text-gray-300" weight="fill" />
+              <div className="col-span-full flex justify-center items-center py-8">
+                <div className="text-center">
+                  <div className="rounded-full bg-gray-100 p-4 w-fit mx-auto mb-4">
+                    <ChalkboardSimple size={24} className="text-gray-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-600 mb-2">{t('boards.no_boards_yet')}</h2>
+                  <p className="text-lg text-gray-400">
+                    {t('boards.no_boards_description')}
+                  </p>
                 </div>
-                <h1 className="text-xl font-bold text-gray-600 mb-2">
-                  {t('boards.no_boards', 'No boards yet')}
-                </h1>
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
-                  {t('boards.no_boards_description', 'There are no boards available in this organization yet.')}
-                </p>
               </div>
             )}
           </div>
+        )}
 
-          <CatalogPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            pageNumbers={pageNumbers}
-            onPageChange={goToPage}
-            previousLabel={t('pagination.previous')}
-            nextLabel={t('pagination.next')}
-            className="mt-8"
-          />
+        <CatalogPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageNumbers={pageNumbers}
+          onPageChange={goToPage}
+          previousLabel={t('boards.pagination.previous')}
+          nextLabel={t('boards.pagination.next')}
+          className="mt-8 mb-6"
+        />
 
-          {totalPages > 1 && (
-            <div className="mt-2 text-center text-sm text-gray-500">
-              {t('pagination.showing_page', { current: currentPage, total: totalPages })}
-            </div>
-          )}
-        </div>
-      </GeneralWrapperStyled>
-    </div>
-    </FeatureGate>
+        {totalPages > 1 && (
+          <div className="mb-6 text-center text-sm text-gray-500">
+            {t('boards.pagination.page_of', { current: currentPage, total: totalPages })}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 
-function PublicBoardCard({ board, orgUuid, fromSearch }: { board: any; orgUuid: string; fromSearch: boolean }) {
-  const { track } = useLHAnalytics('learner')
+function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelect, onDuplicate, onDelete }: {
+  board: any
+  orgslug: string
+  orgUuid: string
+  isOwner: boolean
+  isSelected: boolean
+  onToggleSelect: (_boardUuid: string) => void
+  onDuplicate: (_boardUuid: string) => Promise<void>
+  onDelete: (_boardUuid: string) => Promise<void>
+}) {
+  const { t } = useTranslation()
   const thumbnailImage = board.thumbnail_image
     ? getBoardThumbnailMediaDirectory(orgUuid, board.board_uuid, board.thumbnail_image)
     : '/empty_thumbnail.png'
 
+  // Owners manage settings; people it's shared with go straight to the board.
+  const settingsLink = isOwner
+    ? getUriWithOrg(orgslug, `/boards/${board.board_uuid.replace('board_', '')}/general`)
+    : `/board/${board.board_uuid.replace('board_', '')}`
+
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleSelect(board.board_uuid)
+  }
+
   return (
-    <Link
-      href={`/board/${board.board_uuid.replace('board_', '')}`}
-      onClick={() => track(AnalyticsEvent.BoardOpened, { member_count: board.member_count, from_search: fromSearch })}
-      className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
-    >
-      <div className="block relative aspect-video overflow-hidden bg-gray-50">
+    <div className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+      {/* Selection checkbox */}
+      <button
+        onClick={handleSelectClick}
+        aria-label={isSelected ? 'Deselect board' : 'Select board'}
+        className={`absolute top-2 start-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`}
+      >
+        {isSelected ? (
+          <CheckSquare className="w-4 h-4 text-black" />
+        ) : (
+          <Square className="w-4 h-4 text-gray-500" />
+        )}
+      </button>
+
+      {/* Options menu */}
+      <BoardCardOptions
+        board={board}
+        orgslug={orgslug}
+        isOwner={isOwner}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+      />
+
+      <Link
+        href={settingsLink}
+        className="block relative aspect-video overflow-hidden bg-gray-50"
+      >
         <div
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
-      </div>
+        <div className="absolute bottom-2 start-2">
+          {board.public ? (
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <Globe size={10} />
+              {t('boards.public')}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-full">
+              <Lock size={10} />
+              {t('boards.private')}
+            </span>
+          )}
+        </div>
+      </Link>
 
       <div className="p-3 flex flex-col space-y-1.5">
-        <h3 className="text-base font-bold text-gray-900 leading-tight group-hover:text-black transition-colors line-clamp-1">
-          {board.name}
-        </h3>
+        <div className="flex items-start justify-between">
+          <Link href={settingsLink} className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1">
+            {board.name}
+          </Link>
+        </div>
 
         {board.description && (
           <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
@@ -184,13 +491,89 @@ function PublicBoardCard({ board, orgUuid, fromSearch }: { board: any; orgUuid: 
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
           <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
             <Users size={12} />
-            <span>{board.member_count} member{board.member_count !== 1 ? 's' : ''}</span>
+            <span>{board.member_count !== 1
+              ? t('boards.member_count_plural', { count: board.member_count })
+              : t('boards.member_count', { count: board.member_count })}</span>
           </div>
-          <span className="text-[10px] font-bold text-gray-400 group-hover:text-gray-900 transition-colors uppercase tracking-wider">
-            Open
-          </span>
+          <Link
+            href={settingsLink}
+            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+          >
+            {isOwner ? t('boards.settings') : t('boards.open_board')}
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
+  )
+}
+
+function BoardCardOptions({ board, orgslug, isOwner, onDuplicate, onDelete }: {
+  board: any
+  orgslug: string
+  isOwner: boolean
+  onDuplicate: (_boardUuid: string) => Promise<void>
+  onDelete: (_boardUuid: string) => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <div className={`absolute top-2 end-2 z-20 transition-opacity ${
+        !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+      }`}>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger asChild>
+            <button aria-label="Board actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+              <MoreVertical size={18} className="text-gray-700" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuItem asChild>
+              <Link href={`/board/${board.board_uuid.replace('board_', '')}`} className="flex items-center cursor-pointer">
+                <Eye className="me-2 h-4 w-4" /> {t('boards.open_board')}
+              </Link>
+            </DropdownMenuItem>
+            {isOwner && (
+            <DropdownMenuItem asChild>
+              <Link href={getUriWithOrg(orgslug, `/boards/${board.board_uuid.replace('board_', '')}/general`)} className="flex items-center cursor-pointer">
+                <Settings2 className="me-2 h-4 w-4" /> {t('boards.settings')}
+              </Link>
+            </DropdownMenuItem>
+            )}
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('boards.duplicate_board')}
+                confirmationMessage={t('boards.duplicate_board_confirm')}
+                dialogTitle={t('boards.duplicate_board_title', { name: board.name })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                    <Copy className="me-2 h-4 w-4" /> {t('boards.duplicate_board')}
+                  </button>
+                }
+                functionToExecute={() => onDuplicate(board.board_uuid)}
+                status="info"
+              />
+            </DropdownMenuItem>
+            {isOwner && (
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('boards.delete_board')}
+                confirmationMessage={t('boards.delete_board_confirm')}
+                dialogTitle={t('boards.delete_board_title', { name: board.name })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                    <Trash2 className="me-2 h-4 w-4" /> {t('boards.delete_board')}
+                  </button>
+                }
+                functionToExecute={() => onDelete(board.board_uuid)}
+                status="warning"
+              />
+            </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
   )
 }

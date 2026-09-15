@@ -23,8 +23,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.db.users import User
 from src.db.user_organizations import UserOrganization
-from src.db.usergroup_user import UserGroupUser
-from src.db.usergroups import UserGroup
 from src.db.roles import Role
 from src.db.user_audit_events import UserAuditEvent, UserAuditEventType
 from src.db.trail_runs import TrailRun
@@ -142,12 +140,6 @@ async def _identity(db_session: AsyncSession, user_id: int, org_id: int) -> dict
         )).scalars().first()
         role_name = role.name if role else None
 
-    groups = (await db_session.execute(
-        select(UserGroup.name)
-        .join(UserGroupUser, UserGroupUser.usergroup_id == UserGroup.id)
-        .where(UserGroupUser.user_id == user_id, UserGroupUser.org_id == org_id)
-    )).scalars().all()
-
     return {
         "user": {
             "id": user.id,
@@ -161,7 +153,6 @@ async def _identity(db_session: AsyncSession, user_id: int, org_id: int) -> dict
         },
         "membership": {
             "role": role_name,
-            "groups": list(groups),
             "joined_at": joined_at,
         },
         "security": {

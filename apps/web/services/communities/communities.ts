@@ -35,17 +35,8 @@ export interface Community {
   update_date: string
 }
 
-export interface CommunityCreate {
-  name: string
-  description?: string | null
-  public?: boolean
-  course_id?: number | null
-}
-
+// Communities are platform content; admins only change their moderation rules.
 export interface CommunityUpdate {
-  name?: string
-  description?: string | null
-  public?: boolean
   moderation_words?: string[]
   moderation_settings?: CommunityModerationSettings
 }
@@ -56,19 +47,11 @@ export interface CommunityRights {
   is_anonymous: boolean
   permissions: {
     read: boolean
-    create: boolean
-    update: boolean
-    delete: boolean
     create_discussion: boolean
+    moderate: boolean
   }
   ownership: {
-    is_admin: boolean
-    is_maintainer_role: boolean
-  }
-  access: {
-    via_public: boolean
-    via_usergroups: number[]
-    has_usergroup_restriction: boolean
+    is_moderator: boolean
   }
 }
 
@@ -113,19 +96,6 @@ export async function getCommunityByCourse(
   return res
 }
 
-export async function createCommunity(
-  org_id: number,
-  data: CommunityCreate,
-  access_token: string
-) {
-  const result: any = await fetch(
-    `${getAPIUrl()}communities/?org_id=${org_id}`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
-}
-
 export async function updateCommunity(
   community_uuid: string,
   data: CommunityUpdate,
@@ -134,43 +104,6 @@ export async function updateCommunity(
   const result: any = await fetch(
     `${getAPIUrl()}communities/${community_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
-export async function deleteCommunity(
-  community_uuid: string,
-  access_token: string
-) {
-  const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
-export async function linkCommunityToCourse(
-  community_uuid: string,
-  course_uuid: string,
-  access_token: string
-) {
-  const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}/link-course/${course_uuid}`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
-export async function unlinkCommunityFromCourse(
-  community_uuid: string,
-  access_token: string
-) {
-  const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}/unlink-course`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
   const res = await errorHandling(result)
   return res
@@ -185,18 +118,5 @@ export async function getCommunityRights(
     RequestBodyWithAuthHeader('GET', null, null, access_token)
   )
   const res = await errorHandling(result)
-  return res
-}
-
-export async function updateCommunityThumbnail(
-  community_uuid: string,
-  formData: FormData,
-  access_token: string
-) {
-  const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}/thumbnail`,
-    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
   return res
 }

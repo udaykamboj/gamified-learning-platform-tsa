@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
@@ -178,6 +179,22 @@ export function DiscussionDetail({
           <p className="text-gray-500 italic">{t('communities.discussion_detail.no_details')}</p>
         )}
       </div>
+
+      {/* Linked board */}
+      {discussion.board_uuid && (
+        <div className="px-6 pb-6">
+          <Link
+            href={`/board/${discussion.board_uuid.replace('board_', '')}`}
+            className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div>
+              <div className="text-sm font-semibold text-gray-900">Shared board</div>
+              <div className="text-xs text-gray-500">Open the board linked to this discussion and work on it together</div>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-600">Open board</span>
+          </Link>
+        </div>
+      )}
 
       {/* Comments Section */}
       <div className="border-t border-gray-100">

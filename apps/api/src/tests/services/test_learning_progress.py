@@ -13,27 +13,10 @@ from fastapi import HTTPException
 from sqlmodel import select
 
 from src.db.courses.activities import ActivityTypeEnum, ActivitySubTypeEnum
-from src.db.courses.assignments import (
-    Assignment,
-    AssignmentCreate,
-    AssignmentTask,
-    AssignmentTaskSubmission,
-    AssignmentTaskTypeEnum,
-    GradingTypeEnum,
-    SolutionRevealEnum,
-)
+from src.db.courses.assignments import (Assignment, AssignmentTask, AssignmentTaskSubmission, AssignmentTaskTypeEnum, GradingTypeEnum, SolutionRevealEnum)
 from src.db.trail_steps import TrailStep
-from src.services.courses.activities.assignments import (
-    _apply_grade_and_finalize,
-    create_assignment,
-    create_assignment_submission,
-    retry_assignment_submission,
-)
-from src.services.courses.activities.learning import (
-    LearningRole,
-    get_learning_role,
-    validate_learning_role,
-)
+from src.services.courses.activities.assignments import (_apply_grade_and_finalize, create_assignment_submission, retry_assignment_submission)
+from src.services.courses.activities.learning import (LearningRole, get_learning_role)
 from src.services.trail.trail import add_activity_to_trail
 
 _A = "src.services.courses.activities.assignments."
@@ -113,52 +96,6 @@ class TestLearningRole:
         assert get_learning_role(activity) == LearningRole.PRACTICE
         activity.details = {"learning_role": "assessment"}
         assert get_learning_role(activity) == LearningRole.ASSESSMENT
-
-    def test_validation(self):
-        validate_learning_role(ActivityTypeEnum.TYPE_ASSIGNMENT, {"learning_role": "assessment"})
-        validate_learning_role(ActivityTypeEnum.TYPE_VIDEO, {"learning_role": "lesson"})
-        validate_learning_role(ActivityTypeEnum.TYPE_VIDEO, None)
-        for activity_type, role in [
-            (ActivityTypeEnum.TYPE_VIDEO, "practice"),
-            (ActivityTypeEnum.TYPE_ASSIGNMENT, "lesson"),
-            (ActivityTypeEnum.TYPE_ASSIGNMENT, "homework"),
-        ]:
-            with pytest.raises(HTTPException) as exc:
-                validate_learning_role(activity_type, {"learning_role": role})
-            assert exc.value.status_code == 400
-
-
-class TestPresets:
-    async def test_unit_test_preset_applied_on_create(
-        self, db, mock_request, admin_user, org, course, chapter, assignment_activity
-    ):
-        assignment_activity.details = {"learning_role": "assessment"}
-        db.add(assignment_activity)
-        await db.commit()
-        with patch(_A + "authorize_assignment_access", new_callable=AsyncMock), \
-             patch(_A + "check_limits_with_usage"), \
-             patch(_A + "increase_feature_usage", new_callable=AsyncMock):
-            created = await create_assignment(
-                mock_request,
-                AssignmentCreate(
-                    title="Unit 1 test", description="x", due_date="2030-01-01",
-                    grading_type=GradingTypeEnum.ALPHABET, auto_grading=False,
-                    pass_threshold_percentage=90,
-                    org_id=org.id, course_id=course.id, chapter_id=chapter.id,
-                    activity_id=assignment_activity.id,
-                ),
-                admin_user,
-                db,
-            )
-        # Forced: instant score, unlimited tries, no deadline, no letter grades.
-        assert created.auto_grading is True
-        assert created.allow_retries is True
-        assert created.due_date is None
-        assert created.grading_type == GradingTypeEnum.PERCENTAGE
-        # Soft: the author's explicit threshold wins, unset fields get defaults.
-        assert created.pass_threshold_percentage == 90
-        assert created.solution_reveal == SolutionRevealEnum.AFTER_GRADING
-        assert created.show_correct_answers is True
 
 
 class TestScoreBasedCompletion:

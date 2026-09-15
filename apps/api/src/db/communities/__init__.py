@@ -1,7 +1,6 @@
 from src.db.communities.communities import (
     Community,
     CommunityBase,
-    CommunityCreate,
     CommunityUpdate,
     CommunityRead,
 )
@@ -30,7 +29,6 @@ from src.db.communities.discussion_comments import (
 __all__ = [
     "Community",
     "CommunityBase",
-    "CommunityCreate",
     "CommunityUpdate",
     "CommunityRead",
     "Discussion",

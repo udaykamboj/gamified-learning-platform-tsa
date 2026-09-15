@@ -16,7 +16,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from config.config import get_starlab_config
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization, OrganizationRead
-from src.db.usergroups import UserGroup
 from src.db.users import AnonymousUser, PublicUser, UserRead
 from src.services.orgs.orgs import (
     get_org_default_language,
@@ -67,7 +66,6 @@ async def create_invite_code(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: AsyncSession,
-    usergroup_id: Optional[int] = None,
 ):
     # Every visitor to the shared demo holds admin on it, so without this an
     # invite code minted there is a way for anyone to have the platform email
@@ -120,19 +118,6 @@ async def create_invite_code(
             detail="Could not connect to Redis",
         )
 
-    # Validate usergroup exists if provided
-    if usergroup_id is not None:
-        statement = select(UserGroup).where(
-            UserGroup.id == usergroup_id,
-            UserGroup.org_id == org_id,
-        )
-        usergroup = (await db_session.execute(statement)).scalars().first()
-        if not usergroup:
-            raise HTTPException(
-                status_code=404,
-                detail="UserGroup not found or does not belong to this organization",
-            )
-
     # Generate invite code using cryptographically secure random
     def generate_code(length=8):
         alphabet = string.ascii_letters + string.digits
@@ -152,9 +137,6 @@ async def create_invite_code(
         "created_at": datetime.now().isoformat(),
         "created_by": current_user.user_uuid,
     }
-
-    if usergroup_id is not None:
-        inviteCodeObject["usergroup_id"] = usergroup_id
 
     new_invite_key = f"{invite_code_uuid}:org:{org.org_uuid}:code:{generated_invite_code}"
     invite_value = json.dumps(inviteCodeObject)
@@ -230,14 +212,6 @@ async def get_invite_codes(
         if invite_code is None:
             continue
         invite_code = json.loads(invite_code)  # type: ignore
-
-        # Enrich with usergroup name if linked
-        if invite_code.get("usergroup_id"):
-            statement = select(UserGroup).where(
-                UserGroup.id == invite_code["usergroup_id"]
-            )
-            usergroup = (await db_session.execute(statement)).scalars().first()
-            invite_code["usergroup_name"] = usergroup.name if usergroup else None
 
         invite_codes_list.append(invite_code)
 

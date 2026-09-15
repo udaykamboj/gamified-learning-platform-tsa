@@ -4,7 +4,11 @@ import {
   errorHandling,
 } from '@services/utils/ts/requests'
 
+// restricted = private: only the owner and the people it is shared with.
 export type PlaygroundAccessType = 'public' | 'authenticated' | 'restricted'
+
+// The caller's relation to a playground. null means link access (public/signed-in).
+export type PlaygroundRole = 'owner' | 'editor' | 'viewer' | null
 
 export interface Playground {
   id: number
@@ -26,6 +30,7 @@ export interface Playground {
   author_last_name?: string | null
   author_user_uuid?: string | null
   author_avatar_image?: string | null
+  my_role?: PlaygroundRole
   creation_date: string
   update_date: string
 }
@@ -137,25 +142,50 @@ export async function updatePlaygroundThumbnail(
   return errorHandling(result)
 }
 
-export async function addUserGroupToPlayground(
+// ── Sharing ─────────────────────────────────────────────────────────────────
+
+export interface PlaygroundShare {
+  user_id: number
+  role: 'editor' | 'viewer'
+  username?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  avatar_image?: string | null
+  user_uuid?: string | null
+  creation_date: string
+}
+
+export async function getPlaygroundShares(
   playgroundUuid: string,
-  usergroupUuid: string,
   access_token: string
-): Promise<void> {
+): Promise<PlaygroundShare[]> {
   const result = await fetch(
-    `${getAPIUrl()}playgrounds/${playgroundUuid}/usergroups/${usergroupUuid}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token)
+    `${getAPIUrl()}playgrounds/${playgroundUuid}/shares`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
   )
   return errorHandling(result)
 }
 
-export async function removeUserGroupFromPlayground(
+export async function sharePlayground(
   playgroundUuid: string,
-  usergroupUuid: string,
+  identifier: string,
+  role: 'editor' | 'viewer',
+  access_token: string
+): Promise<PlaygroundShare> {
+  const result = await fetch(
+    `${getAPIUrl()}playgrounds/${playgroundUuid}/shares`,
+    RequestBodyWithAuthHeader('POST', { identifier, role }, null, access_token)
+  )
+  return errorHandling(result)
+}
+
+export async function unsharePlayground(
+  playgroundUuid: string,
+  userId: number,
   access_token: string
 ): Promise<void> {
   const result = await fetch(
-    `${getAPIUrl()}playgrounds/${playgroundUuid}/usergroups/${usergroupUuid}`,
+    `${getAPIUrl()}playgrounds/${playgroundUuid}/shares/${userId}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
   return errorHandling(result)

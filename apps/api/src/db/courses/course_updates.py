@@ -22,11 +22,6 @@ class CourseUpdate(SQLModel, table=True):
     creation_date: str
     update_date: str
 
-class CourseUpdateCreate(SQLModel):
-    title: str 
-    content: str 
-    linked_activity_uuids: Optional[str] = Field(default=None)
-    org_id: int
 
 class CourseUpdateRead(SQLModel):
     id: int
@@ -39,9 +34,5 @@ class CourseUpdateRead(SQLModel):
     creation_date: str
     update_date: str
 
-class CourseUpdateUpdate(SQLModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    linked_activity_uuids: Optional[str] = Field(default=None)
 
     

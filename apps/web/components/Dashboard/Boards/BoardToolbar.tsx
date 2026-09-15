@@ -90,7 +90,7 @@ export default function BoardToolbar({
       }}
     >
       {/* Logo */}
-      <Link href="/dash/boards">
+      <Link href="/boards">
         <div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
           <Image
               src="/starlab.svg"

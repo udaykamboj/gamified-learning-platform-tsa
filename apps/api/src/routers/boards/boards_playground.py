@@ -90,6 +90,9 @@ async def start_boards_playground_session(
 
     # Org-wide two-factor policy, applied after the membership gate.
     await enforce_org_mfa(start_acting_user_id, org.id, db_session)
+    # Only people who can edit the board generate content for it.
+    from src.services.boards.boards import require_board_editor
+    await require_board_editor(request, board, current_user, db_session)
     # F-9: per-user + per-org rate limit before any compute / credit spend.
     from src.services.security.rate_limiting import enforce_ai_rate_limit
     enforce_ai_rate_limit(start_acting_user_id, org.id)
@@ -177,6 +180,9 @@ async def iterate_boards_playground_session(
 
     # Org-wide two-factor policy, applied after the membership gate.
     await enforce_org_mfa(iterate_acting_user_id, org.id, db_session)
+    # Only people who can edit the board generate content for it.
+    from src.services.boards.boards import require_board_editor
+    await require_board_editor(request, board, current_user, db_session)
     # F-9: per-user + per-org rate limit before any compute / credit spend.
     from src.services.security.rate_limiting import enforce_ai_rate_limit
     enforce_ai_rate_limit(iterate_acting_user_id, org.id)
@@ -216,6 +222,7 @@ async def iterate_boards_playground_session(
     },
 )
 async def get_session_state(
+    request: Request,
     session_uuid: str,
     current_user: PublicUser = Depends(get_current_user),
     db_session: AsyncSession = Depends(get_db_session),
@@ -251,6 +258,9 @@ async def get_session_state(
 
     # Org-wide two-factor policy, applied after the membership gate.
     await enforce_org_mfa(acting_user_id, org.id, db_session)
+    # Only people who can edit the board generate content for it.
+    from src.services.boards.boards import require_board_editor
+    await require_board_editor(request, board, current_user, db_session)
     return BoardsPlaygroundSessionResponse(
         session_uuid=session.session_uuid,
         iteration_count=session.iteration_count,

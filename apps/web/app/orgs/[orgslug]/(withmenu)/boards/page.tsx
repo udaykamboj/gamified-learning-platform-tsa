@@ -1,8 +1,38 @@
-import { redirect } from 'next/navigation'
+import { getOrganizationContextInfo } from '@services/organizations/orgs'
+import { Metadata } from 'next'
+import React from 'react'
+import BoardListClient from './boards'
 
-// Boards are not part of the student learning experience
-// (docs/refactor/03-change-list.md, section B). The admin tool at /dash/boards
-// is kept. Browser-relative path: the proxy adds the /orgs/{slug} prefix.
-export default async function BoardsPage() {
-  redirect('/dashboard')
+type MetadataProps = {
+  params: Promise<{ orgslug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
+
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const params = await props.params
+  const org = await getOrganizationContextInfo(params.orgslug, {
+    revalidate: 120,
+    tags: ['organizations'],
+  })
+
+  return {
+    title: 'My boards — ' + org.name,
+    description: 'Your boards and the ones shared with you',
+    robots: {
+      index: false,
+      follow: false,
+    },
+  }
+}
+
+async function BoardsPage(params: any) {
+  const orgslug = (await params.params).orgslug
+  const org = await getOrganizationContextInfo(orgslug, {
+    revalidate: 120,
+    tags: ['organizations'],
+  })
+
+  return <BoardListClient org_id={org.id} orgslug={orgslug} />
+}
+
+export default BoardsPage

@@ -15,9 +15,6 @@ from src.db.resource_authors import (
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
-from src.db.usergroups import UserGroup
 from src.db.users import APITokenUser
 from src.services.podcasts.episodes import (
     create_episode,
@@ -103,22 +100,6 @@ async def _make_author(db, resource_uuid, user_id, authorship=ResourceAuthorship
     await db.commit()
     await db.refresh(author)
     return author
-
-
-async def _make_usergroup(db, org, **overrides):
-    usergroup = UserGroup(
-        id=overrides.pop("id", None),
-        org_id=org.id,
-        name=overrides.pop("name", "UserGroup"),
-        description=overrides.pop("description", "Desc"),
-        usergroup_uuid=overrides.pop("usergroup_uuid", "usergroup_test"),
-        creation_date=overrides.pop("creation_date", str(datetime.now())),
-        update_date=overrides.pop("update_date", str(datetime.now())),
-    )
-    db.add(usergroup)
-    await db.commit()
-    await db.refresh(usergroup)
-    return usergroup
 
 
 async def _make_org_config(db, org, config=None):
@@ -322,110 +303,6 @@ class TestPodcastsService:
             await get_podcast_user_rights(mock_request, "missing", admin_user, db)
         assert missing_exc.value.status_code == 404
 
-    @pytest.mark.asyncio
-    async def test_feature_toggle_and_unpublished_helper_branches(
-        self, db, org, other_org, admin_user, regular_user, anonymous_user, mock_request
-    ):
-        assert await _is_podcasts_feature_enabled(other_org.id, db) is False
-
-        await _make_org_config(db, org, {"podcasts": {"enabled": True}})
-        with patch(
-            "src.security.features_utils.resolve.resolve_feature",
-            return_value={"enabled": False},
-        ):
-            assert await _is_podcasts_feature_enabled(org.id, db) is False
-
-        author_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_author_view",
-        )
-        group_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_group_view",
-        )
-        owner_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_owner_view",
-        )
-        hidden_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_hidden_view",
-        )
-        usergroup = await _make_usergroup(db, org, usergroup_uuid="usergroup_podcast_view")
-        db.add(
-            UserGroupResource(
-                usergroup_id=usergroup.id,
-                resource_uuid=group_podcast.podcast_uuid,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=regular_user.id,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        await _make_author(db, author_podcast.podcast_uuid, regular_user.id)
-
-        assert (
-            await _user_can_view_unpublished_podcast(
-                mock_request, hidden_podcast, anonymous_user, db
-            )
-            is False
-        )
-
-        with patch("src.services.podcasts.podcasts.is_user_superadmin", new=AsyncMock(return_value=True)):
-            assert (
-                await _user_can_view_unpublished_podcast(
-                    mock_request, hidden_podcast, regular_user, db
-                )
-                is True
-            )
-
-        with patch("src.services.podcasts.podcasts.is_user_superadmin", new=AsyncMock(return_value=False)):
-            assert (
-                await _user_can_view_unpublished_podcast(
-                    mock_request, author_podcast, regular_user, db
-                )
-                is True
-            )
-            assert (
-                await _user_can_view_unpublished_podcast(
-                    mock_request, owner_podcast, admin_user, db
-                )
-                is True
-            )
-            assert (
-                await _user_can_view_unpublished_podcast(
-                    mock_request, group_podcast, regular_user, db
-                )
-                is True
-            )
-            assert (
-                await _user_can_view_unpublished_podcast(
-                    mock_request, hidden_podcast, regular_user, db
-                )
-                is False
-            )
 
     @pytest.mark.asyncio
     async def test_lookup_and_meta_error_paths(self, db, org, admin_user, regular_user, mock_request):
@@ -471,115 +348,6 @@ class TestPodcastsService:
                 await get_podcast_meta(mock_request, hidden_podcast.podcast_uuid, regular_user, db)
             assert hidden_meta_exc.value.status_code == 404
 
-    @pytest.mark.asyncio
-    async def test_listing_and_count_filters(self, db, org, other_org, admin_user, regular_user, anonymous_user, mock_request):
-        await _make_org_config(db, org, {"podcasts": {"enabled": True}})
-        await _make_org_config(db, other_org, {"podcasts": {"enabled": True}})
-
-        public_podcast = await _make_podcast(
-            db,
-            org,
-            public=True,
-            published=True,
-            podcast_uuid="podcast_public_listing",
-            creation_date="2024-01-04",
-        )
-        published_private = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=True,
-            podcast_uuid="podcast_private_listing",
-            creation_date="2024-01-03",
-        )
-        usergroup = await _make_usergroup(db, org, usergroup_uuid="usergroup_listing")
-        grouped_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_grouped_listing",
-            creation_date="2024-01-02",
-        )
-        author_podcast = await _make_podcast(
-            db,
-            org,
-            public=False,
-            published=False,
-            podcast_uuid="podcast_author_listing",
-            creation_date="2024-01-01",
-        )
-        db.add(
-            UserGroupResource(
-                usergroup_id=usergroup.id,
-                resource_uuid=grouped_podcast.podcast_uuid,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=regular_user.id,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await _make_author(db, author_podcast.podcast_uuid, regular_user.id)
-        await db.commit()
-
-        assert await get_podcasts_orgslug(mock_request, regular_user, "missing-slug", db) == []
-
-        with patch(
-            "src.services.podcasts.podcasts._is_podcasts_feature_enabled",
-            return_value=False,
-        ):
-            assert await get_podcasts_orgslug(mock_request, regular_user, org.slug, db) == []
-
-        assert await get_podcasts_orgslug(mock_request, regular_user, other_org.slug, db) == []
-
-        regular_results = await get_podcasts_orgslug(
-            mock_request, regular_user, org.slug, db, include_unpublished=False
-        )
-        admin_results = await get_podcasts_orgslug(
-            mock_request, admin_user, org.slug, db, include_unpublished=True
-        )
-        with patch("src.services.podcasts.podcasts.is_user_superadmin", new=AsyncMock(return_value=True)):
-            superadmin_results = await get_podcasts_orgslug(
-                mock_request, regular_user, org.slug, db, include_unpublished=True
-            )
-        anonymous_results = await get_podcasts_orgslug(
-            mock_request, anonymous_user, org.slug, db
-        )
-
-        regular_uuids = {podcast.podcast_uuid for podcast in regular_results}
-        admin_uuids = {podcast.podcast_uuid for podcast in admin_results}
-        anon_uuids = {podcast.podcast_uuid for podcast in anonymous_results}
-
-        assert regular_uuids == {
-            public_podcast.podcast_uuid,
-            published_private.podcast_uuid,
-            grouped_podcast.podcast_uuid,
-            author_podcast.podcast_uuid,
-        }
-        assert admin_uuids == regular_uuids
-        assert {podcast.podcast_uuid for podcast in superadmin_results} == regular_uuids
-        assert anon_uuids == {public_podcast.podcast_uuid}
-
-        assert await get_podcasts_count_orgslug(
-            mock_request, anonymous_user, org.slug, db
-        ) == 1
-
-        with patch("src.services.podcasts.podcasts.is_user_superadmin", new=AsyncMock(return_value=True)):
-            assert await get_podcasts_count_orgslug(
-                mock_request, regular_user, org.slug, db
-            ) == 4
-
-        assert await get_podcasts_count_orgslug(
-            mock_request, regular_user, org.slug, db
-        ) == 4
 
     @pytest.mark.asyncio
     async def test_thumbnail_update_sensitive_update_and_delete_errors(

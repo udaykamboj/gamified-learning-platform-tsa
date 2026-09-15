@@ -20,12 +20,7 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionStatus,
     GradingTypeEnum,
 )
-from src.db.courses.assignments import AssignmentTaskUpdate
-from src.services.courses.activities.assignments import (
-    _apply_grade_and_finalize,
-    delete_assignment_task_submission,
-    update_assignment_task,
-)
+from src.services.courses.activities.assignments import (_apply_grade_and_finalize)
 
 _AUTHZ = "src.services.courses.activities.assignments.authorize_assignment_access"
 _RBAC = "src.services.courses.activities.assignments.check_resource_access"
@@ -83,59 +78,6 @@ async def _seed_graded(db, org, course, chapter, activity, user, *, answer="4", 
         )
     await db.refresh(us)
     return a, task, us, ts
-
-
-class TestUpdateTaskRegrades:
-    @pytest.mark.asyncio
-    async def test_changing_answer_key_regrades_graded_submission(
-        self, mock_request, db, org, course, chapter, activity, regular_user, admin_user
-    ):
-        a, task, us, ts = await _seed_graded(db, org, course, chapter, activity, regular_user)
-        assert us.grade == 100  # answered correctly
-
-        # Move the correct answer so the same student answer is now wrong.
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            await update_assignment_task(
-                mock_request, task.assignment_task_uuid,
-                AssignmentTaskUpdate(contents={"correct_answers": ["5"], "match_mode": "exact"}),
-                admin_user, db,
-            )
-        await db.refresh(us)
-        assert us.grade == 0  # re-graded against the new key
-
-    @pytest.mark.asyncio
-    async def test_non_scoring_edit_does_not_regrade(
-        self, mock_request, db, org, course, chapter, activity, regular_user, admin_user
-    ):
-        a, task, us, ts = await _seed_graded(db, org, course, chapter, activity, regular_user)
-        assert us.grade == 100
-        with patch(_AUTHZ, new_callable=AsyncMock), patch(
-            "src.services.courses.activities.assignments._regrade_graded_submissions",
-            new_callable=AsyncMock,
-        ) as regrade:
-            await update_assignment_task(
-                mock_request, task.assignment_task_uuid,
-                AssignmentTaskUpdate(title="Renamed", description="new"),
-                admin_user, db,
-            )
-        regrade.assert_not_called()
-
-
-class TestDeleteTaskSubmissionReconciles:
-    @pytest.mark.asyncio
-    async def test_deleting_task_submission_recomputes_aggregate(
-        self, mock_request, db, org, course, chapter, activity, regular_user, admin_user
-    ):
-        a, task, us, ts = await _seed_graded(db, org, course, chapter, activity, regular_user)
-        assert us.grade == 100
-
-        with patch(_RBAC, new_callable=AsyncMock):
-            await delete_assignment_task_submission(
-                mock_request, ts.assignment_task_submission_uuid, admin_user, db,
-            )
-        await db.refresh(us)
-        # The graded aggregate no longer counts the deleted answer.
-        assert us.grade == 0
 
 
 class TestReconcileCertificateAfterGradeChange:

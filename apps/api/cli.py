@@ -125,6 +125,8 @@ async def _install_async(short: bool) -> None:
                 )
                 print("Default organization user created ✅")
 
+                await _sync_catalog(db_session)
+
                 # Show the user how to login
                 print("Installation completed ✅")
                 print("")
@@ -169,6 +171,8 @@ async def _install_async(short: bool) -> None:
                 )
                 print(username + " user created ✅")
 
+                await _sync_catalog(db_session)
+
                 # Show the user how to login
                 print("Installation completed ✅")
                 print("")
@@ -179,6 +183,52 @@ async def _install_async(short: bool) -> None:
         await async_engine.dispose()
 
 
+async def _sync_catalog(db_session: AsyncSession) -> None:
+    from src.content.catalog.sync import sync_platform_content
+
+    print("Syncing platform courses and communities...")
+    stats = await sync_platform_content(db_session)
+    print(f"Catalog synced ✅ (created {stats.created}, updated {stats.updated}, removed {stats.removed})")
+
+
+@cli.command(name="sync-platform-content")
+def sync_platform_content_command():
+    """Sync the course catalog and platform communities into the database.
+
+    Courses are platform content kept in src/content/catalog/courses. The API
+    runs this on every boot; run it by hand after editing the catalog on a
+    running deployment. Safe to run repeatedly.
+    """
+    asyncio.run(_run_with_session(_sync_catalog))
+
+
+@cli.command(name="retire-teacher-roles")
+def retire_teacher_roles_command():
+    """Move Maintainer/Instructor/custom-role members to Admin or Student and delete those roles.
+
+    Also runs on every boot. Safe to run repeatedly.
+    """
+    async def _retire(db_session: AsyncSession) -> None:
+        from src.services.setup.setup import retire_teacher_roles
+
+        retired = await retire_teacher_roles(db_session)
+        for line in retired:
+            print(f"Retired {line}")
+        if not retired:
+            print("No teacher-era roles left.")
+
+    asyncio.run(_run_with_session(_retire))
+
+
+async def _run_with_session(fn) -> None:
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
+    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            await fn(db_session)
+    finally:
+        await async_engine.dispose()
 
 
 @cli.command()
@@ -487,145 +537,6 @@ async def _nudges_stats(days: int) -> None:
         print(f"\n  {stuck} row(s) stuck in 'claimed' — a run died mid-send.")
 
 
-@cli.command(name="demo-sync")
-def demo_sync():
-    """
-    Create or refresh the shared demo organization.
-
-    Safe to run repeatedly — that is the point. The first run builds the demo
-    from the bundle; every run after it puts back whatever a visitor changed
-    and writes nothing if nothing changed.
-
-    The in-app scheduler calls the same code on an interval. This command is
-    for operators who would rather drive it from their own cron (set
-    STARLAB_DEMO_NO_SCHEDULER) or want to force a refresh now.
-    """
-    asyncio.run(_demo_sync())
-
-
-async def _demo_sync() -> None:
-    from src.services.demo.sync import sync_demo
-
-    starlab_config = get_starlab_config()
-    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            stats = await sync_demo(db_session)
-    finally:
-        await async_engine.dispose()
-
-    action = "provisioned" if stats.provisioned else "refreshed"
-    print(f"Demo {action} (epoch {stats.epoch})")
-    print(f"  created:       {stats.created}")
-    print(f"  updated:       {stats.updated}")
-    print(f"  drift removed: {stats.drift_deleted}")
-    if not stats.created and not stats.updated and not stats.drift_deleted:
-        print("  nothing to do — the demo already matches the bundle")
-
-
-@cli.command(name="demo-status")
-def demo_status():
-    """Show the demo organization's state and what it currently contains."""
-    asyncio.run(_demo_status())
-
-
-async def _demo_status() -> None:
-    from sqlalchemy import func, select
-
-    from src.db.demo_entities import DemoEntity
-    from src.db.demo_state import DEMO_STATE_ID, DemoState
-    from src.db.organizations import Organization
-
-    starlab_config = get_starlab_config()
-    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            state = (
-                await db_session.execute(
-                    select(DemoState).where(DemoState.id == DEMO_STATE_ID)
-                )
-            ).scalars().first()
-            if state is None:
-                print("No demo organization has been created yet.")
-                print("Run: uv run python cli.py demo-sync")
-                return
-
-            org = None
-            if state.org_id:
-                org = (
-                    await db_session.execute(
-                        select(Organization).where(Organization.id == state.org_id)
-                    )
-                ).scalars().first()
-
-            print(f"State:          {state.state}")
-            print(f"Bundle version: {state.bundle_version}")
-            print(f"Content epoch:  {state.content_epoch}")
-            print(f"Last refresh:   {state.last_refresh_at}")
-            if state.last_error:
-                print(f"Last error:     {state.last_error}")
-            if org is not None:
-                print(f"Organization:   {org.name} (/{org.slug}, id={org.id})")
-
-            rows = (
-                await db_session.execute(
-                    select(DemoEntity.kind, func.count())
-                    .group_by(DemoEntity.kind)
-                    .order_by(DemoEntity.kind)
-                )
-            ).all()
-            if rows:
-                print("\nRegistered rows:")
-                for kind, count in rows:
-                    print(f"  {kind:18} {count}")
-    finally:
-        await async_engine.dispose()
-
-
-@cli.command(name="demo-teardown")
-def demo_teardown(
-    yes: Annotated[bool, typer.Option("--yes", help="Skip the confirmation")] = False,
-):
-    """
-    Delete the demo organization, its students, its files and its state.
-
-    Everything it owns goes with the organization via cascade; the fake student
-    accounts, their uploaded files and the authorship rows that reference
-    content by a bare uuid are removed explicitly, because none of those are
-    org-owned rows the cascade can reach.
-    """
-    if not yes:
-        typer.confirm(
-            "Delete the demo organization and all forty demo student accounts?",
-            abort=True,
-        )
-    asyncio.run(_demo_teardown())
-
-
-async def _demo_teardown() -> None:
-    from src.services.demo.teardown import teardown_demo
-
-    starlab_config = get_starlab_config()
-    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            removed = await teardown_demo(db_session)
-            await db_session.commit()
-
-            for line in removed:
-                print(line)
-            if not removed:
-                print("No demo organization found.")
-    finally:
-        await async_engine.dispose()
-
-
 @cli.command()
 def main():
     cli()
@@ -649,8 +560,6 @@ async def _backfill_async() -> None:
     try:
         async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
             from src.services.orgs.platform import get_platform_org
-            from src.db.organizations import Organization
-            from sqlmodel import select
             
             org = await get_platform_org(db_session)
             if org:
@@ -661,29 +570,6 @@ async def _backfill_async() -> None:
             # Here we could collapse other orgs or move users, but for now we just verify.
             print("Backfill complete ✅")
             
-    finally:
-        await async_engine.dispose()
-
-@cli.command(name="backfill-course-qa")
-def backfill_course_qa():
-    """Create the Q&A community for every course that doesn't have one yet.
-
-    New courses get theirs on creation; run this once for courses created
-    before that. Safe to run repeatedly.
-    """
-    asyncio.run(_backfill_course_qa())
-
-
-async def _backfill_course_qa() -> None:
-    from src.services.communities.communities import backfill_course_communities
-
-    starlab_config = get_starlab_config()
-    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            created = await backfill_course_communities(db_session)
-        print(f"Created {created} course Q&A communities.")
     finally:
         await async_engine.dispose()
 

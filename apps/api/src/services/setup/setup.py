@@ -14,499 +14,103 @@ from src.db.roles import DashboardPermission, Permission, PermissionsWithOwn, Ri
 from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate, UserRead
 from src.security.security import security_hash_password
-from src.security.rbac.constants import ADMIN_ROLE_ID
+from src.security.rbac.constants import ADMIN_ROLE_ID, PLATFORM_ROLE_IDS, USER_ROLE_ID
+
+
+def _perm(create=False, read=True, update=False, delete=False) -> Permission:
+    return Permission(
+        action_create=create, action_read=read, action_update=update, action_delete=delete
+    )
+
+
+def _own(create=False, read=True, update=False, delete=False, own=False) -> PermissionsWithOwn:
+    """``own`` grants read/update/delete on the caller's own resources."""
+    return PermissionsWithOwn(
+        action_create=create,
+        action_read=read,
+        action_read_own=True,
+        action_update=update,
+        action_update_own=own,
+        action_delete=delete,
+        action_delete_own=own,
+    )
+
+
+# Student tools (boards, playgrounds) and community posts belong to whoever
+# creates them. Nobody grants them, so both roles hold the same "own" rights and
+# neither can edit another user's tools (docs/refactor/progress/01-plan.md, D1).
+_OWN_TOOL = dict(create=True, read=True, own=True)
 
 
 # Install Default roles
 async def install_default_elements(db_session: AsyncSession):
-    """Upsert global default roles. Existing roles are updated in place to
-    preserve FK references from userorganization."""
+    """Upsert the two platform roles and retire every teacher-era role.
+
+    Existing roles are updated in place to preserve FK references from
+    userorganization."""
 
     logger = logging.getLogger(__name__)
 
-    # Build the desired role definitions
+    # Admin: platform administration, monitoring and community moderation.
+    # Courses, chapters, activities and assignments are platform-authored
+    # content (src/content/catalog.py), so admins only read them.
     role_global_admin = Role(
         name="Admin",
-        description="Full platform control",
-        id=1,
+        description="Platform administration, monitoring and community moderation",
+        id=ADMIN_ROLE_ID,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_admin",
         rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            folders=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            media=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            assignments=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            roles=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-            communities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            discussions=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            podcasts=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            boards=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            playgrounds=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
+            courses=_own(),
+            users=_perm(read=True, update=True, delete=True),
+            folders=_perm(create=True, update=True, delete=True),
+            media=_perm(create=True, update=True, delete=True),
+            organizations=_perm(update=True),
+            coursechapters=_perm(),
+            activities=_perm(),
+            assignments=_perm(),
+            roles=_perm(),
+            dashboard=DashboardPermission(action_access=True),
+            communities=_perm(update=True),
+            discussions=_own(create=True, update=True, delete=True, own=True),
+            podcasts=_own(create=True, update=True, delete=True, own=True),
+            boards=_own(**_OWN_TOOL),
+            playgrounds=_own(**_OWN_TOOL),
         ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
 
-    role_global_maintainer = Role(
-        name="Maintainer",
-        description="Mid-level manager, wide permissions but no platform control",
-        id=2,
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_maintainer",
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            folders=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            media=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            assignments=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-            communities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            discussions=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            podcasts=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            boards=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-            playgrounds=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=True,
-                action_update_own=True,
-                action_delete=True,
-                action_delete_own=True,
-            ),
-        ),
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    role_global_instructor = Role(
-        name="Instructor",
-        description="Can manage their own content",
-        id=3,
-        role_type=RoleTypeEnum.TYPE_GLOBAL,
-        role_uuid="role_global_instructor",
-        rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            users=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            folders=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            media=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            assignments=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=False,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=True,
-            ),
-            communities=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            discussions=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            podcasts=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            boards=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            playgrounds=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-        ),
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
+    # Student: every public signup. Learns at their own pace and owns their tools.
     role_global_user = Role(
         name="User",
-        description="Read-Only Learner",
+        description="Student",
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_user",
-        id=4,
+        id=USER_ROLE_ID,
         rights=Rights(
-            courses=PermissionsWithOwn(
-                action_create=False,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=False,
-                action_delete=False,
-                action_delete_own=False,
-            ),
-            users=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            folders=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            media=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            activities=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            assignments=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            roles=Permission(
-                action_create=False,
-                action_read=False,
-                action_update=False,
-                action_delete=False,
-            ),
-            dashboard=DashboardPermission(
-                action_access=False,
-            ),
-            communities=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            discussions=PermissionsWithOwn(
-                action_create=True,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=True,
-                action_delete=False,
-                action_delete_own=True,
-            ),
-            podcasts=PermissionsWithOwn(
-                action_create=False,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=False,
-                action_delete=False,
-                action_delete_own=False,
-            ),
-            boards=PermissionsWithOwn(
-                action_create=False,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=False,
-                action_delete=False,
-                action_delete_own=False,
-            ),
-            playgrounds=PermissionsWithOwn(
-                action_create=False,
-                action_read=True,
-                action_read_own=True,
-                action_update=False,
-                action_update_own=False,
-                action_delete=False,
-                action_delete_own=False,
-            ),
+            courses=_own(),
+            users=_perm(read=False),
+            folders=_perm(),
+            media=_perm(),
+            organizations=_perm(read=False),
+            coursechapters=_perm(),
+            activities=_perm(),
+            assignments=_perm(),
+            roles=_perm(read=False),
+            dashboard=DashboardPermission(action_access=False),
+            communities=_perm(),
+            discussions=_own(create=True, own=True),
+            podcasts=_own(),
+            boards=_own(**_OWN_TOOL),
+            playgrounds=_own(**_OWN_TOOL),
         ),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
 
     # Serialize rights to JSON
-    desired_roles = [role_global_admin, role_global_maintainer, role_global_instructor, role_global_user]
+    desired_roles = [role_global_admin, role_global_user]
     for role in desired_roles:
         role.rights = role.rights.model_dump()  # type: ignore
 
@@ -528,7 +132,48 @@ async def install_default_elements(db_session: AsyncSession):
 
     await db_session.commit()
 
+    retired = await retire_teacher_roles(db_session)
+    if retired:
+        logger.info(f"Retired teacher-era roles: {retired}")
+
     return True
+
+
+async def retire_teacher_roles(db_session: AsyncSession) -> list[str]:
+    """Remove every role that isn't Admin or Student.
+
+    Maintainer, Instructor and custom organization roles were the teacher layer
+    (R1, R2). Their members become Admins when the role granted dashboard
+    access (staff) and Students otherwise; then the role rows are deleted.
+    API-token roles are untouched: tokens carry their own rights. Idempotent.
+    """
+    from src.security.platform_roles import role_grants_dashboard_access
+
+    roles = (
+        await db_session.execute(
+            select(Role).where(
+                Role.id.not_in(PLATFORM_ROLE_IDS),
+                Role.role_type != RoleTypeEnum.TYPE_ORGANIZATION_API_TOKEN,
+            )
+        )
+    ).scalars().all()
+    retired: list[str] = []
+    for role in roles:
+        target = ADMIN_ROLE_ID if role_grants_dashboard_access(role) else USER_ROLE_ID
+        memberships = (
+            await db_session.execute(
+                select(UserOrganization).where(UserOrganization.role_id == role.id)
+            )
+        ).scalars().all()
+        for membership in memberships:
+            membership.role_id = target
+            membership.update_date = str(datetime.now())
+            db_session.add(membership)
+        retired.append(f"{role.name} (id={role.id}, {len(memberships)} members -> {target})")
+        await db_session.flush()
+        await db_session.delete(role)
+    await db_session.commit()
+    return retired
 
 
 # Organization creation
