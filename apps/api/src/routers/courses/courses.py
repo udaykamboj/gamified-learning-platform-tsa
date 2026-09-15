@@ -1,7 +1,5 @@
 from typing import List
-import os
-from fastapi import APIRouter, Depends, HTTPException, Request, Query
-from pydantic import BaseModel, field_validator
+from fastapi import APIRouter, Depends, Request, Query
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
@@ -30,62 +28,7 @@ from src.services.courses.updates import (
 )
 
 
-# Request models for batch operations
-class BatchExportRequest(BaseModel):
-    """
-    Request model for batch course export.
-
-    SECURITY: Limited to 20 courses per request to prevent resource exhaustion.
-    """
-    course_uuids: List[str]
-
-    @field_validator('course_uuids')
-    @classmethod
-    def validate_course_uuids(cls, v):
-        if len(v) > 20:
-            raise ValueError('Maximum 20 courses can be exported at once')
-        if len(v) == 0:
-            raise ValueError('At least one course UUID is required')
-        return v
-
-
-class ImportRequest(BaseModel):
-    """
-    Request model for course import.
-
-    SECURITY: Limited to 20 courses per import request.
-    """
-    temp_id: str
-    course_uuids: List[str]
-    name_prefix: str | None = None
-    set_private: bool = True
-    set_unpublished: bool = True
-
-    @field_validator('course_uuids')
-    @classmethod
-    def validate_course_uuids(cls, v):
-        if len(v) > 20:
-            raise ValueError('Maximum 20 courses can be imported at once')
-        if len(v) == 0:
-            raise ValueError('At least one course UUID is required')
-        return v
-
-
 router = APIRouter(dependencies=[Depends(require_courses_feature)])
-
-
-def _validated_export_path(zip_path: str) -> str:
-    """Confirm an export archive path stays within the system temp directory
-    before it is streamed back. The export service builds the file with
-    ``tempfile.mkstemp`` (server-controlled), so this is defense-in-depth that
-    also keeps the value reaching FileResponse a checked one."""
-    import tempfile
-
-    base_real = os.path.realpath(tempfile.gettempdir())
-    full_real = os.path.realpath(zip_path)
-    if full_real != base_real and os.path.commonpath([base_real, full_real]) != base_real:
-        raise HTTPException(status_code=400, detail="Invalid export path")
-    return full_real
 
 
 @router.get(

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { ArrowRight, Check, Loader2, Plus } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getUriWithOrg } from '@services/config/config'
 import { getOrgCourses } from '@services/courses/courses'
 import { removeCourse, startCourse } from '@services/courses/activity'
 import { useTrail } from '@/hooks/queries/useTrail'
@@ -91,7 +92,7 @@ export default function SkillsEnrollment({ orgslug }: { orgslug: string }) {
         const done = (run?.steps || []).filter((step: any) => step.complete).length
         const percent = total > 0 ? Math.round((done / total) * 100) : 0
         const color = ACCENTS[index % ACCENTS.length]
-        const courseHref = `/course/${course.course_uuid.replace('course_', '')}`
+        const courseHref = getUriWithOrg(orgslug, `/course/${course.course_uuid.replace('course_', '')}`)
         const busy = pending === course.course_uuid
 
         return (

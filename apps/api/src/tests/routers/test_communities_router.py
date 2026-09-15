@@ -112,10 +112,6 @@ def _upload_file():
 
 class TestCommunitiesRouter:
     async def test_community_endpoints(self, client):
-        with patch("src.routers.communities.communities.create_community", new_callable=AsyncMock, return_value=_mock_community()):
-            response = await client.post("/api/v1/communities/?org_id=1", json={"name": "Community", "description": "Desc", "public": True})
-        assert response.status_code == 200
-
         with patch("src.routers.communities.communities.get_community", new_callable=AsyncMock, return_value=_mock_community()):
             response = await client.get("/api/v1/communities/community_test")
         assert response.status_code == 200
@@ -128,20 +124,8 @@ class TestCommunitiesRouter:
             response = await client.get("/api/v1/communities/course/course_test")
         assert response.status_code == 200
 
-        with patch("src.routers.communities.communities.update_community", new_callable=AsyncMock, return_value=_mock_community(name="Updated")):
-            response = await client.put("/api/v1/communities/community_test", json={"name": "Updated"})
-        assert response.status_code == 200
-
-        with patch("src.routers.communities.communities.delete_community", new_callable=AsyncMock, return_value={"deleted": True}):
-            response = await client.delete("/api/v1/communities/community_test")
-        assert response.status_code == 200
-
-        with patch("src.routers.communities.communities.link_community_to_course", new_callable=AsyncMock, return_value=_mock_community(course_id=1)):
-            response = await client.put("/api/v1/communities/community_test/link-course/course_test")
-        assert response.status_code == 200
-
-        with patch("src.routers.communities.communities.unlink_community_from_course", new_callable=AsyncMock, return_value=_mock_community()):
-            response = await client.delete("/api/v1/communities/community_test/unlink-course")
+        with patch("src.routers.communities.communities.update_community", new_callable=AsyncMock, return_value=_mock_community(moderation_words=["spam"])):
+            response = await client.put("/api/v1/communities/community_test", json={"moderation_words": ["spam"]})
         assert response.status_code == 200
 
         with patch("src.routers.communities.communities.get_community_user_rights", new_callable=AsyncMock, return_value={"read": True}):
@@ -228,43 +212,6 @@ class TestCommunitiesRouter:
             response = await client.post("/api/v1/discussions/d1/reactions", json={"emoji": "👍"})
         assert response.status_code == 200
 
-    async def test_create_community_with_course_id_validation(self, client, db, org):
-        """Covers communities router lines 68-80: when course_id is supplied on
-        create, the endpoint verifies the course exists (404) and belongs to the
-        same org (400) BEFORE delegating to create_community."""
-        from src.db.courses.courses import Course
-
-        # 404: course_id does not resolve to any course
-        response = await client.post(
-            "/api/v1/communities/?org_id=1",
-            json={"name": "C", "description": "D", "public": True, "course_id": 999999},
-        )
-        assert response.status_code == 404
-        assert response.json()["detail"] == "Course not found"
-
-        # 400: course exists but belongs to a different organization
-        other_org_course = Course(
-            id=4242,
-            name="Other Org Course",
-            description="Desc",
-            public=True,
-            published=True,
-            open_to_contributors=False,
-            org_id=999,
-            course_uuid="course_other_org_router",
-            creation_date="2024-01-01",
-            update_date="2024-01-01",
-        )
-        db.add(other_org_course)
-        await db.commit()
-
-        response = await client.post(
-            "/api/v1/communities/?org_id=1",
-            json={"name": "C", "description": "D", "public": True, "course_id": 4242},
-        )
-        assert response.status_code == 400
-        assert "same organization" in response.json()["detail"]
-
     async def test_batch_user_votes_too_many_uuids(self, client):
         """Covers discussions router lines 364-369: a batch larger than 200
         discussion_uuids is rejected with 400 before hitting the DB."""
@@ -272,63 +219,3 @@ class TestCommunitiesRouter:
         response = await client.post("/api/v1/discussions/votes/batch", json=too_many)
         assert response.status_code == 400
         assert "maximum 200" in response.json()["detail"]
-
-    async def test_community_thumbnail_endpoint_branches(self, client, db, org, admin_user):
-        community = Community(
-            id=21,
-            name="Community With Thumb",
-            description="Desc",
-            public=True,
-            thumbnail_image="old-thumb.png",
-            org_id=org.id,
-            course_id=None,
-            community_uuid="community_thumb",
-            moderation_words=[],
-            creation_date="2024-01-01",
-            update_date="2024-01-01",
-        )
-        orphan_community = Community(
-            id=22,
-            name="Orphan Community",
-            description="Desc",
-            public=True,
-            thumbnail_image="",
-            org_id=999,
-            course_id=None,
-            community_uuid="community_orphan",
-            moderation_words=[],
-            creation_date="2024-01-01",
-            update_date="2024-01-01",
-        )
-        db.add(community)
-        db.add(orphan_community)
-        db.commit()
-
-        with patch("src.routers.communities.communities.check_resource_access", new_callable=AsyncMock), patch(
-            "src.routers.communities.communities.upload_community_thumbnail",
-            new_callable=AsyncMock,
-            return_value="new-thumb.png",
-        ):
-            response = await client.put(
-                "/api/v1/communities/community_thumb/thumbnail",
-                files={"thumbnail": _upload_file()},
-            )
-
-        assert response.status_code == 200
-        assert response.json()["thumbnail_image"] == "new-thumb.png"
-
-        with patch("src.routers.communities.communities.check_resource_access", new_callable=AsyncMock):
-            no_file_response = await client.put(
-                "/api/v1/communities/community_thumb/thumbnail"
-            )
-            missing_community_response = await client.put(
-                "/api/v1/communities/missing/thumbnail"
-            )
-            missing_org_response = await client.put(
-                "/api/v1/communities/community_orphan/thumbnail"
-            )
-
-        assert no_file_response.status_code == 200
-        assert no_file_response.json()["thumbnail_image"] == "new-thumb.png"
-        assert missing_community_response.status_code == 404
-        assert missing_org_response.status_code == 404

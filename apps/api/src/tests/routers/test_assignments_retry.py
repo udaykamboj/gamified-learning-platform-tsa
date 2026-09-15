@@ -504,8 +504,11 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert rows[0].assignmentusersubmission_uuid == original_uuid
 
     async def test_rejects_when_existing_row_is_submitted(
-        self, db, regular_user, mock_request, assignment
+        self, db, regular_user, mock_request, assignment, org, course, activity
     ):
+        await _make_trail_artifacts(
+            db, org.id, course.id, activity.id, regular_user.id, complete=False
+        )
         await _make_user_submission(
             db,
             assignment.id,
@@ -526,8 +529,11 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert "already exists" in exc_info.value.detail
 
     async def test_rejects_when_existing_row_is_graded(
-        self, db, regular_user, mock_request, assignment
+        self, db, regular_user, mock_request, assignment, org, course, activity
     ):
+        await _make_trail_artifacts(
+            db, org.id, course.id, activity.id, regular_user.id, complete=False
+        )
         await _make_user_submission(
             db,
             assignment.id,

@@ -68,6 +68,7 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests'
 import { getAssignmentsFromACourse } from '@services/courses/assignments'
+
 import { getDeploymentMode } from '@services/config/config'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -99,6 +100,7 @@ function DashLeftMenu() {
   const access_token = session?.data?.tokens?.access_token
 
   // Fetch recent courses
+  // Fetch recent courses for hover menu
   const { data: coursesData } = useQuery({
     queryKey: [...queryKeys.courses.list(org?.slug || ''), 'recent', 8],
     queryFn: async () => {
@@ -307,9 +309,11 @@ function DashLeftMenu() {
                         <HoverMenuItem key={course.course_uuid} asChild>
                           <Link
                             href={`/dash/courses/course/${course.course_uuid.replace('course_', '')}/settings`}
+                            href={`/dash/courses/course/${course.course_uuid.replace('course_', '')}/overview`}
                             className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
                           >
                             <PencilSimple size={14} className="text-white/40" />
+                            <BookOpen size={14} className="text-white/40" />
                             <span className="truncate">{course.name}</span>
                           </Link>
                         </HoverMenuItem>
@@ -440,36 +444,22 @@ function DashLeftMenu() {
                 active={isActivePath('/dash/library')}
               />
             )}
-            {showPodcasts && (
-              <MenuLink
-                href="/dash/podcasts"
-                icon={<Headphones size={20} weight="fill" />}
-                label={t('podcasts.podcasts')}
-                isCollapsed={isCollapsed}
-                active={isActivePath('/dash/podcasts')}
-              />
-            )}
-            {showPlaygrounds && (
-              <MenuLink
-                href="/dash/playgrounds"
-                icon={<Cube size={20} weight="fill" />}
-                label={t('common.playgrounds')}
-                isCollapsed={isCollapsed}
-                active={isActivePath('/dash/playgrounds')}
-              />
-            )}
-            {showCommunities && (
-              <>
-                <NavGroupLabel label="Community" isCollapsed={isCollapsed} />
-                <MenuLink
-                  href="/dash/communities"
-                  icon={<ChatsCircle size={20} weight="fill" />}
-                  label="Q&A moderation"
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/communities')}
-                />
-              </>
-            )}
+            <MenuLink
+              href="/dash/podcasts"
+              icon={<Headphones size={20} weight="fill" />}
+              label={t('podcasts.podcasts')}
+              isCollapsed={isCollapsed}
+              active={isActivePath('/dash/podcasts')}
+            />
+
+            <NavGroupLabel label="Community" isCollapsed={isCollapsed} />
+            <MenuLink
+              href="/dash/communities"
+              icon={<ChatsCircle size={20} weight="fill" />}
+              label="Q&A moderation"
+              isCollapsed={isCollapsed}
+              active={isActivePath('/dash/communities')}
+            />
             <NavGroupLabel label="People" isCollapsed={isCollapsed} />
             {/* Users with hover menu */}
             <HoverMenu

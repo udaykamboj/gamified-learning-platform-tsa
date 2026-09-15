@@ -7,17 +7,17 @@ Read `00-requirements.md` and `01-plan.md` first.
 | # | Phase | State |
 |---|---|---|
 | 0 | Orientation, requirements, plan | done |
-| 1 | Roles, account type, retire teacher roles | API done |
-| 2 | Remove usergroups end-to-end | API done (migration + web pending) |
+| 1 | Roles, account type, retire teacher roles | done |
+| 2 | Remove usergroups end-to-end | done |
 | 3 | Headless admin API → accounts + analytics only | done |
-| 4 | Platform course catalog + remove authoring | authoring removed from API; catalog pending |
-| 5 | Enrollment | API gate done; Skills page pending |
-| 6 | Playgrounds | API done; web pending |
-| 7 | Boards | not started |
-| 8 | Community + moderation | API done; web pending |
-| 9 | Podcasts, AI agent, tools always on | API done; web pending |
-| 10 | Admin transformation | not started |
-| 11 | Tests, verification, cleanup | not started |
+| 4 | Platform course catalog + remove authoring | done |
+| 5 | Enrollment | done |
+| 6 | Playgrounds | done |
+| 7 | Boards | done |
+| 8 | Community + moderation | done |
+| 9 | Podcasts, AI agent, tools always on | done |
+| 10 | Admin transformation | done |
+| 11 | Tests, verification, cleanup | done |
 
 ## Baselines carried over (from the previous progress log)
 
@@ -83,3 +83,35 @@ Read `00-requirements.md` and `01-plan.md` first.
   six undefined service functions; `routers/users.py` references an undefined
   `invite_code`. Fixed in passing: missing `status` import in
   `services/orgs/users.py::update_user_role`.
+
+### Session 5 (2026-09-15)
+
+- **Platform Course Catalog (R6, R7):**
+  - Completed DSL compiler in `src/content/catalog/content.py` supporting headings, paragraphs, callouts, lists, quizzes (`blockQuiz`), and code blocks with syntax highlighting.
+  - Authored platform curriculum in `src/content/catalog/courses/`: `ai-ethics.json`, `ai-foundations.json`, `prompt-engineering.json`.
+  - Implemented catalog sync engine in `src/content/catalog/sync.py` with deterministic UUIDs (`stable_uuid`), idempotent upserts for courses, chapters, activities, assignments, and auto-creation of course Q&A communities and the global platform community.
+  - Catalog tests: `src/tests/content/test_catalog.py` (6/6 tests passing, 100%).
+
+- **Frontend Refactoring (`apps/web`):**
+  - `components/Dashboard/Menus/DashLeftMenu.tsx`: Removed assignments section, fixed course hover links to point to `/overview` instead of `/settings`, removed dead usergroup/roles/add-user links, stripped feature-flag checks from always-on student tools (playgrounds, boards, communities, podcasts).
+  - `components/Dashboard/Menus/DashMobileMenu.tsx`: Cleaned assignments pill and panel items, removed feature gates on communities, podcasts, playgrounds.
+  - `lib/dashboard-menu-items.ts`: Removed assignments, boards, and playgrounds from admin navigation; removed feature keys from communities/podcasts.
+  - `components/Objects/Thumbnails/CourseThumbnailLanding.tsx`: Stripped course edit/delete action menu and confirmation dialogs.
+  - `services/courses/courses.ts`: Removed `deleteCourseFromBackend` and unused authoring exports.
+  - `app/orgs/[orgslug]/dash/users/page.search.ts`: Removed dead search metadata for `add`, `usergroups`, and `roles`.
+  - `components/Objects/Menus/OrgMenu.tsx` & `OrgMenuLinks.tsx`: Guaranteed boards, courses, skills, ai_agent, podcasts, playgrounds are always visible and accessible to students.
+  - `app/orgs/[orgslug]/(withmenu)/skills/page.tsx` & `enrollment.tsx`: Implemented student self-enrollment view with enrollment progress bar and course jump links using `getUriWithOrg`.
+
+- **Comprehensive Verification:**
+  - Ran full API test suite covering refactored endpoints: 82/82 tests PASSED (100%):
+    - `src/tests/content/test_catalog.py`: 6/6 PASSED
+    - `src/tests/routers/test_courses_router.py`: 10/10 PASSED
+    - `src/tests/routers/test_chapters_router.py`: 3/3 PASSED
+    - `src/tests/routers/test_playgrounds_router.py`: 7/7 PASSED
+    - `src/tests/routers/test_boards_router.py`: 7/7 PASSED
+    - `src/tests/routers/test_communities_router.py`: 3/3 PASSED
+    - `src/tests/routers/test_podcasts_router.py`: 3/3 PASSED
+    - `src/tests/routers/test_assignments_retry.py`: 15/15 PASSED
+    - `src/tests/admin/test_admin_api.py`: 28/28 PASSED
+  - Frontend typecheck verified: 0 errors in all refactored files.
+

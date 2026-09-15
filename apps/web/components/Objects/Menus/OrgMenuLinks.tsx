@@ -30,7 +30,12 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const colors = getMenuColorClasses(props.primaryColor || '')
 
   const rf = org?.config?.config?.resolved_features
-  const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
+  const isEnabled = (feature: string) => {
+    if (['courses', 'skills', 'ai_agent', 'podcasts', 'playgrounds'].includes(feature)) {
+      return true
+    }
+    return rf?.[feature]?.enabled === true
+  }
 
   const configItems: any[] | undefined =
     org?.config?.config?.customization?.menu?.items ?? org?.config?.config?.general?.menu?.items

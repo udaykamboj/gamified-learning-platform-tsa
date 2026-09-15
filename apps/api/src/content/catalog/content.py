@@ -137,10 +137,11 @@ def _compile_block(block: Any) -> dict:
     if kind == "quiz":
         return _quiz(payload)
     if kind == "code":
+        payload_dict = payload if isinstance(payload, dict) else {"text": str(payload), "lang": None}
         return {
             "type": "codeBlock",
-            "attrs": {"language": payload.get("lang")},
-            "content": _text(payload.get("text", "")),
+            "attrs": {"language": payload_dict.get("lang")},
+            "content": _text(payload_dict.get("text", "")),
         }
     if kind == "rule":
         return {"type": "horizontalRule"}

@@ -397,9 +397,9 @@ def mock_admin_side_effects():
     """
     patches = [
         patch("src.services.admin.admin.dispatch_webhooks", new_callable=AsyncMock),
-        patch("src.services.admin.admin.track", new_callable=AsyncMock),
-        patch("src.services.admin.admin.check_limits_with_usage", new_callable=AsyncMock, return_value=True),
-        patch("src.services.admin.admin.increase_feature_usage", new_callable=AsyncMock, return_value=True),
+        patch("src.services.admin.admin.track", create=True, new_callable=AsyncMock),
+        patch("src.services.admin.admin.check_limits_with_usage", create=True, new_callable=AsyncMock, return_value=True),
+        patch("src.services.admin.admin.increase_feature_usage", create=True, new_callable=AsyncMock, return_value=True),
         patch("src.services.admin.admin.decrease_feature_usage", new_callable=AsyncMock, return_value=True),
     ]
     started = [p.start() for p in patches]

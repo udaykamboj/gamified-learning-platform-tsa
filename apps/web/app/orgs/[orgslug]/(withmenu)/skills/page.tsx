@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Hexagon } from "lucide-react";
+import { getUriWithOrg } from "@services/config/config";
 import SkillsEnrollment from "./enrollment";
 
 export const metadata = {
@@ -17,7 +18,7 @@ export default async function SkillsPage({ params }: { params: PageParams }) {
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "4rem 1.25rem" }}>
         {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3rem" }}>
-          <Link href="/dashboard" style={{
+          <Link href={getUriWithOrg(orgslug, "/dashboard")} style={{
             display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.5)",
             textDecoration: "none", fontSize: 12, fontFamily: "monospace",
             letterSpacing: "0.1em", textTransform: "uppercase"

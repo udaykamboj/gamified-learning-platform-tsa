@@ -54,11 +54,14 @@ from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.requests import Request
 
+from src.db.boards import Board, BoardMember
+from src.db.communities.communities import Community
 from src.db.courses.activities import (
     Activity,
     ActivitySubTypeEnum,
     ActivityTypeEnum,
 )
+from src.db.courses.assignments import Assignment, AssignmentTask
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
@@ -66,6 +69,7 @@ from src.db.courses.courses import Course
 from src.db.folders.folders import Folder
 from src.db.folders.folder_content import FolderContent
 from src.db.organizations import Organization
+from src.db.playgrounds import Playground, PlaygroundShare
 from src.db.roles import (
     DashboardPermission,
     Permission,
