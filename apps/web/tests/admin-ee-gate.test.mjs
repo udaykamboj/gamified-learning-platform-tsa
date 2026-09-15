@@ -1,9 +1,11 @@
-// Contract tests for the superadmin surface's EE gate.
+// Contract tests for the superadmin surface gate.
 //
-// The failure direction here is the whole point. Blocking on anything other
-// than a definitive 'oss' would show live SaaS superadmins a licence screen
-// during an API blip — precisely when they need the dashboard. If someone
-// later "hardens" this into a fail-closed check, these fail.
+// The StarLab single-org build ships the admin console as CORE: admins land on
+// /admin after login in every deployment mode, so the web gate never blocks.
+// Security is enforced by the role/permission layer instead — only superadmin
+// accounts can reach the /admin API surface (SuperadminAuthorization + the
+// backend's _require_platform_superadmin). If someone later re-gates the
+// surface for upstream OSS releases, these fail.
 
 import { describe, expect, test } from "bun:test";
 
@@ -15,8 +17,8 @@ mock.module("server-only", () => ({}));
 const { isSuperadminSurfaceBlocked } = await import("../lib/eeGate.ts");
 
 describe("isSuperadminSurfaceBlocked", () => {
-  test("blocks OSS", () => {
-    expect(isSuperadminSurfaceBlocked("oss")).toBe(true);
+  test("never blocks OSS (admin console is core)", () => {
+    expect(isSuperadminSurfaceBlocked("oss")).toBe(false);
   });
 
   test("never blocks SaaS", () => {
@@ -28,9 +30,6 @@ describe("isSuperadminSurfaceBlocked", () => {
   });
 
   test("fails open when the mode is unknown", () => {
-    // null means the instance/info lookup failed or timed out. Rendering the
-    // dashboard is deliberate: the API-side check still denies every request,
-    // so the worst case is empty panels rather than a locked-out operator.
     expect(isSuperadminSurfaceBlocked(null)).toBe(false);
   });
 });

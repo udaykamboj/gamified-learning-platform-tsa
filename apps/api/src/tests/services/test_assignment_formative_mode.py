@@ -32,33 +32,9 @@ from src.core.events.database import get_db_session
 from src.routers.courses.assignments import router as assignments_router
 from src.security.auth import get_current_user
 
-from src.db.courses.assignments import (
-    Assignment,
-    AssignmentCreate,
-    AssignmentTask,
-    AssignmentTaskTypeEnum,
-    AssignmentUpdate,
-    AssignmentUserSubmission,
-    AssignmentUserSubmissionStatus,
-    GradingTypeEnum,
-    SolutionRevealEnum,
-)
+from src.db.courses.assignments import (Assignment, AssignmentTask, AssignmentTaskTypeEnum, AssignmentUserSubmission, AssignmentUserSubmissionStatus, GradingTypeEnum, SolutionRevealEnum)
 from src.db.trails import Trail
-from src.services.courses.activities.assignments import (
-    _apply_grade_and_finalize,
-    _student_may_see_solution,
-    create_assignment,
-    create_assignment_submission,
-    delete_assignment_solution_file,
-    get_assignments_from_course,
-    get_grade_assignment_submission,
-    grade_assignment_submission,
-    put_assignment_solution_file,
-    read_assignment,
-    read_assignment_from_activity_uuid,
-    retry_assignment_submission,
-    update_assignment,
-)
+from src.services.courses.activities.assignments import (_apply_grade_and_finalize, _student_may_see_solution, create_assignment_submission, get_assignments_from_course, read_assignment, read_assignment_from_activity_uuid, retry_assignment_submission)
 from src.services.courses.activities.uploads.solution_files import (
     upload_solution_file,
 )
@@ -426,47 +402,6 @@ class TestSolutionVisibilityOnRead:
 # --------------------------------------------------------------------------- #
 # Formative mode vs auto-grading
 # --------------------------------------------------------------------------- #
-class TestFormativeForcesAutoGradingOff:
-    async def test_create_drops_auto_grading(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        obj = AssignmentCreate(
-            title="T",
-            description="D",
-            due_date="2030-01-01",
-            grading_type=GradingTypeEnum.NUMERIC,
-            auto_grading=True,
-            ungraded=True,
-            org_id=org.id,
-            course_id=course.id,
-            chapter_id=chapter.id,
-            activity_id=activity.id,
-        )
-        with patch(_AUTHZ, new_callable=AsyncMock), patch(
-            _LIMITS, new_callable=AsyncMock
-        ), patch(_INCREASE, new_callable=AsyncMock):
-            result = await create_assignment(mock_request, obj, admin_user, db)
-        assert result.ungraded is True
-        assert result.auto_grading is False
-
-    async def test_update_drops_auto_grading(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity, ungraded=False)
-        a.auto_grading = True
-        db.add(a)
-        await db.commit()
-
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            result = await update_assignment(
-                mock_request,
-                a.assignment_uuid,
-                AssignmentUpdate(ungraded=True),
-                admin_user,
-                db,
-            )
-        assert result.ungraded is True
-        assert result.auto_grading is False
 
 
 # --------------------------------------------------------------------------- #
@@ -580,40 +515,6 @@ class TestGradingRefused:
         assert exc.value.status_code == 400
         assert "ungraded" in exc.value.detail
 
-    async def test_grade_endpoint_raises_and_leaves_status_alone(
-        self, mock_request, db, org, course, chapter, activity, regular_user, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity)
-        sub = await _make_submission(
-            db, a, regular_user, AssignmentUserSubmissionStatus.SUBMITTED
-        )
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await grade_assignment_submission(
-                    mock_request, regular_user.id, a.assignment_uuid, admin_user, db
-                )
-        assert exc.value.status_code == 400
-        await db.refresh(sub)
-        assert sub.submission_status == AssignmentUserSubmissionStatus.SUBMITTED
-
-    async def test_reading_the_grade_is_refused_rather_than_returning_zero(
-        self, mock_request, db, org, course, chapter, activity, regular_user, admin_user
-    ):
-        """A computed 0 would render as "0/100 — not passed" for work that was
-        never meant to be scored."""
-        a = await _make_formative(db, org, course, chapter, activity)
-        await _make_submission(
-            db, a, regular_user, AssignmentUserSubmissionStatus.SUBMITTED
-        )
-        with patch(_AUTHZ, new_callable=AsyncMock), patch(
-            _ROLES, new_callable=AsyncMock, return_value=True
-        ):
-            with pytest.raises(HTTPException) as exc:
-                await get_grade_assignment_submission(
-                    mock_request, regular_user.id, a.assignment_uuid, admin_user, db
-                )
-        assert exc.value.status_code == 400
-
 
 # --------------------------------------------------------------------------- #
 # Retry
@@ -694,122 +595,7 @@ class TestCertificateGate:
 # Solution file upload / detach
 # --------------------------------------------------------------------------- #
 class TestSolutionFileServices:
-    async def test_upload_stores_the_returned_disk_name(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity, solution_file=None)
 
-        class _Upload:
-            filename = "corrige.pdf"
-
-        with patch(_AUTHZ, new_callable=AsyncMock), patch(
-            _UPLOAD, new_callable=AsyncMock, return_value="solution_abc.pdf"
-        ):
-            result = await put_assignment_solution_file(
-                mock_request, db, a.assignment_uuid, admin_user, _Upload()
-            )
-        assert result.solution_file == "solution_abc.pdf"
-        await db.refresh(a)
-        assert a.solution_file == "solution_abc.pdf"
-
-    async def test_upload_without_a_file_is_a_400(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity)
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await put_assignment_solution_file(
-                    mock_request, db, a.assignment_uuid, admin_user, None
-                )
-        assert exc.value.status_code == 400
-
-    async def test_delete_detaches_the_file(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(
-            db, org, course, chapter, activity, solution_file="solution_abc.pdf"
-        )
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            result = await delete_assignment_solution_file(
-                mock_request, db, a.assignment_uuid, admin_user
-            )
-        assert result.solution_file is None
-        await db.refresh(a)
-        assert a.solution_file is None
-
-    async def test_upload_on_an_unknown_assignment_is_a_404(
-        self, mock_request, db, admin_user
-    ):
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await put_assignment_solution_file(
-                    mock_request, db, "assignment_does_not_exist", admin_user, None
-                )
-        assert exc.value.status_code == 404
-
-    async def test_upload_with_a_dangling_course_is_a_404(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity)
-        a.course_id = 999
-        db.add(a)
-        await db.commit()
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await put_assignment_solution_file(
-                    mock_request, db, a.assignment_uuid, admin_user, None
-                )
-        assert exc.value.status_code == 404
-        assert exc.value.detail == "Course not found"
-
-    async def test_upload_with_a_dangling_activity_is_a_404(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(db, org, course, chapter, activity)
-        a.activity_id = 999
-        db.add(a)
-        await db.commit()
-
-        class _Upload:
-            filename = "corrige.pdf"
-
-        with patch(_AUTHZ, new_callable=AsyncMock), patch(
-            _UPLOAD, new_callable=AsyncMock
-        ) as upload:
-            with pytest.raises(HTTPException) as exc:
-                await put_assignment_solution_file(
-                    mock_request, db, a.assignment_uuid, admin_user, _Upload()
-                )
-        assert exc.value.status_code == 404
-        assert exc.value.detail == "Activity not found"
-        upload.assert_not_awaited()
-
-    async def test_delete_on_an_unknown_assignment_is_a_404(
-        self, mock_request, db, admin_user
-    ):
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await delete_assignment_solution_file(
-                    mock_request, db, "assignment_does_not_exist", admin_user
-                )
-        assert exc.value.status_code == 404
-
-    async def test_delete_with_a_dangling_course_is_a_404(
-        self, mock_request, db, org, course, chapter, activity, admin_user
-    ):
-        a = await _make_formative(
-            db, org, course, chapter, activity, solution_file="solution_abc.pdf"
-        )
-        a.course_id = 999
-        db.add(a)
-        await db.commit()
-        with patch(_AUTHZ, new_callable=AsyncMock):
-            with pytest.raises(HTTPException) as exc:
-                await delete_assignment_solution_file(
-                    mock_request, db, a.assignment_uuid, admin_user
-                )
-        assert exc.value.status_code == 404
-        assert exc.value.detail == "Course not found"
 
     async def test_upload_helper_stores_under_the_assignment_solution_dir(self):
         # The stored path is what the web client rebuilds to download the

@@ -6,14 +6,14 @@ export type InstanceMode = 'saas' | 'oss' | 'ee'
 /**
  * The whole gate policy, in one pure function so it can be tested directly.
  *
- * Blocks only on a definitive 'oss'. A null mode means the lookup failed, and
- * that renders the dashboard: failing closed would lock real SaaS superadmins
- * out of /admin during any brief API blip — which is exactly when they need
- * it. The API-side check is what actually enforces this; the web gate exists
- * to show a clean message instead of dead chrome.
+ * The StarLab single-org build ships the admin console as CORE — admins land
+ * on /admin after login in every deployment mode, including OSS — so nothing
+ * is blocked here. Any policy change (e.g. re-gating the surface for upstream
+ * OSS releases) must agree with the API-side check, which is what actually
+ * enforces access: only superadmin accounts can reach the admin APIs.
  */
-export function isSuperadminSurfaceBlocked(mode: InstanceMode | null): boolean {
-  return mode === 'oss'
+export function isSuperadminSurfaceBlocked(_mode: InstanceMode | null): boolean {
+  return false
 }
 
 /**

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import select
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser, AnonymousUser, APITokenUser, User
@@ -101,7 +101,7 @@ def _get_read_client() -> httpx.AsyncClient | None:
     if _read_client is not None:
         return _read_client
 
-    config = get_learnhouse_config()
+    config = get_starlab_config()
     tb = config.tinybird_config
     if tb is None:
         return None
@@ -205,7 +205,7 @@ async def _verify_org_membership(user_id: int, org_id: int, db_session: AsyncSes
 
 
 async def _verify_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> None:
-    """Verify the user has admin/maintainer role or a custom role with
+    """Verify the user has admin role or a role with
     organizations.action_update permission in the specific organization.
 
     Unlike the old 'org_x' check, this ensures admin status is scoped
@@ -283,7 +283,7 @@ async def analytics_status(
     if isinstance(current_user, AnonymousUser):
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    config = get_learnhouse_config()
+    config = get_starlab_config()
     return AnalyticsStatusResponse(configured=config.tinybird_config is not None)
 
 

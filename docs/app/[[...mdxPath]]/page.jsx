@@ -3,7 +3,7 @@ import { useMDXComponents as getMDXComponents } from '../../mdx-components'
 
 export const generateStaticParams = generateStaticParamsFor('mdxPath')
 
-const SITE_URL = 'https://docs.learnhouse.app'
+const SITE_URL = 'https://docs.starlab.app'
 
 export async function generateMetadata(props) {
   const params = await props.params

@@ -37,6 +37,8 @@ export interface Discussion {
   edit_count: number
   is_pinned: boolean
   is_locked: boolean
+  // A board the author linked so people in the discussion can work on it.
+  board_uuid?: string | null
   creation_date: string
   update_date: string
 }
@@ -60,6 +62,7 @@ export interface DiscussionCreate {
   content?: string | null
   label?: string
   emoji?: string | null
+  board_uuid?: string | null
 }
 
 export interface DiscussionUpdate {

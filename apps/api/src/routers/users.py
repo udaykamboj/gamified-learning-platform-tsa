@@ -19,6 +19,8 @@ from src.services.orgs.orgs import get_org_join_mechanism
 from src.security.auth import get_current_user, get_authenticated_user
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
+from src.db.roles import Role
+from src.services.orgs.platform import require_platform_org
 
 from src.db.users import (
     AnonymousUser,
@@ -54,6 +56,10 @@ router = APIRouter()
 
 SESSION_CACHE_TTL = 600  # 10 minutes
 
+# v2: the payload gained platform_role / can_manage_platform. Bumping the key
+# means a pre-upgrade blob is never served as a "student" to an admin.
+SESSION_CACHE_KEY = "session:v2:{user_id}"
+
 
 def _get_session_cache(user_id: int) -> Optional[dict]:
     """Get cached session data for a user."""
@@ -61,7 +67,7 @@ def _get_session_cache(user_id: int) -> Optional[dict]:
     if r is None:
         return None
     try:
-        raw = r.get(f"session:{user_id}")
+        raw = r.get(SESSION_CACHE_KEY.format(user_id=user_id))
         if raw:
             return json.loads(raw)
     except Exception:
@@ -75,7 +81,7 @@ def _set_session_cache(user_id: int, session_data: dict) -> None:
     if r is None:
         return
     try:
-        r.setex(f"session:{user_id}", SESSION_CACHE_TTL, json.dumps(session_data))
+        r.setex(SESSION_CACHE_KEY.format(user_id=user_id), SESSION_CACHE_TTL, json.dumps(session_data))
     except Exception:
         logger.debug("Session cache write failed for user %s", user_id, exc_info=True)
 
@@ -86,7 +92,7 @@ def _invalidate_session_cache(user_id: int) -> None:
     if r is None:
         return
     try:
-        r.delete(f"session:{user_id}")
+        r.delete(SESSION_CACHE_KEY.format(user_id=user_id))
     except Exception:
         logger.debug("Session cache invalidation failed for user %s", user_id, exc_info=True)
 
@@ -125,14 +131,17 @@ async def api_get_current_user_session(
     """
     Get current user session (cached for 10 minutes).
     """
-    if not isinstance(current_user, AnonymousUser):
+    # Only a real account has a session. The cache is keyed by user id, and a
+    # superadmin API token's id is the token's row id, not a user's.
+    cacheable = isinstance(current_user, PublicUser)
+    if cacheable:
         cached = _get_session_cache(current_user.id)
         if cached:
             return UserSession(**cached)
 
     session = await get_user_session(request, db_session, current_user)
 
-    if not isinstance(current_user, AnonymousUser):
+    if cacheable:
         _set_session_cache(current_user.id, session.model_dump())
 
     return session
@@ -175,6 +184,72 @@ async def _enforce_password_signup_allowed(db_session: AsyncSession, org_id: int
 
 
 @router.post(
+    "/register",
+    response_model=UserRead,
+    tags=["users"],
+    summary="Register as a student (single-org mode)",
+    description=(
+        "Create a student account that automatically joins the platform's single organization. "
+        "No org_id is needed — the backend resolves the default organization automatically. "
+        "The account is created with the 'User' (student) role."
+    ),
+    responses={
+        200: {"description": "Student account created and joined to the platform organization.", "model": UserRead},
+        400: {"description": "Password fails validation, email already registered, or username taken"},
+        404: {"description": "Platform organization not yet configured. Run the install command first."},
+    },
+)
+async def api_register_student(
+    *,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_object: UserCreate,
+) -> UserRead:
+    """
+    Register a new student account in the platform's single organization.
+
+    This is the primary public signup path for the single-org model. It
+    resolves the platform's default (first non-demo) organization automatically
+    and creates the user with the student role (role_id=4).
+    """
+    from sqlmodel import select as _select
+    from src.db.organizations import Organization
+    from src.services.orgs.orgs import get_org_join_mechanism
+
+    # Resolve the platform's default organization: the first non-demo org by id.
+    default_org = (
+        await db_session.execute(
+            _select(Organization)
+            .where(Organization.is_demo == False)  # noqa: E712
+            .order_by(Organization.id.asc())
+            .limit(1)
+        )
+    ).scalars().first()
+
+    if not default_org or not default_org.id:
+        raise HTTPException(
+            status_code=404,
+            detail="Platform organization not found. Please run the installation command first.",
+        )
+
+    org_id = int(default_org.id)
+
+    # Enforce password signup allowed for this org.
+    await _enforce_password_signup_allowed(db_session, org_id)
+
+    # Respect invite-only setting even on the default org.
+    join_mechanism = await get_org_join_mechanism(request, org_id, current_user, db_session)
+    if join_mechanism == "inviteOnly":
+        raise HTTPException(
+            status_code=403,
+            detail="This platform requires an invitation to join.",
+        )
+
+    return await create_user(request, db_session, current_user, user_object, org_id)
+
+
+@router.post(
     "/{org_id}",
     response_model=UserRead,
     tags=["users"],
@@ -194,8 +269,8 @@ async def api_create_user_with_orgid(
     org_id: int,
 ) -> UserRead:
     """
-    Create User with Org ID
-    """
+    await require_platform_org(org_id, db_session)
+
     # An org that has turned email+password off must not hand out password
     # accounts for itself — they could never be used to sign in to it.
     await _enforce_password_signup_allowed(db_session, org_id)
@@ -234,8 +309,7 @@ async def api_create_user_with_orgid_and_invite(
     org_id: int,
 ) -> UserRead:
     """
-    Create User with Org ID and invite code
-    """
+    await require_platform_org(org_id, db_session)
     await _enforce_password_signup_allowed(db_session, org_id)
 
     # Throttle invite-code guessing per IP+org. ``detail`` is a plain string
@@ -253,19 +327,9 @@ async def api_create_user_with_orgid_and_invite(
             headers={"Retry-After": str(retry_after)},
         )
 
-    # TODO: This is temporary, logic should be moved to service
-    if (
-        await get_org_join_mechanism(request, org_id, current_user, db_session)
-        == "inviteOnly"
-    ):
-        return await create_user_with_invite(
-            request, db_session, current_user, user_object, org_id, invite_code
-        )
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="This organization does not require an invite code",
-        )
+    return await create_user_with_invite(
+        request, db_session, current_user, user_object, org_id, invite_code
+    )
 
 
 @router.post(
@@ -287,9 +351,14 @@ async def api_create_user_without_org(
     user_object: UserCreate,
 ) -> UserRead:
     """
-    Create User
+    Delegate to the public register path.
     """
-    return await create_user_without_org(request, db_session, current_user, user_object)
+    return await api_register_student(
+        request=request,
+        db_session=db_session,
+        current_user=current_user,
+        user_object=user_object,
+    )
 
 
 @router.get(

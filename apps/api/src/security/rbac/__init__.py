@@ -67,7 +67,6 @@ from src.security.rbac.dependencies import (
 
 # Low-level RBAC functions (used internally, can be used directly if needed)
 from src.security.rbac.rbac import (
-    check_usergroup_access,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_author,
     authorization_verify_based_on_roles,
@@ -86,12 +85,10 @@ from src.security.rbac.utils import (
 # Constants
 from src.security.rbac.constants import (
     ADMIN_ROLE_ID,
-    MAINTAINER_ROLE_ID,
+    USER_ROLE_ID,
     ADMIN_ROLE_IDS,
-    ADMIN_OR_MAINTAINER_ROLE_IDS,
+    PLATFORM_ROLE_IDS,
     is_admin,
-    is_admin_or_maintainer,
-    has_elevated_privileges,
 )
 
 __all__ = [
@@ -117,7 +114,6 @@ __all__ = [
     "PodcastAccess",
     "CommunityAccess",
     # Low-level functions
-    "check_usergroup_access",
     "authorization_verify_if_element_is_public",
     "authorization_verify_if_user_is_author",
     "authorization_verify_based_on_roles",
@@ -130,10 +126,8 @@ __all__ = [
     "get_element_organization_id",
     # Constants
     "ADMIN_ROLE_ID",
-    "MAINTAINER_ROLE_ID",
+    "USER_ROLE_ID",
     "ADMIN_ROLE_IDS",
-    "ADMIN_OR_MAINTAINER_ROLE_IDS",
+    "PLATFORM_ROLE_IDS",
     "is_admin",
-    "is_admin_or_maintainer",
-    "has_elevated_privileges",
 ]

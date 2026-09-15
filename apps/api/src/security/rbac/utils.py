@@ -12,8 +12,6 @@ async def check_element_type(element_uuid):
         return "courses"
     elif element_uuid.startswith("user_"):
         return "users"
-    elif element_uuid.startswith("usergroup_"):
-        return "usergroups"
     elif element_uuid.startswith("house_"):
         return "houses"
     elif element_uuid.startswith("org_"):
@@ -131,7 +129,6 @@ async def get_element_organization_id(
     from src.db.courses.activities import Activity
     from src.db.organizations import Organization
     from src.db.roles import Role
-    from src.db.usergroups import UserGroup
 
     element_type = await check_element_type(element_uuid)
 
@@ -160,8 +157,6 @@ async def get_element_organization_id(
     elif element_type == "roles":
         return (await db_session.execute(select(Role.org_id).where(Role.role_uuid == element_uuid))).scalars().first()
 
-    elif element_type == "usergroups":
-        return (await db_session.execute(select(UserGroup.org_id).where(UserGroup.usergroup_uuid == element_uuid))).scalars().first()
 
     elif element_type == "users":
         return None

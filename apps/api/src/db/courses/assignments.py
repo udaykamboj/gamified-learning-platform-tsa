@@ -97,12 +97,6 @@ class AssignmentBase(SQLModel):
     activity_id: int
 
 
-class AssignmentCreate(AssignmentBase):
-    """Model for creating a new assignment."""
-
-    pass  # Inherits all fields from AssignmentBase
-
-
 class AssignmentRead(AssignmentBase):
     """Model for reading an assignment."""
 
@@ -114,6 +108,8 @@ class AssignmentRead(AssignmentBase):
     # build file-ref URLs without a second round-trip per request.
     course_uuid: Optional[str] = None
     activity_uuid: Optional[str] = None
+    # "practice" or "assessment", from the parent activity (read services only).
+    learning_role: Optional[str] = None
     # Reveal state of the model answer, computed per-reader by the read
     # services. `has_solution` says a corrigé exists at all (so the learner
     # UI can show "submit to unlock" without leaking it); `solution_unlocked`
@@ -121,35 +117,6 @@ class AssignmentRead(AssignmentBase):
     # whenever a corrigé exists.
     has_solution: Optional[bool] = None
     solution_unlocked: Optional[bool] = None
-
-
-class AssignmentUpdate(SQLModel):
-    """Model for updating an assignment.
-
-    The structural foreign keys (org_id / course_id / chapter_id / activity_id)
-    are intentionally NOT exposed here. They locate the assignment inside a
-    single tenant/course, and the update endpoint only authorizes against the
-    assignment's *current* course — so accepting client-supplied parents would
-    let an instructor reparent an assignment into another org/course they don't
-    own. Assignments are created inside a course and never legitimately moved
-    across one through this endpoint.
-    """
-
-    title: Optional[str] = None
-    description: Optional[str] = None
-    due_date: Optional[str] = None
-    published: Optional[bool] = None
-    grading_type: Optional[GradingTypeEnum] = None
-    auto_grading: Optional[bool] = None
-    anti_copy_paste: Optional[bool] = None
-    show_correct_answers: Optional[bool] = None
-    allow_retries: Optional[bool] = None
-    max_retries: Optional[int] = None
-    pass_threshold_percentage: Optional[float] = None
-    ungraded: Optional[bool] = None
-    solution: Optional[str] = None
-    solution_reveal: Optional[SolutionRevealEnum] = None
-    update_date: Optional[str] = None
 
 
 class Assignment(AssignmentBase, table=True):
@@ -220,12 +187,6 @@ class AssignmentTaskBase(SQLModel):
     max_grade_value: int = Field(default=100, ge=0)
 
 
-class AssignmentTaskCreate(AssignmentTaskBase):
-    """Model for creating a new assignment task."""
-
-    pass  # Inherits all fields from AssignmentTaskBase
-
-
 class AssignmentTaskRead(AssignmentTaskBase):
     """Model for reading an assignment task."""
 
@@ -233,17 +194,6 @@ class AssignmentTaskRead(AssignmentTaskBase):
     assignment_task_uuid: str
     creation_date: str
     update_date: str
-
-
-class AssignmentTaskUpdate(SQLModel):
-    """Model for updating an assignment task."""
-
-    title: Optional[str] = None
-    description: Optional[str] = None
-    hint: Optional[str] = None
-    assignment_type: Optional[AssignmentTaskTypeEnum] = None
-    contents: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
-    max_grade_value: Optional[int] = Field(default=None, ge=0)
 
 
 class AssignmentTask(AssignmentTaskBase, table=True):
@@ -297,12 +247,6 @@ class AssignmentTaskSubmissionBase(SQLModel):
     course_id: int
     chapter_id: int
     assignment_task_id: int
-
-
-class AssignmentTaskSubmissionCreate(AssignmentTaskSubmissionBase):
-    """Model for creating a new assignment task submission."""
-
-    pass  # Inherits all fields from AssignmentTaskSubmissionBase
 
 
 class AssignmentTaskSubmissionRead(AssignmentTaskSubmissionBase):
@@ -406,42 +350,12 @@ class AssignmentUserSubmissionBase(SQLModel):
     )
 
 
-class AssignmentUserSubmissionCreate(SQLModel):
-    """Model for creating/updating an assignment user submission.
-
-    Carries the editable submission fields so the instructor update endpoint
-    can actually persist them. These are Optional because the update path only
-    applies non-None values and strips the privileged ones for students.
-    """
-
-    assignment_id: int
-    # Only the fields the update endpoint guards for students are exposed here.
-    # attempt_number / overall_feedback are intentionally NOT settable through
-    # this model: the update service does not strip them for non-instructors,
-    # so exposing them would let a student reset their own retry counter
-    # (attempt_number) or overwrite the instructor's feedback.
-    submission_status: Optional[AssignmentUserSubmissionStatus] = None
-    grade: Optional[int] = None
-    user_id: Optional[int] = None
-
-
 class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     """Model for reading an assignment user submission."""
 
     id: int
     creation_date: str
     update_date: str
-
-
-class AssignmentUserSubmissionUpdate(SQLModel):
-    """Model for updating an assignment user submission."""
-
-    submission_status: Optional[AssignmentUserSubmissionStatus] = None
-    grade: Optional[int] = None
-    overall_feedback: Optional[str] = None
-    attempt_number: Optional[int] = None
-    user_id: Optional[int] = None
-    assignment_id: Optional[int] = None
 
 
 class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):

@@ -9,7 +9,7 @@ import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
 //
 // Three runtime behaviors selected by `instance.tenancy`:
 //
-//   1. multi (EE-only):   slug.{LEARNHOUSE_DOMAIN} subdomain detection +
+//   1. multi (EE-only):   slug.{STARLAB_DOMAIN} subdomain detection +
 //                         per-org custom domains. The detection logic lives in
 //                         `./ee/services/tenancy/...` and is dynamic-imported
 //                         here — OSS proxy.ts never references subdomain or
@@ -84,6 +84,10 @@ interface ResolvedTenant {
  */
 async function resolveTenant(req: NextRequest, instance: InstanceInfo): Promise<ResolvedTenant> {
   if (instance.tenancy === 'single') {
+    const activeOrg = req.cookies.get('LH_org')?.value
+    if (activeOrg && /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(activeOrg)) {
+      return { slug: activeOrg, source: 'cookie' }
+    }
     return { slug: instance.default_org_slug, source: 'default' }
   }
 
@@ -253,6 +257,11 @@ export default async function proxy(req: NextRequest) {
     const target = pathname === '/admin' || pathname.startsWith('/admin/')
       ? pathname
       : `/admin${pathname}`
+      
+    if (target !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
+      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
+    }
+      
     const response = NextResponse.rewrite(new URL(`${target}${search}`, req.url))
     setInstanceCookies(response, instance)
     return response
@@ -264,6 +273,9 @@ export default async function proxy(req: NextRequest) {
   //     multi mode it's an alternative to the admin.{domain} subdomain.
   // -------------------------------------------------------------------------
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    if (pathname !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
+      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
+    }
     const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
     setInstanceCookies(response, instance)
     return response
@@ -272,12 +284,38 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   // 1b. Legacy /dashboard/* → hub redirects
   //
-  //    The old platform (learnhouse.app) used /dashboard/{slug}/plan, /dashboard/
+  //    The old platform (starlab.app) used /dashboard/{slug}/plan, /dashboard/
   //    new, /dashboard/account, etc. Those paths do NOT exist on .io and would
   //    404. Old bookmarks, emails, and — critically — URLs Stripe has already
   //    stored on live checkout sessions can still point here, so permanently map
   //    them onto the hub instead of dead-ending. SaaS/multi only.
   // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // 1b. Student dashboard — /dashboard resolves to the organisation's Learning
+  //     Universe (the student home), never to the admin surface. In the
+  //     single-org model there is exactly one organization, so resolution is
+  //     tenant-based: the LH_org cookie (if any) is ignored in favour of the
+  //     platform default so a stale cookie can't point a student at the wrong
+  //     (or admin) area. Admins land on /admin after login, not here.
+  // -------------------------------------------------------------------------
+  if (pathname === '/dashboard') {
+    const hasSession = !!req.cookies.get('LH_session')?.value
+    if (!hasSession) {
+      const callbackUrl = encodeURIComponent(pathname + search)
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+    }
+    
+    const resolved = await resolveTenant(req, instance)
+    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
+    const response = NextResponse.rewrite(
+      new URL(`/orgs/${resolved.slug}${search}`, req.url),
+      { request: { headers: requestHeaders } },
+    )
+    setOrgCookies(response, resolved, instance)
+    setInstanceCookies(response, instance)
+    return response
+  }
+
   if (instance.tenancy === 'multi' && pathname.startsWith('/dashboard')) {
     let dest = '/home'
     const planMatch = pathname.match(/^\/dashboard\/([^/]+)\/plan\/?$/)
@@ -311,7 +349,19 @@ export default async function proxy(req: NextRequest) {
   const isHubRoot = HUB_ROOT_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   )
-  if (pathname === '/home' || (instance.tenancy === 'multi' && isHubRoot)) {
+  // Single-org mode: there is exactly one organization everyone joins, so the
+  // org-management hub (org picker, org creation, subscriptions) has nothing to
+  // offer — collapse it onto the student dashboard. Account management stays.
+  // Multi-tenant (SaaS) deployments keep the full hub below.
+  if (
+    instance.tenancy !== 'multi'
+    && ['/home', '/organizations', '/new', '/subscriptions'].includes(pathname)
+  ) {
+    const response = NextResponse.redirect(new URL('/dashboard', req.url), 308)
+    setInstanceCookies(response, instance)
+    return response
+  }
+  if (pathname === '/home' || pathname === '/new' || (instance.tenancy === 'multi' && isHubRoot)) {
     // `/account/*` ALSO exists as an org-scoped dashboard route
     // (/orgs/{slug}/account/[subpage] — general/security/purchases). On an org
     // subdomain or custom domain it must resolve there, NOT the apex hub (which
@@ -339,7 +389,7 @@ export default async function proxy(req: NextRequest) {
     // A logged-in user has no business on /login — bounce them to the hub (the
     // page itself re-verifies, so this is a best-effort UX shortcut).
     if (pathname === '/login' && hasSession) {
-      return NextResponse.redirect(new URL('/home', req.url))
+      return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     const resolved = await resolveTenant(req, instance)
@@ -357,7 +407,7 @@ export default async function proxy(req: NextRequest) {
         || resolved.source === 'custom-domain'
       const hasInviteCode = !!req.nextUrl.searchParams.get('inviteCode')
       if (!onOrgHost && !hasInviteCode) {
-        return NextResponse.redirect(new URL('/home', req.url))
+        return NextResponse.redirect(new URL('/dashboard', req.url))
       }
     }
 
@@ -512,13 +562,23 @@ export default async function proxy(req: NextRequest) {
     return response
   }
 
+  // The apex is the public website. Keep it out of tenant resolution so the
+  // marketing page owns `/` in every tenancy mode.
+  if (pathname === '/') {
+    const hasSession = !!req.cookies.get('LH_session')?.value
+    if (hasSession) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+    return NextResponse.next()
+  }
+
   // -------------------------------------------------------------------------
   // 10. Apex root (multi tenancy only) — login-first, then org picker.
   //
-  //     The bare apex (learnhouse.io) is NOT org-scoped. An unauthenticated
+  //     The bare apex (starlab.io) is NOT org-scoped. An unauthenticated
   //     visitor lands on the login page; once signed in they get the /home org
   //     picker and choose an org — which lives on its own subdomain
-  //     ({slug}.learnhouse.io) or custom domain. Org content is ONLY served on
+  //     ({slug}.starlab.io) or custom domain. Org content is ONLY served on
   //     a subdomain/custom domain, never at the apex. Mirrors the platform's
   //     "log in, then choose an org" flow. We branch on the non-httpOnly
   //     LH_session marker cookie (best-effort; the page itself re-verifies).
@@ -546,7 +606,17 @@ export default async function proxy(req: NextRequest) {
 
   // -------------------------------------------------------------------------
   // 11. Tenant-scoped rewrite — the catch-all that puts us under /orgs/{slug}
+  //     All routes at this level belong to the authenticated student application,
+  //     so we strictly enforce authentication at the edge.
   // -------------------------------------------------------------------------
+  const hasSession = !!req.cookies.get('LH_session')?.value
+  if (!hasSession) {
+    // If an unauthenticated user accesses a student route directly (e.g. /courses),
+    // redirect them to the login gateway.
+    const callbackUrl = encodeURIComponent(pathname + search)
+    return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+  }
+
   const resolved = await resolveTenant(req, instance)
   const requestHeaders = tenantRequestHeaders(req, resolved, instance)
   // `${search}` is load-bearing: a rewrite destination built from an absolute

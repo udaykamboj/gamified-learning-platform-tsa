@@ -2,28 +2,15 @@ import React from 'react'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useMediaQuery } from 'usehooks-ts'
-import { Rss, PencilLine, TentTree } from 'lucide-react'
+import { Rss, TentTree } from 'lucide-react'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@lib/query/keys'
 import { getAPIUrl } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates'
-import toast from 'react-hot-toast'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import * as Form from '@radix-ui/react-form'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useFormik } from 'formik'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 
@@ -148,8 +135,6 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
 
 const UpdatesSection = () => {
   const { t } = useTranslation()
-  const [selectedView, setSelectedView] = React.useState('list')
-  const adminStatus = useAdminStatus()
   const course = useCourse() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -175,22 +160,6 @@ const UpdatesSection = () => {
             </span>
           )}
         </div>
-        {adminStatus.isAdmin && (
-          <button
-            onClick={() => setSelectedView(selectedView === 'new' ? 'list' : 'new')}
-            className={`
-              inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-              transition-colors duration-150
-              ${selectedView === 'new' 
-                ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300' 
-                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-              }
-            `}
-          >
-            <PencilLine size={12} />
-            <span>{selectedView === 'new' ? t('common.cancel') : t('courses.new_update')}</span>
-          </button>
-        )}
       </div>
       
       <motion.div
@@ -200,97 +169,9 @@ const UpdatesSection = () => {
         className="relative"
       >
         <div className="max-h-[300px] overflow-y-auto pe-1 -me-1">
-          {selectedView === 'list' ? (
-            <UpdatesListView />
-          ) : (
-            <NewUpdateForm setSelectedView={setSelectedView} />
-          )}
+          <UpdatesListView />
         </div>
       </motion.div>
-    </div>
-  )
-}
-
-const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
-  const { t } = useTranslation()
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const queryClient = useQueryClient()
-  const courseUuid = course?.courseStructure?.course_uuid
-
-  const formik = useFormik({
-    initialValues: {
-      title: '',
-      content: ''
-    },
-    validate: (values) => {
-      const errors: any = {}
-      if (!values.title) errors.title = t('validation.title_required')
-      if (!values.content) errors.content = t('validation.content_required')
-      return errors
-    },
-    onSubmit: async (values) => {
-      const body = {
-        title: values.title,
-        content: values.content,
-        course_uuid: course.courseStructure.course_uuid,
-        org_id: org.id
-      }
-      const res = await createCourseUpdate(body, session.data?.tokens?.access_token)
-      if (res.status === 200) {
-        toast.success(t('courses.update_added_success'))
-        setSelectedView('list')
-        queryClient.invalidateQueries({ queryKey: queryKeys.courses.updates(courseUuid) })
-      } else {
-        toast.error(t('courses.failed_add_update'))
-      }
-    }
-  })
-
-  return (
-    <div className="space-y-4">
-      <FormLayout onSubmit={formik.handleSubmit} className="space-y-4">
-        <FormField name="title">
-          <FormLabelAndMessage
-            label={t('courses.update_title')}
-            message={formik.errors.title}
-          />
-          <Form.Control asChild>
-            <Input
-              onChange={formik.handleChange}
-              value={formik.values.title}
-              type="text"
-              required
-              placeholder={t('courses.update_title_placeholder')}
-              className="bg-white border-neutral-200 focus:border-neutral-300 focus:ring-neutral-200"
-            />
-          </Form.Control>
-        </FormField>
-        <FormField name="content">
-          <FormLabelAndMessage
-            label={t('courses.update_content')}
-            message={formik.errors.content}
-          />
-          <Form.Control asChild>
-            <Textarea
-              onChange={formik.handleChange}
-              value={formik.values.content}
-              required
-              placeholder={t('courses.update_content_placeholder')}
-              className="bg-white h-[120px] border-neutral-200 focus:border-neutral-300 focus:ring-neutral-200 resize-none"
-            />
-          </Form.Control>
-        </FormField>
-        <div className="flex justify-end space-x-2 pt-2">
-          <button
-            type="submit"
-            className="px-4 py-1.5 bg-neutral-900 hover:bg-black text-white text-xs font-medium rounded-full transition-colors duration-150"
-          >
-            {t('courses.publish_update')}
-          </button>
-        </div>
-      </FormLayout>
     </div>
   )
 }
@@ -298,7 +179,6 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 const UpdatesListView = () => {
   const { t } = useTranslation()
   const course = useCourse() as any
-  const adminStatus = useAdminStatus()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const courseUuid = course?.courseStructure?.course_uuid
@@ -342,61 +222,10 @@ const UpdatesListView = () => {
               </div>
               <p className="text-sm text-neutral-600 line-clamp-3">{update.content}</p>
             </div>
-            {adminStatus.isAdmin && !adminStatus.loading && (
-              <div className="ms-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <DeleteUpdateButton update={update} />
-              </div>
-            )}
           </div>
         </motion.div>
       ))}
     </div>
-  )
-}
-
-const DeleteUpdateButton = ({ update }: any) => {
-  const { t } = useTranslation()
-  const session = useLHSession() as any
-  const course = useCourse() as any
-  const queryClient = useQueryClient()
-  const courseUuid = course?.courseStructure?.course_uuid
-
-  const handleDelete = async () => {
-    const toast_loading = toast.loading(t('courses.deleting_update'))
-    const res = await deleteCourseUpdate(
-      course.courseStructure.course_uuid,
-      update.courseupdate_uuid,
-      session.data?.tokens?.access_token
-    )
-    
-    if (res.status === 200) {
-      toast.dismiss(toast_loading)
-      toast.success(t('courses.update_deleted_success'))
-      queryClient.invalidateQueries({ queryKey: queryKeys.courses.updates(courseUuid) })
-    } else {
-      toast.error(t('courses.failed_delete_update'))
-    }
-  }
-
-  return (
-    <ConfirmationModal
-      confirmationButtonText={t('courses.delete_update')}
-      confirmationMessage={t('courses.delete_update_confirm')}
-      dialogTitle={t('courses.delete_update_title')}
-      buttonid="delete-update-button"
-      dialogTrigger={
-        <button
-          id="delete-update-button"
-          className="p-1.5 text-neutral-400 hover:text-rose-500 rounded-full hover:bg-rose-50 transition-all duration-150"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      }
-      functionToExecute={handleDelete}
-      status="warning"
-    />
   )
 }
 

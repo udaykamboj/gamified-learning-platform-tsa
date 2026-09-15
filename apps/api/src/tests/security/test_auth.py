@@ -415,13 +415,13 @@ class TestSessionLifetime:
 
         with patch.dict("os.environ", {}, clear=False):
             import os
-            os.environ.pop("LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS", None)
+            os.environ.pop("STARLAB_AUTH_REFRESH_TOKEN_DAYS", None)
             assert _refresh_token_lifetime() == timedelta(days=DEFAULT_REFRESH_TOKEN_DAYS)
 
     def test_refresh_lifetime_honours_env_override(self):
         from src.security.auth import _refresh_token_lifetime
 
-        with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": "45"}):
+        with patch.dict("os.environ", {"STARLAB_AUTH_REFRESH_TOKEN_DAYS": "45"}):
             assert _refresh_token_lifetime() == timedelta(days=45)
 
     def test_refresh_lifetime_never_drops_below_two_weeks(self):
@@ -432,13 +432,13 @@ class TestSessionLifetime:
 
         assert MIN_REFRESH_TOKEN_DAYS == 14
         for bad in ("1", "7", "13", "0", "-5"):
-            with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": bad}):
+            with patch.dict("os.environ", {"STARLAB_AUTH_REFRESH_TOKEN_DAYS": bad}):
                 assert _refresh_token_lifetime() == timedelta(days=MIN_REFRESH_TOKEN_DAYS)
 
     def test_refresh_lifetime_ignores_garbage_env(self):
         from src.security.auth import _refresh_token_lifetime, DEFAULT_REFRESH_TOKEN_DAYS
 
-        with patch.dict("os.environ", {"LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS": "not-a-number"}):
+        with patch.dict("os.environ", {"STARLAB_AUTH_REFRESH_TOKEN_DAYS": "not-a-number"}):
             assert _refresh_token_lifetime() == timedelta(days=DEFAULT_REFRESH_TOKEN_DAYS)
 
     def test_issued_refresh_token_outlives_two_weeks(self):

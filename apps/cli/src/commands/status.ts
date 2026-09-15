@@ -7,11 +7,11 @@ export async function statusCommand() {
   const dir = findInstallDir()
   const config = readConfig(dir)
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run `npx learnhouse setup` first.')
+    p.log.error('No StarLab installation found. Run `npx starlab setup` first.')
     process.exit(1)
   }
 
-  p.intro(pc.cyan('LearnHouse Status'))
+  p.intro(pc.cyan('StarLab Status'))
 
   const protocol = config.useHttps ? 'https' : 'http'
   const portSuffix = (config.useHttps && config.httpPort === 443) || (!config.useHttps && config.httpPort === 80) ? '' : `:${config.httpPort}`

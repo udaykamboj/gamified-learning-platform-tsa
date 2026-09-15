@@ -6,7 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, SuperadminAPITokenUser, User, UserRead
 from src.services.users.users import security_get_user
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -79,11 +79,13 @@ JWT_SECRET_KEY = SECRET_KEY
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 JWT_COOKIE_SAMESITE = "lax"
 JWT_COOKIE_SECURE = True
-JWT_COOKIE_DOMAIN = get_learnhouse_config().hosting_config.cookie_config.domain
+JWT_COOKIE_DOMAIN = get_starlab_config().hosting_config.cookie_config.domain
 JWT_COOKIE_NAME = "LH_access"
+JWT_ADMIN_COOKIE_NAME = "LH_admin_access"
+JWT_REFRESH_COOKIE_NAME = "LH_refresh"
+JWT_ADMIN_REFRESH_COOKIE_NAME = "LH_admin_refresh"
 
-
-def extract_jwt_from_request(request: Request) -> Optional[str]:
+def extract_jwt_from_request(request: Request, cookie_name: str = JWT_COOKIE_NAME) -> Optional[str]:
     """Extract JWT token from Authorization header or cookies.
 
     Authorization header takes precedence over cookies to ensure
@@ -95,7 +97,7 @@ def extract_jwt_from_request(request: Request) -> Optional[str]:
         return auth_header[7:].strip()
 
     # Fall back to cookies (for browser-based requests without explicit token)
-    token = request.cookies.get(JWT_COOKIE_NAME)
+    token = request.cookies.get(cookie_name)
     if token:
         return token
 
@@ -126,7 +128,8 @@ def decode_jwt(token: str) -> Optional[dict]:
             options=decode_options
         )
         return payload
-    except PyJWTError:
+    except PyJWTError as e:
+        print(f"JWT Decode Error: {e}")
         return None
 
 
@@ -198,6 +201,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     # setdefault, not update: a caller that deliberately names its own type wins.
     to_encode.setdefault("type", "access")
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Created JWT: {encoded_jwt}")
     return encoded_jwt
 
 
@@ -215,13 +219,13 @@ def _refresh_token_lifetime() -> timedelta:
     Only a user who does not open the app at all for this long loses their
     session.
 
-    Overridable with ``LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS`` for operators who
+    Overridable with ``STARLAB_AUTH_REFRESH_TOKEN_DAYS`` for operators who
     want a longer or shorter window, but never below
     ``MIN_REFRESH_TOKEN_DAYS`` — a shorter window is nearly always a
     misconfiguration that shows up as users complaining they get logged out.
     """
     import os
-    raw = os.environ.get("LEARNHOUSE_AUTH_REFRESH_TOKEN_DAYS")
+    raw = os.environ.get("STARLAB_AUTH_REFRESH_TOKEN_DAYS")
     if raw:
         try:
             days = int(raw)
@@ -257,6 +261,7 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
         "jti": _secrets.token_urlsafe(16),
     })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Created JWT: {encoded_jwt}")
     return encoded_jwt
 
 
@@ -345,7 +350,8 @@ def decode_refresh_token(token: str) -> Optional[dict]:
         if payload.get("type") != "refresh":
             return None
         return payload
-    except PyJWTError:
+    except PyJWTError as e:
+        print(f"JWT Decode Error: {e}")
         return None
 
 
@@ -597,7 +603,9 @@ async def get_current_user(
         raise credentials_exception
 
     # Step 2: Fall back to JWT logic using PyJWT
-    token = extract_jwt_from_request(request)
+    is_admin_route = request.url.path.startswith("/api/v1/admin")
+    cookie_name = JWT_ADMIN_COOKIE_NAME if is_admin_route else JWT_COOKIE_NAME
+    token = extract_jwt_from_request(request, cookie_name=cookie_name)
     username = None
 
     if token:

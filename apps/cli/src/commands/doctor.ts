@@ -27,16 +27,16 @@ function fail(msg: string, fix?: string) {
 }
 
 const REQUIRED_ENV_VARS = [
-  'LEARNHOUSE_DOMAIN',
-  'LEARNHOUSE_SQL_CONNECTION_STRING',
-  'LEARNHOUSE_REDIS_CONNECTION_STRING',
-  'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+  'STARLAB_DOMAIN',
+  'STARLAB_SQL_CONNECTION_STRING',
+  'STARLAB_REDIS_CONNECTION_STRING',
+  'STARLAB_AUTH_JWT_SECRET_KEY',
   'NEXTAUTH_SECRET',
   'NEXTAUTH_URL',
 ]
 
 const SECRET_ENV_VARS = [
-  'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+  'STARLAB_AUTH_JWT_SECRET_KEY',
   'NEXTAUTH_SECRET',
   'POSTGRES_PASSWORD',
 ]
@@ -44,17 +44,17 @@ const SECRET_ENV_VARS = [
 // Enterprise installs use a different .env contract (license + Caddy + the
 // six-service stack builds connection strings in compose, not in .env).
 const EE_REQUIRED_ENV_VARS_BASE = [
-  'LEARNHOUSE_LICENSE_KEY',
+  'STARLAB_LICENSE_KEY',
   'ACME_EMAIL',
   'EE_IMAGE_TAG',
   'DB_PASSWORD',
-  'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+  'STARLAB_AUTH_JWT_SECRET_KEY',
   'COLLAB_INTERNAL_KEY',
-  'LEARNHOUSE_INITIAL_ADMIN_EMAIL',
-  'LEARNHOUSE_INITIAL_ADMIN_PASSWORD',
+  'STARLAB_INITIAL_ADMIN_EMAIL',
+  'STARLAB_INITIAL_ADMIN_PASSWORD',
 ]
 const EE_SECRET_ENV_VARS = [
-  'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
+  'STARLAB_AUTH_JWT_SECRET_KEY',
   'COLLAB_INTERNAL_KEY',
   'DB_PASSWORD',
 ]
@@ -63,7 +63,7 @@ export async function doctorCommand() {
   const dir = findInstallDir()
   const config = readConfig(dir)
 
-  p.intro(pc.cyan('LearnHouse Doctor'))
+  p.intro(pc.cyan('StarLab Doctor'))
 
   // 1. Docker daemon
   p.log.step('Docker Environment')
@@ -82,7 +82,7 @@ export async function doctorCommand() {
   pass('Docker daemon running')
 
   if (!config) {
-    p.log.warn('No LearnHouse installation found. Skipping deployment checks.')
+    p.log.warn('No StarLab installation found. Skipping deployment checks.')
     p.outro(pc.dim('Done'))
     return
   }
@@ -100,7 +100,7 @@ export async function doctorCommand() {
   p.log.step('Containers')
   const containers = listDeploymentContainers(id)
   if (containers.length === 0) {
-    warn('No containers found', 'Run: npx learnhouse start')
+    warn('No containers found', 'Run: npx starlab start')
   } else {
     for (const c of containers) {
       const isUp = c.status.toLowerCase().startsWith('up')
@@ -108,9 +108,9 @@ export async function doctorCommand() {
       if (isUp) {
         pass(`${svcName} running`)
       } else if (c.status.toLowerCase().includes('restarting')) {
-        fail(`${svcName} is restarting`, 'Check logs: npx learnhouse logs')
+        fail(`${svcName} is restarting`, 'Check logs: npx starlab logs')
       } else {
-        fail(`${svcName} — ${c.status}`, 'Run: npx learnhouse start')
+        fail(`${svcName} — ${c.status}`, 'Run: npx starlab start')
       }
     }
   }
@@ -136,7 +136,7 @@ export async function doctorCommand() {
     // Port in use is expected if services are running
     const hasRunning = containers.some((c) => c.status.toLowerCase().startsWith('up'))
     if (hasRunning) {
-      pass(`Port ${config.httpPort} in use (by LearnHouse services)`)
+      pass(`Port ${config.httpPort} in use (by StarLab services)`)
     } else {
       warn(`Port ${config.httpPort} is in use by another process`, `Free the port or change HTTP_PORT in .env`)
     }
@@ -207,7 +207,7 @@ export async function doctorCommand() {
   p.log.step('Environment File')
   const envPath = path.join(installDir, '.env')
   if (!fs.existsSync(envPath)) {
-    fail('.env file missing', 'Run setup again: npx learnhouse setup')
+    fail('.env file missing', 'Run setup again: npx starlab setup')
   } else {
     const envContent = fs.readFileSync(envPath, 'utf-8')
     const envMap = new Map<string, string>()

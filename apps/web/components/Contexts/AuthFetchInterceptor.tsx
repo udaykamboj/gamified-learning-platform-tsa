@@ -80,21 +80,22 @@ export default function AuthFetchInterceptor() {
 
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = getRequestUrl(input)
+
+      if (!url || !isApiRequest(url) || isAuthRoute(url) || (typeof Request !== 'undefined' && input instanceof Request)) {
+        return originalFetch(input, init)
+      }
+
       const headers = getHeaders(init)
       const authHeader = headers.get('Authorization')
       const hasRetried = headers.get(AUTH_RETRY_HEADER) === '1'
 
+      if (!authHeader?.startsWith('Bearer ') || hasRetried) {
+        return originalFetch(input, init)
+      }
+
       const response = await originalFetch(input, init)
 
-      if (
-        !url ||
-        response.status !== 401 ||
-        !isApiRequest(url) ||
-        isAuthRoute(url) ||
-        !authHeader?.startsWith('Bearer ') ||
-        hasRetried ||
-        (typeof Request !== 'undefined' && input instanceof Request)
-      ) {
+      if (response.status !== 401) {
         return response
       }
 

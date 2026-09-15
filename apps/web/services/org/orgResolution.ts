@@ -129,7 +129,7 @@ async function getOrgSlugFromSubdomainViaEE(): Promise<string | null> {
     const mod = await import('@/ee/services/tenancy/resolveMulti.server')
     const cookieStore = await cookies()
     const frontendDomain =
-      process.env.NEXT_PUBLIC_LEARNHOUSE_DOMAIN
+      process.env.NEXT_PUBLIC_STARLAB_DOMAIN
       || cookieStore.get('LH_frontend_domain')?.value
       || 'localhost'
     return await mod.getOrgSlugFromHost(frontendDomain)

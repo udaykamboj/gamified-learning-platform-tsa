@@ -94,8 +94,8 @@ RUN uv sync --frozen --no-dev --no-install-project --no-cache
 COPY ./apps/api ./
 
 # Remove Enterprise Edition folder for public builds
-ARG LEARNHOUSE_PUBLIC=false
-RUN if [ "$LEARNHOUSE_PUBLIC" = "true" ]; then rm -rf /app/api/ee; fi
+ARG STARLAB_PUBLIC=false
+RUN if [ "$STARLAB_PUBLIC" = "true" ]; then rm -rf /app/api/ee; fi
 
 # Collab server: copy built JS + production deps
 WORKDIR /app/collab
@@ -114,7 +114,7 @@ RUN chmod +x /app/api/docker-entrypoint.sh /app/start.sh
 # from writing .pyc files back into it. It also keeps __pycache__ out of the
 # enterprise tree, where stale bytecode could otherwise shadow a source file
 # that verifies clean against the signed manifest.
-ENV PORT=8000 LEARNHOUSE_PORT=9000 COLLAB_PORT=4000 HOSTNAME=0.0.0.0 LEARNHOUSE_OSS=true NEXT_PUBLIC_LEARNHOUSE_OSS=true PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8000 STARLAB_PORT=9000 COLLAB_PORT=4000 HOSTNAME=0.0.0.0 STARLAB_OSS=true NEXT_PUBLIC_STARLAB_OSS=true PYTHONDONTWRITEBYTECODE=1
 
 EXPOSE 80 9000 4000
 

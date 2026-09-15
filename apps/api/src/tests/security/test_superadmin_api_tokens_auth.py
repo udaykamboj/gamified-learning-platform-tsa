@@ -34,7 +34,7 @@ reject_any_api_token = ee_superadmin_tokens.reject_any_api_token
 def _enterprise_mode(monkeypatch):
     """Run these as an Enterprise deployment, which is what they describe.
 
-    conftest pins LEARNHOUSE_DISABLE_EE=1 for the whole suite, so
+    conftest pins STARLAB_DISABLE_EE=1 for the whole suite, so
     get_deployment_mode() answers 'oss' and require_superadmin refuses with
     403 ee_required before any of the token logic below is reached. The module
     still imported (importorskip only asks whether the ee/ package is on disk),

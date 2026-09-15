@@ -3,7 +3,7 @@
 Unlike test_llm_ollama.py (which exercises the llm primitives directly), this drives the
 actual production service functions — activity chat, chat title, follow-ups, course planning,
 and MagicBlocks — and configures the provider through the REAL config path
-(LEARNHOUSE_AI_* env vars -> get_learnhouse_config() -> build_model), exactly as a deployment
+(STARLAB_AI_* env vars -> get_starlab_config() -> build_model), exactly as a deployment
 would. Proves the whole stack runs on a non-Gemini provider with config-only changes.
 
 Run locally:
@@ -18,13 +18,6 @@ import socket
 import pytest
 
 from src.services.ai import base
-from src.services.ai.courseplanning import (
-    extract_plan_from_response,
-    generate_course_plan_stream,
-)
-from src.services.ai.schemas.courseplanning import CoursePlanningSessionData
-from src.services.ai.magicblocks import generate_magicblock_stream
-from src.services.ai.schemas.magicblocks import MagicBlockContext, MagicBlockSessionData
 from src.services.ai.rag.embedding_service import embed_single_text, generate_embeddings
 
 import os
@@ -51,12 +44,12 @@ pytestmark = [
 @pytest.fixture(autouse=True)
 def _ollama_env(monkeypatch):
     """Configure the REAL config to use Ollama for every tier (env path, not a mock)."""
-    monkeypatch.setenv("LEARNHOUSE_AI_PROVIDER", "ollama")
-    monkeypatch.setenv("LEARNHOUSE_AI_BASE_URL", f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/v1")
+    monkeypatch.setenv("STARLAB_AI_PROVIDER", "ollama")
+    monkeypatch.setenv("STARLAB_AI_BASE_URL", f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/v1")
     for tier in ("FAST", "STANDARD", "PRO"):
-        monkeypatch.setenv(f"LEARNHOUSE_AI_MODEL_{tier}", OLLAMA_MODEL)
+        monkeypatch.setenv(f"STARLAB_AI_MODEL_{tier}", OLLAMA_MODEL)
     # Embeddings follow the same (ollama) provider; use a local embedding model.
-    monkeypatch.setenv("LEARNHOUSE_AI_EMBEDDING_MODEL", OLLAMA_EMBED_MODEL)
+    monkeypatch.setenv("STARLAB_AI_EMBEDDING_MODEL", OLLAMA_EMBED_MODEL)
 
 
 @pytest.mark.asyncio
@@ -130,59 +123,6 @@ async def test_generate_follow_up_suggestions():
     assert isinstance(suggestions, list)
     assert len(suggestions) <= 3
     assert all(isinstance(s, str) for s in suggestions)
-
-
-@pytest.mark.asyncio
-async def test_course_planning_stream_parses_into_plan():
-    """generate_course_plan_stream — real JSON-text streaming, parsed into a CoursePlan."""
-    session = CoursePlanningSessionData(
-        session_uuid="cp_ollama_test",
-        org_id=1,
-        language="en",
-    )
-    full = ""
-    async for chunk in generate_course_plan_stream(
-        prompt="A short beginner course about photosynthesis with 2 chapters.",
-        session=session,
-        model_name="",  # resolves to the configured standard tier
-    ):
-        full += chunk
-
-    assert full.strip(), "expected streamed course-plan text"
-    plan = extract_plan_from_response(full)
-    assert plan is not None, f"could not parse a CoursePlan from model output: {full[:300]!r}"
-    assert plan.name.strip()
-
-
-@pytest.mark.asyncio
-async def test_magicblock_stream_produces_html():
-    """generate_magicblock_stream — real interactive-HTML generation (interactive tier)."""
-    context = MagicBlockContext(
-        course_title="Intro to Web",
-        course_description="Basics of interactive widgets.",
-        activity_name="Counters",
-        activity_content_summary="A lesson about click counters.",
-    )
-    session = MagicBlockSessionData(
-        session_uuid="mb_ollama_test",
-        block_uuid="block_1",
-        activity_uuid="act_1",
-        iteration_count=0,
-        max_iterations=6,
-        message_history=[],
-        current_html=None,
-        context=context,
-    )
-    full = ""
-    async for chunk in generate_magicblock_stream(
-        prompt="Make a button that increments a number when clicked.",
-        session=session,
-        model_name="",
-    ):
-        full += chunk
-
-    assert not full.startswith("Error:"), f"generation errored: {full[:200]}"
-    assert "<" in full and ">" in full, "expected HTML-ish output"
 
 
 @pytest.mark.asyncio

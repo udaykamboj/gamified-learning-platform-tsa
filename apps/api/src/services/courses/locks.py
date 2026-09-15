@@ -1,112 +1,74 @@
-"""Lock-based access checks for chapters and activities.
+"""Enrollment lock for course content.
 
-Mirrors the Playground access-type pattern but keyed on chapter_uuid /
-activity_uuid in ``usergroupresource``. Lock tiers:
+Courses are platform content: anyone can see a course's outline, but lesson,
+practice and test content opens once the student has enrolled in the course
+themselves (from Skills or the course page). Nobody else grants or removes
+that access (docs/refactor/progress/00-requirements.md, R8).
 
-- ``public``:        anyone, including anonymous, can read
-- ``authenticated``: must be signed in
-- ``restricted``:    must be in an assigned usergroup (or an org admin)
-
-Batch helpers are provided for TOC-style reads where many resources need
-to be checked at once without N+1 queries.
+- anonymous visitors: outline only, content locked
+- signed-in students: content unlocked when enrolled (a TrailRun exists)
+- admins: never locked, so they can monitor course content
 """
 
-from typing import Iterable
-
+from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.db.user_organizations import UserOrganization
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, APITokenUser, PublicUser
 from src.security.auth import resolve_acting_user_id
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+from src.security.rbac.constants import ADMIN_ROLE_IDS
+from src.services.trail.enrollment import is_user_enrolled_in_course
+
+ENROLLMENT_REQUIRED = "ENROLLMENT_REQUIRED"
 
 
 async def is_org_admin(user_id: int, org_id: int, db_session: AsyncSession) -> bool:
-    """True if user is admin/maintainer on this org (bypasses all locks)."""
+    """True if the user is an admin of this org (never locked out of content)."""
     uo = (await db_session.execute(
         select(UserOrganization).where(
             UserOrganization.user_id == user_id,
             UserOrganization.org_id == org_id,
         )
     )).scalars().first()
-    return bool(uo and uo.role_id in ADMIN_OR_MAINTAINER_ROLE_IDS)
+    return bool(uo and uo.role_id in ADMIN_ROLE_IDS)
 
 
-async def batch_accessible_restricted_uuids(
-    user_id: int,
-    resource_uuids: Iterable[str],
-    db_session: AsyncSession,
-) -> set[str]:
-    """Return the subset of resource_uuids the user can access via usergroup."""
-    uuids = [u for u in resource_uuids if u]
-    if not uuids:
-        return set()
-
-    ugrs = (await db_session.execute(
-        select(
-            UserGroupResource.resource_uuid,
-            UserGroupResource.usergroup_id,
-        ).where(UserGroupResource.resource_uuid.in_(uuids))
-    )).all()
-    if not ugrs:
-        return set()
-
-    ug_ids = list({row[1] for row in ugrs})
-    member_ug_ids = set(
-        (await db_session.execute(
-            select(UserGroupUser.usergroup_id).where(
-                UserGroupUser.usergroup_id.in_(ug_ids),
-                UserGroupUser.user_id == user_id,
-            )
-        )).scalars().all()
-    )
-    return {resource_uuid for resource_uuid, ug_id in ugrs if ug_id in member_ug_ids}
-
-
-async def is_locked_for_user(
-    lock_type: str | None,
-    resource_uuid: str,
+async def is_course_content_locked(
+    course_id: int,
     org_id: int,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
-    *,
-    accessible_restricted_uuids: set[str] | None = None,
-    is_admin: bool | None = None,
 ) -> bool:
-    """True if the resource should be hidden from current_user.
-
-    ``accessible_restricted_uuids`` and ``is_admin`` are pre-computed escape
-    hatches for batch callers -- they avoid repeating the same queries for
-    every row. When absent, this function resolves them on its own.
-    """
-    lt = (lock_type or "public").lower()
-    if lt == "public":
-        return False
-
-    is_anon = isinstance(current_user, AnonymousUser)
-    if lt == "authenticated":
-        return is_anon
-
-    if lt != "restricted":
-        # Unknown value -- fail safe (treat as public to avoid accidentally
-        # locking people out after a rename/migration mishap).
-        return False
-
-    if is_anon:
+    """True if the caller must enroll before seeing this course's content."""
+    if isinstance(current_user, AnonymousUser):
         return True
-
     acting_user_id = resolve_acting_user_id(current_user)
-    admin = is_admin if is_admin is not None else await is_org_admin(acting_user_id, org_id, db_session)
-    if admin:
+    if getattr(current_user, "is_superadmin", False):
         return False
+    if await is_org_admin(acting_user_id, org_id, db_session):
+        return False
+    return not await is_user_enrolled_in_course(db_session, acting_user_id, course_id)
 
-    if accessible_restricted_uuids is not None:
-        return resource_uuid not in accessible_restricted_uuids
 
-    accessible = await batch_accessible_restricted_uuids(
-        acting_user_id, [resource_uuid], db_session
-    )
-    return resource_uuid not in accessible
+async def require_enrollment(
+    course_id: int,
+    org_id: int,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> None:
+    """Raise 403 unless the caller is enrolled (used by submit/complete paths)."""
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    acting_user_id = resolve_acting_user_id(current_user)
+    if not await is_user_enrolled_in_course(db_session, acting_user_id, course_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": ENROLLMENT_REQUIRED,
+                "message": "Enroll in this course to work on it",
+            },
+        )

@@ -12,11 +12,11 @@ import { addContactWithLoops, sendLoopsEvent, LOOPS_SIGNED_USERS_GROUP } from '@
 //
 // Account creation targets one of three backend endpoints, mirroring how the
 // platform worked:
-//   - org-less apex signup → POST /users/            (a standalone account, NOT
-//     attached to any organization — the user creates/joins orgs later)
-//   - org-subdomain signup → POST /users/{org_id}    (create + join that org)
-//   - invite signup        → POST /users/{org_id}/invite/{code}
-// The apex account is NOT linked to the instance default org.
+//   - apex signup            → POST /users/register  (auto-joins the platform's
+//     single organization as a Student — no org selection)
+//   - org-subdomain signup   → POST /users/{org_id}  (create + join that org)
+//   - invite signup          → POST /users/{org_id}/invite/{code}
+// Apex accounts are ALWAYS attached to the instance's single (default) org.
 
 interface SignupBody {
   org_id?: string | number
@@ -119,9 +119,9 @@ export async function POST(request: NextRequest) {
     // Org subdomain: create the account and join that org.
     url = `${base}users/${org_id}`
   } else {
-    // Org-less apex: create a standalone account (POST /users/), unattached to
-    // any org — exactly like the platform. The user creates their org next.
-    url = `${base}users/`
+    // Apex signup in single-org mode: no org is selected — the backend resolves
+    // the platform's single organization and joins it automatically as a Student.
+    url = `${base}users/register`
   }
 
   let backendRes: Response
@@ -140,10 +140,11 @@ export async function POST(request: NextRequest) {
   const data = await backendRes.json().catch(() => ({}))
 
   // On success, sync the marketing contact (SaaS-only, fire-and-forget) — but
-  // ONLY for ORG-LESS signups (learnhouse.io self-serve prospects). Members
-  // signing up INTO an existing org (org_id present) are that org's learners,
-  // not people we market to, so they are not added. Org admins are recorded
-  // separately when they create/administer an org (see /api/loops/admin).
+  // ONLY for apex signups (starlab.io self-serve prospects) that carried no
+  // org_id in the request. Members signing up INTO an existing org (org_id
+  // present) are that org's learners, not people we market to, so they are not
+  // added. Org admins are recorded separately when they create/administer an
+  // org (see /api/loops/admin).
   if (backendRes.ok && saas && !org_id) {
     void addContactWithLoops(email, LOOPS_SIGNED_USERS_GROUP, {
       firstName: first_name || '',
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
     }).catch(() => {})
     void sendLoopsEvent(email, 'user_signed_up', {
       username,
-      has_org: false,
+      has_org: true,
     }).catch(() => {})
   }
 

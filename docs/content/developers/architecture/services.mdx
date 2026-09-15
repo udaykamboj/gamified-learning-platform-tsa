@@ -1,13 +1,13 @@
 # Supporting Services
 
-LearnHouse relies on several supporting services that run alongside the main applications.
+StarLab relies on several supporting services that run alongside the main applications.
 
-- In **development** (`learnhouse dev`), PostgreSQL and Redis run in Docker via `.learnhouse/docker-compose.dev.yml` while the API, web, and collab processes run locally on the host.
-- In **self-hosted production**, the LearnHouse CLI generates a `docker-compose.yml` from templates in `apps/cli/src/templates/` that runs PostgreSQL, Redis, a single `learnhouse-app` container (which bundles web + API + collab), and either nginx or Caddy as a reverse proxy.
+- In **development** (`starlab dev`), PostgreSQL and Redis run in Docker via `.starlab/docker-compose.dev.yml` while the API, web, and collab processes run locally on the host.
+- In **self-hosted production**, the StarLab CLI generates a `docker-compose.yml` from templates in `apps/cli/src/templates/` that runs PostgreSQL, Redis, a single `starlab-app` container (which bundles web + API + collab), and either nginx or Caddy as a reverse proxy.
 
 ## PostgreSQL
 
-`pgvector/pgvector:pg16` (PostgreSQL 16 with the pgvector extension) is the primary database for LearnHouse. It stores all persistent application data including:
+`pgvector/pgvector:pg16` (PostgreSQL 16 with the pgvector extension) is the primary database for StarLab. It stores all persistent application data including:
 
 - Organizations and their configurations
 - User accounts and authentication records
@@ -69,7 +69,7 @@ The CLI-generated self-host stack uses one of two reverse proxies depending on t
 - **Caddy** (`caddy:2-alpine`) — selected when "Automatic SSL" is enabled; handles Let's Encrypt certificate issuance and renewal automatically.
 - **nginx** (`nginx:alpine`) — selected for manual SSL or HTTP-only setups.
 
-Both route traffic to the single `learnhouse-app` container, which internally serves the Next.js frontend, the FastAPI backend, and the Hocuspocus collaboration server.
+Both route traffic to the single `starlab-app` container, which internally serves the Next.js frontend, the FastAPI backend, and the Hocuspocus collaboration server.
 
 ## Service Communication
 
@@ -78,7 +78,7 @@ Logically, a request flows like this:
 ```
 Client
   └── nginx / caddy (reverse proxy)
-        └── learnhouse-app (single container)
+        └── starlab-app (single container)
               ├── Next.js (web)
               ├── FastAPI (api)
               │     ├── PostgreSQL (port 5432)

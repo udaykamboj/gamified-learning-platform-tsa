@@ -343,41 +343,6 @@ WEBHOOK_EVENTS: dict[str, dict] = {
             "upvote_count": "integer",
         },
     },
-    # ── Groups ───────────────────────────────────────────────────────
-    "usergroup_created": {
-        "category": "Groups",
-        "description": "Triggered when a new user group is created",
-        "data_schema": {
-            "usergroup_uuid": "string",
-            "name": "string",
-        },
-    },
-    "usergroup_deleted": {
-        "category": "Groups",
-        "description": "Triggered when a user group is deleted",
-        "data_schema": {
-            "usergroup_uuid": "string",
-            "name": "string",
-        },
-    },
-    "usergroup_users_added": {
-        "category": "Groups",
-        "description": "Triggered when users are added to a user group",
-        "data_schema": {
-            "usergroup_id": "integer",
-            "usergroup_uuid": "string",
-            "user_ids": "list[integer]",
-        },
-    },
-    "usergroup_resources_added": {
-        "category": "Groups",
-        "description": "Triggered when resources are assigned to a user group",
-        "data_schema": {
-            "usergroup_id": "integer",
-            "usergroup_uuid": "string",
-            "resource_uuids": "list[string]",
-        },
-    },
     # ── Subscriptions ────────────────────────────────────────────────
     "pack_activated": {
         "category": "Subscriptions",

@@ -1,25 +1,28 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag } from '@phosphor-icons/react'
+import { Books, FolderSimple, Headphones, Cube, MapTrifold, Star, Robot } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
-type Builtin = { feature: string; link: string; labelKey: string; Icon: any }
+type Builtin = { feature: string; link: string; labelKey: string; Icon: any; labelText?: string }
 
 const BUILTIN: Record<string, Builtin> = {
   courses: { feature: 'courses', link: '/courses', labelKey: 'courses.courses', Icon: Books },
+  journey: { feature: 'journey', link: '/journey', labelKey: '', labelText: 'Journey', Icon: MapTrifold },
+  skills: { feature: 'skills', link: '/skills', labelKey: '', labelText: 'Skills', Icon: Star },
+  ai_agent: { feature: 'ai_agent', link: '/ai-agent', labelKey: '', labelText: 'Astra AI', Icon: Robot },
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
-  communities: { feature: 'communities', link: '/communities', labelKey: 'communities.title', Icon: ChatsCircle },
   playgrounds: { feature: 'playgrounds', link: '/playgrounds', labelKey: 'common.playgrounds', Icon: Cube },
-  store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
 }
 
-// Default order when an org has no custom menu config.
-const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
+// Default order when an org has no custom menu config. Communities are not a
+// top-level item: Q&A is reached from each course page. No store: learning
+// is not sold per course.
+const DEFAULT_ORDER = ['ai_agent', 'journey', 'skills', 'courses', 'library', 'podcasts', 'playgrounds']
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()
@@ -27,7 +30,12 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const colors = getMenuColorClasses(props.primaryColor || '')
 
   const rf = org?.config?.config?.resolved_features
-  const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
+  const isEnabled = (feature: string) => {
+    if (['courses', 'skills', 'ai_agent', 'podcasts', 'playgrounds'].includes(feature)) {
+      return true
+    }
+    return rf?.[feature]?.enabled === true
+  }
 
   const configItems: any[] | undefined =
     org?.config?.config?.customization?.menu?.items ?? org?.config?.config?.general?.menu?.items
@@ -57,7 +65,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       if (!isEnabled(meta.feature)) return null // plan/feature gating
       return {
         key: item.type,
-        label: item.label || t(meta.labelKey),
+        label: item.label || meta.labelText || t(meta.labelKey),
         Icon: meta.Icon,
         href: getUriWithOrg(props.orgslug, meta.link),
         external: false,

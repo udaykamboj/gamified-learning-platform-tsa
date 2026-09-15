@@ -31,15 +31,15 @@ export default async function GroupPage({ params }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'APIReference',
-    name: `LearnHouse API — ${model.title}`,
+    name: `StarLab API — ${model.title}`,
     description: model.description,
-    url: `https://docs.learnhouse.app/reference/${model.slug}`,
+    url: `https://docs.starlab.app/reference/${model.slug}`,
     programmingModel: 'REST',
-    targetPlatform: 'LearnHouse',
+    targetPlatform: 'StarLab',
     isPartOf: {
       '@type': 'WebSite',
-      name: 'LearnHouse Docs',
-      url: 'https://docs.learnhouse.app',
+      name: 'StarLab Docs',
+      url: 'https://docs.starlab.app',
     },
   }
 

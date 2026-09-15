@@ -40,7 +40,7 @@ function AdminTopMenu() {
       >
         {/* Logo */}
         <Link className="flex items-center gap-2 transition-opacity hover:opacity-70 shrink-0" href="/admin">
-          <img src="/lrn-dash.svg" alt="Learnhouse logo" className="h-7 w-7" />
+          <img src="/starlab.svg" alt="Starlab logo" className="h-7 w-7" />
           <span className="font-semibold text-sm text-white">Admin</span>
           <span className="text-[9px] font-medium uppercase tracking-wider text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
             Superadmin
@@ -49,11 +49,6 @@ function AdminTopMenu() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-1">
-          <NavLink
-            href="/admin/organizations"
-            icon={<Buildings size={16} weight="fill" />}
-            label="Organizations"
-          />
           <NavLink
             href="/admin/users"
             icon={<Users size={16} weight="fill" />}

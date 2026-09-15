@@ -69,7 +69,7 @@ export interface SetupConfig {
   unsplashAccessKey?: string
 }
 
-export interface LearnHouseConfigJson {
+export interface StarLabConfigJson {
   version: string
   deploymentId: string
   createdAt: string

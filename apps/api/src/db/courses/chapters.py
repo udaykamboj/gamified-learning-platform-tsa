@@ -1,6 +1,5 @@
 from enum import Enum
-from typing import Any, List, Optional
-from pydantic import BaseModel
+from typing import List, Optional
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
@@ -10,7 +9,7 @@ from src.db.courses.activities import ActivityRead
 class LockType(str, Enum):
     PUBLIC = "public"                # anyone, including anonymous, can view
     AUTHENTICATED = "authenticated"  # must be signed in
-    RESTRICTED = "restricted"        # only members of assigned usergroups (via UserGroupResource)
+    RESTRICTED = "restricted"        # legacy value; course content is gated by enrollment (services/courses/locks.py)
 
 
 class ChapterBase(SQLModel):
@@ -34,21 +33,6 @@ class Chapter(ChapterBase, table=True):
     extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
 
 
-class ChapterCreate(ChapterBase):
-    # referenced order here will be ignored and just used for validation
-    # used order will be the next available.
-    extra_metadata: Optional[dict] = None
-    pass
-
-
-class ChapterUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    thumbnail_image: Optional[str] = None
-    lock_type: Optional[LockType] = None
-    extra_metadata: Optional[dict] = None
-
-
 class ChapterRead(ChapterBase):
     id: int
     activities: List[ActivityRead]
@@ -63,21 +47,3 @@ class ChapterRead(ChapterBase):
     pass
 
 
-class ActivityOrder(BaseModel):
-    activity_id: int
-
-
-class ChapterOrder(BaseModel):
-    chapter_id: int
-    activities_order_by_ids: List[ActivityOrder]
-
-
-class ChapterUpdateOrder(BaseModel):
-    chapter_order_by_ids: List[ChapterOrder]
-
-
-class DepreceatedChaptersRead(BaseModel):
-    chapterOrder: Any
-    chapters: Any
-    activities: Any
-    pass

@@ -11,7 +11,7 @@ interface Deployment {
   containers: { name: string; status: string; image: string }[]
 }
 
-const SERVICES = ['learnhouse-app', 'db', 'redis'] as const
+const SERVICES = ['starlab-app', 'db', 'redis'] as const
 
 // --- Deployments view ---
 
@@ -19,7 +19,7 @@ function showDeployments() {
   let psOutput: string
   try {
     psOutput = execSync(
-      'docker ps -a --filter "name=learnhouse-app-" --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"',
+      'docker ps -a --filter "name=starlab-app-" --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"',
       { stdio: 'pipe' },
     ).toString().trim()
   } catch {
@@ -28,8 +28,8 @@ function showDeployments() {
   }
 
   if (!psOutput) {
-    p.log.info('No LearnHouse deployments found.')
-    p.log.message(pc.dim('  Run npx learnhouse setup to create one.'))
+    p.log.info('No StarLab deployments found.')
+    p.log.message(pc.dim('  Run npx starlab setup to create one.'))
     return
   }
 
@@ -38,7 +38,7 @@ function showDeployments() {
   let allOutput: string
   try {
     allOutput = execSync(
-      'docker ps -a --filter "name=learnhouse-" --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"',
+      'docker ps -a --filter "name=starlab-" --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"',
       { stdio: 'pipe' },
     ).toString().trim()
   } catch {
@@ -49,7 +49,7 @@ function showDeployments() {
     if (!line.trim()) continue
     const [name, status, image] = line.split('\t')
 
-    const match = name.match(/learnhouse-\w+-([a-f0-9]+)$/)
+    const match = name.match(/starlab-\w+-([a-f0-9]+)$/)
     if (!match) continue
 
     const id = match[1]
@@ -156,7 +156,7 @@ async function scaleResources() {
   const dir = findInstallDir()
   const config = readConfig(dir)
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run setup first.')
+    p.log.error('No StarLab installation found. Run setup first.')
     process.exit(1)
   }
 
@@ -248,7 +248,7 @@ async function scaleResources() {
 // --- Main command ---
 
 export async function deploymentsCommand() {
-  p.intro(pc.cyan('LearnHouse Deployments'))
+  p.intro(pc.cyan('StarLab Deployments'))
 
   const action = await p.select({
     message: 'What would you like to do?',

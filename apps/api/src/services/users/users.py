@@ -6,15 +6,14 @@ from typing import Literal
 from uuid import uuid4
 from fastapi import HTTPException, Request, UploadFile, status
 import redis
-from sqlmodel import select, func
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.security.features_utils.usage import (
     check_limits_with_usage,
     increase_feature_usage,
 )
 from src.core.deployment_mode import get_deployment_mode
-from src.services.users.usergroups import add_users_to_usergroup
 from src.services.users.emails import (
     send_account_creation_email,
 )
@@ -30,7 +29,6 @@ from src.db.organizations import Organization, OrganizationRead
 from src.services.orgs.orgs import get_org_default_language, resolve_org_sender_name
 from src.db.users import (
     AnonymousUser,
-    InternalUser,
     PublicUser,
     User,
     UserCreate,
@@ -42,7 +40,6 @@ from src.db.users import (
     UserUpdatePassword,
 )
 from src.db.user_organizations import UserOrganization
-from src.security.rbac.constants import ADMIN_ROLE_ID
 from src.security.security import security_hash_password, security_verify_password
 from src.services.security.password_validation import validate_password_complexity
 from src.services.security.profile_validation import validate_profile_fields
@@ -152,7 +149,7 @@ async def _get_welcome_cta_url(
         # platform — so only use it after the explicit platform URL.
         base_url = get_trusted_base_url_from_request(request)
         if not base_url:
-            platform_url = os.environ.get("LEARNHOUSE_PLATFORM_URL")
+            platform_url = os.environ.get("STARLAB_PLATFORM_URL")
             base_url = (
                 platform_url.rstrip("/")
                 if platform_url
@@ -368,23 +365,12 @@ async def create_user_with_invite(
 
     user = await create_user(request, db_session, current_user, user_object, org_id, signup_provider="invite")
 
-    # Check if invite code contains UserGroup
-    if inviteCode.get("usergroup_id"): # type: ignore
-        # Add user to UserGroup
-        await add_users_to_usergroup(
-            request,
-            db_session,
-            InternalUser(id=0),
-            int(inviteCode.get("usergroup_id")), # type: ignore / Convert to int since usergroup_id is expected to be int
-            str(user.id),
-        )
-
     # NOTE: members usage is already incremented inside create_user(); do not
     # increment again here or every invited signup double-counts the member quota.
 
     # Mark the invitation as no longer pending in Redis
     try:
-        LH_CONFIG = get_learnhouse_config()
+        LH_CONFIG = get_starlab_config()
         redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
         if redis_conn_string:
             r = redis.Redis.from_url(redis_conn_string)
@@ -815,6 +801,8 @@ async def get_user_session(
     current_user: PublicUser | AnonymousUser,
 ) -> UserSession:
     # Get user
+    print(f"headers: {request.headers}")
+    print(f"current_user is: {current_user}")
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = (await db_session.execute(statement)).scalars().first()
 
@@ -826,6 +814,9 @@ async def get_user_session(
 
     user = UserRead.model_validate(user)
 
+    from src.services.orgs.platform import find_platform_org
+    platform_org = await find_platform_org(db_session)
+
     # Get roles and orgs in a single JOIN query (avoids N+1); cap at 100 to prevent
     # unbounded result sets for users with many org memberships
     statement = (
@@ -834,6 +825,8 @@ async def get_user_session(
         .join(Organization, Organization.id == UserOrganization.org_id)
         .where(UserOrganization.user_id == user.id)
     )
+    if platform_org and platform_org.id:
+        statement = statement.where(Organization.id == platform_org.id)
     results = (await db_session.execute(statement.limit(100))).all()
     if len(results) == 100:  # pragma: no cover
         logging.getLogger(__name__).warning(
@@ -850,9 +843,15 @@ async def get_user_session(
             )
         )
 
+    from src.security.platform_roles import resolve_platform_access
+
+    access = await resolve_platform_access(int(user.id), db_session)
+
     user_session = UserSession(
         user=user,
         roles=roles,
+        platform_role=access.role,
+        can_manage_platform=access.can_manage_platform,
     )
 
     return user_session
@@ -866,6 +865,8 @@ async def authorize_user_action(
     action: Literal["create", "read", "update", "delete"],
 ):
     # Get user
+    print(f"headers: {request.headers}")
+    print(f"current_user is: {current_user}")
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = (await db_session.execute(statement)).scalars().first()
 
@@ -914,56 +915,7 @@ async def delete_user_by_id(
     deleted_email = user.email
     deleted_username = user.username
 
-    from src.routers.users import _invalidate_session_cache
 
-    # Delete organizations the user is the SOLE admin of, so we don't leave
-    # behind orphaned, admin-less organizations when an account goes away.
-    # An org is deleted only when the user is one of its admins (role_id=1) AND
-    # no other admin remains. Orgs that still have another admin are kept; the
-    # user is simply removed from them via the membership cleanup below.
-    admin_org_ids = (await db_session.execute(
-        select(UserOrganization.org_id).where(
-            UserOrganization.user_id == user_id,
-            UserOrganization.role_id == ADMIN_ROLE_ID,
-        )
-    )).scalars().all()
-
-    for org_id in admin_org_ids:
-        other_admins = (await db_session.execute(
-            select(func.count()).select_from(UserOrganization).where(
-                UserOrganization.org_id == org_id,
-                UserOrganization.role_id == ADMIN_ROLE_ID,
-                UserOrganization.user_id != user_id,
-            )
-        )).scalar_one()
-
-        if other_admins:
-            # Another admin remains — keep the org, only drop this membership.
-            continue
-
-        org = (await db_session.execute(
-            select(Organization).where(Organization.id == org_id)
-        )).scalars().first()
-        if not org:
-            continue
-
-        # Capture every member so we can invalidate their cached sessions; their
-        # UserOrganization rows are removed via the CASCADE on the org FK.
-        member_ids = (await db_session.execute(
-            select(UserOrganization.user_id).where(UserOrganization.org_id == org_id)
-        )).scalars().all()
-
-        logging.warning(
-            "AUDIT: Organization auto-deleted on user deletion - "
-            f"org_id={org_id}, org_uuid={org.org_uuid}, org_name={org.name}, "
-            f"triggered_by_user_id={user_id}"
-        )
-
-        await db_session.delete(org)
-        await db_session.flush()
-
-        for member_id in member_ids:
-            _invalidate_session_cache(member_id)
 
     # Remove any remaining org memberships (no CASCADE on this FK). Memberships
     # of orgs deleted above are already gone via the org-level CASCADE.

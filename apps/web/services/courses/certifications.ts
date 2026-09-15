@@ -24,47 +24,6 @@ export async function getCourseCertifications(
   return res
 }
 
-export async function createCertification(
-  course_id: number,
-  config: any,
-  org_id: number,
-  access_token: string
-) {
-  const result = await fetch(
-    `${getAPIUrl()}certifications/?org_id=${org_id}`,
-    RequestBodyWithAuthHeader('POST', { course_id, config }, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
-export async function updateCertification(
-  certification_uuid: string,
-  config: any,
-  org_id: number,
-  access_token: string
-) {
-  const result = await fetch(
-    `${getAPIUrl()}certifications/${certification_uuid}?org_id=${org_id}`,
-    RequestBodyWithAuthHeader('PUT', { config }, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
-export async function deleteCertification(
-  certification_uuid: string,
-  org_id: number,
-  access_token: string
-) {
-  const result = await fetch(
-    `${getAPIUrl()}certifications/${certification_uuid}?org_id=${org_id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
-  )
-  const res = await errorHandling(result)
-  return res
-}
-
 export async function getUserCertificates(
   course_uuid: string,
   org_id: number,

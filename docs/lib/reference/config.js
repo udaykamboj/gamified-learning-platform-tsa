@@ -7,7 +7,7 @@
  */
 
 export const API_BASE_URL = (
-  process.env.LEARNHOUSE_API_URL || 'https://api.learnhouse.io'
+  process.env.STARLAB_API_URL || 'https://api.starlab.io'
 ).replace(/\/$/, '')
 
 export const SPEC_REVALIDATE_SECONDS = 3600 // 1h ISR window for all reference pages
@@ -174,7 +174,7 @@ export const API_GROUPS = [
     tags: ['webhooks'],
     access: 'session',
     rightsBucket: null,
-    description: 'Register HTTP endpoints that receive event notifications from LearnHouse.',
+    description: 'Register HTTP endpoints that receive event notifications from StarLab.',
   },
   {
     slug: 'headless',

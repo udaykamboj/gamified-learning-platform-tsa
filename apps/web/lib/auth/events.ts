@@ -1,5 +1,5 @@
-export const AUTH_EXPIRED_EVENT = 'learnhouse:auth-expired'
-export const AUTH_REFRESHED_EVENT = 'learnhouse:auth-refreshed'
+export const AUTH_EXPIRED_EVENT = 'starlab:auth-expired'
+export const AUTH_REFRESHED_EVENT = 'starlab:auth-refreshed'
 
 type AuthExpiredDetail = {
   callbackUrl?: string

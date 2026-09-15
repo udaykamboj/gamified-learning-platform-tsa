@@ -39,10 +39,10 @@ function OrgFooter() {
       <div className="flex flex-col items-center justify-center space-y-4">
         {footerText && <p className="text-sm text-gray-500">{footerText}</p>}
         {showWatermark && (
-          <Link href="https://learnhouse.app" target="_blank" rel="noopener noreferrer">
+          <Link href="https://starlab.app" target="_blank" rel="noopener noreferrer">
             <Image
-              src="/lrn.svg"
-              alt="LearnHouse"
+                src="/starlab-black.svg"
+              alt="StarLab"
               width={24}
               height={24}
               style={{ height: 'auto' }}
@@ -122,11 +122,12 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       {!chromeless && <OrgMenu orgslug={orgslug} />}
       {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
       {!chromeless && <OrgMFAPolicyGate />}
-      <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+      <div
+        className={`flex-1 relative ${pathname === '/' || pathname === '/dashboard' || pathname === '/dashboard/' || (pathname !== null && /\/orgs\/[^/]+\/?$/.test(pathname)) ? 'flex flex-col min-h-0 overflow-hidden' : ''}`}
+        style={{ zIndex: 'var(--z-content)' }}
+      >
         {children}
       </div>
-      {!isFullBleedPage && !chromeless && <OrgFooter />}
-      {!isFullBleedPage && !chromeless && <Watermark />}
     </div>
   )
 }

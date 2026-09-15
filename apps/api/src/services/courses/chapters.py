@@ -1,95 +1,23 @@
-from datetime import datetime
 from typing import List
-from uuid import uuid4
-from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.users import AnonymousUser, APITokenUser, PublicUser
-from src.security.auth import resolve_acting_user_id
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import (
     Chapter,
-    ChapterCreate,
     ChapterRead,
-    ChapterUpdate,
-    ChapterUpdateOrder,
 )
 from src.db.courses.courses import Course
 from fastapi import HTTPException, status, Request
 from src.security.rbac import check_resource_access, AccessAction
-from src.services.courses.locks import (
-    batch_accessible_restricted_uuids,
-    is_locked_for_user,
-    is_org_admin,
-)
+from src.services.courses.locks import is_course_content_locked
 
 
 ####################################################
 # CRUD
 ####################################################
-
-
-async def create_chapter(
-    request: Request,
-    chapter_object: ChapterCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> ChapterRead:
-    chapter = Chapter.model_validate(chapter_object)
-
-    # Get COurse
-    statement = select(Course).where(Course.id == chapter_object.course_id)
-
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=404,
-            detail="Course not found",
-        )
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
-
-    # complete chapter object
-    chapter.course_id = chapter_object.course_id
-    chapter.chapter_uuid = f"chapter_{uuid4()}"
-    chapter.creation_date = str(datetime.now())
-    chapter.update_date = str(datetime.now())
-    chapter.org_id = course.org_id
-
-    # Determine insertion order atomically to prevent duplicate order values
-    # under concurrent chapter creation for the same course
-    max_order = (await db_session.execute(
-        select(func.max(CourseChapter.order)).where(
-            CourseChapter.course_id == chapter.course_id
-        )
-    )).scalars().first()
-    to_be_used_order = (max_order or 0) + 1
-
-    # Flush to get the DB-assigned ID without committing yet
-    db_session.add(chapter)
-    await db_session.flush()
-
-    chapter_read = ChapterRead(**chapter.model_dump(), activities=[])
-
-    # Create CourseChapter link atomically with the chapter insert
-    course_chapter = CourseChapter(
-        course_id=chapter.course_id,
-        chapter_id=chapter.id,
-        org_id=chapter.org_id,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-        order=to_be_used_order,
-    )
-
-    # Single atomic commit for both Chapter and CourseChapter
-    db_session.add(course_chapter)
-    await db_session.commit()
-
-    return chapter_read
 
 
 async def get_chapter(
@@ -139,90 +67,6 @@ async def get_chapter(
     await _apply_locks_to_chapters([chapter], course, current_user, db_session)
 
     return chapter
-
-
-async def update_chapter(
-    request: Request,
-    chapter_object: ChapterUpdate,
-    chapter_id: int,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> ChapterRead:
-    statement = select(Chapter).where(Chapter.id == chapter_id)
-    chapter = (await db_session.execute(statement)).scalars().first()
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
-        )
-
-    # RBAC check — use course_uuid (not chapter_uuid) to be consistent with create/get
-    statement = select(Course).where(Course.id == chapter.course_id)
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
-        )
-
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
-
-    # Update only the fields that were passed in
-    for var, value in vars(chapter_object).items():
-        if var in ("org_id", "course_id"):
-            continue
-        if value is not None:
-            setattr(chapter, var, value)
-
-    chapter.update_date = str(datetime.now())
-
-    await db_session.commit()
-    await db_session.refresh(chapter)
-
-    if chapter:
-        chapter = await get_chapter(
-            request, chapter.id, current_user, db_session  # type: ignore
-        )
-
-    return chapter
-
-
-async def delete_chapter(
-    request: Request,
-    chapter_id: int,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-):
-    statement = select(Chapter).where(Chapter.id == chapter_id)
-    chapter = (await db_session.execute(statement)).scalars().first()
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
-        )
-
-    # RBAC check — permissions are held at the course level, not the chapter level
-    statement = select(Course).where(Course.id == chapter.course_id)
-    course = (await db_session.execute(statement)).scalars().first()
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
-        )
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
-
-
-    # Remove all linked chapter activities
-    statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)
-    chapter_activities = (await db_session.execute(statement)).scalars().all()
-
-    for chapter_activity in chapter_activities:
-        await db_session.delete(chapter_activity)
-
-    # Delete the chapter
-    await db_session.delete(chapter)
-    await db_session.commit()
-
-    return {"detail": "chapter deleted"}
 
 
 async def get_course_chapters(
@@ -381,77 +225,20 @@ async def _apply_locks_to_chapters(
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
 ) -> None:
-    """Compute is_locked for each chapter + activity and strip content for locked items.
+    """Strip activity content until the caller has enrolled in the course.
 
-    Admins/maintainers bypass all locks (still see the lock_type so they can edit
-    it in the dashboard). A locked chapter cascades — all its activities become
-    locked regardless of their own lock_type. A usergroup attached at the COURSE
-    level also grants access to all restricted chapters/activities inside that
-    course (same table, keyed on ``course_uuid``), so admins don't have to
-    re-assign the same group on every chapter.
+    The outline (chapter and activity names) stays visible so students can
+    decide whether to enroll. See ``services/courses/locks.py``.
     """
     if not chapters or course is None:
         return
 
-    is_anon = isinstance(current_user, AnonymousUser)
-    acting_user_id = resolve_acting_user_id(current_user)
-    admin = False if is_anon else await is_org_admin(acting_user_id, course.org_id, db_session)
-
-    # Admins see everything — no stripping.
-    if admin:
-        return
-
-    # Collect the uuids we need to check access on, in a single batch query:
-    # course_uuid (parent grant) + every restricted chapter_uuid + activity_uuid.
-    check_uuids: list[str] = [course.course_uuid]
+    locked = await is_course_content_locked(course.id, course.org_id, current_user, db_session)
     for chapter in chapters:
-        if (chapter.lock_type or "public") == "restricted":
-            check_uuids.append(chapter.chapter_uuid)
+        chapter.is_locked = locked
         for activity in chapter.activities:
-            if (activity.lock_type or "public") == "restricted":
-                check_uuids.append(activity.activity_uuid)
-
-    accessible: set[str] = set()
-    if not is_anon:
-        accessible = await batch_accessible_restricted_uuids(
-            acting_user_id, check_uuids, db_session
-        )
-
-    # Course-level usergroup membership unlocks everything below it.
-    course_grants_access = course.course_uuid in accessible
-
-    for chapter in chapters:
-        chapter_locked = False if course_grants_access else await is_locked_for_user(
-            chapter.lock_type,
-            chapter.chapter_uuid,
-            course.org_id,
-            current_user,
-            db_session,
-            accessible_restricted_uuids=accessible,
-            is_admin=admin,
-        )
-        chapter.is_locked = chapter_locked
-        if chapter_locked:
-            chapter.description = ""
-            chapter.thumbnail_image = ""
-
-        for activity in chapter.activities:
-            if chapter_locked:
-                activity_locked = True
-            elif course_grants_access:
-                activity_locked = False
-            else:
-                activity_locked = await is_locked_for_user(
-                    activity.lock_type,
-                    activity.activity_uuid,
-                    course.org_id,
-                    current_user,
-                    db_session,
-                    accessible_restricted_uuids=accessible,
-                    is_admin=admin,
-                )
-            activity.is_locked = activity_locked
-            if activity_locked:
+            activity.is_locked = locked
+            if locked:
                 activity.content = {}
                 activity.details = None
 
@@ -539,158 +326,3 @@ async def DEPRECEATED_get_course_chapters(
     return final
 
 
-async def reorder_chapters_and_activities(
-    request: Request,
-    course_uuid: str,
-    chapters_order: ChapterUpdateOrder,
-    current_user: PublicUser,
-    db_session: AsyncSession,
-):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = (await db_session.execute(statement)).scalars().first()
-
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
-        )
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
-
-    ###########
-    # Chapters
-    ###########
-
-    # Get all existing course chapters
-    statement = select(CourseChapter).where(
-        CourseChapter.course_id == course.id,
-        CourseChapter.org_id == course.org_id
-    )
-    existing_course_chapters = (await db_session.execute(statement)).scalars().all()
-
-    # Create a map of existing chapters for faster lookup
-    existing_chapter_map = {cc.chapter_id: cc for cc in existing_course_chapters}
-
-    unlinked_chapter_ids = [
-        co.chapter_id
-        for co in chapters_order.chapter_order_by_ids
-        if co.chapter_id not in existing_chapter_map
-    ]
-    chapter_owner_map = {}
-    if unlinked_chapter_ids:
-        rows = (await db_session.execute(
-            select(Chapter).where(Chapter.id.in_(unlinked_chapter_ids))  # type: ignore
-        )).scalars().all()
-        chapter_owner_map = {c.id: c for c in rows}
-
-    # Update or create course chapters based on new order
-    for index, chapter_order in enumerate(chapters_order.chapter_order_by_ids):
-        if chapter_order.chapter_id in existing_chapter_map:
-            # Update existing chapter order
-            course_chapter = existing_chapter_map[chapter_order.chapter_id]
-            course_chapter.order = index
-            db_session.add(course_chapter)
-        else:
-            owner = chapter_owner_map.get(chapter_order.chapter_id)
-            if owner is None or owner.course_id != course.id or owner.org_id != course.org_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Chapter {chapter_order.chapter_id} is not part of this course",
-                )
-            # Create new course chapter
-            course_chapter = CourseChapter(
-                chapter_id=chapter_order.chapter_id,
-                course_id=course.id, # type: ignore
-                org_id=course.org_id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-                order=index,
-            )
-            db_session.add(course_chapter)
-
-    # Remove chapters that are no longer in the order
-    chapter_ids_to_keep = {co.chapter_id for co in chapters_order.chapter_order_by_ids}
-    for cc in existing_course_chapters:
-        if cc.chapter_id not in chapter_ids_to_keep:
-            await db_session.delete(cc)
-    await db_session.commit()
-
-    ###########
-    # Activities
-    ###########
-
-    # Get all existing chapter activities
-    statement = select(ChapterActivity).where(
-        ChapterActivity.course_id == course.id,
-        ChapterActivity.org_id == course.org_id
-    )
-    existing_chapter_activities = (await db_session.execute(statement)).scalars().all()
-
-    # Create a map for faster lookup
-    existing_activity_map = {
-        (ca.chapter_id, ca.activity_id): ca
-        for ca in existing_chapter_activities
-    }
-
-    valid_chapter_ids = {co.chapter_id for co in chapters_order.chapter_order_by_ids}
-    requested_activity_ids = {
-        ao.activity_id
-        for co in chapters_order.chapter_order_by_ids
-        for ao in co.activities_order_by_ids
-    }
-    activity_owner_map = {}
-    if requested_activity_ids:
-        rows = (await db_session.execute(
-            select(Activity).where(Activity.id.in_(requested_activity_ids))  # type: ignore
-        )).scalars().all()
-        activity_owner_map = {a.id: a for a in rows}
-
-    # Track which activities we want to keep
-    activities_to_keep = set()
-
-    # Update or create chapter activities based on new order
-    for chapter_order in chapters_order.chapter_order_by_ids:
-        for index, activity_order in enumerate(chapter_order.activities_order_by_ids):
-            activity_key = (chapter_order.chapter_id, activity_order.activity_id)
-
-            if activity_key in existing_activity_map:
-                activities_to_keep.add(activity_key)
-                # Update existing activity order
-                chapter_activity = existing_activity_map[activity_key]
-                chapter_activity.order = index
-                db_session.add(chapter_activity)
-            else:
-                owner = activity_owner_map.get(activity_order.activity_id)
-                if (
-                    chapter_order.chapter_id not in valid_chapter_ids
-                    or owner is None
-                    or owner.course_id != course.id
-                    or owner.org_id != course.org_id
-                ):
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=(
-                            f"Activity {activity_order.activity_id} or chapter "
-                            f"{chapter_order.chapter_id} is not part of this course"
-                        ),
-                    )
-                activities_to_keep.add(activity_key)
-                # Create new chapter activity
-                chapter_activity = ChapterActivity(
-                    chapter_id=chapter_order.chapter_id,
-                    activity_id=activity_order.activity_id,
-                    org_id=course.org_id,
-                    course_id=course.id, # type: ignore
-                    creation_date=str(datetime.now()),
-                    update_date=str(datetime.now()),
-                    order=index,
-                )
-                db_session.add(chapter_activity)
-
-    # Remove activities that are no longer in any chapter
-    for ca in existing_chapter_activities:
-        if (ca.chapter_id, ca.activity_id) not in activities_to_keep:
-            await db_session.delete(ca)
-    await db_session.commit()
-
-    return {"detail": "Chapters and activities reordered successfully"}

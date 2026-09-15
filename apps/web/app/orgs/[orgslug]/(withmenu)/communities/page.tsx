@@ -26,8 +26,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     ? getOrgOgImageMediaDirectory(org?.org_uuid, seoConfig.default_og_image)
     : null
   const imageUrl = ogImageUrl || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
-  const title = buildPageTitle('Communities', org.name, seoConfig)
-  const description = seoConfig.default_meta_description || `Discussion communities from ${org.name}`
+  const title = buildPageTitle('Community', org.name, seoConfig)
+  const description = seoConfig.default_meta_description || `Ask questions and help each other on ${org.name}`
   const canonical = await getServerCanonicalUrl(params.orgslug, '/communities')
 
   return {
@@ -95,7 +95,7 @@ const CommunitiesPage = async (params: any) => {
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: 'Home', url: await getServerCanonicalUrl(orgslug, '/') },
-    { name: 'Communities', url: await getServerCanonicalUrl(orgslug, '/communities') },
+    { name: 'Community', url: await getServerCanonicalUrl(orgslug, '/communities') },
   ])
 
   return (

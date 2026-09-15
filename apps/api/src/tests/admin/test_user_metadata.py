@@ -19,7 +19,6 @@ from sqlmodel import select
 
 from src.db.user_organizations import UserOrganization
 from src.db.users import APITokenUser, User, UserUpdate
-from src.services.admin.admin import provision_user
 from src.services.users.users import update_user
 
 
@@ -63,101 +62,6 @@ def mock_admin_side_effects():
 
 class TestProvisionUserExtraMetadata:
 
-    @pytest.mark.asyncio
-    async def test_provision_user_persists_extra_metadata(
-        self,
-        token_user,
-        user_role,
-        mock_request,
-        db,
-        mock_admin_side_effects,
-    ):
-        metadata = {"external_id": "abc-123", "team": "ops"}
-
-        result = await provision_user(
-            token_user=token_user,
-            email="meta@example.com",
-            username="metauser",
-            first_name="Meta",
-            last_name="User",
-            password=None,
-            role_id=user_role.id,
-            request=mock_request,
-            db_session=db,
-            extra_metadata=metadata,
-        )
-
-        # Sanity-check the response carries it too.
-        assert result.extra_metadata == metadata
-
-        # Reload from DB to confirm persistence.
-        row = (await db.execute(select(User).where(User.id == result.id))).scalars().first()
-        assert row is not None
-        assert row.extra_metadata == {"external_id": "abc-123", "team": "ops"}
-
-        # Membership row was created.
-        membership = (await db.execute(
-            select(UserOrganization).where(
-                UserOrganization.user_id == result.id,
-                UserOrganization.org_id == token_user.org_id,
-            )
-        )).scalars().first()
-        assert membership is not None
-
-    @pytest.mark.asyncio
-    async def test_provision_user_attach_existing_user_does_not_overwrite_metadata(
-        self,
-        token_user,
-        other_org,
-        user_role,
-        mock_request,
-        db,
-        mock_admin_side_effects,
-    ):
-        # Pre-create a user who lives only in another org so the attach path
-        # is taken (not the duplicate-in-this-org rejection).
-        existing = User(
-            id=42,
-            username="existing",
-            first_name="Ex",
-            last_name="Isting",
-            email="existing@example.com",
-            password="hashed",
-            user_uuid="user_existing",
-            extra_metadata={"keep": True},
-        )
-        db.add(existing)
-        await db.commit()
-        db.add(
-            UserOrganization(
-                user_id=existing.id,
-                org_id=other_org.id,
-                role_id=user_role.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        await db.commit()
-
-        # Call provision_user with a *different* extra_metadata payload.
-        result = await provision_user(
-            token_user=token_user,
-            email="existing@example.com",
-            username="ignored",
-            first_name="ignored",
-            last_name="ignored",
-            password=None,
-            role_id=user_role.id,
-            request=mock_request,
-            db_session=db,
-            extra_metadata={"new": "value"},
-        )
-
-        # documents current behavior: attach path leaves existing metadata intact.
-        await db.refresh(existing)
-        assert existing.extra_metadata == {"keep": True}
-        assert result.id == existing.id
-        assert result.extra_metadata == {"keep": True}
 
     @pytest.mark.asyncio
     async def test_update_user_ignores_extra_metadata(

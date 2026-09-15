@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import CopilotBubble from '@components/Copilot/CopilotBubble'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -26,6 +25,7 @@ import {
   ChalkboardSimple,
   Signpost,
 } from '@phosphor-icons/react'
+import { StarLabLogo } from '@components/Objects/Menus/StarLabLogo'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
   DropdownMenu,
@@ -134,6 +134,10 @@ export const OrgMenu = (props: any) => {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  // On the home page (Learning Universe) the nav floats over the full-bleed
+  // 3D canvas, so we must NOT render the spacer that compensates for it.
+  const isHomePage = pathname !== null && (/\/orgs\/[^/]+\/?$/.test(pathname) || pathname === '/dashboard' || pathname === '/dashboard/')
+
   // Only hide menu if we're in an activity page and focus mode is enabled
   if (pathname?.includes('/activity/') && isFocusMode) {
     return null;
@@ -141,10 +145,12 @@ export const OrgMenu = (props: any) => {
 
   return (
     <>
-      <div className="backdrop-blur-lg h-[60px] blur-3xl" style={{ zIndex: 'var(--z-behind)', marginTop: topOffset }}></div>
+      {!isHomePage && (
+        <div className="backdrop-blur-lg h-[60px] blur-3xl" style={{ zIndex: 'var(--z-behind)', marginTop: topOffset }}></div>
+      )}
       <nav
         aria-label="Top navigation"
-        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-white/90 nice-shadow' : ''}`}
+        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-black/90 border-b border-white/10' : ''}`}
         style={{
           zIndex: 'var(--z-nav)',
           backgroundColor: primaryColor || undefined,
@@ -154,17 +160,12 @@ export const OrgMenu = (props: any) => {
         <div className="flex items-center justify-between w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center space-x-5 md:w-auto w-full">
             <div className="logo flex md:w-auto w-full justify-center">
-              <Link href={getUriWithOrg(orgslug, '/')}>
+              <Link href="/dashboard">
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
-                  {org?.logo_image ? (
-                    <img
-                      src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                      alt="Learnhouse"
-                      style={{ width: 'auto', height: '100%' }}
-                      className="rounded-md"
-                    />
+                  {!org || (org && !org?.logo_image) ? (
+                    <img src="/starlab.svg" alt="StarLab" className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
                   ) : (
-                    <LearnHouseLogo logoFilter={colors.logoFilter} />
+                    <img src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)} alt={org?.name} className="h-[30px] rounded-sm" />
                   )}
                 </div>
               </Link>
@@ -202,28 +203,26 @@ export const OrgMenu = (props: any) => {
               </div>
             </AuthenticatedClientElement>
             {/* Boards */}
-            {rf?.boards?.enabled && (
-              <AuthenticatedClientElement checkMethod="authentication">
-                <div className="hidden md:flex">
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={getUriWithOrg(orgslug, '/boards')}
-                          className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                          aria-label="Boards"
-                        >
-                          <ChalkboardSimple size={20} weight="fill" />
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        Boards
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </AuthenticatedClientElement>
-            )}
+            <AuthenticatedClientElement checkMethod="authentication">
+              <div className="hidden md:flex">
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={getUriWithOrg(orgslug, '/boards')}
+                        className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
+                        aria-label="Boards"
+                      >
+                        <ChalkboardSimple size={20} weight="fill" />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      Boards
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </AuthenticatedClientElement>
             {/* AI Copilot */}
             {rf?.ai?.enabled && config?.admin_toggles?.ai?.copilot_enabled !== false && (
               <AuthenticatedClientElement checkMethod="authentication">
@@ -238,125 +237,6 @@ export const OrgMenu = (props: any) => {
                   />
                 </div>
               </AuthenticatedClientElement>
-            )}
-            {/* Dashboard Dropdown - Only visible to admins */}
-            {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
-              <div className="hidden md:flex">
-                <DropdownMenu>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                            aria-label={t('common.dashboard')}
-                          >
-                            <SquaresFour size={20} weight="fill" />
-                          </button>
-                        </DropdownMenuTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        {t('common.dashboard')}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <SquaresFour size={16} weight="fill" />
-                      <span>{t('common.dashboard')}</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {visibleDashboardItems.map((item) => {
-                      const IconComponent = item.icon
-                      return (
-                        <DropdownMenuItem key={item.id} asChild>
-                          <Link
-                            href={item.href}
-                            className="flex items-center gap-2"
-                            onClick={() => track(AnalyticsEvent.DashboardEntered, { source: 'org_menu' })}
-                          >
-                            <IconComponent size={16} weight="fill" />
-                            <span>{t(item.labelKey)}</span>
-                          </Link>
-                        </DropdownMenuItem>
-                      )
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-
-            {/* Help Dropdown - Only visible to admins/maintainers/instructors */}
-            {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
-              <div className="hidden md:flex">
-                <DropdownMenu>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                            aria-label={t('common.help')}
-                          >
-                            <Question size={20} weight="fill" />
-                          </button>
-                        </DropdownMenuTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        {t('common.help')}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <Question size={16} weight="fill" />
-                      <span>{t('common.help')}</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="https://docs.learnhouse.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Book size={16} weight="fill" />
-                        <span>{t('common.help_menu.documentation')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="https://learnhouse.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Globe size={16} weight="fill" />
-                        <span>{t('common.help_menu.website')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="https://discord.gg/learnhouse"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <DiscordIcon size={16} />
-                        <span>{t('common.help_menu.discord')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setFeedbackModalOpen(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <ChatCircleDots size={16} weight="fill" />
-                      <span>{t('common.help_menu.report_feedback')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             )}
 
             <div className="hidden md:flex">
@@ -380,7 +260,7 @@ export const OrgMenu = (props: any) => {
         </div>
       </nav>
       <div
-        className={`fixed inset-x-0 bg-white/80 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed inset-x-0 bg-white/80 dark:bg-neutral-950/95 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out ${
           isMenuOpen ? 'opacity-100' : '-top-full opacity-0'
         }`}
         style={{
@@ -423,7 +303,6 @@ export const OrgMenu = (props: any) => {
     </>
   )
 }
-
 const CopilotMenuButton = ({
   orgslug,
   isBubbleMode,
@@ -557,14 +436,3 @@ const CopilotMenuButton = ({
   )
 }
 
-const LearnHouseLogo = ({ logoFilter }: { logoFilter: string }) => {
-  return (
-    <Image
-      src="/lrn-text.svg"
-      alt="LearnHouse logo"
-      width={133}
-      height={40}
-      style={{ height: 'auto', filter: logoFilter }}
-    />
-  )
-}

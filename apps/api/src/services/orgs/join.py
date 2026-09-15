@@ -6,7 +6,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
-from src.db.users import AnonymousUser, InternalUser, PublicUser, User
+from src.db.users import AnonymousUser, PublicUser, User
 from src.security.features_utils.usage import (
     check_limits_with_usage,
     increase_feature_usage,
@@ -14,7 +14,6 @@ from src.security.features_utils.usage import (
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.join_notifications import notify_user_joined_org
 from src.services.orgs.orgs import get_org_join_mechanism
-from src.services.users.usergroups import add_users_to_usergroup
 
 
 class JoinOrg(BaseModel):
@@ -125,16 +124,6 @@ async def join_org(
             _invalidate_session_cache(user.id)
 
             await notify_user_joined_org(request, db_session, user, org.id, org=org)
-
-            # Add user to UserGroup if invite code is linked to one
-            if inviteCode.get("usergroup_id"):
-                await add_users_to_usergroup(
-                    request,
-                    db_session,
-                    InternalUser(id=0),
-                    int(inviteCode.get("usergroup_id")),
-                    str(user.id),
-                )
 
             return "Great, You're part of the Organization"
 

@@ -508,7 +508,7 @@ async def api_org_mfa_compliance(
     "/mfa/org-policy/{org_id}/settings",
     summary="Get the org's saved security policy",
     description=(
-        "Admin/maintainer only. Returns the policy exactly as stored, read "
+        "Admins only. Returns the policy exactly as stored, read "
         "straight from the database. The settings UI reads it from here rather "
         "than from the cached organization payload, so a save is never followed "
         "by the previous values reappearing."
@@ -552,7 +552,7 @@ async def _org_security_policy_payload(db_session: AsyncSession, org_id: int) ->
     "/mfa/org-policy/{org_id}",
     summary="Set the org-wide two-factor requirement",
     description=(
-        "Admin/maintainer only. Enabling the policy requires the calling admin "
+        "Admins only. Enabling the policy requires the calling admin "
         "to already have two-factor enabled themselves."
     ),
     tags=["auth"],
@@ -684,7 +684,7 @@ async def api_set_org_mfa_policy(
     "/mfa/org-compliance/{org_id}",
     summary="List members and whether they have two-factor enabled",
     description=(
-        "Admin/maintainer only. Intended to be checked BEFORE switching the "
+        "Admins only. Intended to be checked BEFORE switching the "
         "policy on — enabling it blind is how an org locks out its own staff."
     ),
     tags=["auth"],
@@ -752,7 +752,7 @@ async def api_org_mfa_compliance_list(
     "/mfa/org-reset/{org_id}/{user_id}",
     summary="Reset (clear) a member's two-factor factor",
     description=(
-        "Admin/maintainer recovery tool. Removes a member's TOTP factor and all "
+        "Admin recovery tool. Removes a member's TOTP factor and all "
         "their backup codes so they can re-enroll — the supported path for a "
         "member who lost their device with no backup codes left. Does not enroll "
         "anything on their behalf; if the org requires 2FA the member re-enters "

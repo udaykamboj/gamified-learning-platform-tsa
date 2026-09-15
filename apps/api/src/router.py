@@ -5,10 +5,9 @@ from src.routers import audit as audit_router_module
 from src.routers import code_execution
 from src.routers import code_submissions
 from src.routers import health
-from src.routers import demo as demo_router_module
+
 from src.routers import instance
 from src.routers import plans
-from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import mfa as mfa_router_module
 from src.routers import monitoring
@@ -17,7 +16,7 @@ from src.routers import stream
 from src.routers import api_tokens
 from src.routers import webhooks
 from src.routers.integrations import zapier as zapier_integration
-from src.routers.ai import ai, magicblocks, courseplanning, rag, images, quiz, assignment_gen, scenario, audio
+from src.routers.ai import ai, rag, images, audio
 from src.routers.boards import boards_playground
 from src.routers.orgs import ai_credits
 from src.routers.orgs import custom_domains
@@ -26,7 +25,6 @@ from src.routers.orgs import org_plan
 from src.routers.courses import chapters, courses, assignments, certifications
 from src.routers.folders import folders as folders_router_module
 from src.routers.media import media as media_router_module
-from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
 from src.routers.courses.activities import activities, blocks
@@ -35,6 +33,8 @@ from src.routers.podcasts import episodes as episodes_router_module
 from src.routers.boards import boards as boards_router_module
 from src.routers.playgrounds import playgrounds as playgrounds_router_module
 from src.routers.playgrounds import playgrounds_generator as playgrounds_generator_router
+from src.routers import superadmin as superadmin_router_module
+from src.routers import platform as platform_router_module
 from src.core.ee_hooks import register_ee_routers
 from src.core.deployment_mode import get_deployment_mode
 from src.services.dev.dev import isDevModeEnabledOrRaise
@@ -45,7 +45,7 @@ from src.security.api_token_utils import (
     require_authenticated_user_or_api_token,
     require_non_api_token_user,
 )
-from src.security.features_utils.plan_check import require_plan, require_plan_for_boards, require_plan_for_certifications, require_plan_for_community, require_plan_for_usergroups, require_plan_for_playgrounds
+from src.security.features_utils.plan_check import require_plan, require_plan_for_certifications
 
 
 v1_router = APIRouter(prefix="/api/v1")
@@ -71,23 +71,6 @@ v1_router.include_router(
     tags=["users"],
     dependencies=[Depends(get_non_api_token_user)]
 )
-v1_router.include_router(
-    usergroups.router,
-    prefix="/usergroups",
-    tags=["usergroups"],
-    # Admit API tokens (headless enrollment/usergroup management) while still
-    # rejecting anonymous callers — same pattern as /assignments. `usergroups`
-    # is already an allowed API-token resource type in the RBAC layer
-    # (rbac.py authorization_verify_api_token_permissions), and every handler
-    # authorizes through usergroups.rbac_check, which has an APITokenUser branch
-    # enforcing the token's usergroups rights + org boundary. The two handlers
-    # that authorize against a placeholder uuid (create, get-by-resource) get an
-    # explicit token org-boundary check in the service layer.
-    dependencies=[
-        Depends(require_authenticated_user_or_api_token),
-        Depends(require_plan_for_usergroups("standard", "User Groups")),
-    ],
-)
 v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 # Two-factor: enrollment/management plus the /auth/login/mfa challenge.
 v1_router.include_router(mfa_router_module.router, prefix="/auth", tags=["auth"])
@@ -110,6 +93,23 @@ v1_router.include_router(
     dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(
+    stream.router,
+    prefix="/stream",
+    tags=["stream"],
+    dependencies=[Depends(require_authenticated_user_or_api_token)],
+)
+v1_router.include_router(
+    superadmin_router_module.router,
+    prefix="/superadmin",
+    tags=["superadmin"],
+)
+# Read-only platform monitoring for admins (overview, courses, community activity).
+v1_router.include_router(
+    platform_router_module.router,
+    prefix="/platform",
+    tags=["platform"],
+)
+v1_router.include_router(
     api_tokens.router,
     prefix="/orgs",
     tags=["api-tokens"],
@@ -126,12 +126,9 @@ v1_router.include_router(
     prefix="/integrations/zapier",
     tags=["integrations", "zapier"],
 )
-v1_router.include_router(
-    custom_domains.router,
-    prefix="/orgs",
-    tags=["custom-domains"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan("standard", "Custom Domains"))]
-)
+# Custom domain management (custom_domains.router) is not mounted: StarLab is
+# one platform on one domain (docs/refactor/03-change-list.md, section H).
+# Resolution stays mounted because the web tenancy/auth code still calls it.
 # Public domain resolution endpoint (no auth required)
 v1_router.include_router(
     custom_domains.public_router,
@@ -200,22 +197,14 @@ v1_router.include_router(
     tags=["admin"],
 )
 v1_router.include_router(courses.router, prefix="/courses", tags=["courses"])
-v1_router.include_router(
-    migration_router_module.router,
-    prefix="/courses",
-    tags=["migration"],
-    dependencies=[Depends(require_authenticated_user)]
-)
 v1_router.include_router(search.router, prefix="/search", tags=["search"])
 v1_router.include_router(
     assignments.router,
     prefix="/assignments",
     tags=["assignments"],
-    # Admit API tokens (headless assignments) while still rejecting anonymous.
-    # Individual handlers gate access: authoring + grading go through
-    # authorize_assignment_access (assignments rights bucket), while learner
-    # /me + submission endpoints keep _block_api_tokens (session-only).
-    dependencies=[Depends(require_authenticated_user_or_api_token)]
+    # Students read, answer and submit their own work. No API tokens: there is
+    # no headless authoring or grading (docs/refactor/progress/00-requirements.md, R10).
+    dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(chapters.router, prefix="/chapters", tags=["chapters"])
 v1_router.include_router(activities.router, prefix="/activities", tags=["activities"])
@@ -225,16 +214,17 @@ v1_router.include_router(
 v1_router.include_router(
     media_router_module.router, prefix="/media", tags=["media"]
 )
+# Student tools (community, boards, playgrounds, podcasts, AI) are part of the
+# platform for every signed-in user. They are not plan- or admin-gated
+# (docs/refactor/progress/00-requirements.md, R16, R17).
 v1_router.include_router(
     communities_router_module.router,
     prefix="/communities",
     tags=["communities"],
-    dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
 v1_router.include_router(
     discussions_router_module.router,
     tags=["discussions"],
-    dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
 v1_router.include_router(
     podcasts_router_module.router,
@@ -256,7 +246,7 @@ v1_router.include_router(
     boards_router_module.router,
     prefix="/boards",
     tags=["boards"],
-    dependencies=[Depends(get_non_api_token_user), Depends(require_plan_for_boards("personal", "Boards"))]
+    dependencies=[Depends(get_non_api_token_user)]
 )
 v1_router.include_router(
     boards_router_module.internal_router,
@@ -273,18 +263,6 @@ v1_router.include_router(
     ai.router,
     prefix="/ai",
     tags=["ai"],
-    dependencies=[Depends(require_authenticated_user)]
-)
-v1_router.include_router(
-    magicblocks.router,
-    prefix="/ai",
-    tags=["ai", "magicblocks"],
-    dependencies=[Depends(require_authenticated_user)]
-)
-v1_router.include_router(
-    courseplanning.router,
-    prefix="/ai",
-    tags=["ai", "courseplanning"],
     dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(
@@ -306,40 +284,22 @@ v1_router.include_router(
     dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(
-    quiz.router,
-    prefix="/ai",
-    tags=["ai", "quiz"],
-    dependencies=[Depends(require_authenticated_user)]
-)
-v1_router.include_router(
-    assignment_gen.router,
-    prefix="/ai",
-    tags=["ai", "assignment-gen"],
-    dependencies=[Depends(require_authenticated_user)]
-)
-v1_router.include_router(
-    scenario.router,
-    prefix="/ai",
-    tags=["ai", "scenario"],
-    dependencies=[Depends(require_authenticated_user)]
-)
-v1_router.include_router(
     boards_playground.router,
     prefix="/boards",
     tags=["boards", "boards-playground"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan_for_boards("personal", "Boards"))]
+    dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(
     playgrounds_router_module.router,
     prefix="/playgrounds",
     tags=["playgrounds"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan_for_playgrounds("personal", "Playgrounds"))]
+    dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(
     playgrounds_generator_router.router,
     prefix="/playgrounds",
     tags=["playgrounds", "playgrounds-generator"],
-    dependencies=[Depends(require_authenticated_user), Depends(require_plan_for_playgrounds("personal", "Playgrounds"))]
+    dependencies=[Depends(require_authenticated_user)]
 )
 
 v1_router.include_router(
@@ -373,9 +333,7 @@ v1_router.include_router(
 
 # Instance info (public, no auth)
 v1_router.include_router(instance.router, prefix="/instance", tags=["instance"])
-# Demo: /demo/status is public (the onboarding page calls it before the
-# visitor has done anything); /demo/enter resolves the user itself.
-v1_router.include_router(demo_router_module.router, prefix="/demo", tags=["demo"])
+
 
 # Sentry feedback relay (rejects API tokens; works for both anonymous and
 # authenticated callers so the in-app feedback modal keeps working everywhere)

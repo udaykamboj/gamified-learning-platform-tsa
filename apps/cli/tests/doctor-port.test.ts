@@ -10,7 +10,7 @@ vi.mock('node:child_process', async () => {
   return {
     ...actual,
     execSync: vi.fn((cmd: string) =>
-      cmd.includes('docker ps') ? Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+      cmd.includes('docker ps') ? Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
         : cmd.includes('State.Running') ? Buffer.from('true')
           : cmd.includes('RestartCount') ? Buffer.from('0')
             : cmd.includes('{{.Image}}') ? Buffer.from('sha256:abcdef0123456789')
@@ -38,14 +38,14 @@ describe('doctor — configured port in use', () => {
 
   beforeEach(() => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-docp-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     origHome = process.env.HOME
     process.env.HOME = home
     vi.spyOn(process, 'exit').mockImplementation(((code?: number) => { throw new Error(`exit ${code}`) }) as never)

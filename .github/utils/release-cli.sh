@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# LearnHouse CLI release script. Bumps the CLI version on dev, tags `cli-<version>`
+# StarLab CLI release script. Bumps the CLI version on dev, tags `cli-<version>`
 # (which triggers .github/workflows/cli-publish.yaml → npm publish), and drafts a
 # GitHub Release. Pushing a tag is effectively irreversible, so EVERY precondition
 # is checked BEFORE anything is mutated: a failed check leaves the repo untouched.
@@ -19,7 +19,7 @@ sed_inplace() {
 
 if [ -z "$VERSION" ]; then
   echo ""
-  echo "  📦 LearnHouse CLI Release Script"
+  echo "  📦 StarLab CLI Release Script"
   echo ""
   echo "  Usage: .github/utils/release-cli.sh <version>"
   echo "  Example: .github/utils/release-cli.sh 1.4.9"
@@ -33,7 +33,7 @@ PKG="$REPO_ROOT/apps/cli/package.json"
 CONST="$REPO_ROOT/apps/cli/src/constants.ts"
 
 echo ""
-echo "  🚀 LearnHouse CLI Release — ${VERSION}"
+echo "  🚀 StarLab CLI Release — ${VERSION}"
 echo "  ─────────────────────────────────────"
 echo ""
 
@@ -85,8 +85,8 @@ git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1 \
   && die "Tag $TAG already exists on origin. Pick a new version."
 
 # 10) The new version must not already be published on npm (npm rejects re-publishing).
-PUBLISHED="$(npm view learnhouse@"$VERSION" version 2>/dev/null || true)"
-[ -n "$PUBLISHED" ] && die "learnhouse@$VERSION is already published on npm. Pick a new version."
+PUBLISHED="$(npm view starlab@"$VERSION" version 2>/dev/null || true)"
+[ -n "$PUBLISHED" ] && die "starlab@$VERSION is already published on npm. Pick a new version."
 
 echo "  ✅ Preflight passed — releasing ${TAG} to ${REPO}"
 
@@ -138,7 +138,7 @@ CHANGELOG_FILE=$(mktemp)
   echo "## 📦 Install"
   echo ""
   echo "\`\`\`bash"
-  echo "npx learnhouse@${VERSION}"
+  echo "npx starlab@${VERSION}"
   echo "\`\`\`"
   echo ""
   echo "**Full Changelog:** https://github.com/${REPO}/compare/${PREV_TAG:-}...${TAG}"

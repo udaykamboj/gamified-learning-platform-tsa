@@ -3,10 +3,10 @@ import os from 'node:os'
 import path from 'node:path'
 import { CONFIG_FILENAME, VERSION } from '../constants.js'
 import { isContainerRunning } from './docker.js'
-import type { LearnHouseConfigJson, SetupConfig } from '../types.js'
+import type { StarLabConfigJson, SetupConfig } from '../types.js'
 
 export function writeConfig(config: SetupConfig): void {
-  const data: LearnHouseConfigJson = {
+  const data: StarLabConfigJson = {
     version: VERSION,
     deploymentId: config.deploymentId,
     createdAt: new Date().toISOString(),
@@ -28,7 +28,7 @@ export function writeConfig(config: SetupConfig): void {
   )
 }
 
-export function readConfig(dir?: string): LearnHouseConfigJson | null {
+export function readConfig(dir?: string): StarLabConfigJson | null {
   const configPath = path.join(dir || process.cwd(), CONFIG_FILENAME)
   if (!fs.existsSync(configPath)) return null
   try {
@@ -49,11 +49,11 @@ function isCompleteInstall(dir: string): boolean {
   }
 }
 
-export function listInstallations(): { name: string; dir: string; config: LearnHouseConfigJson }[] {
-  const baseDir = path.join(os.homedir(), '.learnhouse')
+export function listInstallations(): { name: string; dir: string; config: StarLabConfigJson }[] {
+  const baseDir = path.join(os.homedir(), '.starlab')
   if (!fs.existsSync(baseDir)) return []
 
-  const results: { name: string; dir: string; config: LearnHouseConfigJson }[] = []
+  const results: { name: string; dir: string; config: StarLabConfigJson }[] = []
   try {
     const entries = fs.readdirSync(baseDir, { withFileTypes: true })
     for (const entry of entries) {
@@ -77,7 +77,7 @@ export function findInstallDir(): string {
 
   if (installations.length > 1) {
     const running = installations.find((i) =>
-      isContainerRunning(`learnhouse-app-${i.config.deploymentId}`)
+      isContainerRunning(`starlab-app-${i.config.deploymentId}`)
     )
     return (running ?? installations[0]).dir
   }

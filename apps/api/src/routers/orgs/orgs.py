@@ -1,49 +1,42 @@
 from typing import List, Literal, Optional, Union
 from fastapi import APIRouter, Depends, Request, UploadFile, Query, Path, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
+from src.db.users import AnonymousUser, PublicUser
+from src.core.events.database import get_db_session
 from src.services.orgs.invites import (
     create_invite_code,
     delete_invite_code,
     get_invite_code,
     get_invite_codes,
 )
-from src.services.orgs.join import JoinOrg, join_org
 from src.services.orgs.users import (
     export_organization_users_csv,
     get_list_of_invited_users,
     get_organization_users,
     invite_batch_users,
-    leave_org,
     remove_all_users_from_org,
     remove_batch_users_from_org,
     remove_invited_user,
     remove_user_from_org,
     update_user_role,
 )
-from src.db.organization_config import OrganizationConfigBase
-from src.db.users import AnonymousUser, PublicUser
 from src.db.organizations import (
-    OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
-from src.core.events.database import get_db_session
 from src.security.auth import get_current_user, get_authenticated_user
 from src.security.features_utils.dependencies import require_org_admin
+from src.security.platform_roles import require_platform_admin
+
+
+
+
+
 from src.services.orgs.orgs import (
-    create_org,
-    create_org_with_config,
-    delete_org,
     wipe_org_content,
     get_organization_by_uuid,
     get_organization_by_slug,
-    get_orgs_by_user,
-    get_orgs_by_user_admin,
     update_org,
-    update_org_logo,
-    update_org_preview,
-    update_org_signup_mechanism,
-    update_org_ai_config,
     update_org_communities_config,
     update_org_payments_config,
     update_org_folders_config,
@@ -80,61 +73,6 @@ feature_config_router = APIRouter(
     dependencies=[Depends(require_org_admin)],
 )
 
-
-@router.post(
-    "/",
-    response_model=OrganizationRead,
-    summary="Create an organization",
-    description="Create a new organization owned by the authenticated user.",
-    responses={
-        200: {"description": "Organization created.", "model": OrganizationRead},
-        401: {"description": "Not authenticated"},
-    },
-)
-async def api_create_org(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    return await create_org(request, org_object, current_user, db_session)
-
-
-# Temporary pre-alpha code
-@router.post(
-    "/withconfig/",
-    response_model=OrganizationRead,
-    summary="Create an organization with config",
-    description="Create a new organization together with its base configuration in a single call (pre-alpha).",
-    responses={
-        200: {"description": "Organization and configuration created.", "model": OrganizationRead},
-        401: {"description": "Not authenticated"},
-    },
-)
-async def api_create_org_withconfig(
-    request: Request,
-    org_object: OrganizationCreate,
-    config_object: OrganizationConfigBase,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    # SECURITY: create_org_with_config() persists the client-supplied config
-    # verbatim. The config carries the org's billing plan (cloud.plan), so a
-    # self-service caller could otherwise mint a free "enterprise"/"pro" org and
-    # unlock every paid feature/limit without paying. The standard create_org
-    # path always provisions a "free" plan; force the same here so the plan can
-    # only ever be elevated through the billing system, not the request body.
-    if config_object.cloud is not None:
-        config_object.cloud.plan = "free"
-    return await create_org_with_config(
-        request, org_object, current_user, db_session, config_object
-    )
 
 
 @router.get(
@@ -178,8 +116,6 @@ async def api_export_org_users(
     request: Request,
     org_id: int,
     search: str = "",
-    usergroup_id: Optional[int] = Query(default=None),
-    usergroup_filter: Optional[Literal["in_group", "not_in_group"]] = Query(default=None),
     sort_order: Optional[Literal["asc", "desc"]] = Query(default="desc"),
     role_id: Optional[int] = Query(default=None),
     status: Optional[Literal["verified", "unverified"]] = Query(default=None),
@@ -191,7 +127,7 @@ async def api_export_org_users(
     """
     return await export_organization_users_csv(
         request, org_id, db_session, current_user, search,
-        usergroup_id, usergroup_filter, sort_order or "desc", role_id, status,
+        sort_order or "desc", role_id, status,
     )
 
 
@@ -216,8 +152,6 @@ async def api_get_org_users(
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=20, ge=1, le=100, description="Items per page (max 100)"),
     search: str = "",
-    usergroup_id: Optional[int] = Query(default=None, description="Filter by usergroup membership"),
-    usergroup_filter: Optional[Literal["in_group", "not_in_group"]] = Query(default=None, description="Membership filter: 'in_group' or 'not_in_group'"),
     sort_order: Optional[Literal["asc", "desc"]] = Query(default="desc", description="Sort order for join date"),
     role_id: Optional[int] = Query(default=None, description="Filter by role ID"),
     status: Optional[Literal["verified", "unverified"]] = Query(default=None, description="Filter by verification status"),
@@ -234,43 +168,11 @@ async def api_get_org_users(
     """
     return await get_organization_users(
         request, org_id, db_session, current_user, page, limit, search,
-        usergroup_id, usergroup_filter, sort_order or "desc", role_id, status,
+        sort_order or "desc", role_id, status,
     )
 
 
-@router.post(
-    "/join",
-    summary="Join an organization",
-    description="Join an existing organization, optionally consuming an invite code.",
-    responses={
-        200: {"description": "Organization joined successfully."},
-        401: {"description": "Not authenticated"},
-        403: {"description": "Organization is invite-only or invite is invalid"},
-        404: {"description": "Organization or invite not found"},
-    },
-)
-async def api_join_an_org(
-    request: Request,
-    args: JoinOrg,
-    current_user: PublicUser = Depends(get_authenticated_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    """
-    Get single Org by ID
-    """
-    # SECURITY: the downstream join_org() trusts the body-supplied user_id and
-    # joins THAT user into the org without verifying it is the caller. Without
-    # this guard any authenticated user could force-add (or, on an "open" org,
-    # silently enroll) an arbitrary other account into an organization. Pin the
-    # join to the authenticated identity. user_id in the body may be either the
-    # numeric id or the user_uuid, so accept either form of the caller's own id.
-    target = str(args.user_id)
-    if target not in (str(current_user.id), str(getattr(current_user, "user_uuid", ""))):
-        raise HTTPException(
-            status_code=403,
-            detail="You can only join an organization as yourself.",
-        )
-    return await join_org(request, args, current_user, db_session)
+
 
 
 @router.put(
@@ -343,7 +245,7 @@ async def api_remove_batch_users_from_org(
 async def api_remove_all_users_from_org(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: PublicUser = Depends(require_platform_admin),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -371,7 +273,7 @@ async def api_remove_all_users_from_org(
 async def api_wipe_org_content(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: PublicUser = Depends(require_platform_admin),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -406,28 +308,7 @@ async def api_remove_user_from_org(
     )
 
 
-@router.delete(
-    "/{org_id}/leave",
-    summary="Leave an organization",
-    description=(
-        "Remove the CURRENT (authenticated) user's own membership in the org — "
-        "self-service, no admin rights required. The last remaining admin cannot "
-        "leave (they must transfer ownership or delete the org)."
-    ),
-    responses={
-        200: {"description": "Left the organization."},
-        400: {"description": "You are the last admin"},
-        401: {"description": "Not authenticated"},
-        404: {"description": "Organization not found or you are not a member"},
-    },
-)
-async def api_leave_org(
-    request: Request,
-    org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    return await leave_org(request, org_id, db_session, current_user)
+
 
 
 # Config related routes
@@ -1116,25 +997,24 @@ async def api_upload_org_og_image(
 @router.post(
     "/{org_id}/invites",
     summary="Create an invite code",
-    description="Create a new invite code for the organization, optionally linked to a usergroup.",
+    description="Create a new invite code for the organization.",
     responses={
         200: {"description": "Invite code created."},
         401: {"description": "Not authenticated"},
         403: {"description": "Caller is not an organization administrator"},
-        404: {"description": "Organization or usergroup not found"},
+        404: {"description": "Organization not found"},
     },
 )
 async def api_create_invite_code(
     request: Request,
     org_id: int,
-    usergroup_id: Optional[int] = None,
     current_user: PublicUser = Depends(get_current_user),
     db_session: AsyncSession = Depends(get_db_session),
 ):
     """
-    Create invite code, optionally linked to a usergroup
+    Create invite code
     """
-    return await create_invite_code(request, org_id, current_user, db_session, usergroup_id)
+    return await create_invite_code(request, org_id, current_user, db_session)
 
 
 @router.get(
@@ -1500,28 +1380,7 @@ async def api_update_org(
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete(
-    "/{org_id}",
-    summary="Delete an organization",
-    description="Delete an organization by its ID. This action cannot be undone.",
-    responses={
-        200: {"description": "Organization deleted."},
-        401: {"description": "Not authenticated"},
-        403: {"description": "Caller is not an organization administrator"},
-        404: {"description": "Organization not found"},
-    },
-)
-async def api_delete_org(
-    request: Request,
-    org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: AsyncSession = Depends(get_db_session),
-):
-    """
-    Delete Org by ID
-    """
 
-    return await delete_org(request, org_id, current_user, db_session)
 
 
 @router.put(

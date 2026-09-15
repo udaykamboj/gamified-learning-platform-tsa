@@ -2,18 +2,18 @@ import { Callout } from 'nextra/components'
 
 # CLI
 
-The LearnHouse CLI is the primary tool for deploying, managing, and developing LearnHouse. It orchestrates Docker Compose services and provides an interactive setup wizard for production deployments, as well as a full local development environment.
+The StarLab CLI is the primary tool for deploying, managing, and developing StarLab. It orchestrates Docker Compose services and provides an interactive setup wizard for production deployments, as well as a full local development environment.
 
-<img src="/img/pages/cli/cli-screenshot.png" alt="LearnHouse CLI" style={{ borderRadius: '12px', marginTop: '1rem' }} />
+<img src="/img/pages/cli/cli-screenshot.png" alt="StarLab CLI" style={{ borderRadius: '12px', marginTop: '1rem' }} />
 
-**Package**: [`learnhouse`](https://www.npmjs.com/package/learnhouse) on npm
+**Package**: [`starlab`](https://www.npmjs.com/package/starlab) on npm
 
 ## Installation
 
 ### Quick Start (recommended)
 
 ```bash
-npx learnhouse@latest setup
+npx starlab@latest setup
 ```
 
 ### One-line Install (macOS / Linux)
@@ -21,13 +21,13 @@ npx learnhouse@latest setup
 Installs Docker, Node.js, and launches the CLI:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.ps1 | iex
 ```
 
 ## Requirements
@@ -43,7 +43,7 @@ The CLI handles two main workflows:
 
 The [setup wizard](/cli/setup-wizard) generates a complete Docker Compose deployment with:
 
-- **LearnHouse app** container (Next.js + FastAPI)
+- **StarLab app** container (Next.js + FastAPI)
 - **PostgreSQL** database (with optional pgvector for AI)
 - **Redis** cache
 - **Caddy** or **Nginx** reverse proxy (with optional auto-SSL)
@@ -58,21 +58,21 @@ The [`dev` command](/cli/dev-mode) starts infrastructure in Docker and runs the 
 
 | Command | Description |
 | --- | --- |
-| `npx learnhouse setup` | Interactive setup wizard |
-| `npx learnhouse start` | Start all services |
-| `npx learnhouse stop` | Stop all services |
-| `npx learnhouse update` | Update to latest or a specific version |
-| `npx learnhouse status` | Show service status |
-| `npx learnhouse health` | Run health checks |
-| `npx learnhouse logs` | Stream container logs |
-| `npx learnhouse config` | Show installation info |
-| `npx learnhouse env` | Edit environment variables |
-| `npx learnhouse backup` | Backup database |
-| `npx learnhouse restore <archive>` | Restore database from backup |
-| `npx learnhouse doctor` | Run diagnostics |
-| `npx learnhouse deployments` | Manage deployments & resource limits |
-| `npx learnhouse shell` | Open shell in a container |
-| `npx learnhouse dev` | Start dev environment |
+| `npx starlab setup` | Interactive setup wizard |
+| `npx starlab start` | Start all services |
+| `npx starlab stop` | Stop all services |
+| `npx starlab update` | Update to latest or a specific version |
+| `npx starlab status` | Show service status |
+| `npx starlab health` | Run health checks |
+| `npx starlab logs` | Stream container logs |
+| `npx starlab config` | Show installation info |
+| `npx starlab env` | Edit environment variables |
+| `npx starlab backup` | Backup database |
+| `npx starlab restore <archive>` | Restore database from backup |
+| `npx starlab doctor` | Run diagnostics |
+| `npx starlab deployments` | Manage deployments & resource limits |
+| `npx starlab shell` | Open shell in a container |
+| `npx starlab dev` | Start dev environment |
 
 <Callout type="info">
 See [Commands](/cli/commands) for the full reference including all flags.

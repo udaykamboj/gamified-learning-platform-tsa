@@ -4,12 +4,16 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/query/keys'
+import { getBoards } from '@services/boards/boards'
 import { createDiscussion, DISCUSSION_LABELS } from '@services/communities/discussions'
 import { useMutateDiscussions } from '@components/Hooks/useDiscussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
 import { EmojiPicker } from '@components/Objects/Communities/EmojiPicker'
-import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check } from 'lucide-react'
+import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check, Presentation } from 'lucide-react'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CreateDiscussionModalProps {
@@ -53,8 +57,18 @@ export function CreateDiscussionModal({
   const [titleError, setTitleError] = useState<string | null>(null)
   const [selectedLabel, setSelectedLabel] = useState<string>('general')
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+  const [boardUuid, setBoardUuid] = useState<string>('')
+  const org = useOrg() as any
 
   const accessToken = session?.data?.tokens?.access_token
+
+  // Boards the student can link: their own boards and ones they edit.
+  const { data: myBoards } = useQuery({
+    queryKey: queryKeys.boards.list(org?.slug || ''),
+    queryFn: () => getBoards(org.id, accessToken),
+    enabled: isOpen && !!accessToken && !!org?.id,
+    staleTime: 60_000,
+  })
 
   const validateTitle = (value: string) => {
     if (!value.trim()) {
@@ -94,6 +108,7 @@ export function CreateDiscussionModal({
           content: content ? JSON.stringify(content) : null,
           label: selectedLabel,
           emoji: selectedEmoji,
+          board_uuid: boardUuid || null,
         },
         accessToken
       )
@@ -111,6 +126,7 @@ export function CreateDiscussionModal({
         setContent(null)
         setSelectedLabel('general')
         setSelectedEmoji(null)
+        setBoardUuid('')
         onClose()
       }
     } catch (err: any) {
@@ -233,6 +249,31 @@ export function CreateDiscussionModal({
               {t('communities.create_discussion.editor_hint')}
             </p>
           </div>
+
+          {/* Optional board to work on together */}
+          {Array.isArray(myBoards) && myBoards.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Link a board (optional)
+              </label>
+              <div className="flex items-center gap-2">
+                <Presentation size={16} className="text-gray-400" />
+                <select
+                  value={boardUuid}
+                  onChange={(e) => setBoardUuid(e.target.value)}
+                  className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                >
+                  <option value="">No board</option>
+                  {myBoards.map((board: any) => (
+                    <option key={board.board_uuid} value={board.board_uuid}>{board.name}</option>
+                  ))}
+                </select>
+              </div>
+              <p className="mt-1.5 text-xs text-gray-500">
+                Everyone who can read this discussion will be able to work on the board with you.
+              </p>
+            </div>
+          )}
 
           {/* Error message */}
           {error && (

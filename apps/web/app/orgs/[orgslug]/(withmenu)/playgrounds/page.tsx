@@ -10,8 +10,8 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   const { orgslug } = await params
   const org = await getOrganizationContextInfo(orgslug, { revalidate: 120, tags: ['organizations'] })
   return {
-    title: `Playgrounds — ${org?.name || 'Organization'}`,
-    description: `Interactive AI-generated experiences from ${org?.name || 'this organization'}`,
+    title: `My playgrounds — ${org?.name || 'Organization'}`,
+    description: 'Your AI playgrounds and the ones shared with you',
   }
 }
 

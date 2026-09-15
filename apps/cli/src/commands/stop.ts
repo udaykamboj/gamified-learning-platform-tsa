@@ -7,14 +7,14 @@ export async function stopCommand() {
   const dir = findInstallDir()
   const config = readConfig(dir)
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run `npx learnhouse setup` first.')
+    p.log.error('No StarLab installation found. Run `npx starlab setup` first.')
     process.exit(1)
   }
 
-  p.intro(pc.cyan('Stopping LearnHouse'))
+  p.intro(pc.cyan('Stopping StarLab'))
   try {
     dockerComposeDown(config.installDir)
-    p.log.success('LearnHouse stopped.')
+    p.log.success('StarLab stopped.')
   } catch {
     p.log.error('Failed to stop services. Check Docker output above.')
     process.exit(1)

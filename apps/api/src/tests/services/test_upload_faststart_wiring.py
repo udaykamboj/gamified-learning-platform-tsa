@@ -32,7 +32,7 @@ async def test_filesystem_upload_invokes_faststart(monkeypatch, tmp_path):
             content_delivery=SimpleNamespace(type="filesystem")
         )
     )
-    monkeypatch.setattr(upload_content_mod, "get_learnhouse_config", lambda: cfg)
+    monkeypatch.setattr(upload_content_mod, "get_starlab_config", lambda: cfg)
 
     seen = {}
     monkeypatch.setattr(

@@ -9,17 +9,7 @@ from sqlmodel import Field, SQLModel
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.roles import DashboardPermission, Permission, PermissionsWithOwn, Rights, Role
 from src.db.users import APITokenUser
-from src.security.rbac.rbac import (
-    _get_offer_for_usergroup,
-    authorization_verify_api_token_permissions,
-    authorization_verify_based_on_org_admin_status,
-    authorization_verify_based_on_roles,
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_based_on_roles_and_authorship_or_api_token,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_author,
-    check_usergroup_access,
-)
+from src.security.rbac.rbac import (authorization_verify_api_token_permissions, authorization_verify_based_on_org_admin_status, authorization_verify_based_on_roles, authorization_verify_based_on_roles_and_authorship, authorization_verify_based_on_roles_and_authorship_or_api_token, authorization_verify_if_element_is_public, authorization_verify_if_user_is_author)
 
 
 def _result(*, first=None, all=None):
@@ -158,75 +148,7 @@ def _role_with_object_rights() -> Role:
 
 
 class TestRBACRuntime:
-    @pytest.mark.asyncio
-    async def test_get_offer_for_usergroup_returns_offer_metadata(self):
-        offer = SimpleNamespace(id=12, name="Pro", amount=19.0, currency="USD")
-        session = _session_with_results(_result(first=offer))
 
-        with patch.dict(sys.modules, {"ee.db.payments.payments_offers": _fake_payments_module}):
-            result = await _get_offer_for_usergroup(7, session)
-
-        assert result == {
-            "offer_id": 12,
-            "offer_name": "Pro",
-            "amount": 19.0,
-            "currency": "USD",
-        }
-
-    @pytest.mark.asyncio
-    async def test_get_offer_for_usergroup_returns_none_on_exception(self):
-        session = AsyncMock()
-        session.execute.side_effect = RuntimeError("db failure")
-
-        result = await _get_offer_for_usergroup(7, session)
-
-        assert result is None
-
-    @pytest.mark.asyncio
-    async def test_check_usergroup_access_allows_open_resource(self):
-        session = _session_with_results(_result(all=[]))
-
-        assert await check_usergroup_access("course_1", 99, session) is True
-
-    @pytest.mark.asyncio
-    async def test_check_usergroup_access_allows_member(self):
-        session = _session_with_results(
-            _result(all=[SimpleNamespace(usergroup_id=1)]),
-            _result(first=SimpleNamespace(usergroup_id=1)),
-        )
-
-        assert await check_usergroup_access("course_1", 99, session) is True
-
-    @pytest.mark.asyncio
-    async def test_check_usergroup_access_denies_non_member_without_offer(self):
-        session = _session_with_results(
-            _result(all=[SimpleNamespace(usergroup_id=1)]),
-            _result(first=None),
-            _result(first=None),
-        )
-
-        assert await check_usergroup_access("course_1", 99, session) is False
-
-    @pytest.mark.asyncio
-    async def test_check_usergroup_access_raises_payment_required_for_paid_group(self):
-        session = _session_with_results(
-            _result(all=[SimpleNamespace(usergroup_id=1)]),
-            _result(first=None),
-            _result(first=SimpleNamespace(id=77, name="VIP", amount=49.0, currency="EUR")),
-        )
-
-        with patch.dict(sys.modules, {"ee.db.payments.payments_offers": _fake_payments_module}):
-            with pytest.raises(HTTPException) as exc_info:
-                await check_usergroup_access("course_1", 99, session)
-
-        assert exc_info.value.status_code == 402
-        assert exc_info.value.detail == {
-            "code": "PAYMENT_REQUIRED",
-            "offer_id": 77,
-            "offer_name": "VIP",
-            "amount": 49.0,
-            "currency": "EUR",
-        }
 
     @pytest.mark.asyncio
     async def test_authorization_verify_if_element_is_public_covers_podcast_and_folder_failures(self):

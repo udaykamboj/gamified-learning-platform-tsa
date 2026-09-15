@@ -2,7 +2,7 @@ import { execSync, spawnSync } from 'node:child_process'
 import os from 'node:os'
 import path from 'node:path'
 
-const CLI_PATH = path.resolve(__dirname, '..', 'dist', 'bin', 'learnhouse.js')
+const CLI_PATH = path.resolve(__dirname, '..', 'dist', 'bin', 'starlab.js')
 
 export interface CliResult {
   stdout: string
@@ -42,7 +42,7 @@ export function cliWithHome(home: string, args: string, timeoutMs = 120_000): Cl
   }
 }
 
-/** Returns the image string of a running container (e.g. "ghcr.io/learnhouse/app:1.2.6") */
+/** Returns the image string of a running container (e.g. "ghcr.io/starlab/app:1.2.6") */
 export function getContainerImage(containerName: string): string {
   const r = spawnSync('docker', ['inspect', '--format', '{{.Config.Image}}', containerName], {
     encoding: 'utf-8',

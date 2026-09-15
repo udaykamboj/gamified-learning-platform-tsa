@@ -1,5 +1,5 @@
 """
-Shared test fixtures for the LearnHouse API test suite.
+Shared test fixtures for the StarLab API test suite.
 
 Provides reusable fixtures for database, models, users, RBAC bypass,
 and httpx AsyncClient for router tests. All integration tests use an
@@ -20,24 +20,24 @@ os.environ["TESTING"] = "true"
 # Unpinned, get_deployment_mode() resolves against the filesystem: 'oss' in CI
 # (no ee/ checkout) but potentially 'ee' on a developer machine with the
 # apps/api/ee symlink. That divergence hides EE-gating regressions locally.
-# Going through LEARNHOUSE_DISABLE_EE rather than patching
+# Going through STARLAB_DISABLE_EE rather than patching
 # get_deployment_mode is deliberate — several modules import that symbol at
 # load time, so a patch would reach only the lazy importers and leave the
 # suite split-brained, silently relaxing the SaaS plan gates that key off the
 # same function. Tests that need 'saas' or 'ee' patch it explicitly.
-os.environ["LEARNHOUSE_DISABLE_EE"] = "1"
+os.environ["STARLAB_DISABLE_EE"] = "1"
 
 # Pin the demo organization off for the whole suite.
 #
 # config.py calls load_dotenv() while parsing, so a developer running the local
-# demo stack has LEARNHOUSE_DEMO_ENABLED=1 in apps/api/.env and it leaks into
+# demo stack has STARLAB_DEMO_ENABLED=1 in apps/api/.env and it leaks into
 # the test process — the demo scheduler then starts a background task, and
 # tests that assert on the application's task lifecycle fail on that machine
 # and nowhere else. Tests that need the feature on enable it themselves.
-os.environ["LEARNHOUSE_DEMO_ENABLED"] = "0"
+os.environ["STARLAB_DEMO_ENABLED"] = "0"
 
 # Set a valid JWT secret key for tests (must be at least 32 characters)
-os.environ["LEARNHOUSE_AUTH_JWT_SECRET_KEY"] = (
+os.environ["STARLAB_AUTH_JWT_SECRET_KEY"] = (
     "test-secret-key-for-unit-tests-32chars!"
 )
 
@@ -54,11 +54,14 @@ from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.requests import Request
 
+from src.db.boards import Board, BoardMember
+from src.db.communities.communities import Community
 from src.db.courses.activities import (
     Activity,
     ActivitySubTypeEnum,
     ActivityTypeEnum,
 )
+from src.db.courses.assignments import Assignment, AssignmentTask
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
@@ -66,6 +69,7 @@ from src.db.courses.courses import Course
 from src.db.folders.folders import Folder
 from src.db.folders.folder_content import FolderContent
 from src.db.organizations import Organization
+from src.db.playgrounds import Playground, PlaygroundShare
 from src.db.roles import (
     DashboardPermission,
     Permission,

@@ -1,7 +1,7 @@
 /**
  * Playwright global setup.
  *
- * Boots a real LearnHouse self-host using the LearnHouse CLI (`setup --ci`,
+ * Boots a real StarLab self-host using the StarLab CLI (`setup --ci`,
  * pulling the published image) unless we've been pointed at an already-running
  * instance via E2E_BASE_URL / E2E_SKIP_BOOT. Then it waits until the API
  * health endpoint and the bootstrapped organization are both reachable before
@@ -57,7 +57,7 @@ async function waitForOk(url: string, timeoutMs: number, label: string): Promise
 }
 
 function bootSelfHost(): void {
-  console.log(`Booting LearnHouse self-host via CLI (install "${INSTALL_NAME}")…`)
+  console.log(`Booting StarLab self-host via CLI (install "${INSTALL_NAME}")…`)
   const cmd = [
     CLI,
     'setup',
@@ -96,7 +96,7 @@ export default async function globalSetup(): Promise<void> {
 
   await waitForOk(`${API_URL}/health`, SKIP_BOOT ? 60_000 : BOOT_TIMEOUT_MS, 'API health')
   await waitForOk(`${API_URL}/orgs/slug/${ORG_SLUG}`, 60_000, `org "${ORG_SLUG}"`)
-  console.log(`LearnHouse is ready at ${BASE_URL}. Admin: ${ADMIN_EMAIL}`)
+  console.log(`StarLab is ready at ${BASE_URL}. Admin: ${ADMIN_EMAIL}`)
 
   await generateSharedAuth()
 }

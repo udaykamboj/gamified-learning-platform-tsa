@@ -12,7 +12,7 @@ vi.mock('node:child_process', async () => {
     ...actual,
     execSync: vi.fn((cmd: string) => {
       if (typeof cmd === 'string' && cmd.includes('docker ps')) {
-        return Buffer.from('learnhouse-app-dep1\tUp 2 hours\tghcr.io/learnhouse/app:1.4.2\n')
+        return Buffer.from('starlab-app-dep1\tUp 2 hours\tghcr.io/starlab/app:1.4.2\n')
       }
       if (typeof cmd === 'string' && cmd.includes('State.Running')) return Buffer.from('true')
       return Buffer.from('')
@@ -45,14 +45,14 @@ describe('doctor — DNS resolution check', () => {
 
   beforeEach(() => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-dns-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'learn.example.com', httpPort: 443,
       useHttps: true, autoSsl: true, useExternalDb: false, orgSlug: 'default',
     }))
-    fs.writeFileSync(path.join(installDir, '.env'), 'LEARNHOUSE_DOMAIN=learn.example.com\n')
+    fs.writeFileSync(path.join(installDir, '.env'), 'STARLAB_DOMAIN=learn.example.com\n')
     origHome = process.env.HOME
     process.env.HOME = home
     vi.spyOn(process, 'exit').mockImplementation(((c?: number) => { throw new Error(`exit ${c}`) }) as never)

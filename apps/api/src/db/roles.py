@@ -39,7 +39,6 @@ class DashboardPermission(BaseModel):
 class Rights(BaseModel):
     courses: PermissionsWithOwn
     users: Permission
-    usergroups : Permission
     folders: Permission = Permission(
         action_create=False,
         action_read=True,
@@ -95,7 +94,7 @@ class Rights(BaseModel):
 
 
 class RoleTypeEnum(str, Enum):
-    TYPE_ORGANIZATION = "TYPE_ORGANIZATION"  # Organization roles are associated with an organization, they are used to define the rights of a user in an organization
+    TYPE_ORGANIZATION = "TYPE_ORGANIZATION"  # Legacy custom org roles; retired by retire_teacher_roles, never created
     TYPE_ORGANIZATION_API_TOKEN = "TYPE_ORGANIZATION_API_TOKEN"  # Organization API Token roles are associated with an organization, they are used to define the rights of an API Token in an organization
     TYPE_GLOBAL = "TYPE_GLOBAL"  # Global roles are not associated with an organization, they are used to define the default rights of a user
 
@@ -130,12 +129,3 @@ class RoleRead(RoleBase):
     update_date: str
 
 
-class RoleCreate(RoleBase):
-    org_id: Optional[int] = Field(default=None, foreign_key="organization.id")
-
-
-class RoleUpdate(SQLModel):
-    role_id: int = Field(default=None, foreign_key="role.id")
-    name: Optional[str] = None
-    description: Optional[str] = None
-    rights: Optional[Union[Rights, dict]] = Field(default_factory=dict, sa_column=Column(JSON))

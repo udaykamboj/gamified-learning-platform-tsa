@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
 import { removeCourse, startCourse } from '@services/courses/activity'
-import { revalidateTags, asArray } from '@services/utils/ts/requests'
+import { asArray } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getOffersByResource } from '@services/payments/offers'
-import { UserPen, ClockIcon, ArrowRight, BookOpen, UserPlus } from 'lucide-react'
+import { ArrowRight, BookOpen, UserPlus } from 'lucide-react'
 import { OfferCard } from './OfferCard'
-import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
-import { useContributorStatus } from '../../../../hooks/useContributorStatus'
 import CourseProgress from '../CourseProgress/CourseProgress'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useOrg, useOrgMembership } from '@components/Contexts/OrgContext'
@@ -41,7 +39,6 @@ interface Course {
       activity_type: string
     }>
   }>
-  open_to_contributors?: boolean
 }
 
 interface CourseActionsProps {
@@ -58,8 +55,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   const router = useRouter()
   const session = useLHSession() as any
   const [isActionLoading, setIsActionLoading] = useState(false)
-  const [isContributeLoading, setIsContributeLoading] = useState(false)
-  const { contributorStatus, refetch } = useContributorStatus(courseuuid)
   const [isProgressOpen, setIsProgressOpen] = useState(false)
   const org = useOrg() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
@@ -113,6 +108,8 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
         if (org?.id) queryClient.invalidateQueries({ queryKey: queryKeys.trail.org(org.id) })
         track(AnalyticsEvent.CourseLeft, { course_uuid: cleanCourseUuid })
         toast.success(t('courses.leave_course_success'), { id: loadingToast })
+        // Lesson content locks again once the student leaves the course.
+        router.refresh()
       } else {
         await startCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
         if (org?.id) queryClient.invalidateQueries({ queryKey: queryKeys.trail.org(org.id) })
@@ -122,6 +119,8 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           has_offers: linkedOffers.length > 0,
         })
         toast.success(t('courses.start_course_success'), { id: loadingToast })
+        // Enrolling unlocks the course's lessons, practice and tests.
+        router.refresh()
 
         // Get the first activity from the first chapter
         const firstChapter = course.chapters?.[0]
@@ -148,33 +147,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     }
   }
 
-  const handleApplyToContribute = async () => {
-    if (!session.data?.user) {
-      router.push(getUriWithOrg(orgslug, '/signup'))
-      return
-    }
-
-    setIsContributeLoading(true)
-    const loadingToast = toast.loading(t('courses.submitting_contributor_application'))
-
-    try {
-      const data = {
-        message: "I would like to contribute to this course."
-      }
-
-      await applyForContributor('course_' + courseuuid, data, session.data?.tokens?.access_token)
-      await revalidateTags(['courses'], orgslug)
-      await refetch()
-      track(AnalyticsEvent.ContributorApplicationSubmitted, { course_uuid: cleanCourseUuid })
-      toast.success(t('courses.contributor_application_success'), { id: loadingToast })
-    } catch (error) {
-      console.error('Failed to apply as contributor:', error)
-      toast.error(t('courses.contributor_application_error'), { id: loadingToast })
-    } finally {
-      setIsContributeLoading(false)
-    }
-  }
-
   const renderActionButton = (action: 'start' | 'leave') => {
     if (!session.data?.user) {
       return (
@@ -198,61 +170,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
         <span>{action === 'start' ? t('courses.start_course') : t('courses.leave_course')}</span>
         <ArrowRight className="w-5 h-5" />
       </>
-    );
-  };
-
-  const renderContributorButton = () => {
-    if (contributorStatus === 'INACTIVE' || course.open_to_contributors !== true) {
-      return null;
-    }
-
-    if (!session.data?.user) {
-      return (
-        <button
-          onClick={() => router.push(getUriWithOrg(orgslug, '/signup'))}
-          aria-label={t('auth.sign_up_to_contribute')}
-          className="w-full bg-white text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer"
-        >
-          <UserPen className="w-5 h-5" />
-          {t('auth.authenticate_to_contribute')}
-        </button>
-      );
-    }
-
-    if (contributorStatus === 'ACTIVE') {
-      return (
-        <div className="w-full bg-green-50 text-green-700 border border-green-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
-          <UserPen className="w-5 h-5" />
-          {t('courses.you_are_contributor')}
-        </div>
-      );
-    }
-
-    if (contributorStatus === 'PENDING') {
-      return (
-        <div className="w-full bg-amber-50 text-amber-700 border border-amber-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
-          <ClockIcon className="w-5 h-5" />
-          {t('courses.contributor_application_pending')}
-        </div>
-      );
-    }
-
-    return (
-      <button
-        onClick={handleApplyToContribute}
-        disabled={isContributeLoading}
-        aria-label={t('courses.apply_to_contribute')}
-        className="w-full bg-white text-neutral-700 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer disabled:cursor-not-allowed"
-      >
-        {isContributeLoading ? (
-          <div className="w-5 h-5 border-2 border-neutral-700 border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <>
-            <UserPen className="w-5 h-5" />
-            {t('courses.apply_to_contribute')}
-          </>
-        )}
-      </button>
     );
   };
 
@@ -437,7 +354,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                 : renderActionButton('leave')
               }
             </button>
-            {renderContributorButton()}
           </div>
         </div>
       )
@@ -454,7 +370,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
         {linkedOffers.map((offer: any) => (
           <OfferCard key={offer.offer_id} offer={offer} orgslug={orgslug} />
         ))}
-        {renderContributorButton()}
       </div>
     )
   }
@@ -483,8 +398,6 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           )}
         </button>
 
-        {/* Contributor Button */}
-        {renderContributorButton()}
 
         {/* Course Progress Modal */}
         <CourseProgress

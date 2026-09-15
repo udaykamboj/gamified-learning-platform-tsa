@@ -2,7 +2,6 @@ import json
 import logging
 from datetime import datetime
 from typing import Literal, Optional
-from uuid import uuid4
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.organization_config import (
@@ -18,7 +17,6 @@ from src.db.users import AnonymousUser, APITokenUser, InternalUser, PublicUser
 from src.db.user_organizations import UserOrganization
 from src.db.organizations import (
     Organization,
-    OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
@@ -26,7 +24,6 @@ from fastapi import HTTPException, UploadFile, status, Request
 
 from src.services.orgs.uploads import upload_org_logo, upload_org_preview, upload_org_thumbnail, upload_org_landing_content, upload_org_auth_background, upload_org_og_image, upload_org_favicon
 from src.db.organization_config import AuthBrandingConfig, SeoOrgConfig
-from src.core.ee_hooks import is_multi_org_allowed
 from src.services.webhooks.dispatch import dispatch_webhooks
 
 
@@ -143,292 +140,6 @@ async def get_organization_by_slug(
 
     return org_read
 
-
-# Free-plan organizations a single user may own (as admin) before an upgrade is
-# required. Users who already pay for at least one org are exempt.
-MAX_FREE_ORGS = 3
-
-
-async def _enforce_free_org_cap(
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-) -> None:
-    """Block a free-tier user from owning more than MAX_FREE_ORGS organizations.
-
-    Only orgs where the user is admin count toward the cap. A user with at least
-    one paid organization is exempt (a customer, not free-tier).
-
-    The shared demo organization is excluded. Visitors are joined to it as
-    admin, so without this filter simply looking at the demo would consume one
-    of a user's three free slots — and a user who looked at it three times over
-    could not create a real organization at all.
-    """
-    admin_org_ids = (
-        await db_session.execute(
-            select(UserOrganization.org_id)
-            .join(Organization, Organization.id == UserOrganization.org_id)
-            .where(
-                UserOrganization.user_id == int(current_user.id),
-                UserOrganization.role_id == ADMIN_ROLE_ID,
-                Organization.is_demo.is_(False),
-            )
-        )
-    ).scalars().all()
-    if len(admin_org_ids) < MAX_FREE_ORGS:
-        return
-
-    configs = (
-        await db_session.execute(
-            select(OrganizationConfig.config).where(
-                OrganizationConfig.org_id.in_(admin_org_ids)
-            )
-        )
-    ).scalars().all()
-
-    def _plan_of(cfg: dict | None) -> str:
-        cfg = cfg or {}
-        return cfg.get("plan") or (cfg.get("cloud") or {}).get("plan") or "free"
-
-    if any(_plan_of(c) not in ("free", "oss", None) for c in configs):
-        return
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail=(
-            f"Free plan is limited to {MAX_FREE_ORGS} organizations. "
-            "Upgrade an organization to create more."
-        ),
-    )
-
-
-async def _try_send_org_created(request: Request, org, current_user, db_session) -> None:
-    """Best-effort welcome email to the org creator (never fails the create).
-
-    The CTA lands on the new org's own dashboard, on the org's host. It used to
-    point at `{request-host}/home`, which is wrong twice over: orgs are created
-    from the platform apex, so the host was the apex rather than the new org,
-    and `/home` is the org picker on every host — the creator was sent to a list
-    of organizations instead of into the one they had just made.
-    """
-    try:
-        email = getattr(current_user, "email", None)
-        if not email:
-            return
-        from src.services.email.utils import get_org_signup_base_url
-        from src.services.users.emails import send_org_created_email
-        base = await get_org_signup_base_url(
-            org.slug, request, db_session=db_session, org_id=org.id
-        )
-        # Deliberately platform-branded: the org was created seconds ago, so it
-        # has no configured sender name yet, and this mail is the platform
-        # confirming an action taken on the platform.
-        send_org_created_email(email, org.name, f"{base.rstrip('/')}/dash")
-    except Exception:
-        logging.exception("send_org_created_email failed")
-
-
-def _try_record_org_admin_in_loops(current_user, org) -> None:
-    """Best-effort: the org creator is now an ADMIN — add them to the Loops
-    marketing audience. Fire-and-forget, SaaS-gated, never fails the create."""
-    try:
-        from src.services.marketing.loops import record_org_admin_in_loops
-        record_org_admin_in_loops(
-            email=getattr(current_user, "email", None),
-            org_slug=getattr(org, "slug", None),
-            first_name=getattr(current_user, "first_name", None),
-            last_name=getattr(current_user, "last_name", None),
-        )
-    except Exception:
-        logging.exception("record_org_admin_in_loops failed")
-
-
-async def create_org(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-):
-    # EE gating: only allow multiple orgs with Enterprise Edition
-    if not is_multi_org_allowed():
-        existing_org = (await db_session.execute(select(Organization).limit(1))).scalars().first()
-        if existing_org is not None:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Multi-organization mode requires Enterprise Edition",
-            )
-
-    statement = select(Organization).where(Organization.slug == org_object.slug)
-    org = (await db_session.execute(statement)).scalars().first()
-
-    if org:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"The slug '{org_object.slug}' is already taken. Please choose a different slug.",
-        )
-
-    org = Organization.model_validate(org_object)
-
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You should be logged in to be able to achieve this action",
-        )
-
-    await _enforce_free_org_cap(current_user, db_session)
-
-    # Complete the org object
-    org.org_uuid = f"org_{uuid4()}"
-    org.creation_date = str(datetime.now())
-    org.update_date = str(datetime.now())
-
-    db_session.add(org)
-    await db_session.commit()
-    await db_session.refresh(org)
-
-    # Link user to org
-    user_org = UserOrganization(
-        user_id=int(current_user.id),
-        org_id=int(org.id if org.id else 0),
-        role_id=1,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(user_org)
-    await db_session.commit()
-    await db_session.refresh(user_org)
-
-    # Invalidate session cache so the new org role is picked up immediately
-    from src.routers.users import _invalidate_session_cache
-    _invalidate_session_cache(int(current_user.id))
-
-    from src.db.organization_config import OrganizationConfigV2Base
-    org_config = OrganizationConfigV2Base(
-        config_version="2.0",
-        plan="free",
-    )
-
-    org_config = json.loads(org_config.model_dump_json())
-
-    # OrgSettings
-    org_settings = OrganizationConfig(
-        org_id=int(org.id if org.id else 0),
-        config=org_config,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(org_settings)
-    await db_session.commit()
-    await db_session.refresh(org_settings)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    org_config = (await db_session.execute(statement)).scalars().first()
-
-    if org_config is None:
-        logging.warning(f"Organization {org.id} has no config")
-
-    # Reuse the shared builder so the create response carries resolved_features,
-    # matching the GET org endpoints (and the None-config case is handled).
-    org_read = _build_org_read_with_resolved(org, org_config)
-    await _try_send_org_created(request, org, current_user, db_session)
-    _try_record_org_admin_in_loops(current_user, org)
-    return org_read
-
-
-async def create_org_with_config(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: AsyncSession,
-    submitted_config: dict | OrganizationConfigBase,
-):
-    # EE gating: only allow multiple orgs with Enterprise Edition
-    if not is_multi_org_allowed():
-        existing_org = (await db_session.execute(select(Organization).limit(1))).scalars().first()
-        if existing_org is not None:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Multi-organization mode requires Enterprise Edition",
-            )
-
-    statement = select(Organization).where(Organization.slug == org_object.slug)
-    org = (await db_session.execute(statement)).scalars().first()
-
-    if org:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"The slug '{org_object.slug}' is already taken. Please choose a different slug.",
-        )
-
-    org = Organization.model_validate(org_object)
-
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You should be logged in to be able to achieve this action",
-        )
-
-    await _enforce_free_org_cap(current_user, db_session)
-
-    # Complete the org object
-    org.org_uuid = f"org_{uuid4()}"
-    org.creation_date = str(datetime.now())
-    org.update_date = str(datetime.now())
-
-    db_session.add(org)
-    await db_session.commit()
-    await db_session.refresh(org)
-
-    # Link user to org
-    user_org = UserOrganization(
-        user_id=int(current_user.id),
-        org_id=int(org.id if org.id else 0),
-        role_id=1,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(user_org)
-    await db_session.commit()
-    await db_session.refresh(user_org)
-
-    # Invalidate session cache so the new org role is picked up immediately
-    from src.routers.users import _invalidate_session_cache
-    _invalidate_session_cache(int(current_user.id))
-
-    # Support both dict (v2) and Pydantic model (v1) inputs
-    if isinstance(submitted_config, dict):
-        org_config = submitted_config
-    else:
-        org_config = json.loads(submitted_config.model_dump_json())
-
-    # OrgSettings
-    org_settings = OrganizationConfig(
-        org_id=int(org.id if org.id else 0),
-        config=org_config,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-
-    db_session.add(org_settings)
-    await db_session.commit()
-    await db_session.refresh(org_settings)
-
-    # Get org config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    org_config = (await db_session.execute(statement)).scalars().first()
-
-    if org_config is None:
-        logging.warning(f"Organization {org.id} has no config")
-
-    # Reuse the shared builder so the create response carries resolved_features,
-    # matching the GET org endpoints (and the None-config case is handled).
-    org_read = _build_org_read_with_resolved(org, org_config)
-    await _try_send_org_created(request, org, current_user, db_session)
-    _try_record_org_admin_in_loops(current_user, org)
-    return org_read
 
 
 async def update_org(
@@ -2063,3 +1774,4 @@ async def rbac_check(
 
 
 ## 🔒 RBAC Utils ##
+

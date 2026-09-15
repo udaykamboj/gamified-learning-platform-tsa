@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────────────
-# LearnHouse — Install Script (macOS & Linux)
+# StarLab — Install Script (macOS & Linux)
 # Installs Docker and Node.js if missing, then runs the CLI.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.sh | bash
 # ─────────────────────────────────────────────────────────────
 
 BOLD="\033[1m"
@@ -67,7 +67,7 @@ if [ "$PLATFORM" = "linux" ]; then
 fi
 
 echo ""
-echo -e "${BOLD}LearnHouse Installer${RESET}"
+echo -e "${BOLD}StarLab Installer${RESET}"
 echo -e "${DIM}Platform: $PLATFORM ($ARCH)${RESET}"
 echo ""
 
@@ -109,7 +109,7 @@ else
       echo -e "${DIM}  Open Docker from Applications or run: open -a Docker${RESET}"
       echo ""
       echo -e "${DIM}  After Docker is running, re-run:${RESET}"
-      echo -e "${DIM}  npx learnhouse${RESET}"
+      echo -e "${DIM}  npx starlab${RESET}"
       exit 0
     fi
 
@@ -293,14 +293,14 @@ fi
 echo ""
 echo -e "${GREEN}${BOLD}All dependencies are ready!${RESET}"
 echo ""
-echo -e "${CYAN}Launching LearnHouse setup...${RESET}"
+echo -e "${CYAN}Launching StarLab setup...${RESET}"
 echo ""
 
 # Build the launch command — reattach stdin from /dev/tty when piped from curl
 if [ ! -t 0 ]; then
-  LAUNCH_CMD="npx learnhouse@latest setup </dev/tty"
+  LAUNCH_CMD="npx starlab@latest setup </dev/tty"
 else
-  LAUNCH_CMD="npx learnhouse@latest setup"
+  LAUNCH_CMD="npx starlab@latest setup"
 fi
 
 # If we just added the user to the docker group, use sg to pick up the new

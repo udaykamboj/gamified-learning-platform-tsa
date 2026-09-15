@@ -5,14 +5,14 @@ import { Callout } from 'nextra/components'
 The `dev` command starts a full local development environment with hot reload for all services.
 
 ```bash
-npx learnhouse dev
+npx starlab dev
 ```
 
 ## How It Works
 
 The command splits infrastructure and application services:
 
-- **Infrastructure** (Docker): PostgreSQL with pgvector + Redis run in containers via `.learnhouse/docker-compose.dev.yml`
+- **Infrastructure** (Docker): PostgreSQL with pgvector + Redis run in containers via `.starlab/docker-compose.dev.yml`
 - **Application** (local): API, Web, and Collab servers run directly on your machine with hot reload
 
 ## Requirements
@@ -59,7 +59,7 @@ While running, you can type commands to manage services:
 Use the `--ee` flag to enable Enterprise Edition features:
 
 ```bash
-npx learnhouse dev --ee
+npx starlab dev --ee
 ```
 
 Without the flag, the `apps/api/ee/` directory is temporarily hidden during development.
@@ -73,7 +73,7 @@ When you quit (`q` or Ctrl+C):
 - To fully stop infrastructure:
 
 ```bash
-docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
+docker compose -f .starlab/docker-compose.dev.yml -p starlab-dev down
 ```
 
 <Callout type="info">

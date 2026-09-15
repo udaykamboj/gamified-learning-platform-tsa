@@ -21,15 +21,10 @@ from src.db.organization_config import OrganizationConfig
 from src.db.user_organizations import UserOrganization
 from src.db.users import PublicUser, User
 from src.services.ai import ai as ai_service
-from src.services.ai import editor as editor_service
 from src.services.ai.rag import content_extraction
 from src.services.ai.schemas.ai import (
     SendActivityAIChatMessage,
     StartActivityAIChatSession,
-)
-from src.services.ai.schemas.editor import (
-    SendEditorAIChatMessage,
-    StartEditorAIChatSession,
 )
 from src.security.rbac import AccessAction
 
@@ -302,133 +297,6 @@ class TestActivityChatAuthorization:
 # ---------------------------------------------------------------------------
 
 
-class TestEditorAIAuthorization:
-    async def test_outsider_cannot_spend_org_credits(
-        self, db, org, course, activity, mock_request, outsider_user
-    ):
-        chat_obj = StartEditorAIChatSession(
-            activity_uuid="activity_test",
-            message="rewrite this",
-            current_content={"type": "doc", "content": []},
-        )
-
-        with patch.object(
-            editor_service, "reserve_ai_credit", new_callable=AsyncMock
-        ) as reserve, patch(
-            RATE_LIMIT_PATH
-        ) as rate_limit, patch.object(
-            editor_service, "check_resource_access", new_callable=AsyncMock
-        ):
-            with pytest.raises(HTTPException) as exc:
-                await editor_service.editor_ai_start_chat_session_stream(
-                    chat_obj, outsider_user, db, mock_request
-                )
-
-        assert exc.value.status_code == 403
-        reserve.assert_not_called()
-        rate_limit.assert_not_called()
-
-    async def test_outsider_blocked_on_editor_send(
-        self, db, org, course, activity, mock_request, outsider_user
-    ):
-        chat_obj = SendEditorAIChatMessage(
-            aichat_uuid="chat_1",
-            activity_uuid="activity_test",
-            message="rewrite this",
-            current_content={"type": "doc", "content": []},
-        )
-
-        with patch.object(
-            editor_service, "reserve_ai_credit", new_callable=AsyncMock
-        ) as reserve, patch(
-            RATE_LIMIT_PATH
-        ), patch.object(
-            editor_service, "check_resource_access", new_callable=AsyncMock
-        ):
-            with pytest.raises(HTTPException) as exc:
-                await editor_service.editor_ai_send_message_stream(
-                    chat_obj, outsider_user, db, mock_request
-                )
-
-        assert exc.value.status_code == 403
-        reserve.assert_not_called()
-
-    async def test_member_editor_session_succeeds_and_checks_update_rights(
-        self, db, org, course, activity, mock_request, admin_user
-    ):
-        chat_obj = StartEditorAIChatSession(
-            activity_uuid="activity_test",
-            message="rewrite this",
-            current_content={
-                "type": "doc",
-                "content": [
-                    {
-                        "type": "heading",
-                        "attrs": {"level": 2},
-                        "content": [{"type": "text", "text": "Intro"}],
-                    }
-                ],
-            },
-        )
-
-        with patch.object(
-            editor_service, "reserve_ai_credit", new_callable=AsyncMock
-        ) as reserve, patch(
-            RATE_LIMIT_PATH
-        ), patch.object(
-            editor_service, "check_resource_access", new_callable=AsyncMock
-        ) as rbac, patch.object(
-            editor_service, "model_for_tier", return_value="test-model"
-        ), patch.object(
-            editor_service,
-            "get_chat_session_history",
-            return_value={"aichat_uuid": "chat_1", "message_history": []},
-        ):
-            context = await editor_service.editor_ai_start_chat_session_stream(
-                chat_obj, admin_user, db, mock_request
-            )
-
-        assert context["ai_model"] == "test-model"
-        assert "## Intro" in context["ai_friendly_text"]
-        reserve.assert_awaited_once()
-        # Editing is an authoring action -> UPDATE on the owning course.
-        assert rbac.await_args.args[3] == "course_test"
-        assert rbac.await_args.args[4] == AccessAction.UPDATE
-
-    async def test_member_editor_send_without_request_skips_resource_check(
-        self, db, org, course, activity, admin_user
-    ):
-        """The router does not forward the Request yet; the org gate still runs."""
-        chat_obj = SendEditorAIChatMessage(
-            aichat_uuid="chat_1",
-            activity_uuid="activity_test",
-            message="rewrite this",
-            current_content={"type": "doc", "content": []},
-            selected_text="some selection",
-        )
-
-        with patch.object(
-            editor_service, "reserve_ai_credit", new_callable=AsyncMock
-        ) as reserve, patch(
-            RATE_LIMIT_PATH
-        ), patch.object(
-            editor_service, "check_resource_access", new_callable=AsyncMock
-        ) as rbac, patch.object(
-            editor_service, "model_for_tier", return_value="test-model"
-        ), patch.object(
-            editor_service,
-            "get_chat_session_history",
-            return_value={"aichat_uuid": "chat_1", "message_history": []},
-        ):
-            context = await editor_service.editor_ai_send_message_stream(
-                chat_obj, admin_user, db
-            )
-
-        assert context["selected_text"] == "some selection"
-        reserve.assert_awaited_once()
-        rbac.assert_not_called()
-
-
 # ---------------------------------------------------------------------------
 # F19 — editor TipTap serialization clamp
 # ---------------------------------------------------------------------------
@@ -439,65 +307,6 @@ def _heading_doc(attrs) -> dict:
     if attrs is not ...:
         node["attrs"] = attrs
     return {"type": "doc", "content": [node]}
-
-
-class TestEditorHeadingClamp:
-    @pytest.mark.parametrize(
-        "attrs",
-        [
-            {"level": 5_000_000_000},
-            {"level": -1},
-            {"level": 0},
-            {"level": "3"},
-            {"level": None},
-            {"level": True},
-            {},
-            None,
-            "not-a-dict",
-            ...,
-        ],
-    )
-    def test_malformed_level_is_bounded(self, attrs):
-        out = editor_service._serialize_tiptap_content_to_text(_heading_doc(attrs))
-        assert out.endswith("Title")
-        assert out.count("#") <= editor_service.MAX_HEADING_LEVEL
-
-    @pytest.mark.parametrize("level", [1, 2, 3, 4, 5, 6])
-    def test_valid_levels_render_exact_markers(self, level):
-        out = editor_service._serialize_tiptap_content_to_text(
-            _heading_doc({"level": level})
-        )
-        assert out == "#" * level + " Title"
-
-    def test_huge_level_does_not_allocate(self):
-        out = editor_service._serialize_tiptap_content_to_text(
-            _heading_doc({"level": 5_000_000_000})
-        )
-        assert len(out) < 100
-
-    def test_malformed_blocks_do_not_raise(self):
-        doc = {
-            "type": "doc",
-            "content": [
-                {"type": "codeBlock", "attrs": None, "content": [{"type": "text", "text": "x"}]},
-                {"type": "blockQuiz", "attrs": {"questions": "not-a-list"}},
-                {"type": "blockQuiz", "attrs": {"questions": ["nope", {"answers": "x"}]}},
-                {
-                    "type": "blockQuiz",
-                    "attrs": {
-                        "questions": [
-                            {"question": "Q1", "answers": [None, {"answer": "A1", "correct": True}]}
-                        ]
-                    },
-                },
-                {"type": "flipcard", "attrs": ["bad"]},
-                {"type": "blockLibrary", "attrs": {"snapshot": "bad"}},
-            ],
-        }
-        out = editor_service._serialize_tiptap_content_to_text(doc)
-        assert "[QUIZ] Q1" in out
-        assert "A1 (correct)" in out
-        assert "[LIBRARY RESOURCE]" in out
 
 
 # ---------------------------------------------------------------------------

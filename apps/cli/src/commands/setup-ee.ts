@@ -117,7 +117,7 @@ function readExistingSecrets(installDir: string): Partial<EeSecrets> {
   }
   return {
     dbPassword: get('DB_PASSWORD'),
-    jwtSecret: get('LEARNHOUSE_AUTH_JWT_SECRET_KEY'),
+    jwtSecret: get('STARLAB_AUTH_JWT_SECRET_KEY'),
     collabKey: get('COLLAB_INTERNAL_KEY'),
   }
 }
@@ -257,7 +257,7 @@ async function startEe(config: SetupConfig, interactive: boolean, firstDeploy: b
     })
   } catch (err) {
     const stderr = (err as { stderr?: Buffer })?.stderr?.toString?.() ?? ''
-    const m = `Failed to pull or start the EE stack. Inspect with \`learnhouse logs\` (cd ${dir} && docker compose logs).`
+    const m = `Failed to pull or start the EE stack. Inspect with \`starlab logs\` (cd ${dir} && docker compose logs).`
     if (interactive) { p.log.error(m); if (stderr) p.log.message(pc.dim(stderr.trim().slice(0, 500))) }
     else { console.error(m); if (stderr) console.error(stderr.trim().slice(0, 500)) }
     process.exit(1)
@@ -267,7 +267,7 @@ async function startEe(config: SetupConfig, interactive: boolean, firstDeploy: b
   if (ready === 'ee') {
     interactive ? p.log.success('API is up in EE mode — license active') : console.log('API is up in EE mode — license active')
   } else if (ready === 'oss') {
-    const m = 'API is up but in OSS mode — license not active. Check `learnhouse logs`.'
+    const m = 'API is up but in OSS mode — license not active. Check `starlab logs`.'
     interactive ? p.log.warn(m) : console.warn(m)
   } else {
     const m = 'Could not confirm EE mode within timeout. The stack may still be starting.'
@@ -314,7 +314,7 @@ async function setupEnterpriseCi(options: EeSetupOptions): Promise<void> {
   const installName = options.name || 'default'
   const installDir = options.installDir
     ? path.resolve(options.installDir)
-    : path.join(os.homedir(), '.learnhouse', installName)
+    : path.join(os.homedir(), '.starlab', installName)
   const firstDeploy = !fs.existsSync(path.join(installDir, '.env'))
 
   const config = buildConfig({
@@ -335,7 +335,7 @@ async function setupEnterpriseCi(options: EeSetupOptions): Promise<void> {
   })
 
   const secrets = resolveSecrets(installDir)
-  console.log(`Setting up LearnHouse Enterprise (${tenancy}) in ${installDir}`)
+  console.log(`Setting up StarLab Enterprise (${tenancy}) in ${installDir}`)
   try {
     writeEeFiles(config, secrets)
   } catch (err) {
@@ -405,7 +405,7 @@ async function setupEnterpriseInteractive(options: EeSetupOptions): Promise<void
   const installName = options.name || 'default'
   const installDir = options.installDir
     ? path.resolve(options.installDir)
-    : path.join(os.homedir(), '.learnhouse', installName)
+    : path.join(os.homedir(), '.starlab', installName)
 
   const firstDeploy = !fs.existsSync(path.join(installDir, '.env'))
   if (!firstDeploy) {
@@ -439,7 +439,7 @@ async function setupEnterpriseInteractive(options: EeSetupOptions): Promise<void
   }
   s.stop('Configuration files generated')
 
-  const startNow = exit(await p.confirm({ message: 'Start LearnHouse Enterprise now?', initialValue: true })) as boolean
+  const startNow = exit(await p.confirm({ message: 'Start StarLab Enterprise now?', initialValue: true })) as boolean
   if (!startNow) {
     p.log.info(`Files generated in ${installDir}`)
     p.log.message(`  Start later with: cd ${installDir} && docker compose up -d`)

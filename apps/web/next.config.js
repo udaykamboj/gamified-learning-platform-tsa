@@ -2,6 +2,7 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('common.next').NextConfig} */
 const nextConfig = {
+  devIndicators: false,
   // Required by PostHog's reverse-proxy rewrites below so the trailing-slash
   // handling on /ingest/* doesn't 308-redirect ingestion requests.
   skipTrailingSlashRedirect: true,
@@ -138,7 +139,7 @@ const nextConfig = {
   },
   // Ensure consistent build IDs across multiple pods in Kubernetes
   generateBuildId: async () => {
-    return process.env.BUILD_ID || 'learnhouse-production'
+    return process.env.BUILD_ID || 'starlab-production'
   },
 }
 

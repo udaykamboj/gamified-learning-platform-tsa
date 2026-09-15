@@ -1,3 +1,12 @@
+"""Boards: student-owned collaborative whiteboards.
+
+Any signed-in member creates as many boards as they want. A board is private to
+its owner until they share it with specific people (members: editor/viewer) or
+link it into a community discussion, where readers of that discussion can work
+on it (docs/refactor/progress/00-requirements.md, R13). Nobody else, admins
+included, has access. Access rules live in ``ResourceAccessChecker._check_board_access``.
+"""
+
 from typing import List, Optional
 from uuid import uuid4
 from datetime import datetime
@@ -100,14 +109,15 @@ async def get_boards_by_org(
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
 ) -> List[BoardRead]:
-    # Require org membership before listing boards — prevents unauthenticated
-    # and cross-org enumeration of boards.
-    await require_org_membership(resolve_acting_user_id(current_user), org_id, db_session)
+    """The caller's boards: ones they own or were added to, newest first."""
+    acting_user_id = resolve_acting_user_id(current_user)
+    await require_org_membership(acting_user_id, org_id, db_session)
 
     statement = (
         select(Board)
-        .where(Board.org_id == org_id)
-        .order_by(Board.creation_date.desc())
+        .join(BoardMember, BoardMember.board_id == Board.id)
+        .where(Board.org_id == org_id, BoardMember.user_id == acting_user_id)
+        .order_by(Board.update_date.desc())
     )
     boards = (await db_session.execute(statement)).scalars().all()
     if not boards:
@@ -230,6 +240,14 @@ async def add_board_member(
     # `role` as a bare str, so without this an arbitrary string (or a second
     # "owner") could be persisted, corrupting role-based access logic.
     role = _validate_member_role(member_object.role)
+    if role == BoardMemberRole.OWNER:
+        raise HTTPException(status_code=400, detail="A board has one owner")
+
+    # Students share with people they know by username or email.
+    if member_object.user_id is None:
+        member_object.user_id = await _resolve_member_identifier(
+            member_object.identifier, board.org_id, db_session
+        )
 
     # Ensure the target user actually belongs to this board's organization.
     # Otherwise a board manager could add users from *other* organizations,
@@ -301,6 +319,12 @@ async def add_board_members_batch(
         # Validate role and ensure the user belongs to this board's org
         # (prevents cross-tenant member additions and invalid/escalated roles).
         role = _validate_member_role(member_create.role)
+        if role == BoardMemberRole.OWNER:
+            raise HTTPException(status_code=400, detail="A board has one owner")
+        if member_create.user_id is None:
+            member_create.user_id = await _resolve_member_identifier(
+                member_create.identifier, board.org_id, db_session
+            )
         await require_org_membership(member_create.user_id, board.org_id, db_session)
 
         # Skip duplicates silently
@@ -336,7 +360,9 @@ async def remove_board_member(
     db_session: AsyncSession,
 ):
     board = await _get_board_or_404(board_uuid, db_session)
-    await check_resource_access(request, db_session, current_user, board.board_uuid, AccessAction.UPDATE)
+    # The owner removes anyone; a member can leave on their own.
+    if resolve_acting_user_id(current_user) != user_id:
+        await check_resource_access(request, db_session, current_user, board.board_uuid, AccessAction.UPDATE)
 
     member = (await db_session.execute(
         select(BoardMember).where(
@@ -389,16 +415,21 @@ async def check_board_membership(
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
 
-    # Not a direct member — fall back to RBAC so public boards, linked usergroups,
-    # resource authors, and org admins can still join the collab session as viewers.
+    # Not a direct member: public boards open as viewers, and readers of a
+    # community discussion the board is linked into work on it as editors.
     await check_resource_access(request, db_session, current_user, board.board_uuid, AccessAction.READ)
+    linked_role = (
+        BoardMemberRole.EDITOR
+        if await is_linked_into_readable_discussion(request, board, current_user, db_session)
+        else BoardMemberRole.VIEWER
+    )
 
     user = (await db_session.execute(select(User).where(User.id == current_user.id))).scalars().first()
     return BoardMemberRead(
         id=0,
         board_id=board.id,
         user_id=current_user.id,
-        role=BoardMemberRole.VIEWER,
+        role=linked_role,
         creation_date="",
         username=user.username if user else None,
         email=user.email if user else None,
@@ -499,6 +530,72 @@ async def store_ydoc_state(
     db_session.add(board)
     await db_session.commit()
     return {"detail": "Ydoc state stored"}
+
+
+async def is_linked_into_readable_discussion(
+    request: Request,
+    board: Board,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> bool:
+    """True if the board is linked into a discussion the caller can read."""
+    if isinstance(current_user, AnonymousUser):
+        return False
+    from src.db.communities.communities import Community
+    from src.db.communities.discussions import Discussion
+    from src.security.rbac import ResourceAccessChecker
+
+    community_uuids = set((await db_session.execute(
+        select(Community.community_uuid)
+        .join(Discussion, Discussion.community_id == Community.id)
+        .where(Discussion.board_uuid == board.board_uuid)
+    )).scalars().all())
+    if not community_uuids:
+        return False
+    checker = ResourceAccessChecker(request, db_session, current_user)
+    for community_uuid in community_uuids:
+        if (await checker.check_access(community_uuid, AccessAction.READ)).allowed:
+            return True
+    return False
+
+
+async def require_board_editor(
+    request: Request,
+    board: Board,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+) -> None:
+    """Owner, editor, or a reader of a discussion the board is linked into."""
+    acting_user_id = resolve_acting_user_id(current_user)
+    member = (await db_session.execute(
+        select(BoardMember).where(
+            BoardMember.board_id == board.id,
+            BoardMember.user_id == acting_user_id,
+        )
+    )).scalars().first()
+    if member and member.role in (BoardMemberRole.OWNER, BoardMemberRole.EDITOR):
+        return
+    if await is_linked_into_readable_discussion(request, board, current_user, db_session):
+        return
+    raise HTTPException(status_code=403, detail="You can't edit this board")
+
+
+async def _resolve_member_identifier(identifier: Optional[str], org_id: int, db_session: AsyncSession) -> int:
+    from sqlmodel import or_
+    from src.db.user_organizations import UserOrganization
+
+    value = (identifier or "").strip().lower()
+    if not value:
+        raise HTTPException(status_code=400, detail="Give a username or email to share with")
+    user_id = (await db_session.execute(
+        select(User.id)
+        .join(UserOrganization, UserOrganization.user_id == User.id)
+        .where(UserOrganization.org_id == org_id)
+        .where(or_(func.lower(User.username) == value, func.lower(User.email) == value))
+    )).scalars().first()
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="No one on the platform has that username or email")
+    return user_id
 
 
 def _validate_member_role(role) -> BoardMemberRole:

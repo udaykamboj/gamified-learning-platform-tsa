@@ -489,8 +489,9 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert result.grade == 0
         assert result.attempt_number == 2
 
+        # Handing in a graded assignment doesn't complete it; passing does.
         await db.refresh(step)
-        assert step.complete is True
+        assert step.complete is False
 
         rows = (await db.execute(
             select(AssignmentUserSubmission).where(
@@ -503,8 +504,11 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert rows[0].assignmentusersubmission_uuid == original_uuid
 
     async def test_rejects_when_existing_row_is_submitted(
-        self, db, regular_user, mock_request, assignment
+        self, db, regular_user, mock_request, assignment, org, course, activity
     ):
+        await _make_trail_artifacts(
+            db, org.id, course.id, activity.id, regular_user.id, complete=False
+        )
         await _make_user_submission(
             db,
             assignment.id,
@@ -525,8 +529,11 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert "already exists" in exc_info.value.detail
 
     async def test_rejects_when_existing_row_is_graded(
-        self, db, regular_user, mock_request, assignment
+        self, db, regular_user, mock_request, assignment, org, course, activity
     ):
+        await _make_trail_artifacts(
+            db, org.id, course.id, activity.id, regular_user.id, complete=False
+        )
         await _make_user_submission(
             db,
             assignment.id,
@@ -557,8 +564,8 @@ class TestCreateAssignmentSubmissionRetryPath:
     ):
         """When no AssignmentUserSubmission row exists yet, the service hits
         the else branch and creates a fresh row with attempt_number=1. The
-        first-submission path also marks the (existing) trail step complete
-        via the new else branch that keeps the reuse path consistent."""
+        existing trail step stays incomplete: a graded assignment completes
+        when an attempt passes, not on hand-in."""
         _, _, step = await _make_trail_artifacts(
             db, org.id, course.id, activity.id, regular_user.id, complete=False
         )
@@ -586,7 +593,7 @@ class TestCreateAssignmentSubmissionRetryPath:
         assert result.attempt_number == 1
 
         await db.refresh(step)
-        assert step.complete is True
+        assert step.complete is False
 
         rows = (await db.execute(
             select(AssignmentUserSubmission).where(

@@ -7,9 +7,6 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import PodcastThumbnail from '@components/Objects/Thumbnails/PodcastThumbnail'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import CreatePodcastModal from '@components/Objects/Modals/Podcast/Create/CreatePodcast'
-import NewPodcastButton from '@components/Objects/StyledElements/Buttons/NewPodcastButton'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
 import { Headphones, Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -32,9 +29,6 @@ export default function PodcastsClient({
   const { t } = useTranslation()
   const allPodcasts = initialPodcasts
   const searchParams = useSearchParams()
-  const isCreatingPodcast = searchParams.get('new') ? true : false
-  const [newPodcastModal, setNewPodcastModal] = useState(isCreatingPodcast)
-  const { isAdmin: isUserAdmin } = useAdminStatus()
 
   useTrackView(
     AnalyticsEvent.PodcastsListViewed,
@@ -68,10 +62,6 @@ export default function PodcastsClient({
     resetPage()
   }, [searchQuery, resetPage])
 
-  async function closeNewPodcastModal() {
-    setNewPodcastModal(false)
-  }
-
   return (
     <FeatureGate feature="podcasts" orgslug={orgslug} context="public">
     <div className="w-full">
@@ -79,32 +69,6 @@ export default function PodcastsClient({
         <div className="flex flex-col space-y-2 mb-2">
           <div className="flex items-center justify-between">
             <TypeOfContentTitle title={t('podcasts.podcasts')} type="pod" />
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              action="create"
-              ressourceType="podcasts"
-              orgId={org_id}
-            >
-              <Modal
-                isDialogOpen={newPodcastModal}
-                onOpenChange={setNewPodcastModal}
-                minHeight="md"
-                minWidth="lg"
-                dialogContent={
-                  <CreatePodcastModal
-                    closeModal={closeNewPodcastModal}
-                    orgslug={orgslug}
-                  />
-                }
-                dialogTitle={t('podcasts.create_podcast')}
-                dialogDescription={t('podcasts.create_new_podcast')}
-                dialogTrigger={
-                  <button>
-                    <NewPodcastButton />
-                  </button>
-                }
-              />
-            </AuthenticatedClientElement>
           </div>
 
           {/* Search */}
@@ -163,26 +127,8 @@ export default function PodcastsClient({
                   {t('podcasts.no_podcasts')}
                 </h1>
                 <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
-                  {isUserAdmin ? (
-                    t('podcasts.create_podcasts_placeholder')
-                  ) : (
-                    t('podcasts.no_podcasts_description')
-                  )}
+                  {t('podcasts.no_podcasts_description')}
                 </p>
-                {isUserAdmin && (
-                  <div className="mt-4">
-                    <AuthenticatedClientElement
-                      action="create"
-                      ressourceType="podcasts"
-                      checkMethod="roles"
-                      orgId={org_id}
-                    >
-                      <button onClick={() => setNewPodcastModal(true)}>
-                        <NewPodcastButton />
-                      </button>
-                    </AuthenticatedClientElement>
-                  </div>
-                )}
               </div>
             )}
           </div>

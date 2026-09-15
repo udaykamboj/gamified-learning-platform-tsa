@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import * as p from '../utils/prompt.js'
 import pc from 'picocolors'
-import type { LearnHouseConfigJson } from '../types.js'
+import type { StarLabConfigJson } from '../types.js'
 import { dockerComposeExec, dockerComposeRun } from '../services/docker.js'
 
 // Shared upgrade helpers used by BOTH the Community and Enterprise update paths:
@@ -18,7 +18,7 @@ export interface UpdateLog {
 
 /** Which container service + alembic working dir + DB layout an edition uses. */
 export interface EditionLayout {
-  appService: string      // compose service running the API (EE: 'api', CE: 'learnhouse-app')
+  appService: string      // compose service running the API (EE: 'api', CE: 'starlab-app')
   alembicCwd: string      // where alembic.ini lives in that image (EE: '/app', CE: '/app/api')
   dbService: string       // in-container Postgres service name ('db' for both)
 }
@@ -44,7 +44,7 @@ export function setEnvVar(installDir: string, key: string, value: string): void 
 
 /** External DB if the .env carries a full connection string (no in-container db). */
 export function isExternalDbInstall(installDir: string): boolean {
-  return !!readEnvVar(installDir, 'LEARNHOUSE_SQL_CONNECTION_STRING')
+  return !!readEnvVar(installDir, 'STARLAB_SQL_CONNECTION_STRING')
 }
 
 function alembic(cwd: string, layout: EditionLayout, args: string): string {
@@ -58,7 +58,7 @@ const PG_CLIENT_IMAGE = 'postgres:17'
 
 /** pg_dump the DB to ./backups before any change. Works for in-container and
  *  external databases (dialed via a client sharing the app's network). */
-export function backupDatabase(config: LearnHouseConfigJson, layout: EditionLayout, ui: UpdateLog): string {
+export function backupDatabase(config: StarLabConfigJson, layout: EditionLayout, ui: UpdateLog): string {
   const dir = config.installDir
   const backupsDir = path.join(dir, 'backups')
   fs.mkdirSync(backupsDir, { recursive: true })
@@ -66,7 +66,7 @@ export function backupDatabase(config: LearnHouseConfigJson, layout: EditionLayo
   const out = path.join(backupsDir, `db-pre-upgrade-${stamp}.sql.gz`)
 
   if (isExternalDbInstall(dir)) {
-    const conn = readEnvVar(dir, 'LEARNHOUSE_SQL_CONNECTION_STRING') || ''
+    const conn = readEnvVar(dir, 'STARLAB_SQL_CONNECTION_STRING') || ''
     // Share the RUNNING app container's network namespace so the dump client
     // reaches the external DB exactly as the app does. This avoids guessing the
     // compose network name (which differs by edition) and inherits the app's
@@ -82,7 +82,7 @@ export function backupDatabase(config: LearnHouseConfigJson, layout: EditionLayo
   } else {
     ui.log('in-container database — pg_dump from the db service')
     execSync(
-      `docker compose exec -T ${layout.dbService} sh -c 'pg_dump -U "$\{POSTGRES_USER:-learnhouse}" "$\{POSTGRES_DB:-learnhouse}"' | gzip > ${JSON.stringify(out)}`,
+      `docker compose exec -T ${layout.dbService} sh -c 'pg_dump -U "$\{POSTGRES_USER:-starlab}" "$\{POSTGRES_DB:-starlab}"' | gzip > ${JSON.stringify(out)}`,
       { cwd: dir, stdio: ['ignore', 'inherit', 'inherit'] },
     )
   }
@@ -181,7 +181,7 @@ export function runAlembicUpgrade(dir: string, layout: EditionLayout, ui: Update
 
 /** Migration heads shipped by the *running* image, read from its migration
  *  scripts alone — no database round-trip. Older images ship an alembic env.py
- *  that ignores LEARNHOUSE_SQL_CONNECTION_STRING and dials localhost, so
+ *  that ignores STARLAB_SQL_CONNECTION_STRING and dials localhost, so
  *  `current` and `stamp` fail inside them, but `heads` still answers, and it is
  *  exactly the revision their create_all schema corresponds to. */
 export function readAlembicHeads(dir: string, layout: EditionLayout): string[] {
@@ -246,7 +246,7 @@ export interface EeUpdateOptions {
   interactive: boolean
 }
 
-export async function updateEnterprise(config: LearnHouseConfigJson, options: EeUpdateOptions): Promise<void> {
+export async function updateEnterprise(config: StarLabConfigJson, options: EeUpdateOptions): Promise<void> {
   const dir = config.installDir
   const ui: UpdateLog = {
     log: (m) => (options.interactive ? p.log.info(m) : console.log(m)),
@@ -257,7 +257,7 @@ export async function updateEnterprise(config: LearnHouseConfigJson, options: Ee
 
   const targetTag = options.version ? options.version.replace(/^v/, '') : 'prod'
   const currentTag = readEnvVar(dir, 'EE_IMAGE_TAG') || 'prod'
-  ui.log(`Upgrading LearnHouse Enterprise: ${pc.dim(currentTag)} → ${pc.cyan(targetTag)}`)
+  ui.log(`Upgrading StarLab Enterprise: ${pc.dim(currentTag)} → ${pc.cyan(targetTag)}`)
 
   if (options.backup !== false) {
     try { ui.ok(`Backup: ${backupDatabase(config, EE_LAYOUT, ui)}`) }
@@ -268,8 +268,8 @@ export async function updateEnterprise(config: LearnHouseConfigJson, options: Ee
 
   ensureAlembicBaseline(dir, EE_LAYOUT, ui)
 
-  const license = readEnvVar(dir, 'LEARNHOUSE_LICENSE_KEY')
-  if (!license) die('LEARNHOUSE_LICENSE_KEY not found in .env — cannot pull EE images.')
+  const license = readEnvVar(dir, 'STARLAB_LICENSE_KEY')
+  if (!license) die('STARLAB_LICENSE_KEY not found in .env — cannot pull EE images.')
   try { dockerLogin(EE_REGISTRY, EE_REGISTRY_USERNAME, license!); ui.ok('Authenticated to the EE registry') }
   catch (err) { die(`registry login failed (license expired?): ${(err as { stderr?: string })?.stderr ?? err}`) }
 
@@ -282,7 +282,7 @@ export async function updateEnterprise(config: LearnHouseConfigJson, options: Ee
   catch (err) { die(`failed to start the upgraded stack: ${(err as Error)?.message ?? err}. Restore from ./backups/ if needed.`) }
 
   const ready = await waitForEeReady(dir)
-  if (ready === 'oss') ui.warn('API came up in OSS mode — license not active. Check `learnhouse logs`.')
+  if (ready === 'oss') ui.warn('API came up in OSS mode — license not active. Check `starlab logs`.')
   else if (ready === 'timeout') ui.warn('Could not confirm EE mode yet; the API may still be starting.')
 
   if (options.migrate !== false) {
@@ -294,6 +294,6 @@ export async function updateEnterprise(config: LearnHouseConfigJson, options: Ee
     ui.warn('Skipped migrations (--no-migrate). Run later: docker compose exec api sh -c "cd /app && uv run alembic upgrade head"')
   }
 
-  ui.ok(`LearnHouse Enterprise upgraded to ${targetTag}.`)
+  ui.ok(`StarLab Enterprise upgraded to ${targetTag}.`)
   ui.log(pc.dim(`  Rollback: EE_IMAGE_TAG=${currentTag} in ${dir}/.env, restore ./backups/, docker compose up -d`))
 }

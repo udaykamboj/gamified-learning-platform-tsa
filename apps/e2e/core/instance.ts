@@ -2,7 +2,7 @@
  * Shared configuration for the E2E suite.
  *
  * Everything is overridable via env so the same specs can run against:
- *  - a self-host the suite boots itself via the LearnHouse CLI (default), or
+ *  - a self-host the suite boots itself via the StarLab CLI (default), or
  *  - an already-running instance (set E2E_BASE_URL to skip the boot).
  */
 
@@ -25,11 +25,11 @@ export const ORG_SLUG = process.env.E2E_ORG_SLUG || 'default'
 export const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@school.dev'
 export const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'E2eTestAdmin!234'
 
-/** CLI install name (also the docker-compose project dir under ~/.learnhouse). */
+/** CLI install name (also the docker-compose project dir under ~/.starlab). */
 export const INSTALL_NAME = process.env.E2E_INSTALL_NAME || 'e2e'
 
 /** The CLI command used to boot the self-host. Override to use a local build. */
-export const CLI = process.env.E2E_CLI || 'npx --yes learnhouse@latest'
+export const CLI = process.env.E2E_CLI || 'npx --yes starlab@latest'
 
 /** When set (or E2E_BASE_URL is provided), global-setup will NOT boot a new instance. */
 export const SKIP_BOOT =

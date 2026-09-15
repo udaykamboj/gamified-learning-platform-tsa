@@ -72,7 +72,7 @@ jobs:
             echo "::error::Version mismatch: package.json=$PKG_VERSION tag=$TAG_VERSION"
             exit 1
           fi
-          BIN_VERSION="$(node dist/bin/learnhouse.js --version)"
+          BIN_VERSION="$(node dist/bin/starlab.js --version)"
           if [ "$BIN_VERSION" != "$TAG_VERSION" ]; then
             echo "::error::Built binary reports '$BIN_VERSION' but the tag is '$TAG_VERSION' — is src/constants.ts out of sync with package.json?"
             exit 1

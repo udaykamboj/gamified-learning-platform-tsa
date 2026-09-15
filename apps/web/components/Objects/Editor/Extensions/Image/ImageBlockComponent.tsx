@@ -12,11 +12,11 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { constructAcceptValue } from '@/lib/constants';
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useTranslation } from 'react-i18next'
-import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
+import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Objects/UnsplashImagePicker/UnsplashImagePicker'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif'])
-const UNSPLASH_UTM = '?utm_source=LearnHouse&utm_medium=referral'
+const UNSPLASH_UTM = '?utm_source=StarLab&utm_medium=referral'
 const withUtm = (url?: string | null) => (url ? `${url}${UNSPLASH_UTM}` : '')
 
 function ImageBlockComponent(props: any) {

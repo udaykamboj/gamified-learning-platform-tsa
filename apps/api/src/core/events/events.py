@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Callable
 from fastapi import FastAPI
-from config.config import LearnHouseConfig, get_learnhouse_config
+from config.config import StarLabConfig, get_starlab_config
 from src.core.events.autoinstall import auto_install
 from src.core.events.content import check_content_directory
 from src.core.events.database import close_database, connect_to_db
@@ -12,17 +12,6 @@ from src.core.ee_hooks import run_ee_startup
 logger = logging.getLogger(__name__)
 
 _cleanup_task = None
-
-
-async def _periodic_migration_cleanup():
-    """Run migration temp cleanup every 10 minutes."""
-    from src.services.courses.migration.migration_service import cleanup_old_temp_migrations
-    while True:
-        await asyncio.sleep(600)  # 10 minutes
-        try:
-            cleanup_old_temp_migrations()
-        except Exception as e:
-            logger.warning("Periodic migration cleanup failed: %s", e)
 
 
 async def _reconcile_packs():
@@ -39,9 +28,9 @@ async def _reconcile_packs():
 
 def startup_app(app: FastAPI) -> Callable:
     async def start_app() -> None:
-        # Get LearnHouse Config
-        learnhouse_config: LearnHouseConfig = get_learnhouse_config()
-        app.learnhouse_config = learnhouse_config  # type: ignore
+        # Get StarLab Config
+        starlab_config: StarLabConfig = get_starlab_config()
+        app.starlab_config = starlab_config  # type: ignore
 
         # Connect to database
         await connect_to_db(app)
@@ -63,25 +52,14 @@ def startup_app(app: FastAPI) -> Callable:
         # Reconcile pack credits (Redis ↔ DB)
         await _reconcile_packs()
 
-        # Clean up stale migration temp directories (on startup + every 10 min)
-        from src.services.courses.migration.migration_service import cleanup_old_temp_migrations
-        cleanup_old_temp_migrations()
-        global _cleanup_task
-        _cleanup_task = asyncio.create_task(_periodic_migration_cleanup())
-
         # Lifecycle nudges run on their own daily tick so the feature needs no
         # external scheduler. No-op unless enabled; never raises.
         from src.services.nudges.scheduler import start_scheduler
         start_scheduler()
 
-        # The shared demo organization refreshes itself on an interval, so the
-        # feature needs no external scheduler. No-op unless
-        # LEARNHOUSE_DEMO_ENABLED; never raises.
-        from src.services.demo.scheduler import start_scheduler as start_demo_scheduler
-        start_demo_scheduler()
 
         # Start the in-app HLS transcoding consumer (drains the Redis queue as a
-        # background task; no separate worker). No-op unless LEARNHOUSE_HLS_ENABLED.
+        # background task; no separate worker). No-op unless STARLAB_HLS_ENABLED.
         from src.services.utils.hls_jobs import start_consumer
         start_consumer()
 
@@ -118,9 +96,6 @@ def shutdown_app(app: FastAPI) -> Callable:
         # Stop the daily nudge tick.
         from src.services.nudges.scheduler import stop_scheduler
         await stop_scheduler()
-        # Stop the demo refresh tick.
-        from src.services.demo.scheduler import stop_scheduler as stop_demo_scheduler
-        await stop_demo_scheduler()
         await close_database(app)
 
     return close_app

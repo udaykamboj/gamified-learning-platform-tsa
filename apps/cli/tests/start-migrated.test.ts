@@ -31,15 +31,15 @@ describe('start — content migrated branch', () => {
 
   beforeEach(() => {
     home = fs.mkdtempSync(path.join(os.tmpdir(), 'lh-startm-'))
-    installDir = path.join(home, '.learnhouse', 'test')
+    installDir = path.join(home, '.starlab', 'test')
     fs.mkdirSync(installDir, { recursive: true })
-    fs.writeFileSync(path.join(installDir, 'learnhouse.config.json'), JSON.stringify({
+    fs.writeFileSync(path.join(installDir, 'starlab.config.json'), JSON.stringify({
       version: '1.4.8', deploymentId: 'dep1', createdAt: '2026-01-01T00:00:00Z',
       installDir, domain: 'localhost', httpPort: 8080,
       useHttps: false, autoSsl: false, useExternalDb: false, orgSlug: 'default',
     }))
     fs.writeFileSync(path.join(installDir, '.env'), 'X=1\n')
-    fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), 'services:\n  learnhouse-app:\n')
+    fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), 'services:\n  starlab-app:\n')
     origHome = process.env.HOME
     process.env.HOME = home
     vi.spyOn(process, 'exit').mockImplementation(((c?: number) => { throw new Error(`exit ${c}`) }) as never)

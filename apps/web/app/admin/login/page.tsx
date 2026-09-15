@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Shield } from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const { signIn } = useAuth()
+  const { signIn, signOut } = useAuth()
   const _router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,15 +18,26 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const result = await signIn('credentials', {
+      const result: any = await signIn('credentials', {
         email,
         password,
         redirect: false,
+        isAdmin: true,
       })
 
       if (result?.error) {
         setError('Invalid email or password')
       } else {
+        // STRICT PORTAL SEGREGATION: 
+        // If the resolved landing URL is not /admin, this is not an Admin account.
+        // They are not allowed to log in via the Admin portal.
+        if (result?.url && !result.url.endsWith('/admin')) {
+          // Immediately log them out
+          signOut({ redirect: false })
+          setError('You do not have administrative privileges.')
+          return
+        }
+
         window.location.href = '/admin'
       }
     } catch {
@@ -41,7 +52,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center mb-8">
           <Shield className="w-10 h-10 text-white/70 mb-3" />
-          <h1 className="text-2xl font-bold text-white">LearnHouse Admin</h1>
+          <h1 className="text-2xl font-bold text-white">StarLab Admin</h1>
           <p className="text-white/40 text-sm mt-1">Sign in to continue</p>
         </div>
 

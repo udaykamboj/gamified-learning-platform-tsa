@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Development Environment Setup
 
-The LearnHouse CLI provides a streamlined way to set up and run the entire development environment with a single command.
+The StarLab CLI provides a streamlined way to set up and run the entire development environment with a single command.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Make sure Docker has at least **4GB of RAM** allocated. You can check and adjust
 </Callout>
 
 <Callout type="info">
-`npx learnhouse dev` runs `bun install` and `uv sync` to install project dependencies, but it does **not** install `bun` or `uv` themselves — install them on your host first.
+`npx starlab dev` runs `bun install` and `uv sync` to install project dependencies, but it does **not** install `bun` or `uv` themselves — install them on your host first.
 </Callout>
 
 ## Setup Steps
@@ -26,7 +26,7 @@ Make sure Docker has at least **4GB of RAM** allocated. You can check and adjust
 ### 1. Clone the Repository and Start Development
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse && cd learnhouse && npx learnhouse dev
+git clone https://github.com/starlab/starlab && cd starlab && npx starlab dev
 ```
 
 That single command handles everything:
@@ -41,7 +41,7 @@ All services are coordinated automatically so you do not need to manage them ind
 
 ## Accessing the Application
 
-Once `npx learnhouse dev` is running, you can access:
+Once `npx starlab dev` is running, you can access:
 
 | Service | URL |
 | --- | --- |
@@ -55,10 +55,10 @@ The Swagger UI at `/docs` is only available in development mode. Production inst
 
 ## Stopping the Environment
 
-Press `Ctrl+C` in the terminal where `npx learnhouse dev` is running to stop all services.
+Press `Ctrl+C` in the terminal where `npx starlab dev` is running to stop all services.
 
 ## Troubleshooting
 
 - **Port conflicts** -- Make sure ports 3000 (web), 1338 (API), 4000 (collab), 5432 (Postgres), and 6379 (Redis) are not in use by other applications.
-- **Docker not running** -- Ensure the Docker daemon is started before running `npx learnhouse dev`.
-- **Dependency issues** -- The CLI installs all dependencies automatically. If you encounter issues, try deleting `node_modules` and `.venv` directories and re-running `npx learnhouse dev`.
+- **Docker not running** -- Ensure the Docker daemon is started before running `npx starlab dev`.
+- **Dependency issues** -- The CLI installs all dependencies automatically. If you encounter issues, try deleting `node_modules` and `.venv` directories and re-running `npx starlab dev`.

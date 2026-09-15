@@ -15,25 +15,21 @@ PlanLevel = Literal["free", "personal", "personal-family", "standard", "pro", "e
 # Plan hierarchy (lower index = lower tier)
 PLAN_HIERARCHY: list[str] = ["free", "personal", "personal-family", "standard", "pro", "enterprise"]
 
-# Feature to required plan mapping
+# Feature to required plan mapping. Student tools (boards, playgrounds,
+# communities, podcasts) are absent on purpose: every plan includes them
+# (docs/refactor/progress/00-requirements.md, R16/R17).
 FEATURE_PLAN_REQUIREMENTS: dict[str, PlanLevel] = {
     # AI is available from the free plan (metered by a starter credit allowance);
     # access is gated by remaining AI credits rather than by plan tier.
     "ai": "free",
     "analytics": "standard",
     "collaboration": "standard",
-    "communities": "standard",
     "payments": "standard",
-    "podcasts": "standard",
     "seo": "standard",
-    "usergroups": "standard",
     "api_tokens": "pro",
     "webhooks": "pro",
-    "boards": "personal",
     "certifications": "pro",
     "custom_domains": "pro",
-    "playgrounds": "personal",
-    "roles": "pro",
     "versioning": "pro",
     "analytics_advanced": "pro",
     "audit_logs": "enterprise",
@@ -62,13 +58,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 1, "enabled": True, "limit": 10},
             "payments": {"enabled": False},
 
-            "usergroups": {"enabled": False, "limit": 0},
-            "podcasts": {"enabled": False, "limit": 0},
-            "boards": {"enabled": False, "limit": 0},
+            "podcasts": {"enabled": True, "limit": 0},
+            "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
-            "communities": {"enabled": False},
-            "playgrounds": {"enabled": False, "limit": 0},
-            "roles": {"enabled": False},
+            "communities": {"enabled": True},
+            "playgrounds": {"enabled": True, "limit": 0},
             "scorm": {"enabled": False},
             "sso": {"enabled": False},
             "versioning": {"enabled": False},
@@ -90,13 +84,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 1, "enabled": True, "limit": 1},
             "payments": {"enabled": False},
 
-            "usergroups": {"enabled": False, "limit": 0},
-            "podcasts": {"enabled": False, "limit": 0},
+            "podcasts": {"enabled": True, "limit": 0},
             "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
-            "communities": {"enabled": False},
+            "communities": {"enabled": True},
             "playgrounds": {"enabled": True, "limit": 0},
-            "roles": {"enabled": False},
             "scorm": {"enabled": False},
             "sso": {"enabled": False},
             "versioning": {"enabled": False},
@@ -118,13 +110,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 4, "enabled": True, "limit": 4},
             "payments": {"enabled": False},
 
-            "usergroups": {"enabled": False, "limit": 0},
-            "podcasts": {"enabled": False, "limit": 0},
+            "podcasts": {"enabled": True, "limit": 0},
             "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
-            "communities": {"enabled": False},
+            "communities": {"enabled": True},
             "playgrounds": {"enabled": True, "limit": 0},
-            "roles": {"enabled": False},
             "scorm": {"enabled": False},
             "sso": {"enabled": False},
             "versioning": {"enabled": False},
@@ -146,13 +136,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 2, "enabled": True, "limit": 200},
             "payments": {"enabled": True},
 
-            "usergroups": {"enabled": True, "limit": 0},
             "podcasts": {"enabled": True, "limit": 0},
-            "boards": {"enabled": False, "limit": 0},
+            "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
             "communities": {"enabled": True},
-            "playgrounds": {"enabled": False, "limit": 0},
-            "roles": {"enabled": False},
+            "playgrounds": {"enabled": True, "limit": 0},
             "scorm": {"enabled": False},
             "sso": {"enabled": False},
             "versioning": {"enabled": False},
@@ -174,13 +162,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 10, "enabled": True, "limit": 500},
             "payments": {"enabled": True},
 
-            "usergroups": {"enabled": True, "limit": 0},
             "podcasts": {"enabled": True, "limit": 0},
             "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
             "communities": {"enabled": True},
             "playgrounds": {"enabled": True, "limit": 0},
-            "roles": {"enabled": True},
             "scorm": {"enabled": False},
             "sso": {"enabled": False},
             "versioning": {"enabled": True},
@@ -202,13 +188,11 @@ PLAN_FEATURE_CONFIGS: dict[str, dict] = {
             "members": {"admin_limit": 100, "enabled": True, "limit": 0},
             "payments": {"enabled": True},
 
-            "usergroups": {"enabled": True, "limit": 0},
             "podcasts": {"enabled": True, "limit": 0},
             "boards": {"enabled": True, "limit": 0},
             "folders": {"enabled": True},
             "communities": {"enabled": True},
             "playgrounds": {"enabled": True, "limit": 0},
-            "roles": {"enabled": True},
             "scorm": {"enabled": True},
             "sso": {"enabled": True},
             "versioning": {"enabled": True},
@@ -233,7 +217,7 @@ PLAN_LIMITS: dict[str, dict[str, int]] = {
 
 # AI credit allocation per plan
 # 0 = no access, -1 = unlimited
-# Free orgs get a starter allowance of AI credits so new teachers can try the AI
+# Free orgs get a starter allowance of AI credits so new platforms can try the AI
 # features (incl. AI podcast/audio generation) before upgrading. When these run
 # out, the AI endpoints return 402/403 which the UI surfaces as an upgrade prompt.
 AI_CREDIT_LIMITS: dict[str, int] = {

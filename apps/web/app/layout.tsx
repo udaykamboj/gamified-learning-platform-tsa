@@ -39,7 +39,7 @@ export default function RootLayout({
   // no-JS baseline for crawlers; the script overwrites it for everyone else.
   return (
     <html
-      className={`${wixMadeforText.variable} ${tajawal.variable}`}
+      className={`${wixMadeforText.variable} ${tajawal.variable} dark`}
       lang="en"
       suppressHydrationWarning
     >

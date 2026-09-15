@@ -22,7 +22,7 @@ import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { UploadCloud, Image as ImageIcon } from 'lucide-react'
-import UnsplashImagePicker from "@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker"
+import UnsplashImagePicker from "@components/Objects/UnsplashImagePicker/UnsplashImagePicker"
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
 import { useTranslation } from "react-i18next"

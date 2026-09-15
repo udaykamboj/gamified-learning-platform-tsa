@@ -1,10 +1,10 @@
 # CLI Release Workflow
 
-How to release a new version of the LearnHouse CLI to npm.
+How to release a new version of the StarLab CLI to npm.
 
 ## Prerequisites
 
-- npm org `learnhouse` created on [npmjs.com](https://www.npmjs.com)
+- npm org `starlab` created on [npmjs.com](https://www.npmjs.com)
 - `NPM_TOKEN` (Automation type) added to GitHub repo: **Settings > Secrets > Actions**
 - `gh` CLI installed and authenticated (`gh auth status`)
 - Push access to the repository
@@ -46,9 +46,9 @@ The tag push triggers `.github/workflows/cli-publish.yaml`, which:
 
 After the workflow completes (~1-2 minutes):
 
-- **npm:** https://www.npmjs.com/package/learnhouse — should show the new version
+- **npm:** https://www.npmjs.com/package/starlab — should show the new version
 - **GitHub:** Releases page shows the new release
-- **Test:** `npx learnhouse@latest --version` prints the new version
+- **Test:** `npx starlab@latest --version` prints the new version
 
 ## Manual release (fallback)
 
@@ -113,7 +113,7 @@ The workflow only triggers on tags matching `cli-[0-9]*`. This means:
 ### npm 403 / auth error
 - Check that `NPM_TOKEN` secret is set in GitHub repo settings
 - Token must be an **Automation** type token from the npm org
-- Token must have publish permissions for the `learnhouse` package
+- Token must have publish permissions for the `starlab` package
 
 ### Build fails
 - Run `bun run build` locally first to catch TypeScript errors

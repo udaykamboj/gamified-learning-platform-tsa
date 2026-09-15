@@ -19,7 +19,7 @@ from src.services.podcasts.thumbnails import upload_episode_thumbnail, upload_ep
 from fastapi import HTTPException, Request, UploadFile
 from datetime import datetime
 from src.security.rbac import check_resource_access, AccessAction
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+from src.security.rbac.constants import ADMIN_ROLE_IDS
 from src.security.features_utils.usage import check_feature_access
 from src.services.webhooks.dispatch import dispatch_webhooks
 from src.security.superadmin import is_user_superadmin
@@ -63,7 +63,7 @@ async def _user_can_view_unpublished_episode(
     )
     user_roles = (await db_session.execute(role_statement)).scalars().all()
     for role in user_roles:
-        if role.id in ADMIN_OR_MAINTAINER_ROLE_IDS:
+        if role.id in ADMIN_ROLE_IDS:
             return True
 
     return False
@@ -153,7 +153,7 @@ async def get_episodes_by_podcast(
             )
             user_roles = (await db_session.execute(role_statement)).scalars().all()
             for role in user_roles:
-                if role.id in ADMIN_OR_MAINTAINER_ROLE_IDS:
+                if role.id in ADMIN_ROLE_IDS:
                     can_view_unpublished = True
                     break
 

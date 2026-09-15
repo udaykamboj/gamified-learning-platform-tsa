@@ -8,7 +8,7 @@ from sqlmodel import select
 from src.db.users import AnonymousUser, User, UserRead
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.core.deployment_mode import get_deployment_mode
 from src.security.auth import (
     authenticate_user,
@@ -26,7 +26,9 @@ from src.security.auth import (
     JWT_ACCESS_TOKEN_EXPIRES,
     JWT_REFRESH_TOKEN_EXPIRES,
     JWT_REFRESH_COOKIE_NAME,
+    JWT_ADMIN_REFRESH_COOKIE_NAME,
     JWT_COOKIE_NAME,
+    JWT_ADMIN_COOKIE_NAME,
 )
 from src.services.users.users import security_get_user
 from src.services.auth.utils import signWithGoogle, get_google_user_info
@@ -59,15 +61,7 @@ from src.security.session_context import (
 from src.db.organizations import Organization
 
 
-async def _resolve_org_id_from_slug(org_slug: Optional[str], db_session: AsyncSession) -> Optional[int]:
-    """Map an optional login-page org slug to an org id, for the session's
-    ``sorg`` binding. Unknown/absent slug → None (a central/apex login)."""
-    if not org_slug:
-        return None
-    org = (
-        await db_session.execute(select(Organization).where(Organization.slug == org_slug))
-    ).scalars().first()
-    return org.id if org else None
+
 
 
 def get_token_expiry_ms() -> Optional[int]:
@@ -89,12 +83,12 @@ def get_cookie_domain_for_request(request: Request) -> str | None:
       whatever Host the request arrived with — same code path serves
       localhost dev and self-hosted VPS deployments on any domain.
     - tenancy == "multi":
-        - request from a subdomain of LEARNHOUSE_DOMAIN → configured cookie
-          domain (e.g. ".learnhouse.io") so subdomains share the session.
+        - request from a subdomain of STARLAB_DOMAIN → configured cookie
+          domain (e.g. ".starlab.io") so subdomains share the session.
         - request from a custom (per-org) domain or unknown host → None
           (host-only cookie).
     """
-    config = get_learnhouse_config()
+    config = get_starlab_config()
     tenancy = config.hosting_config.tenancy
 
     if tenancy == "single":
@@ -181,13 +175,16 @@ def is_request_secure(request: Request | None) -> bool:
     return not isDevModeEnabled()
 
 
-def set_auth_cookies(response: Response, access_token: str, refresh_token: str, request: Request = None):
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str, request: Request = None, is_admin: bool = False):
     """Helper to set authentication cookies."""
     is_secure = is_request_secure(request)
     cookie_domain = get_cookie_domain_for_request(request) if request else None
 
+    access_cookie = JWT_ADMIN_COOKIE_NAME if is_admin else JWT_COOKIE_NAME
+    refresh_cookie = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin else JWT_REFRESH_COOKIE_NAME
+
     response.set_cookie(
-        key=JWT_COOKIE_NAME,
+        key=access_cookie,
         value=access_token,
         httponly=True,
         secure=is_secure,
@@ -196,7 +193,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str, 
         max_age=int(timedelta(hours=8).total_seconds()),
     )
     response.set_cookie(
-        key=JWT_REFRESH_COOKIE_NAME,
+        key=refresh_cookie,
         value=refresh_token,
         httponly=True,
         secure=is_secure,
@@ -214,7 +211,7 @@ def unset_auth_cookies(response: Response, request: Request = None):
     response.delete_cookie(key=JWT_REFRESH_COOKIE_NAME, domain=cookie_domain)
 
 
-_refresh_logger = logging.getLogger("learnhouse.auth.refresh")
+_refresh_logger = logging.getLogger("starlab.auth.refresh")
 
 
 def _token_age_seconds(payload: dict | None) -> int | None:
@@ -276,6 +273,11 @@ def _log_refresh_outcome(
 
 
 @router.get(
+    "/admin/refresh",
+    summary="Refresh admin access token",
+    description="Validate the admin refresh token and issue a new access token.",
+)
+@router.get(
     "/refresh",
     summary="Refresh access token",
     description=(
@@ -324,7 +326,9 @@ async def refresh(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    refresh_token = request.cookies.get(JWT_REFRESH_COOKIE_NAME)
+    is_admin_refresh = request.url.path.endswith("/admin/refresh")
+    cookie_name = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin_refresh else JWT_REFRESH_COOKIE_NAME
+    refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
         _log_refresh_outcome("cookie_missing")
         raise credentials_exception
@@ -344,6 +348,11 @@ async def refresh(
     user = await security_get_user(request, db_session, email=email)
     if user is None or user.id is None:
         _log_refresh_outcome("user_not_found", token_age_seconds=_token_age_seconds(payload))
+        raise credentials_exception
+
+    if is_admin_refresh and not user.is_superadmin:
+        raise credentials_exception
+    if not is_admin_refresh and user.is_superadmin:
         raise credentials_exception
 
     # Enforce password-change cutover: tokens minted before the user's last
@@ -432,8 +441,12 @@ async def refresh(
 
     cookie_domain = get_cookie_domain_for_request(request)
     is_secure = is_request_secure(request)
+    
+    access_cookie = JWT_ADMIN_COOKIE_NAME if is_admin_refresh else JWT_COOKIE_NAME
+    refresh_cookie = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin_refresh else JWT_REFRESH_COOKIE_NAME
+
     response.set_cookie(
-        key=JWT_COOKIE_NAME,
+        key=access_cookie,
         value=new_access_token,
         httponly=True,
         secure=is_secure,
@@ -442,7 +455,7 @@ async def refresh(
         max_age=int(timedelta(hours=8).total_seconds()),
     )
     response.set_cookie(
-        key=JWT_REFRESH_COOKIE_NAME,
+        key=refresh_cookie,
         value=new_refresh_token,
         httponly=True,
         secure=is_secure,
@@ -468,6 +481,11 @@ async def refresh(
 
 
 @router.post(
+    "/admin/login",
+    summary="Log in as an administrator",
+    description="Authenticate an admin. On success, sets admin-specific cookies.",
+)
+@router.post(
     "/login",
     summary="Log in with email and password",
     description=(
@@ -479,7 +497,7 @@ async def refresh(
     responses={
         200: {"description": "Login successful; cookies set and body contains user + tokens."},
         401: {"description": "Incorrect email or password"},
-        403: {"description": "Email not verified (SaaS mode)"},
+        403: {"description": "Email not verified (SaaS mode) or incorrect portal"},
         423: {"description": "Account is locked due to too many failed attempts"},
         429: {"description": "Too many login attempts from this IP"},
     },
@@ -540,6 +558,18 @@ async def login(
     # state no longer enables enumeration since the caller has proven they
     # control the account.
 
+    is_admin_login = request.url.path.endswith("/admin/login")
+    if is_admin_login and not user.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "ADMIN_REQUIRED", "message": "This portal is for administrators only."}
+        )
+    if not is_admin_login and user.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "STUDENT_REQUIRED", "message": "Administrators must use the admin login portal."}
+        )
+
     # Step 3: Enforce lockout from prior failed attempts.
     is_pre_locked, pre_lock_remaining = check_account_locked(user)
     if is_pre_locked and pre_lock_remaining:
@@ -569,7 +599,8 @@ async def login(
     # the refusal can never be used to probe which orgs exist.
     from src.services.orgs.auth_policy import enforce_login_auth_method
 
-    session_org_id = await _resolve_org_id_from_slug(org_slug, db_session)
+    from src.services.orgs.platform import get_platform_org_id
+    session_org_id = await get_platform_org_id(db_session)
     await enforce_login_auth_method(db_session, session_org_id, AUTH_METHOD_PASSWORD)
 
     # Step 6: Reset failed attempts and update login info
@@ -600,7 +631,8 @@ async def login(
             "mfa_token": issue.mfa_token,
         }
 
-    set_auth_cookies(response, issue.access_token, issue.refresh_token, request)
+    is_admin_login = request.url.path.endswith("/admin/login")
+    set_auth_cookies(response, issue.access_token, issue.refresh_token, request, is_admin=is_admin_login)
 
     user = UserRead.model_validate(user)
 
@@ -656,9 +688,6 @@ async def third_party_login(
     import redis as _redis
     _logger = logging.getLogger(__name__)
 
-    # Usergroup to attach the user to after sign-in, when they joined through an
-    # invite code that is linked to one (mirrors create_user_with_invite).
-    _invite_usergroup_id = None
     # Pending email invite to mark as consumed once the user actually joins.
     _consume_invite_key = None
 
@@ -674,6 +703,9 @@ async def third_party_login(
     # when none was found. Signing up with Google into an open org — or through
     # an invite *code* link — therefore created an account with no organization
     # at all, while the equivalent form signup joined the org normally.
+    from src.services.orgs.platform import get_platform_org_id
+    org_id = await get_platform_org_id(db_session)
+
     if org_id is not None:
         from src.db.organizations import Organization
         from src.services.orgs.orgs import get_org_join_mechanism
@@ -751,13 +783,12 @@ async def third_party_login(
                     _code_data = None
                 if _code_data:
                     _authorized = True
-                    _invite_usergroup_id = _code_data.get("usergroup_id")
 
             # 2. Or a pending invite sent to this address from the org dashboard.
             if not _authorized:
                 _r = None
                 try:
-                    _lh_config = get_learnhouse_config()
+                    _lh_config = get_starlab_config()
                     _redis_url = _lh_config.redis_config.redis_connection_string
                     if _redis_url:
                         _r = _redis.Redis.from_url(_redis_url)
@@ -815,32 +846,12 @@ async def third_party_login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Finish the invite the same way the form signup does: attach the usergroup
-    # the invite code is linked to, and stop showing the invite as pending.
-    # Neither of these ran on the OAuth path before, so a user invited by email
-    # stayed "pending" in the org's member list after joining, and an invite code
-    # carrying a usergroup silently didn't apply it.
-    if _invite_usergroup_id and user.id is not None:
-        from src.db.users import InternalUser
-        from src.services.users.usergroups import add_users_to_usergroup
-
-        try:
-            await add_users_to_usergroup(
-                request,
-                db_session,
-                InternalUser(id=0),
-                int(_invite_usergroup_id),
-                str(user.id),
-            )
-        except Exception:
-            # The account exists and is in the org; a usergroup failure must not
-            # turn a completed sign-in into an error.
-            _logger.warning("Could not attach OAuth user to invite usergroup")
-
+    # Finish the invite the same way the form signup does: stop showing the
+    # invite as pending once the user has joined.
     if _consume_invite_key:
         _r = None
         try:
-            _redis_url = get_learnhouse_config().redis_config.redis_connection_string
+            _redis_url = get_starlab_config().redis_config.redis_connection_string
             if _redis_url:
                 _r = _redis.Redis.from_url(_redis_url)
                 _invited_data = _r.get(_consume_invite_key)
@@ -920,7 +931,6 @@ async def magic_link_request(
 ):
     from src.services.auth.magic_login import (
         issue_magic_login_token,
-        resolve_org,
         send_magic_login_email,
     )
     from src.services.orgs.auth_policy import is_login_method_allowed
@@ -936,7 +946,8 @@ async def magic_link_request(
 
     generic = {"detail": "If an account exists for that email, a login link has been sent."}
 
-    org = await resolve_org(body.org_slug, db_session)
+    from src.services.orgs.platform import get_platform_org
+    org = await get_platform_org(db_session)
     # If the request is scoped to an org that does not offer magic-link login,
     # do not send one — the link would only be refused at the org gate anyway.
     if org is not None and not await is_login_method_allowed(

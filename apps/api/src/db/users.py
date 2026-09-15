@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Literal, Optional, TYPE_CHECKING
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from sqlmodel import Field, SQLModel
@@ -77,7 +77,7 @@ class UserReadPublic(SQLModel):
     """User model for public-facing endpoints — excludes sensitive fields.
 
     SECURITY: This is the view returned to *any* authenticated user when they
-    look up *another* user (by id/uuid/username, or via usergroup member lists).
+    look up *another* user (by id/uuid/username).
     It must therefore NOT inherit from ``UserBase``, because ``UserBase`` (and
     ``UserRead``) expose PII / internal fields — ``email``, ``signup_method``,
     ``is_superadmin``, ``extra_metadata`` — that would leak to anyone who can
@@ -126,6 +126,13 @@ class UserRoleWithOrg(BaseModel):
 class UserSession(BaseModel):
     user: UserRead
     roles: list[UserRoleWithOrg]
+    # Account type in the single-organization platform (see
+    # src/security/platform_roles.py). Computed server-side from the platform
+    # org membership; the web app routes on these instead of re-deriving them
+    # from role rights. Defaulted so a session cached before these fields
+    # existed still deserializes (and reads as the least-privileged type).
+    platform_role: Literal["admin", "student"] = "student"
+    can_manage_platform: bool = False
 
 
 class AnonymousUser(SQLModel):

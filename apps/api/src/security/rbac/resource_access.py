@@ -10,8 +10,8 @@ Access Rules:
 - Public View:
     - Public + Published: Everyone can see
     - Public + Unpublished: Nobody (except dashboard)
-    - UserGroup-linked + Published + User in Group: UserGroup members only
-    - Not Public + Not in UserGroup: Authenticated users only
+    - Not Public + Published: signed-in members of the platform
+    - Boards: owner, members and linked-discussion readers only (never the whole platform)
     - Author of resource: Always accessible to author
 - Communities: Don't have a published field, only use public flag
 """
@@ -24,8 +24,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.db.users import AnonymousUser, PublicUser, APITokenUser
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
 from src.security.rbac.types import AccessAction, AccessContext, AccessDecision, ResourceConfig
 from src.security.rbac.config import get_resource_config, RESOURCE_CONFIGS
 from src.security.rbac.rbac import (
@@ -63,12 +61,12 @@ class ResourceAccessChecker:
         self.current_user = current_user
         # Per-request memoization caches. Within a single request a given course
         # page can trigger check_resource_access 2–3 times; without these caches
-        # each call re-runs the same author/admin/usergroup/resource lookups.
+        # each call re-runs the same author/admin/resource lookups.
         self._resource_cache: dict = {}
         self._author_cache: dict[str, bool] = {}
         self._admin_cache: dict[str, bool] = {}
         self._public_published_cache: dict[str, tuple[bool, bool]] = {}
-        self._usergroup_cache: dict[tuple[str, bool], bool] = {}
+        self._member_cache: dict[str, bool] = {}
         self._parent_uuid_cache: dict[str, Optional[str]] = {}
 
     async def check_access(
@@ -156,6 +154,18 @@ class ResourceAccessChecker:
         # "you don't have permission", which a plain reason string cannot do.
         await self._enforce_org_mfa_policy(resource_uuid, config)
 
+        # Course-linked communities are the course's Q&A space: reading them
+        # follows the course's read access (no enrollment), regardless of `public`.
+        if config.resource_type == "communities":
+            course_gate = await self._check_course_community_gate(resource_uuid, action, context, config)
+            if course_gate is not None:
+                return course_gate
+
+        # Boards are student-owned tools, shared explicitly. They skip the
+        # platform-content rule chain: no admin override, no member-wide read.
+        if config.resource_type == "boards" and not resource_uuid.endswith("_x"):
+            return await self._check_board_access(resource_uuid, action, context)
+
         # Route to appropriate check based on action
         if action == AccessAction.READ:
             return await self._check_read_access(resource_uuid, context, config)
@@ -235,12 +245,12 @@ class ResourceAccessChecker:
         """Check dashboard read access - admins/authors see everything."""
         user_id = self._get_user_id()
 
-        # Check admin/maintainer status first
-        is_admin = await self._is_admin_or_maintainer(resource_uuid)
+        # Check admin status first
+        is_admin = await self._is_platform_admin(resource_uuid)
         if is_admin:
             return AccessDecision(
                 allowed=True,
-                reason="User is admin/maintainer",
+                reason="User is an admin",
                 via_admin=True,
                 resource_uuid=resource_uuid,
                 user_id=user_id,
@@ -262,9 +272,8 @@ class ResourceAccessChecker:
                     context="dashboard",
                 )
 
-        # Fall through to public view rules. Note: public_view's usergroup rule
-        # requires is_published=True, so usergroup members on unpublished
-        # resources still get denied here — which is the intended behavior.
+        # Fall through to public view rules. The member rule requires
+        # is_published=True, so unpublished resources stay denied here.
         return await self._check_public_view_read_access(resource_uuid, config)
 
     async def _check_public_view_read_access(
@@ -315,12 +324,12 @@ class ResourceAccessChecker:
                     action="read",
                 )
 
-        # Rule 3: Admin/maintainer always has access
-        is_admin = await self._is_admin_or_maintainer(resource_uuid)
+        # Rule 3: Admins always have access
+        is_admin = await self._is_platform_admin(resource_uuid)
         if is_admin:
             return AccessDecision(
                 allowed=True,
-                reason="User is admin/maintainer",
+                reason="User is an admin",
                 via_admin=True,
                 resource_uuid=resource_uuid,
                 user_id=user_id,
@@ -328,8 +337,10 @@ class ResourceAccessChecker:
             )
 
         # Rule 4: Check role-based permissions (only for public resources)
-        # Non-public resources should only be accessible via authorship, admin, or usergroup membership
-        if is_public:
+        # Non-public resources are accessible via authorship, admin, or platform membership.
+        # Unpublished drafts are never readable through a role: only authors and
+        # admins (rules 2-3) see them.
+        if is_public and (is_published or not config.has_published_field):
             has_role_permission = await authorization_verify_based_on_roles(
                 self.request, user_id, "read", resource_uuid, self.db_session
             )
@@ -343,33 +354,19 @@ class ResourceAccessChecker:
                     action="read",
                 )
 
-        # Rule 5: Check UserGroup membership (if supported)
-        if config.supports_usergroups:
-            has_usergroup_access = await self._check_usergroup_membership(resource_uuid, is_public)
-            logger.info(f"[ACCESS_CHECK] Rule 5 - has_usergroup_access={has_usergroup_access}, is_published={is_published}")
-
-            # For resources with published field, UserGroup access requires published=True
-            if config.has_published_field:
-                if has_usergroup_access and is_published:
-                    return AccessDecision(
-                        allowed=True,
-                        reason="User is member of linked UserGroup and resource is published",
-                        via_usergroup=True,
-                        resource_uuid=resource_uuid,
-                        user_id=user_id,
-                        action="read",
-                    )
-            else:
-                # No published field - UserGroup access is sufficient
-                if has_usergroup_access:
-                    return AccessDecision(
-                        allowed=True,
-                        reason="User is member of linked UserGroup",
-                        via_usergroup=True,
-                        resource_uuid=resource_uuid,
-                        user_id=user_id,
-                        action="read",
-                    )
+        # Rule 5: signed-in members of the platform read platform content.
+        # Nobody grants access to a course, podcast or community: being a
+        # member is enough (docs/refactor/progress/00-requirements.md, R3/R8).
+        # Unpublished resources still require authorship or admin (rules 2-3).
+        if config.readable_by_members and (is_published or not config.has_published_field):
+            if await self._is_platform_member(resource_uuid):
+                return AccessDecision(
+                    allowed=True,
+                    reason="User is a signed-in member of the platform",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action="read",
+                )
 
         # All checks failed
         return AccessDecision(
@@ -456,7 +453,7 @@ class ResourceAccessChecker:
                 action="create",
             )
 
-        # Check admin/maintainer status
+        # Check admin status
         # For creation, we check against a placeholder - need org context
         is_admin = await authorization_verify_based_on_org_admin_status(
             self.request, user_id, "create", resource_uuid, self.db_session
@@ -464,7 +461,7 @@ class ResourceAccessChecker:
         if is_admin:
             return AccessDecision(
                 allowed=True,
-                reason="User is admin/maintainer",
+                reason="User is an admin",
                 via_admin=True,
                 resource_uuid=resource_uuid,
                 user_id=user_id,
@@ -501,12 +498,12 @@ class ResourceAccessChecker:
                     action=action.value,
                 )
 
-        # Check admin/maintainer status
-        is_admin = await self._is_admin_or_maintainer(resource_uuid)
+        # Check admin status
+        is_admin = await self._is_platform_admin(resource_uuid)
         if is_admin:
             return AccessDecision(
                 allowed=True,
-                reason="User is admin/maintainer",
+                reason="User is an admin",
                 via_admin=True,
                 resource_uuid=resource_uuid,
                 user_id=user_id,
@@ -529,7 +526,7 @@ class ResourceAccessChecker:
 
         return AccessDecision(
             allowed=False,
-            reason=f"You must be the resource owner or have admin/maintainer role to {action.value} this resource",
+            reason=f"You must be the resource owner or be an admin to {action.value} this resource",
             resource_uuid=resource_uuid,
             user_id=user_id,
             action=action.value,
@@ -813,8 +810,130 @@ class ResourceAccessChecker:
         await enforce_org_mfa_policy(self.db_session, user_id, org_id)
         await enforce_org_auth_policy(self.db_session, user_id, org_id)
 
-    async def _is_admin_or_maintainer(self, resource_uuid: str) -> bool:
-        """Check if current user is admin/maintainer in the resource's organization."""
+    async def _check_course_community_gate(
+        self,
+        resource_uuid: str,
+        action: AccessAction,
+        context: AccessContext,
+        config: ResourceConfig,
+    ) -> Optional[AccessDecision]:
+        """
+        Gate for communities linked to a course: the course's Q&A space
+        (docs/refactor/03-change-list.md, section A).
+
+        Reading it (which is also what posting, voting and reacting check)
+        follows the course's own read access. Starting the course is not
+        required: a student who can open a lesson can see and ask questions
+        about it. The community's `public` flag is ignored.
+
+        Returns a decision to short-circuit, or None to continue with the normal
+        rule chain (org-wide communities, and writes to the community itself).
+        """
+        if action != AccessAction.READ:
+            return None
+
+        community = await self._get_resource(resource_uuid, config)
+        course_id = getattr(community, "course_id", None) if community else None
+        if not isinstance(course_id, int) or not course_id:
+            return None
+
+        from src.db.courses.courses import Course
+
+        course = (
+            await self.db_session.execute(select(Course).where(Course.id == course_id))
+        ).scalars().first()
+        if not course:
+            return None
+
+        course_decision = await self.check_access(course.course_uuid, AccessAction.READ, context)
+        return AccessDecision(
+            allowed=course_decision.allowed,
+            reason=f"Course Q&A follows course access: {course_decision.reason}",
+            via_admin=course_decision.via_admin,
+            resource_uuid=resource_uuid,
+            user_id=self._get_user_id(),
+            action=action.value,
+            context=context.value,
+        )
+
+    async def _check_board_access(
+        self,
+        resource_uuid: str,
+        action: AccessAction,
+        context: AccessContext,
+    ) -> AccessDecision:
+        """
+        Board access (docs/refactor/progress/00-requirements.md, R13):
+
+        - read: public boards, board members, and anyone who can read a community
+          discussion the board is linked into
+        - update/delete: the board's owner only
+        """
+        from src.db.boards import Board, BoardMember, BoardMemberRole
+        from src.db.communities.discussions import Discussion
+        from src.db.communities.communities import Community
+
+        user_id = self._get_user_id()
+
+        def decision(allowed: bool, reason: str) -> AccessDecision:
+            return AccessDecision(
+                allowed=allowed,
+                reason=reason,
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+
+        board = (
+            await self.db_session.execute(select(Board).where(Board.board_uuid == resource_uuid))
+        ).scalars().first()
+        if board is None:
+            return decision(False, "Board not found")
+
+        member = None
+        if user_id:
+            member = (
+                await self.db_session.execute(
+                    select(BoardMember).where(
+                        BoardMember.board_id == board.id,
+                        BoardMember.user_id == user_id,
+                    )
+                )
+            ).scalars().first()
+        is_owner = bool(user_id) and (
+            board.created_by == user_id
+            or (member is not None and member.role == BoardMemberRole.OWNER)
+        )
+
+        if action != AccessAction.READ:
+            if is_owner:
+                return decision(True, "User owns the board")
+            return decision(False, "Only the board's owner can do this")
+
+        if board.public:
+            return decision(True, "Board is public")
+        if is_owner or member is not None:
+            return decision(True, "User is a board member")
+        if not user_id:
+            return decision(False, "Board is private")
+
+        linked_communities = (
+            await self.db_session.execute(
+                select(Community.community_uuid)
+                .join(Discussion, Discussion.community_id == Community.id)
+                .where(Discussion.board_uuid == board.board_uuid)
+            )
+        ).scalars().all()
+        for community_uuid in set(linked_communities):
+            community_decision = await self.check_access(community_uuid, AccessAction.READ, context)
+            if community_decision.allowed:
+                return decision(True, "Board is linked into a discussion the user can read")
+
+        return decision(False, "Board is private")
+
+    async def _is_platform_admin(self, resource_uuid: str) -> bool:
+        """Check if current user is an admin in the resource's organization."""
         user_id = self._get_user_id()
         if user_id == 0:
             return False
@@ -829,49 +948,19 @@ class ResourceAccessChecker:
         self._admin_cache[resource_uuid] = result
         return result
 
-    async def _check_usergroup_membership(self, resource_uuid: str, is_public: bool = False) -> bool:
-        """Check if user has access via UserGroup membership."""
+    async def _is_platform_member(self, resource_uuid: str) -> bool:
+        """Is the caller a signed-in member of the organization owning the resource?"""
         user_id = self._get_user_id()
         if user_id == 0:
             return False
 
-        cache_key = (resource_uuid, is_public)
-        cached = self._usergroup_cache.get(cache_key)
+        cached = self._member_cache.get(resource_uuid)
         if cached is not None:
             return cached
 
-        # Check if resource has any UserGroups linked
-        usergroup_stmt = select(UserGroupResource).where(
-            UserGroupResource.resource_uuid == resource_uuid
-        )
-        usergroup_resources = (await self.db_session.execute(usergroup_stmt)).scalars().all()
-
-        # If no UserGroups linked, resource is accessible to any authenticated
-        # MEMBER OF ITS ORGANIZATION.
-        #
-        # UsersOnly semantics: public=false + no linked group = signed-in users
-        # only; the anonymous branch short-circuits above via user_id == 0.
-        # "Signed-in" alone is not enough: this returned True for any account on
-        # the deployment, so an admin who set a course, folder, media item, board
-        # or community to "Users Only" was in fact publishing it to every user of
-        # every other tenant. Membership in the owning org is what the setting is
-        # understood to mean.
-        if not usergroup_resources:
-            allowed = await self._is_member_of_resource_org(resource_uuid, user_id)
-            self._usergroup_cache[cache_key] = allowed
-            return allowed
-
-        # Check if user is a member of any linked UserGroup
-        usergroup_ids = [ugr.usergroup_id for ugr in usergroup_resources]
-        membership_stmt = select(UserGroupUser).where(
-            UserGroupUser.usergroup_id.in_(usergroup_ids),
-            UserGroupUser.user_id == user_id
-        )
-        membership = (await self.db_session.execute(membership_stmt)).scalars().first()
-
-        result = membership is not None
-        self._usergroup_cache[cache_key] = result
-        return result
+        allowed = await self._is_member_of_resource_org(resource_uuid, user_id)
+        self._member_cache[resource_uuid] = allowed
+        return allowed
 
     async def _is_member_of_resource_org(self, resource_uuid: str, user_id: int) -> bool:
         """Is the caller a member of the organization that owns this resource?
@@ -985,7 +1074,7 @@ def _get_request_checker(
     Return a ResourceAccessChecker scoped to the current request, reusing the
     same instance (and its memoization caches) across every RBAC call within
     that request. This collapses what was previously 2–3× redundant author /
-    admin / usergroup / resource lookups per course endpoint.
+    admin / resource lookups per course endpoint.
     """
     existing = getattr(request.state, "rbac_checker", None)
     if (

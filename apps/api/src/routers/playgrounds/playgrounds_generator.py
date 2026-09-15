@@ -13,7 +13,6 @@ from src.core.events.database import get_db_session
 from src.db.users import PublicUser, AnonymousUser, APITokenUser
 from src.security.auth import get_current_user, resolve_acting_user_id
 from src.security.features_utils.usage import reserve_ai_credit
-from src.security.features_utils.dependencies import require_playgrounds_feature
 from src.services.ai.llm import model_for_tier
 from src.services.playgrounds.playgrounds_generator import (
     get_playground_session,
@@ -28,7 +27,7 @@ from src.services.playgrounds.schemas.playgrounds_generator import (
     PlaygroundMessage,
 )
 
-router = APIRouter(dependencies=[Depends(require_playgrounds_feature)])
+router = APIRouter()
 
 
 async def event_generator(generator, session_uuid: str):
@@ -111,17 +110,10 @@ async def start_playground_session(
     if isinstance(current_user, APITokenUser) and current_user.org_id != playground.org_id:
         raise HTTPException(status_code=403, detail="Insufficient permissions to generate content")
 
-    # Verify user can edit (must be creator or have update rights)
+    # Owners and shared editors generate; nobody else.
     generate_acting_user_id = resolve_acting_user_id(current_user)
-    from src.services.playgrounds.playgrounds import _get_user_rights
-    rights = await _get_user_rights(generate_acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == generate_acting_user_id
-    can_edit = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_edit:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to generate content")
+    from src.services.playgrounds.playgrounds import require_playground_editor
+    await require_playground_editor(playground, current_user, db_session)
 
     # F-9: per-user + per-org rate limit before any compute / credit spend.
     from src.services.security.rate_limiting import enforce_ai_rate_limit
@@ -211,17 +203,10 @@ async def iterate_playground_session(
     if isinstance(current_user, APITokenUser) and current_user.org_id != playground.org_id:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    # Verify user can edit
+    # Owners and shared editors generate; nobody else.
     iterate_acting_user_id = resolve_acting_user_id(current_user)
-    from src.services.playgrounds.playgrounds import _get_user_rights
-    rights = await _get_user_rights(iterate_acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == iterate_acting_user_id
-    can_edit = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_edit:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    from src.services.playgrounds.playgrounds import require_playground_editor
+    await require_playground_editor(playground, current_user, db_session)
 
     # F-9: per-user + per-org rate limit before any compute / credit spend.
     from src.services.security.rate_limiting import enforce_ai_rate_limit
@@ -291,16 +276,8 @@ async def get_session_state(
     if not playground:
         raise HTTPException(status_code=404, detail="Playground not found")
 
-    state_acting_user_id = resolve_acting_user_id(current_user)
-    from src.services.playgrounds.playgrounds import _get_user_rights
-    rights = await _get_user_rights(state_acting_user_id, playground.org_id, db_session)
-    pg_rights = rights.get("playgrounds", {})
-    is_owner = playground.created_by == state_acting_user_id
-    can_edit = pg_rights.get("action_update", False) or (
-        is_owner and pg_rights.get("action_update_own", False)
-    )
-    if not can_edit:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    from src.services.playgrounds.playgrounds import require_playground_editor
+    await require_playground_editor(playground, current_user, db_session)
 
     return PlaygroundSessionResponse(
         session_uuid=session.session_uuid,

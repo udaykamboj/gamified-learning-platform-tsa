@@ -9,113 +9,15 @@ from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, Reso
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.db.users import APITokenUser
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
 from src.security.rbac.utils import (
     check_element_type,
     check_course_permissions_with_own,
     get_element_organization_id,
 )
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+from src.security.rbac.constants import ADMIN_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 
 logger = logging.getLogger(__name__)
-
-
-async def _get_offer_for_usergroup(usergroup_id: int, db_session: AsyncSession) -> dict | None:
-    """
-    Return offer metadata if a usergroup is the access-control group for a PaymentsOffer.
-    Returns None if the usergroup is not tied to any offer.
-    """
-    try:
-        from ee.db.payments.payments_offers import PaymentsOffer
-        stmt = select(PaymentsOffer).where(
-            PaymentsOffer.usergroup_id == usergroup_id,
-        )
-        offer = (await db_session.execute(stmt)).scalars().first()
-        if offer:
-            return {
-                "offer_id": offer.id,
-                "offer_name": offer.name,
-                "amount": offer.amount,
-                "currency": offer.currency,
-            }
-    except Exception:
-        pass
-    return None
-
-
-async def check_usergroup_access(
-    resource_uuid: str,
-    user_id: int,
-    db_session: AsyncSession,
-) -> bool:
-    """
-    Check if a user has access to a resource via UserGroup membership.
-
-    This checks if:
-    1. The resource is linked to any UserGroups
-    2. If yes, whether the user is a member of any of those UserGroups
-
-    When access is denied because the resource belongs to a paid offer's UserGroup,
-    raises HTTP 402 Payment Required instead of returning False.
-
-    Args:
-        resource_uuid: UUID of the resource (course, podcast, community, etc.)
-        user_id: ID of the user to check
-        db_session: Database session
-
-    Returns:
-        bool: True if user has access (either no UserGroup restrictions or user is a member)
-    """
-    logger.info("[USERGROUP_ACCESS] Checking access for resource_uuid=%s, user_id=%s", resource_uuid, user_id)
-
-    # Check if resource has any UserGroups linked
-    usergroup_stmt = select(UserGroupResource).where(
-        UserGroupResource.resource_uuid == resource_uuid
-    )
-    usergroup_resources = (await db_session.execute(usergroup_stmt)).scalars().all()
-
-    logger.info("[USERGROUP_ACCESS] Found %d UserGroupResource entries for resource", len(usergroup_resources))
-
-    # If no UserGroups linked, resource is accessible to all authenticated users
-    if not usergroup_resources:
-        logger.info("[USERGROUP_ACCESS] No UserGroups linked, granting access")
-        return True
-
-    # Check if user is a member of any linked UserGroup
-    usergroup_ids = [ugr.usergroup_id for ugr in usergroup_resources]
-    logger.info("[USERGROUP_ACCESS] UserGroup IDs linked to resource: %s", usergroup_ids)
-
-    membership_stmt = select(UserGroupUser).where(
-        UserGroupUser.usergroup_id.in_(usergroup_ids),
-        UserGroupUser.user_id == user_id
-    )
-    membership = (await db_session.execute(membership_stmt)).scalars().first()
-
-    if membership:
-        logger.info("[USERGROUP_ACCESS] User %s IS a member of UserGroup %s, granting access", user_id, membership.usergroup_id)
-    else:
-        logger.info("[USERGROUP_ACCESS] User %s is NOT a member of any linked UserGroups %s, denying access", user_id, usergroup_ids)
-
-        # Check if any of the blocking UserGroups is tied to a paid offer
-        # If so, return HTTP 402 Payment Required (semantically distinct from 403 Forbidden)
-        for ugid in usergroup_ids:
-            offer_meta = await _get_offer_for_usergroup(ugid, db_session)
-            if offer_meta:
-                logger.info("[USERGROUP_ACCESS] Resource is behind paid offer %s, returning 402", offer_meta["offer_id"])
-                raise HTTPException(
-                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                    detail={
-                        "code": "PAYMENT_REQUIRED",
-                        "offer_id": offer_meta["offer_id"],
-                        "offer_name": offer_meta["offer_name"],
-                        "amount": offer_meta["amount"],
-                        "currency": offer_meta["currency"],
-                    },
-                )
-
-    return membership is not None
 
 
 # Tested and working
@@ -445,13 +347,12 @@ async def authorization_verify_based_on_org_admin_status(
         # If we can't determine the organization, deny access for safety
         return False
 
-    # Check if user has admin or maintainer role in the TARGET organization
-    # Note: This checks for admin/maintainer role which typically have full permissions
+    # Check if user holds the admin role in the TARGET organization
     statement = (
         select(UserOrganization)
         .where(UserOrganization.user_id == user_id)
         .where(UserOrganization.org_id == target_org_id)
-        .where(UserOrganization.role_id.in_(ADMIN_OR_MAINTAINER_ROLE_IDS))
+        .where(UserOrganization.role_id.in_(ADMIN_ROLE_IDS))
     )
 
     user_org = (await db_session.execute(statement)).scalars().first()
@@ -484,26 +385,10 @@ async def authorization_verify_based_on_roles_and_authorship(
     )
     logger.info("[RBAC] isRole=%s", isRole)
 
-    # Authors and role-holders (e.g. course admins/maintainers) must never be
-    # blocked by the paywall on a resource they own or manage. Grant access
-    # immediately so the UserGroup/paid-offer check below cannot raise a 402
-    # against them (check_usergroup_access raises HTTP 402 for paid offers, which
-    # would otherwise lock the author/admin out of their own paid resource).
     if isAuthor or isRole:
-        logger.info("[RBAC] Access GRANTED via author/role before usergroup check")
         return True
 
-    # For read actions, also check UserGroup membership
-    # UserGroups allow access to resources that are not public but restricted to group members
-    hasUserGroupAccess = False
-    if action == "read":
-        hasUserGroupAccess = await check_usergroup_access(
-            element_uuid, user_id, db_session
-        )
-    logger.info("[RBAC] hasUserGroupAccess=%s", hasUserGroupAccess)
-
-    # Enrollment-based access: users who have paid for this resource always get access,
-    # regardless of UserGroup membership state (e.g. if an admin removes them from the group).
+    # Enrollment-based access: users who have paid for this resource.
     hasPaidEnrollmentAccess = False
     if action == "read":
         try:
@@ -513,11 +398,10 @@ async def authorization_verify_based_on_roles_and_authorship(
             pass  # payments module not available (community edition) — skip silently
     logger.info("[RBAC] hasPaidEnrollmentAccess=%s", hasPaidEnrollmentAccess)
 
-    if isAuthor or isRole or hasUserGroupAccess or hasPaidEnrollmentAccess:
-        logger.info("[RBAC] Access GRANTED (isAuthor=%s, isRole=%s, hasUserGroupAccess=%s, hasPaidEnrollmentAccess=%s)", isAuthor, isRole, hasUserGroupAccess, hasPaidEnrollmentAccess)
+    if hasPaidEnrollmentAccess:
         return True
     else:
-        logger.info("[RBAC] Access DENIED (isAuthor=%s, isRole=%s, hasUserGroupAccess=%s, hasPaidEnrollmentAccess=%s)", isAuthor, isRole, hasUserGroupAccess, hasPaidEnrollmentAccess)
+        logger.info("[RBAC] Access DENIED (isAuthor=%s, isRole=%s)", isAuthor, isRole)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User rights (roles & authorship) : You don't have the right to perform this action",
@@ -548,7 +432,7 @@ async def authorization_verify_api_token_permissions(
 
     API tokens are restricted to these resources:
     - courses, activities, coursechapters, folders, media, certifications,
-    - usergroups, payments, search, assignments
+    - payments, search, assignments
 
     Args:
         request: FastAPI request object
@@ -574,7 +458,7 @@ async def authorization_verify_api_token_permissions(
     # API tokens are restricted to specific resource types
     allowed_resource_types = [
         'courses', 'activities', 'coursechapters', 'folders', 'media',
-        'certifications', 'usergroups', 'payments', 'search', 'assignments'
+        'certifications', 'payments', 'search', 'assignments'
     ]
 
     if element_type not in allowed_resource_types:

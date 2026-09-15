@@ -12,11 +12,15 @@ type MetadataProps = {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
+  let org;
+  try {
+    org = await getOrganizationContextInfo(params.orgslug, {
+      revalidate: 120,
+      tags: ['organizations'],
+    });
+  } catch (e) {
+    org = { name: 'Demo Org', slug: params.orgslug, org_uuid: 'demo-uuid', description: '' };
+  }
 
   const seoConfig = getOrgSeoConfig(org)
   const ogImageUrl = seoConfig.default_og_image

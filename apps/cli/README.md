@@ -1,8 +1,8 @@
-# LearnHouse CLI
+# StarLab CLI
 
-The official [LearnHouse](https://learnhouse.app) CLI — deploy, manage, and operate your LearnHouse instance.
+The official [StarLab](https://starlab.app) CLI — deploy, manage, and operate your StarLab instance.
 
-[Website](https://learnhouse.app) | [Documentation](https://docs.learnhouse.app) | [GitHub](https://github.com/learnhouse/learnhouse)
+[Website](https://starlab.app) | [Documentation](https://docs.starlab.app) | [GitHub](https://github.com/starlab/starlab)
 
 <img width="915" height="871" alt="image" src="https://github.com/user-attachments/assets/957c6cea-3efb-4cab-a643-55df3ac4c6aa" />
 
@@ -13,25 +13,25 @@ The official [LearnHouse](https://learnhouse.app) CLI — deploy, manage, and op
 **macOS / Linux:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-irm https://raw.githubusercontent.com/learnhouse/learnhouse/main/apps/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.ps1 | iex
 ```
 
 ### Using npx
 
 ```bash
-npx learnhouse@latest setup
+npx starlab@latest setup
 ```
 
 ### Install a specific version
 
 ```bash
-npx learnhouse@1.0.0 setup
+npx starlab@1.0.0 setup
 ```
 
 ## Requirements
@@ -43,22 +43,22 @@ npx learnhouse@1.0.0 setup
 
 | Command | Description |
 |---------|-------------|
-| `learnhouse setup` | Interactive setup wizard |
-| `learnhouse start` | Start all services |
-| `learnhouse stop` | Stop all services |
-| `learnhouse update` | Update to the latest version |
-| `learnhouse update --version <x.y.z>` | Update to a specific version |
-| `learnhouse logs` | Stream service logs |
-| `learnhouse config` | Show current configuration |
-| `learnhouse status` | Show service status |
-| `learnhouse health` | Run health checks |
-| `learnhouse backup` | Backup database |
-| `learnhouse restore <archive>` | Restore database from a backup |
-| `learnhouse deployments` | View deployments and set resource limits |
-| `learnhouse doctor` | Diagnose common issues |
-| `learnhouse shell` | Open a shell in a running container |
-| `learnhouse env` | Edit environment variables |
-| `learnhouse dev` | Start local development environment |
+| `starlab setup` | Interactive setup wizard |
+| `starlab start` | Start all services |
+| `starlab stop` | Stop all services |
+| `starlab update` | Update to the latest version |
+| `starlab update --version <x.y.z>` | Update to a specific version |
+| `starlab logs` | Stream service logs |
+| `starlab config` | Show current configuration |
+| `starlab status` | Show service status |
+| `starlab health` | Run health checks |
+| `starlab backup` | Backup database |
+| `starlab restore <archive>` | Restore database from a backup |
+| `starlab deployments` | View deployments and set resource limits |
+| `starlab doctor` | Diagnose common issues |
+| `starlab shell` | Open a shell in a running container |
+| `starlab env` | Edit environment variables |
+| `starlab dev` | Start local development environment |
 
 ## Setup
 
@@ -77,24 +77,24 @@ You can go back to any step, and edit from the summary before confirming.
 
 ```bash
 # Back up first
-npx learnhouse backup
+npx starlab backup
 
 # Update to latest
-npx learnhouse update
+npx starlab update
 
 # Or a specific version
-npx learnhouse update --version 1.2.0
+npx starlab update --version 1.2.0
 ```
 
-The update command pulls the new image, restarts services, and asks if you want to run database migrations. Check [docs.learnhouse.app](https://docs.learnhouse.app) for migration guides before proceeding.
+The update command pulls the new image, restarts services, and asks if you want to run database migrations. Check [docs.starlab.app](https://docs.starlab.app) for migration guides before proceeding.
 
 ## Generated Files
 
 ```
-learnhouse/
+starlab/
   docker-compose.yml       # Service definitions
   .env                     # Configuration
-  learnhouse.config.json   # CLI metadata
+  starlab.config.json   # CLI metadata
   extra/
     nginx.prod.conf        # Reverse proxy (or Caddyfile for auto-SSL)
 ```
@@ -105,7 +105,7 @@ All commands support non-interactive usage for CI pipelines:
 
 ```bash
 # Setup without prompts
-npx learnhouse setup --ci \
+npx starlab setup --ci \
   --name production \
   --domain example.com \
   --port 80 \
@@ -113,13 +113,13 @@ npx learnhouse setup --ci \
   --admin-password secretpass123
 
 # Update with auto-migration
-npx learnhouse update --version 1.2.0 --migrate
+npx starlab update --version 1.2.0 --migrate
 
 # Update without migrations
-npx learnhouse update --no-migrate
+npx starlab update --no-migrate
 
 # Setup without starting services
-npx learnhouse setup --ci --admin-password pass123 --no-start
+npx starlab setup --ci --admin-password pass123 --no-start
 ```
 
 ## Testing
@@ -145,7 +145,7 @@ bun run test:all
 - `update --migrate` with pending Alembic migrations
 - `logs` (streams indefinitely)
 - `dev` mode (requires full monorepo source)
-- Multi-installation discovery (`findInstallDir` with multiple `~/.learnhouse/*` entries)
+- Multi-installation discovery (`findInstallDir` with multiple `~/.starlab/*` entries)
 - Error recovery (Docker daemon down, port conflicts, corrupted config)
 
 ## License

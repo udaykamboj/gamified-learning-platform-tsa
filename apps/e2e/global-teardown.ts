@@ -2,8 +2,8 @@
  * Playwright global teardown.
  *
  * Tears the self-host down deterministically via `docker compose down -v` on
- * the compose file the CLI generated under ~/.learnhouse/<name>/. We avoid
- * `learnhouse stop` here because it can prompt interactively when more than one
+ * the compose file the CLI generated under ~/.starlab/<name>/. We avoid
+ * `starlab stop` here because it can prompt interactively when more than one
  * install exists on the machine; operating on the compose file directly is
  * non-interactive and only touches the instance we created.
  *
@@ -26,7 +26,7 @@ export default async function globalTeardown(): Promise<void> {
     return
   }
 
-  const composePath = join(homedir(), '.learnhouse', INSTALL_NAME, 'docker-compose.yml')
+  const composePath = join(homedir(), '.starlab', INSTALL_NAME, 'docker-compose.yml')
   if (!existsSync(composePath)) {
     console.warn(`No compose file at ${composePath}; nothing to tear down.`)
     return

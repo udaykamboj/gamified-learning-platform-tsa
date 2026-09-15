@@ -2,8 +2,6 @@ from typing import List
 from uuid import uuid4
 from sqlmodel import select, or_, and_, func
 from sqlmodel.ext.asyncio.session import AsyncSession
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
 from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
@@ -33,10 +31,10 @@ from src.security.rbac import (
     check_resource_access,
     AccessAction,
 )
-from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+from src.security.rbac.constants import ADMIN_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.podcasts.thumbnails import upload_podcast_thumbnail
-from fastapi import HTTPException, Request, UploadFile, status
+from fastapi import HTTPException, Request, UploadFile
 from datetime import datetime
 from src.db.organization_config import OrganizationConfig
 
@@ -67,7 +65,6 @@ async def _user_can_view_unpublished_podcast(
     Users can view unpublished podcasts if they are:
     1. A resource author (creator, maintainer, or contributor) of the podcast
     2. An admin or maintainer in the organization
-    3. A member of a UserGroup that has access to the podcast
     """
     # Anonymous users cannot view unpublished podcasts
     if isinstance(current_user, AnonymousUser):
@@ -98,23 +95,7 @@ async def _user_can_view_unpublished_podcast(
     )
     user_roles = (await db_session.execute(role_statement)).scalars().all()
     for role in user_roles:
-        if role.id in ADMIN_OR_MAINTAINER_ROLE_IDS:  # Admin or Maintainer role IDs
-            return True
-
-    # Check if user is a member of a UserGroup that has access to this podcast
-    usergroup_stmt = select(UserGroupResource).where(
-        UserGroupResource.resource_uuid == podcast.podcast_uuid
-    )
-    usergroup_resources = (await db_session.execute(usergroup_stmt)).scalars().all()
-
-    if usergroup_resources:
-        usergroup_ids = [ugr.usergroup_id for ugr in usergroup_resources]
-        membership_stmt = select(UserGroupUser).where(
-            UserGroupUser.usergroup_id.in_(usergroup_ids),
-            UserGroupUser.user_id == acting_user_id
-        )
-        membership = (await db_session.execute(membership_stmt)).scalars().first()
-        if membership:
+        if role.id in ADMIN_ROLE_IDS:
             return True
 
     return False
@@ -300,7 +281,7 @@ async def get_podcasts_orgslug(
             )
             user_roles = (await db_session.execute(role_statement)).scalars().all()
             for role in user_roles:
-                if role.id in ADMIN_OR_MAINTAINER_ROLE_IDS:  # Admin role IDs
+                if role.id in ADMIN_ROLE_IDS:  # Admin role IDs
                     can_view_unpublished = True
                     break
 
@@ -319,24 +300,18 @@ async def get_podcasts_orgslug(
         if can_view_unpublished:
             pass
         else:
-            # For regular users, show:
-            # 1. Published AND public podcasts
-            # 2. Published podcasts not in any UserGroup
-            # 3. Podcasts (including unpublished) in UserGroups where the user is a member
-            # 4. Podcasts (including unpublished) where the user is a resource author
+            # Podcasts are platform content every signed-in student can listen
+            # to (docs/refactor/progress/00-requirements.md, R15). Publishers also
+            # see their own drafts.
             query = (
                 query
-                .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Podcast.podcast_uuid)
-                .outerjoin(UserGroupUser, and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == acting_user_id
+                .outerjoin(ResourceAuthor, and_(
+                    ResourceAuthor.resource_uuid == Podcast.podcast_uuid,
+                    ResourceAuthor.user_id == acting_user_id,
                 ))
-                .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Podcast.podcast_uuid)
                 .where(or_(
-                    and_(Podcast.published == True, Podcast.public == True),  # Published public podcasts
-                    and_(Podcast.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published podcasts not in any UserGroup
-                    UserGroupUser.user_id == acting_user_id,  # Podcasts in UserGroups where user is a member (including unpublished)
-                    ResourceAuthor.user_id == acting_user_id  # Podcasts where user is a resource author (including unpublished)
+                    Podcast.published == True,  # noqa: E712
+                    ResourceAuthor.user_id == acting_user_id,
                 ))
             )
 
@@ -431,24 +406,16 @@ async def get_podcasts_count_orgslug(
         # Superadmins see all podcasts (no additional filter)
         pass
     else:
-        # For authenticated users, count:
-        # 1. Published AND public podcasts
-        # 2. Published podcasts not in any UserGroup
-        # 3. Podcasts (including unpublished) in UserGroups where the user is a member
-        # 4. Podcasts (including unpublished) where the user is a resource author
+        # Signed-in students count every published podcast plus their own drafts.
         query = (
             query
-            .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Podcast.podcast_uuid)
-            .outerjoin(UserGroupUser, and_(
-                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                UserGroupUser.user_id == count_acting_user_id
+            .outerjoin(ResourceAuthor, and_(
+                ResourceAuthor.resource_uuid == Podcast.podcast_uuid,
+                ResourceAuthor.user_id == count_acting_user_id,
             ))
-            .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Podcast.podcast_uuid)
             .where(or_(
-                and_(Podcast.published == True, Podcast.public == True),  # Published public podcasts
-                and_(Podcast.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published podcasts not in any UserGroup
-                UserGroupUser.user_id == count_acting_user_id,  # Podcasts in UserGroups where user is a member (including unpublished)
-                ResourceAuthor.user_id == count_acting_user_id  # Podcasts where user is a resource author (including unpublished)
+                Podcast.published == True,  # noqa: E712
+                ResourceAuthor.user_id == count_acting_user_id,
             ))
         )
 
@@ -646,40 +613,6 @@ async def update_podcast(
     # SECURITY: Require podcast ownership or admin role for updating podcasts
     await check_resource_access(request, db_session, current_user, podcast.podcast_uuid, AccessAction.UPDATE)
 
-    # SECURITY: Additional checks for sensitive access control fields
-    sensitive_fields_updated = []
-
-    if podcast_object.public is not None:
-        sensitive_fields_updated.append("public")
-
-    if sensitive_fields_updated:
-        # Resolve to the token's creator for API-token callers so ownership /
-        # admin checks run against a real user_id (tokens have id=0).
-        acting_user_id = resolve_acting_user_id(current_user)
-
-        statement = select(ResourceAuthor).where(
-            ResourceAuthor.resource_uuid == podcast_uuid,
-            ResourceAuthor.user_id == acting_user_id
-        )
-        resource_author = (await db_session.execute(statement)).scalars().first()
-
-        is_podcast_owner = False
-        if resource_author:
-            if ((resource_author.authorship == ResourceAuthorshipEnum.CREATOR) or
-                (resource_author.authorship == ResourceAuthorshipEnum.MAINTAINER)) and \
-                resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE:
-                is_podcast_owner = True
-
-        is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
-            request, acting_user_id, "update", podcast_uuid, db_session
-        )
-
-        if not (is_podcast_owner or is_admin_or_maintainer):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"You must be the podcast owner (CREATOR or MAINTAINER) or have admin role to change access settings: {', '.join(sensitive_fields_updated)}",
-            )
-
     # Update only the fields that were passed in
     # Skip empty strings for the thumbnail field to prevent accidental clearing
     # (PodcastUpdate.thumbnail_image defaults to "", not None, so an unchanged
@@ -766,7 +699,7 @@ async def get_podcast_user_rights(
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
 ) -> dict:
-    """Get detailed user rights for a specific podcast."""
+    """What the caller can do with a podcast: students listen, admins publish."""
     statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
     podcast = (await db_session.execute(statement)).scalars().first()
 
@@ -776,121 +709,36 @@ async def get_podcast_user_rights(
             detail="Podcast not found",
         )
 
-    # API tokens report rights under their creator's identity.
     acting_user_id = resolve_acting_user_id(current_user)
-
     rights = {
         "podcast_uuid": podcast_uuid,
         "user_id": acting_user_id,
         "is_anonymous": acting_user_id == 0,
         "permissions": {
             "read": False,
-            "create": False,
-            "update": False,
-            "delete": False,
-            "create_episodes": False,
-            "update_episodes": False,
-            "delete_episodes": False,
-            "manage_access": False,
-        },
-        "ownership": {
-            "is_owner": False,
-            "is_creator": False,
-            "is_maintainer": False,
-            "is_contributor": False,
-            "authorship_status": None,
+            "publish": False,
         },
         "roles": {
             "is_admin": False,
-            "is_maintainer_role": False,
-            "is_instructor": False,
-            "is_user": False,
-        }
+            "is_student": False,
+        },
     }
 
-    # Handle anonymous users
+    try:
+        await check_resource_access(request, db_session, current_user, podcast_uuid, AccessAction.READ)
+        rights["permissions"]["read"] = True
+    except HTTPException:
+        pass
+
     if acting_user_id == 0:
-        if podcast.public:
-            rights["permissions"]["read"] = True
         return rights
 
-    # Check podcast ownership
-    statement = select(ResourceAuthor).where(
-        ResourceAuthor.resource_uuid == podcast_uuid,
-        ResourceAuthor.user_id == acting_user_id
-    )
-    resource_author = (await db_session.execute(statement)).scalars().first()
-
-    if resource_author:
-        rights["ownership"]["authorship_status"] = resource_author.authorship_status
-
-        if resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE:
-            if resource_author.authorship == ResourceAuthorshipEnum.CREATOR:
-                rights["ownership"]["is_creator"] = True
-                rights["ownership"]["is_owner"] = True
-            elif resource_author.authorship == ResourceAuthorshipEnum.MAINTAINER:
-                rights["ownership"]["is_maintainer"] = True
-                rights["ownership"]["is_owner"] = True
-            elif resource_author.authorship == ResourceAuthorshipEnum.CONTRIBUTOR:
-                rights["ownership"]["is_contributor"] = True
-                rights["ownership"]["is_owner"] = True
-
-    # Check user roles
-    from src.security.rbac.rbac import authorization_verify_based_on_roles
-
-    is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
+    is_admin = await authorization_verify_based_on_org_admin_status(
         request, acting_user_id, "update", podcast_uuid, db_session
     )
-
-    if is_admin_or_maintainer:
-        rights["roles"]["is_admin"] = True
-        rights["roles"]["is_maintainer_role"] = True
-
-    has_instructor_permissions = await authorization_verify_based_on_roles(
-        request, acting_user_id, "create", "podcast_x", db_session
-    )
-
-    if has_instructor_permissions:
-        rights["roles"]["is_instructor"] = True
-
-    has_user_permissions = await authorization_verify_based_on_roles(
-        request, acting_user_id, "read", podcast_uuid, db_session
-    )
-
-    if has_user_permissions:
-        rights["roles"]["is_user"] = True
-
-    # Determine permissions based on ownership and roles
-    is_podcast_owner = rights["ownership"]["is_owner"]
-    is_admin = rights["roles"]["is_admin"]
-    is_maintainer_role = rights["roles"]["is_maintainer_role"]
-    is_instructor = rights["roles"]["is_instructor"]
-
-    # READ permissions
-    if podcast.public or is_podcast_owner or is_admin or is_maintainer_role or is_instructor or has_user_permissions:
+    rights["roles"]["is_admin"] = is_admin
+    rights["roles"]["is_student"] = not is_admin
+    rights["permissions"]["publish"] = is_admin
+    if is_admin:
         rights["permissions"]["read"] = True
-
-    # CREATE permissions (podcast creation)
-    if is_instructor or is_admin or is_maintainer_role:
-        rights["permissions"]["create"] = True
-
-    # UPDATE permissions
-    if is_podcast_owner or is_admin or is_maintainer_role:
-        rights["permissions"]["update"] = True
-
-    # DELETE permissions
-    if is_podcast_owner or is_admin or is_maintainer_role:
-        rights["permissions"]["delete"] = True
-
-    # EPISODE permissions
-    if is_podcast_owner or is_admin or is_maintainer_role:
-        rights["permissions"]["create_episodes"] = True
-        rights["permissions"]["update_episodes"] = True
-        rights["permissions"]["delete_episodes"] = True
-
-    # ACCESS MANAGEMENT permissions
-    if (rights["ownership"]["is_creator"] or rights["ownership"]["is_maintainer"] or
-        is_admin or is_maintainer_role):
-        rights["permissions"]["manage_access"] = True
-
     return rights

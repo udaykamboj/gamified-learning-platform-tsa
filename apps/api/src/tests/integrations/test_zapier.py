@@ -14,22 +14,10 @@ from sqlmodel import select
 
 from src.db.courses.courses import Course
 from src.db.roles import Role
-from src.db.usergroups import UserGroup
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, User
 from src.db.webhooks import WebhookEndpoint
-from src.routers.integrations.zapier import (
-    ZapierSubscriptionCreate,
-    _require_api_token,
-    zapier_create_subscription,
-    zapier_delete_subscription,
-    zapier_list_courses,
-    zapier_list_events,
-    zapier_list_subscriptions,
-    zapier_list_usergroups,
-    zapier_list_users,
-    zapier_me,
-)
+from src.routers.integrations.zapier import (ZapierSubscriptionCreate, _require_api_token, zapier_create_subscription, zapier_delete_subscription, zapier_list_courses, zapier_list_events, zapier_list_subscriptions, zapier_list_users, zapier_me)
 
 
 # ── Fixtures ────────────────────────────────────────────────────────────────
@@ -133,23 +121,6 @@ def other_token(other_org, other_user):
         token_name="Other Token",
         created_by_user_id=other_user.id,
     )
-
-
-@pytest.fixture
-async def usergroup(db, org):
-    g = UserGroup(
-        id=1,
-        name="Students",
-        description="",
-        org_id=org.id,
-        usergroup_uuid="ug_test",
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
-    )
-    db.add(g)
-    await db.commit()
-    await db.refresh(g)
-    return g
 
 
 @pytest.fixture
@@ -300,14 +271,6 @@ class TestZapierUsers:
             result = await zapier_list_users(limit=100, ctx=(token_user, db))
         assert len(result) == 1
         assert result[0].email == "test@example.com"
-
-
-class TestZapierUsergroups:
-    async def test_lists_org_groups(self, db, token_user, usergroup):
-        with _patch_plan_pro():
-            result = await zapier_list_usergroups(limit=100, ctx=(token_user, db))
-        assert len(result) == 1
-        assert result[0].name == "Students"
 
 
 # ── Subscriptions CRUD ──────────────────────────────────────────────────────

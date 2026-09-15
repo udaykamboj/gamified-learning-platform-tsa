@@ -2,7 +2,7 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import starlabIcon from 'public/starlab_bigicon_1.png'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 import { cn } from '@/lib/utils'
@@ -28,10 +28,10 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
     unsplash_photographer_url = '',
     unsplash_photo_url = '',
   } = authBranding
-  const UNSPLASH_UTM = '?utm_source=LearnHouse&utm_medium=referral'
+  const UNSPLASH_UTM = '?utm_source=StarLab&utm_medium=referral'
   const withUtm = (url: string) => (url ? `${url}${UNSPLASH_UTM}` : '')
 
-  // Check if org has enterprise plan - hide LearnHouse branding for enterprise users
+  // Check if org has enterprise plan - hide StarLab branding for enterprise users
   // In OSS mode, always show branding regardless of plan
   const plan = usePlan()
   const isEnterprise = plan === 'enterprise'
@@ -75,7 +75,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
 
   const displayMessage = welcome_message || welcomeText || ''
   // No-org platform copy (defaults mirror the platform login illustration).
-  const noOrgTitle = title || 'Welcome back to LearnHouse.'
+  const noOrgTitle = title || 'Welcome back to StarLab.'
   const noOrgSubtitle =
     subtitle || 'Pick up where you left off — your courses, students, and tools are waiting.'
   // Treat the no-org illustration like a photo background: dark scrim, no
@@ -141,16 +141,16 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full p-10">
-          {/* Top bar with LearnHouse lrn.svg logo - hidden for enterprise users
+          {/* Top bar with StarLab starlab.png logo - hidden for enterprise users
               and for the no-org apex panel (platform shows no logo on the image). */}
           {!isEnterprise && !noOrg && (
             <div className="login-topbar">
-              <Link prefetch href="https://learnhouse.app" target="_blank">
+              <Link prefetch href="https://starlab.app" target="_blank">
                 <img
-                  src="/lrn.svg"
-                  alt="LearnHouse"
-                  width={30}
-                  height={30}
+                  src="/starlab.svg"
+                  alt="StarLab"
+                  width={110}
+                  height={22}
                   className={cn(
                     "transition-opacity hover:opacity-100",
                     text_color === 'light' ? "opacity-60 invert" : "opacity-40"
@@ -177,7 +177,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
               <div className="flex-1 flex items-center justify-center">
                 <div className={cn(
                   "flex flex-col items-center text-center gap-6",
-                  text_color === 'light' ? "text-white" : "text-gray-900"
+                    "text-white"
                 )}>
                   {/* Organization logo */}
                   <Link prefetch href={getUriWithOrg(org?.slug, '/')}>
@@ -193,8 +193,8 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                           quality={100}
                           width={96}
                           height={96}
-                          src={learnhouseIcon}
-                          alt="LearnHouse"
+                          src={starlabIcon}
+                          alt="StarLab"
                           className="object-contain"
                         />
                       )}
@@ -203,11 +203,11 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
 
                   {/* Text content */}
                   <div className="space-y-1">
-                    <h1 className="font-black text-3xl tracking-tight">{org?.name || 'LearnHouse'}</h1>
+                    <h1 className="font-black text-3xl tracking-tight">{org?.name || 'StarLab'}</h1>
                     {displayMessage && (
                       <p className={cn(
                         "text-lg max-w-sm leading-relaxed",
-                        text_color === 'light' ? "text-white/70" : "text-gray-600"
+                        "text-white/70"
                       )}>
                         {displayMessage}
                       </p>
@@ -225,7 +225,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
           {background_type === 'unsplash' && background_image && unsplash_photographer_name && (
             <div className={cn(
               "absolute bottom-3 start-4 end-4 z-10 text-[11px] leading-tight",
-              text_color === 'light' ? "text-white/70" : "text-gray-700"
+              "text-white/70"
             )}>
               Photo by{' '}
               <a

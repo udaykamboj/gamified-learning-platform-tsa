@@ -1,9 +1,8 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from pydantic import BaseModel
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 from src.db.roles import RoleRead
-from src.db.usergroups import UserGroupRead
 
 from src.db.organization_config import OrganizationConfig
 
@@ -79,7 +78,6 @@ class OrganizationRead(OrganizationBase):
 class OrganizationUser(BaseModel):
     user: "UserRead"
     role: RoleRead
-    usergroups: List[UserGroupRead] = []
     joined_at: Optional[str] = None
     # Active-user billing (current UTC month): distinct days seen + active flag.
     visit_days: int = 0

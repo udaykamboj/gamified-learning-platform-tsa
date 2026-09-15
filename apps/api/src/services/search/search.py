@@ -141,7 +141,7 @@ async def search_across_org(
     - Authenticated non-members see public content only; they cannot search users.
     - Org members additionally see org-scoped non-public content where the
       resource itself doesn't restrict it further (e.g. unpublished items and
-      usergroup-restricted playgrounds are always excluded from search).
+      private (restricted) playgrounds are always excluded from search).
     - User hits are serialized as ``UserReadPublic``, never ``UserRead``: search
       is open to every member, so it must not expose the PII the dedicated
       member directory restricts to admins.
@@ -264,7 +264,7 @@ async def search_across_org(
         db_session, discussions_q, page, limit
     )
 
-    # ── Playgrounds (published only; restricted are usergroup-gated elsewhere) ─
+    # ── Playgrounds (published, link-shared ones only; private ones never) ─
     playgrounds_q = (
         select(Playground)
         .where(Playground.org_id == org.id)

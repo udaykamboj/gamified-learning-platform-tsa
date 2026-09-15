@@ -287,11 +287,11 @@ async def api_rag_chat(
     "/rag/index",
     response_model=RAGIndexResponse,
     summary="Reindex course content for RAG",
-    description="Manually trigger re-indexing (embedding) of a course's content for the RAG chatbot. Requires admin/maintainer role on the course's organization.",
+    description="Manually trigger re-indexing (embedding) of a course's content for the RAG chatbot. Requires admin role on the course's organization.",
     responses={
         200: {"description": "Course re-indexed successfully.", "model": RAGIndexResponse},
         401: {"description": "Authentication required"},
-        403: {"description": "User lacks admin/maintainer role on the organization"},
+        403: {"description": "User lacks the admin role on the organization"},
         404: {"description": "Course not found"},
     },
 )
@@ -303,7 +303,7 @@ async def api_rag_index(
 ):
     """
     Manually trigger re-indexing of a course's content for RAG.
-    Requires admin/maintainer role on the course's organization.
+    Requires admin role on the course's organization.
     """
     # Resolve course
     course = (await db_session.execute(
@@ -312,7 +312,7 @@ async def api_rag_index(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # Require admin/maintainer access
+    # Require admin access
     await require_org_admin(resolve_acting_user_id(current_user), course.org_id, db_session)
 
     # Run indexing

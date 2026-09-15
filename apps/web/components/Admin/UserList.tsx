@@ -18,12 +18,7 @@ import {
   EnvelopeSimple,
 } from '@phosphor-icons/react'
 
-interface OrgMembership {
-  id: number
-  name: string
-  slug: string
-  role_name: string
-}
+
 
 interface GlobalUser {
   id: number
@@ -35,7 +30,6 @@ interface GlobalUser {
   avatar_image: string | null
   is_superadmin: boolean
   org_count: number
-  orgs: OrgMembership[]
   creation_date: string
   update_date: string
 }
@@ -55,67 +49,6 @@ function getAvatarUrl(userUuid: string, avatarImage: string): string {
 const SUPERADMIN_FILTERS = ['all', 'yes', 'no'] as const
 const PAGE_SIZE = 20
 
-function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
-  const [open, setOpen] = useState(false)
-  const btnRef = React.useRef<HTMLButtonElement>(null)
-  const [pos, setPos] = useState<{ top: number; left: number; rtl: boolean } | null>(null)
-
-  useEffect(() => {
-    if (open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect()
-      // Anchor to the edge the tooltip grows away from, so it doesn't run off
-      // the viewport when the UI is right-to-left.
-      const rtl = document.documentElement.dir === 'rtl'
-      setPos({ top: rect.top - 8, left: rtl ? window.innerWidth - rect.right : rect.left, rtl })
-    }
-  }, [open])
-
-  if (orgs.length === 0) {
-    return <span className="text-white/25 text-xs">None</span>
-  }
-
-  return (
-    <>
-      <button
-        ref={btnRef}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        className="text-sm text-white/60 hover:text-white/80 transition-colors underline decoration-dotted underline-offset-2"
-      >
-        {orgs.length} org{orgs.length !== 1 ? 's' : ''}
-      </button>
-      {open && pos && (
-        <div
-          className="fixed z-[9999] w-64 bg-[#1a1a1b] border border-white/[0.12] rounded-lg shadow-xl p-2 space-y-1 max-h-64 overflow-y-auto"
-          style={{ top: pos.top, ...(pos.rtl ? { right: pos.left } : { left: pos.left }), transform: 'translateY(-100%)' }}
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-        >
-          {orgs.map((o) => (
-            <div
-              key={o.id}
-              className="flex items-center justify-between px-2 py-1.5 rounded"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <Buildings
-                  size={12}
-                  weight="fill"
-                  className="text-white/30 shrink-0"
-                />
-                <span className="text-xs font-medium text-white/90 truncate">
-                  {o.name}
-                </span>
-              </div>
-              <span className="text-[10px] text-white/40 shrink-0 ms-2">
-                {o.role_name}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
 
 export default function UserList() {
   const session = useLHSession() as any
@@ -135,9 +68,6 @@ export default function UserList() {
   const [superadminFilter, setSuperadminFilter] = useState<string>(
     searchParams.get('superadmin') || 'all'
   )
-  const [minOrgs, setMinOrgs] = useState(
-    Number(searchParams.get('min_orgs')) || 0
-  )
 
   const updateUrl = useCallback(
     (updates: Record<string, string | number>) => {
@@ -148,8 +78,7 @@ export default function UserList() {
           (key === 'page' && strVal === '1') ||
           (key === 'sort' && strVal === 'id') ||
           (key === 'superadmin' && strVal === 'all') ||
-          (key === 'search' && strVal === '') ||
-          (key === 'min_orgs' && strVal === '0')
+          (key === 'search' && strVal === '')
         ) {
           params.delete(key)
         } else {
@@ -179,9 +108,8 @@ export default function UserList() {
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (superadminFilter !== 'all')
       params.set('superadmin', superadminFilter)
-    if (minOrgs > 0) params.set('min_orgs', String(minOrgs))
     return params.toString()
-  }, [page, sortBy, debouncedSearch, superadminFilter, minOrgs])
+  }, [page, sortBy, debouncedSearch, superadminFilter])
 
   const {
     data: userData,
@@ -189,7 +117,7 @@ export default function UserList() {
     isFetching,
   } = useQuery<PaginatedUserResponse>({
     queryKey: [...queryKeys.superadmin.users(), queryParams],
-    queryFn: () => apiFetch(`${getAPIUrl()}ee/superadmin/users?${queryParams}`, accessToken),
+    queryFn: () => apiFetch(`${getAPIUrl()}superadmin/users?${queryParams}`, accessToken),
     enabled: !!accessToken,
     staleTime: 60_000,
     placeholderData: (prev) => prev,
@@ -219,11 +147,6 @@ export default function UserList() {
     setSuperadminFilter(val)
     setPage(1)
     updateUrl({ superadmin: val, page: 1 })
-  }
-  const handleMinOrgsChange = (val: number) => {
-    setMinOrgs(val)
-    setPage(1)
-    updateUrl({ min_orgs: val, page: 1 })
   }
 
   const avatarFallback = (
@@ -276,22 +199,7 @@ export default function UserList() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40">Min orgs:</span>
-              {[0, 1, 2, 3, 5].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => handleMinOrgsChange(n)}
-                  className={`text-xs px-2 py-1 rounded-md transition-colors ${
-                    minOrgs === n
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
-                  }`}
-                >
-                  {n === 0 ? 'Any' : `${n}+`}
-                </button>
-              ))}
-            </div>
+
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-white/40 me-1">Sort:</span>
@@ -300,8 +208,7 @@ export default function UserList() {
                 ['id', 'Default'],
                 ['newest', 'Newest'],
                 ['oldest', 'Oldest'],
-                ['orgs_desc', 'Most orgs'],
-                ['orgs_asc', 'Least orgs'],
+
                 ['username', 'Username'],
                 ['recently_updated', 'Updated'],
               ] as const
@@ -349,9 +256,7 @@ export default function UserList() {
                   <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
-                    Organizations
-                  </th>
+
                   <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
                     Role
                   </th>
@@ -413,9 +318,7 @@ export default function UserList() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <OrgListTooltip orgs={u.orgs} />
-                      </td>
+
                       <td className="px-4 py-3">
                         {u.is_superadmin ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400/10 text-amber-400">

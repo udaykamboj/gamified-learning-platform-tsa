@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
+import UnsplashImagePicker, { UnsplashPhotoMeta } from '@components/Objects/UnsplashImagePicker/UnsplashImagePicker'
 import AIImageButton from '@components/Objects/AI/AIImageButton'
 import { usePlan } from '@components/Hooks/usePlan'
 
@@ -35,7 +35,7 @@ export default function AuthBrandingTab() {
 
   const existingConfig = org?.config?.config?.customization?.auth_branding || org?.config?.config?.general?.auth_branding || {}
 
-  // Check if org has enterprise plan - hide LearnHouse branding for enterprise users
+  // Check if org has enterprise plan - hide StarLab branding for enterprise users
   // In OSS mode, always show branding regardless of plan
   const plan = usePlan()
   const isEnterprise = plan === 'enterprise'
@@ -324,7 +324,7 @@ export default function AuthBrandingTab() {
                       "w-4 h-4 bg-contain bg-no-repeat",
                       textColor === 'light' ? "opacity-60 invert" : "opacity-40"
                     )}
-                    style={{ backgroundImage: "url(/lrn.svg)" }}
+                    style={{ backgroundImage: "url(/starlab.png)" }}
                   />
                 </div>
               )}

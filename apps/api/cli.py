@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 import typer
-from config.config import get_learnhouse_config
+from config.config import get_starlab_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
 from src.services.setup.setup import (
@@ -46,7 +46,7 @@ def _to_sync_url(url: str) -> str:
 def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False
 ):
-    """Install LearnHouse: schema, default elements, organization, and admin user.
+    """Install StarLab: schema, default elements, organization, and admin user.
 
     Typer entry point — uses asyncio.run because no loop is running yet.
     Programmatic async callers (FastAPI lifespan, etc.) should await
@@ -56,8 +56,8 @@ def install(
 
 
 async def _install_async(short: bool) -> None:
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
 
     # Schema DDL runs on a sync engine (SQLModel.metadata.create_all is sync).
     sync_engine = create_engine(_to_sync_url(sql_url), echo=False, pool_pre_ping=True)
@@ -83,11 +83,11 @@ async def _install_async(short: bool) -> None:
                 await install_default_elements(db_session)
                 print("Default elements installed ✅")
 
-                # Honor LEARNHOUSE_INITIAL_ORG_NAME / LEARNHOUSE_INITIAL_ORG_SLUG when
+                # Honor STARLAB_INITIAL_ORG_NAME / STARLAB_INITIAL_ORG_SLUG when
                 # the CLI passes them — falls back to "Default Organization" / "default"
                 # so existing standalone deployments still work unchanged.
-                org_name = os.environ.get("LEARNHOUSE_INITIAL_ORG_NAME", "Default Organization")
-                org_slug = os.environ.get("LEARNHOUSE_INITIAL_ORG_SLUG", "default").lower()
+                org_name = os.environ.get("STARLAB_INITIAL_ORG_NAME", "Default Organization")
+                org_slug = os.environ.get("STARLAB_INITIAL_ORG_SLUG", "default").lower()
 
                 # Create the Organization
                 print(f"Creating organization '{org_name}' (slug: {org_slug})...")
@@ -107,16 +107,16 @@ async def _install_async(short: bool) -> None:
                 # Create Organization User
                 print("Creating default organization user...")
                 # Use email from environment variable if provided, otherwise default to "admin@school.dev"
-                email = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_EMAIL", "admin@school.dev")
+                email = os.environ.get("STARLAB_INITIAL_ADMIN_EMAIL", "admin@school.dev")
                 # Require password from environment variable
-                password = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_PASSWORD")
+                password = os.environ.get("STARLAB_INITIAL_ADMIN_PASSWORD")
                 if not password:
-                    print("❌ Error: LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable is required")
-                    print("Please set LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable before running installation.")
+                    print("❌ Error: STARLAB_INITIAL_ADMIN_PASSWORD environment variable is required")
+                    print("Please set STARLAB_INITIAL_ADMIN_PASSWORD environment variable before running installation.")
                     raise typer.Exit(code=1)
-                print("Using password from LEARNHOUSE_INITIAL_ADMIN_PASSWORD environment variable")
+                print("Using password from STARLAB_INITIAL_ADMIN_PASSWORD environment variable")
                 if email != "admin@school.dev":
-                    print(f"Using email from LEARNHOUSE_INITIAL_ADMIN_EMAIL environment variable: {email}")
+                    print(f"Using email from STARLAB_INITIAL_ADMIN_EMAIL environment variable: {email}")
                 user = UserCreate(
                     username="admin", email=email, password=password
                 )
@@ -125,12 +125,14 @@ async def _install_async(short: bool) -> None:
                 )
                 print("Default organization user created ✅")
 
+                await _sync_catalog(db_session)
+
                 # Show the user how to login
                 print("Installation completed ✅")
                 print("")
                 print("Login with the following credentials:")
                 print("email: " + email)
-                print("password: (the password you set in LEARNHOUSE_INITIAL_ADMIN_PASSWORD)")
+                print("password: (the password you set in STARLAB_INITIAL_ADMIN_PASSWORD)")
                 print("⚠️ Remember to change the password after logging in ⚠️")
 
             else:
@@ -169,6 +171,8 @@ async def _install_async(short: bool) -> None:
                 )
                 print(username + " user created ✅")
 
+                await _sync_catalog(db_session)
+
                 # Show the user how to login
                 print("Installation completed ✅")
                 print("")
@@ -179,6 +183,52 @@ async def _install_async(short: bool) -> None:
         await async_engine.dispose()
 
 
+async def _sync_catalog(db_session: AsyncSession) -> None:
+    from src.content.catalog.sync import sync_platform_content
+
+    print("Syncing platform courses and communities...")
+    stats = await sync_platform_content(db_session)
+    print(f"Catalog synced ✅ (created {stats.created}, updated {stats.updated}, removed {stats.removed})")
+
+
+@cli.command(name="sync-platform-content")
+def sync_platform_content_command():
+    """Sync the course catalog and platform communities into the database.
+
+    Courses are platform content kept in src/content/catalog/courses. The API
+    runs this on every boot; run it by hand after editing the catalog on a
+    running deployment. Safe to run repeatedly.
+    """
+    asyncio.run(_run_with_session(_sync_catalog))
+
+
+@cli.command(name="retire-teacher-roles")
+def retire_teacher_roles_command():
+    """Move Maintainer/Instructor/custom-role members to Admin or Student and delete those roles.
+
+    Also runs on every boot. Safe to run repeatedly.
+    """
+    async def _retire(db_session: AsyncSession) -> None:
+        from src.services.setup.setup import retire_teacher_roles
+
+        retired = await retire_teacher_roles(db_session)
+        for line in retired:
+            print(f"Retired {line}")
+        if not retired:
+            print("No teacher-era roles left.")
+
+    asyncio.run(_run_with_session(_retire))
+
+
+async def _run_with_session(fn) -> None:
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
+    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            await fn(db_session)
+    finally:
+        await async_engine.dispose()
 
 
 @cli.command()
@@ -335,8 +385,8 @@ async def _compute_active_user_overage(year: int, month: int) -> None:
         now = datetime.now(timezone.utc)
         year, month = now.year, now.month
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -377,7 +427,7 @@ def nudges_run(
     """
     Daily: send lifecycle nudges to organization admins.
 
-    Cron-invoked. Sends nothing unless LEARNHOUSE_NUDGES_ENABLED is set and the
+    Cron-invoked. Sends nothing unless STARLAB_NUDGES_ENABLED is set and the
     deployment is SaaS — so deploying this command is not the same as arming
     it. Start with --dry-run, then --seed, then a small --max-sends.
     """
@@ -404,8 +454,8 @@ async def _run_nudges(
 ) -> None:
     from src.services.nudges.runner import run_nudges
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
 
     try:
@@ -455,8 +505,8 @@ async def _nudges_stats(days: int) -> None:
 
     from src.db.nudges import NudgeSend
 
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
     async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
@@ -487,148 +537,41 @@ async def _nudges_stats(days: int) -> None:
         print(f"\n  {stuck} row(s) stuck in 'claimed' — a run died mid-send.")
 
 
-@cli.command(name="demo-sync")
-def demo_sync():
-    """
-    Create or refresh the shared demo organization.
-
-    Safe to run repeatedly — that is the point. The first run builds the demo
-    from the bundle; every run after it puts back whatever a visitor changed
-    and writes nothing if nothing changed.
-
-    The in-app scheduler calls the same code on an interval. This command is
-    for operators who would rather drive it from their own cron (set
-    LEARNHOUSE_DEMO_NO_SCHEDULER) or want to force a refresh now.
-    """
-    asyncio.run(_demo_sync())
-
-
-async def _demo_sync() -> None:
-    from src.services.demo.sync import sync_demo
-
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            stats = await sync_demo(db_session)
-    finally:
-        await async_engine.dispose()
-
-    action = "provisioned" if stats.provisioned else "refreshed"
-    print(f"Demo {action} (epoch {stats.epoch})")
-    print(f"  created:       {stats.created}")
-    print(f"  updated:       {stats.updated}")
-    print(f"  drift removed: {stats.drift_deleted}")
-    if not stats.created and not stats.updated and not stats.drift_deleted:
-        print("  nothing to do — the demo already matches the bundle")
-
-
-@cli.command(name="demo-status")
-def demo_status():
-    """Show the demo organization's state and what it currently contains."""
-    asyncio.run(_demo_status())
-
-
-async def _demo_status() -> None:
-    from sqlalchemy import func, select
-
-    from src.db.demo_entities import DemoEntity
-    from src.db.demo_state import DEMO_STATE_ID, DemoState
-    from src.db.organizations import Organization
-
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            state = (
-                await db_session.execute(
-                    select(DemoState).where(DemoState.id == DEMO_STATE_ID)
-                )
-            ).scalars().first()
-            if state is None:
-                print("No demo organization has been created yet.")
-                print("Run: uv run python cli.py demo-sync")
-                return
-
-            org = None
-            if state.org_id:
-                org = (
-                    await db_session.execute(
-                        select(Organization).where(Organization.id == state.org_id)
-                    )
-                ).scalars().first()
-
-            print(f"State:          {state.state}")
-            print(f"Bundle version: {state.bundle_version}")
-            print(f"Content epoch:  {state.content_epoch}")
-            print(f"Last refresh:   {state.last_refresh_at}")
-            if state.last_error:
-                print(f"Last error:     {state.last_error}")
-            if org is not None:
-                print(f"Organization:   {org.name} (/{org.slug}, id={org.id})")
-
-            rows = (
-                await db_session.execute(
-                    select(DemoEntity.kind, func.count())
-                    .group_by(DemoEntity.kind)
-                    .order_by(DemoEntity.kind)
-                )
-            ).all()
-            if rows:
-                print("\nRegistered rows:")
-                for kind, count in rows:
-                    print(f"  {kind:18} {count}")
-    finally:
-        await async_engine.dispose()
-
-
-@cli.command(name="demo-teardown")
-def demo_teardown(
-    yes: Annotated[bool, typer.Option("--yes", help="Skip the confirmation")] = False,
-):
-    """
-    Delete the demo organization, its students, its files and its state.
-
-    Everything it owns goes with the organization via cascade; the fake student
-    accounts, their uploaded files and the authorship rows that reference
-    content by a bare uuid are removed explicitly, because none of those are
-    org-owned rows the cascade can reach.
-    """
-    if not yes:
-        typer.confirm(
-            "Delete the demo organization and all forty demo student accounts?",
-            abort=True,
-        )
-    asyncio.run(_demo_teardown())
-
-
-async def _demo_teardown() -> None:
-    from src.services.demo.teardown import teardown_demo
-
-    learnhouse_config = get_learnhouse_config()
-    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
-    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
-
-    try:
-        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
-            removed = await teardown_demo(db_session)
-            await db_session.commit()
-
-            for line in removed:
-                print(line)
-            if not removed:
-                print("No demo organization found.")
-    finally:
-        await async_engine.dispose()
-
-
 @cli.command()
 def main():
     cli()
+
+
+@cli.command()
+def backfill():
+    """Backfill existing data to single-org architecture.
+    In single-org mode, there is only one organization. This command ensures the platform organization is set up correctly.
+    """
+    asyncio.run(_backfill_async())
+
+async def _backfill_async() -> None:
+    starlab_config = get_starlab_config()
+    sql_url = starlab_config.database_config.sql_connection_string  # type: ignore
+
+    async_engine = create_async_engine(
+        _to_async_url(sql_url), echo=False, pool_pre_ping=True
+    )
+
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            from src.services.orgs.platform import get_platform_org
+            
+            org = await get_platform_org(db_session)
+            if org:
+                print(f"Platform organization exists: {org.name} (id: {org.id})")
+            else:
+                print("No platform organization found. Run `agy install` first.")
+                
+            # Here we could collapse other orgs or move users, but for now we just verify.
+            print("Backfill complete ✅")
+            
+    finally:
+        await async_engine.dispose()
 
 
 if __name__ == "__main__":

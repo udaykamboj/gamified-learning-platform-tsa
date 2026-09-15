@@ -20,11 +20,6 @@ class MemberOrgConfig(BaseModel):
     limit: int = 10
 
 
-class UserGroupOrgConfig(BaseModel):
-    enabled: bool = True
-    limit: int = 10
-
-
 class StorageOrgConfig(BaseModel):
     enabled: bool = True
     limit: int = 10
@@ -93,7 +88,6 @@ class PlaygroundsOrgConfig(BaseModel):
 class OrgFeatureConfig(BaseModel):
     courses: CourseOrgConfig = CourseOrgConfig()
     members: MemberOrgConfig = MemberOrgConfig()
-    usergroups: UserGroupOrgConfig = UserGroupOrgConfig()
     storage: StorageOrgConfig = StorageOrgConfig()
     ai: AIOrgConfig = AIOrgConfig()
     assignments: AssignmentOrgConfig = AssignmentOrgConfig()
@@ -158,7 +152,7 @@ class SecurityAdminToggle(BaseModel):
     allowed_auth_methods: list[str] = Field(
         default_factory=lambda: ["password", "magic_login", "google", "sso"]
     )
-    # Whether a session established on the central apex (learnhouse.io) or for a
+    # Whether a session established on the central apex (starlab.io) or for a
     # different org may be used to access this org directly. Default True keeps
     # today's behavior (one session works everywhere the user is a member). When
     # False, a member arriving with a foreign/central session is refused and must

@@ -1,34 +1,34 @@
 <p align="center">
-  <a href="https://docs.learnhouse.app">
-    <img alt="LearnHouse" src=".github/images/learnhouse-github.png" width="600" />
+  <a href="https://docs.starlab.app">
+    <img alt="StarLab" src=".github/images/starlab-github.png" width="600" />
   </a>
 </p>
 
 <p align="center">
-  <strong>LearnHouse Documentation</strong>
+  <strong>StarLab Documentation</strong>
 </p>
 
 <p align="center">
-  Official documentation for <a href="https://learnhouse.app">LearnHouse</a>, the open-source learning management system.
+  Official documentation for <a href="https://starlab.app">StarLab</a>, the open-source learning management system.
 </p>
 
 <p align="center">
-  <a href="https://docs.learnhouse.app">docs.learnhouse.app</a>
+  <a href="https://docs.starlab.app">docs.starlab.app</a>
 </p>
 
 ---
 
 ## Local Development
 
-This site lives in the [`learnhouse/learnhouse`](https://github.com/learnhouse/learnhouse)
+This site lives in the [`starlab/starlab`](https://github.com/starlab/starlab)
 monorepo under `docs/`. Run all commands from that directory.
 
 **Prerequisites:** [Bun](https://bun.sh) installed.
 
 ```bash
 # Clone the monorepo and move into the docs app
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse/docs
+git clone https://github.com/starlab/starlab.git
+cd starlab/docs
 
 # Install dependencies
 bun install

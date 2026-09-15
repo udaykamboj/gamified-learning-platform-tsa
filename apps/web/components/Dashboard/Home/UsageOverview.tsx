@@ -115,15 +115,8 @@ export default function UsageOverview() {
       key: 'podcasts',
       label: t('dashboard.home.podcasts'),
       icon: Microphone,
-      enabled: orgFeatures?.podcasts?.enabled === true,
+      enabled: orgFeatures?.podcasts?.enabled !== false,
       href: '/dash/podcasts',
-    },
-    {
-      key: 'boards',
-      label: t('dashboard.home.boards'),
-      icon: Chalkboard,
-      enabled: orgFeatures?.boards?.enabled === true,
-      href: '/dash/boards',
     },
   ]
 

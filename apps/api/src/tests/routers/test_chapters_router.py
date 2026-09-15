@@ -66,26 +66,6 @@ def _mock_chapter_read(**overrides) -> ChapterRead:
 
 
 class TestChaptersRouter:
-    async def test_create_chapter(self, client):
-        with patch(
-            "src.routers.courses.chapters.create_chapter",
-            new_callable=AsyncMock,
-            return_value=_mock_chapter_read(),
-        ):
-            response = await client.post(
-                "/api/v1/chapters/",
-                json={
-                    "name": "Test Chapter",
-                    "description": "A chapter",
-                    "thumbnail_image": "",
-                    "org_id": 1,
-                    "course_id": 1,
-                },
-            )
-
-        assert response.status_code == 200
-        assert response.json()["chapter_uuid"] == "chapter_test"
-
     async def test_get_chapter(self, client):
         with patch(
             "src.routers.courses.chapters.get_chapter",
@@ -108,24 +88,6 @@ class TestChaptersRouter:
         assert response.status_code == 200
         assert response.json()["chapterOrder"] == []
 
-    async def test_update_chapter_order(self, client):
-        with patch(
-            "src.routers.courses.chapters.reorder_chapters_and_activities",
-            new_callable=AsyncMock,
-            return_value={"detail": "reordered"},
-        ):
-            response = await client.put(
-                "/api/v1/chapters/course/course_test/order",
-                json={
-                    "chapter_order_by_ids": [
-                        {"chapter_id": 1, "activities_order_by_ids": [{"activity_id": 1}]}
-                    ]
-                },
-            )
-
-        assert response.status_code == 200
-        assert response.json()["detail"] == "reordered"
-
     async def test_get_course_chapters(self, client):
         with patch(
             "src.routers.courses.chapters.get_course_chapters",
@@ -136,58 +98,3 @@ class TestChaptersRouter:
 
         assert response.status_code == 200
         assert response.json()[0]["chapter_uuid"] == "chapter_test"
-
-    async def test_update_chapter(self, client):
-        with patch(
-            "src.routers.courses.chapters.update_chapter",
-            new_callable=AsyncMock,
-            return_value=_mock_chapter_read(name="Updated Chapter"),
-        ):
-            response = await client.put(
-                "/api/v1/chapters/1",
-                json={"name": "Updated Chapter"},
-            )
-
-        assert response.status_code == 200
-        assert response.json()["name"] == "Updated Chapter"
-
-    async def test_delete_chapter(self, client):
-        with patch(
-            "src.routers.courses.chapters.delete_chapter",
-            new_callable=AsyncMock,
-            return_value={"detail": "chapter deleted"},
-        ):
-            response = await client.delete("/api/v1/chapters/1")
-
-        assert response.status_code == 200
-        assert response.json()["detail"] == "chapter deleted"
-
-    async def test_chapter_usergroup_endpoints(self, client):
-        with patch(
-            "src.routers.courses.chapters.get_chapter_usergroups",
-            new_callable=AsyncMock,
-            return_value=[{"usergroup_uuid": "ug1"}],
-        ):
-            list_response = await client.get("/api/v1/chapters/chapter_test/usergroups")
-
-        with patch(
-            "src.routers.courses.chapters.add_usergroup_to_chapter",
-            new_callable=AsyncMock,
-            return_value={"detail": "Usergroup added"},
-        ):
-            add_response = await client.post(
-                "/api/v1/chapters/chapter_test/usergroups/ug1"
-            )
-
-        with patch(
-            "src.routers.courses.chapters.remove_usergroup_from_chapter",
-            new_callable=AsyncMock,
-            return_value={"detail": "Usergroup removed"},
-        ):
-            remove_response = await client.delete(
-                "/api/v1/chapters/chapter_test/usergroups/ug1"
-            )
-
-        assert list_response.status_code == 200
-        assert add_response.status_code == 200
-        assert remove_response.status_code == 200

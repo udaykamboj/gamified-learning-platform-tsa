@@ -6,38 +6,38 @@ import * as fs from 'node:fs'
 import { isDockerInstalled, isDockerRunning } from '../services/docker.js'
 import { checkDevEnv } from '../services/env-check.js'
 
-const PROJECT_NAME = 'learnhouse-dev'
+const PROJECT_NAME = 'starlab-dev'
 
-const DEV_COMPOSE = `name: learnhouse-dev
+const DEV_COMPOSE = `name: starlab-dev
 
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: learnhouse-db-dev
+    container_name: starlab-db-dev
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=learnhouse
-      - POSTGRES_PASSWORD=learnhouse
-      - POSTGRES_DB=learnhouse
+      - POSTGRES_USER=starlab
+      - POSTGRES_PASSWORD=starlab
+      - POSTGRES_DB=starlab
     ports:
       - "5432:5432"
     volumes:
-      - learnhouse_db_dev_data:/var/lib/postgresql/data
+      - starlab_db_dev_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U learnhouse"]
+      test: ["CMD-SHELL", "pg_isready -U starlab"]
       interval: 5s
       timeout: 4s
       retries: 5
 
   redis:
     image: redis:8.6.1-alpine
-    container_name: learnhouse-redis-dev
+    container_name: starlab-redis-dev
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
       - "6379:6379"
     volumes:
-      - learnhouse_redis_dev_data:/data
+      - starlab_redis_dev_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -45,8 +45,8 @@ services:
       retries: 5
 
 volumes:
-  learnhouse_db_dev_data:
-  learnhouse_redis_dev_data:
+  starlab_db_dev_data:
+  starlab_redis_dev_data:
 `
 
 function findProjectRoot(): string | null {
@@ -65,7 +65,7 @@ function findProjectRoot(): string | null {
 }
 
 function getDevComposePath(root: string): string {
-  const dotDir = path.join(root, '.learnhouse')
+  const dotDir = path.join(root, '.starlab')
   if (!fs.existsSync(dotDir)) fs.mkdirSync(dotDir, { recursive: true })
   const composePath = path.join(dotDir, 'docker-compose.dev.yml')
   fs.writeFileSync(composePath, DEV_COMPOSE)
@@ -135,7 +135,7 @@ function isContainerRunning(name: string): boolean {
 }
 
 function isInfraRunning(): boolean {
-  return isContainerRunning('learnhouse-db-dev') && isContainerRunning('learnhouse-redis-dev')
+  return isContainerRunning('starlab-db-dev') && isContainerRunning('starlab-redis-dev')
 }
 
 let serviceEnv: Record<string, string> = {}
@@ -180,12 +180,12 @@ function killProcess(child: ChildProcess | null): Promise<void> {
 export async function devCommand(opts: { ee?: boolean; adminEmail?: string; adminPassword?: string }) {
   const root = findProjectRoot()
   if (!root) {
-    p.log.error('Not inside a LearnHouse project.')
-    p.log.info('Run this command from within the learnhouse monorepo (must contain dev/docker-compose.yml, apps/api/, and apps/web/).')
+    p.log.error('Not inside a StarLab project.')
+    p.log.info('Run this command from within the starlab monorepo (must contain dev/docker-compose.yml, apps/api/, and apps/web/).')
     process.exit(1)
   }
 
-  p.intro(pc.cyan('LearnHouse Dev Mode'))
+  p.intro(pc.cyan('StarLab Dev Mode'))
 
   // Check env files before anything else
   const envOk = await checkDevEnv(root)
@@ -281,12 +281,12 @@ export async function devCommand(opts: { ee?: boolean; adminEmail?: string; admi
 
   serviceEnv = {
     FORCE_COLOR: '1',
-    LEARNHOUSE_DEVELOPMENT_MODE: 'true',
-    ...(adminEmail && { LEARNHOUSE_INITIAL_ADMIN_EMAIL: adminEmail }),
-    ...(adminPassword && { LEARNHOUSE_INITIAL_ADMIN_PASSWORD: adminPassword }),
-    ...(!opts.ee && { LEARNHOUSE_DISABLE_EE: '1' }),
+    STARLAB_DEVELOPMENT_MODE: 'true',
+    ...(adminEmail && { STARLAB_INITIAL_ADMIN_EMAIL: adminEmail }),
+    ...(adminPassword && { STARLAB_INITIAL_ADMIN_PASSWORD: adminPassword }),
+    ...(!opts.ee && { STARLAB_DISABLE_EE: '1' }),
     // Bypass license verification for local dev when --ee is active
-    ...(opts.ee && { LEARNHOUSE_FORCE_EE: '1' }),
+    ...(opts.ee && { STARLAB_FORCE_EE: '1' }),
   }
 
   // Health checks
@@ -294,8 +294,8 @@ export async function devCommand(opts: { ee?: boolean; adminEmail?: string; admi
   healthSpinner.start('Waiting for DB and Redis to be healthy...')
 
   const [dbReady, redisReady] = await Promise.all([
-    waitForHealth('DB', 'docker', ['exec', 'learnhouse-db-dev', 'pg_isready', '-U', 'learnhouse']),
-    waitForHealth('Redis', 'docker', ['exec', 'learnhouse-redis-dev', 'redis-cli', 'ping']),
+    waitForHealth('DB', 'docker', ['exec', 'starlab-db-dev', 'pg_isready', '-U', 'starlab']),
+    waitForHealth('Redis', 'docker', ['exec', 'starlab-redis-dev', 'redis-cli', 'ping']),
   ])
 
   if (!dbReady || !redisReady) {
@@ -359,7 +359,7 @@ export async function devCommand(opts: { ee?: boolean; adminEmail?: string; admi
 
   p.log.success('API, Web, and Collab servers started')
   console.log()
-  console.log(pc.dim('  Thank you for contributing to LearnHouse!'))
+  console.log(pc.dim('  Thank you for contributing to StarLab!'))
   console.log()
 
   printControls()
@@ -379,8 +379,8 @@ export async function devCommand(opts: { ee?: boolean; adminEmail?: string; admi
     await Promise.all([killProcess(apiProc), killProcess(webProc), killProcess(collabProc)])
 
     console.log(pc.dim('DB and Redis containers are still running for next session.'))
-    console.log(pc.dim('To stop them: docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down'))
-    console.log(pc.dim('Thanks for building with LearnHouse!'))
+    console.log(pc.dim('To stop them: docker compose -f .starlab/docker-compose.dev.yml -p starlab-dev down'))
+    console.log(pc.dim('Thanks for building with StarLab!'))
     process.exit(0)
   }
 

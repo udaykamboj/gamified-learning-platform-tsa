@@ -1,7 +1,7 @@
 """
 Zapier integration router.
 
-These endpoints are called by the Zapier Platform (not the LearnHouse dashboard)
+These endpoints are called by the Zapier Platform (not the StarLab dashboard)
 and MUST be authenticated via an API token (``Authorization: Bearer lh_...``).
 The token carries the organization scope — no ``org_id`` appears in the URL.
 
@@ -24,7 +24,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
-from src.db.usergroups import UserGroup
 from src.db.user_organizations import UserOrganization
 from src.db.users import APITokenUser, User
 from src.db.webhooks import WebhookEndpoint
@@ -104,13 +103,6 @@ class ZapierUserItem(BaseModel):
     username: str
     first_name: str
     last_name: str
-
-
-class ZapierUserGroupItem(BaseModel):
-    id: int
-    usergroup_uuid: str
-    name: str
-    description: str
 
 
 class ZapierSubscriptionCreate(BaseModel):
@@ -252,39 +244,6 @@ async def zapier_list_users(
             last_name=u.last_name or "",
         )
         for u in users
-    ]
-
-
-@router.get(
-    "/usergroups",
-    response_model=List[ZapierUserGroupItem],
-    summary="List user groups for Zapier",
-    description="List cohorts / user groups in the caller's organization. Maximum 500 rows.",
-    responses={
-        200: {"description": "List of user groups in the caller's organization."},
-        401: {"description": "Missing or invalid API token"},
-        403: {"description": "Organization plan does not include Zapier integration (Pro+ required)"},
-    },
-)
-async def zapier_list_usergroups(
-    limit: int = 100,
-    ctx=Depends(_zapier_context),
-) -> List[ZapierUserGroupItem]:
-    api_user, db_session = ctx
-    query = (
-        select(UserGroup)
-        .where(UserGroup.org_id == api_user.org_id)
-        .limit(max(1, min(limit, 500)))
-    )
-    groups = (await db_session.execute(query)).scalars().all()
-    return [
-        ZapierUserGroupItem(
-            id=g.id or 0,
-            usergroup_uuid=g.usergroup_uuid,
-            name=g.name,
-            description=g.description or "",
-        )
-        for g in groups
     ]
 
 

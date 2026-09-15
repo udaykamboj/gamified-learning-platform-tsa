@@ -80,7 +80,7 @@ describe('update-ee shared upgrade helpers', () => {
   })
 
   it('backupDatabase dumps an in-container database', () => {
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     expect(isExternalDbInstall(dir)).toBe(false)
     const out = backupDatabase({ installDir: dir } as never, LAYOUT, ui)
     expect(out).toMatch(/db-pre-upgrade-.*\.sql\.gz$/)
@@ -89,7 +89,7 @@ describe('update-ee shared upgrade helpers', () => {
 
   it('backupDatabase dumps an external database via the app container network', () => {
     fs.writeFileSync(path.join(dir, '.env'),
-      'LEARNHOUSE_SQL_CONNECTION_STRING=postgresql://u:p@host:5432/lh\n')
+      'STARLAB_SQL_CONNECTION_STRING=postgresql://u:p@host:5432/lh\n')
     expect(isExternalDbInstall(dir)).toBe(true)
     const out = backupDatabase({ installDir: dir } as never, LAYOUT, ui) // 69-81
     expect(fs.existsSync(out)).toBe(true)
@@ -97,13 +97,13 @@ describe('update-ee shared upgrade helpers', () => {
 
   it('backupDatabase throws when the app container is not running (external)', () => {
     fs.writeFileSync(path.join(dir, '.env'),
-      'LEARNHOUSE_SQL_CONNECTION_STRING=postgresql://u:p@host:5432/lh\n')
+      'STARLAB_SQL_CONNECTION_STRING=postgresql://u:p@host:5432/lh\n')
     cp.cid = '' // compose ps -q returns nothing → not running (75)
     expect(() => backupDatabase({ installDir: dir } as never, LAYOUT, ui)).toThrow(/not running/)
   })
 
   it('backupDatabase throws when the produced dump looks empty', () => {
-    fs.writeFileSync(path.join(dir, '.env'), 'LEARNHOUSE_DOMAIN=localhost\n')
+    fs.writeFileSync(path.join(dir, '.env'), 'STARLAB_DOMAIN=localhost\n')
     cp.dumpBytes = 10 // < 100 bytes → "looks empty" (90)
     expect(() => backupDatabase({ installDir: dir } as never, LAYOUT, ui)).toThrow(/looks empty/)
   })
@@ -187,8 +187,8 @@ describe('updateEnterprise command', () => {
     dir = path.join(home, 'ee')
     fs.mkdirSync(dir, { recursive: true })
     fs.writeFileSync(path.join(dir, '.env'),
-      'EE_IMAGE_TAG=prod\nLEARNHOUSE_LICENSE_KEY=lh_live_TESTKEY\nLEARNHOUSE_DOMAIN=learn.school.dev\n')
-    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: learnhouse-dep1\nservices:\n  api:\n')
+      'EE_IMAGE_TAG=prod\nSTARLAB_LICENSE_KEY=lh_live_TESTKEY\nSTARLAB_DOMAIN=learn.school.dev\n')
+    fs.writeFileSync(path.join(dir, 'docker-compose.yml'), 'name: starlab-dep1\nservices:\n  api:\n')
     origHome = process.env.HOME
     process.env.HOME = home
     ctl.composeExec = 'abc12345 (head)\n' // alembic already at head → migrations no-op

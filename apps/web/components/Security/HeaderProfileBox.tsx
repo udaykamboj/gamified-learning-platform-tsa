@@ -164,23 +164,8 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
 
   return (
     <div className="flex items-stretch items-center">
-      {session.status == 'unauthenticated' && (
-        <div className="flex items-stretch grow items-center">
-          <ul className="flex space-x-0.5 sm:space-x-1 items-center">
-            <li>
-              <LanguageSwitcher primaryColor={primaryColor} />
-            </li>
-            <li>
-              <Link
-                className={`px-3 py-2 rounded-lg transition-colors text-sm font-bold ${colors.hoverBg} ${colors.text}`}
-                href={getUriWithOrg(org?.slug, '/login')} >{t('auth.login')}</Link>
-            </li>
-            <li className={`rounded-lg shadow-sm transition-colors px-4 py-2 text-xs sm:text-sm font-bold ms-1 sm:ms-2 ${colors.signUpBtn}`}>
-              <Link href={getUriWithOrg(org?.slug, '/signup')}>{t('auth.sign_up')}</Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      {/* The proxy enforces authentication before any component under the (withmenu) layout loads.
+          Therefore, an unauthenticated state with Login/Signup buttons is no longer necessary. */}
       {session.status == 'authenticated' && (
         <div className="flex items-center space-x-0">
           <div className="flex items-center space-x-3">
@@ -234,14 +219,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {rights?.dashboard?.action_access && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dash" className="flex items-center space-x-2">
-                      <Shield size={16} weight="fill" />
-                      <span>{t('common.dashboard')}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+
                 <DropdownMenuItem asChild>
                   <Link href="/account/general" className="flex items-center space-x-2">
                     <User size={16} weight="fill" />
@@ -278,7 +256,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                         <DropdownMenuSubContent className="max-h-72 overflow-auto">
                           {myOrgs.map((o: any) => (
                             <DropdownMenuItem key={o.id} asChild>
-                              <Link href={getUriWithOrg(o.slug, '/')} className="flex items-center space-x-2">
+                              <Link href={getUriWithOrg(o.slug, '/dashboard')} className="flex items-center space-x-2">
                                 {o.logo_image ? (
                                   <img src={getOrgLogoMediaDirectory(o.org_uuid, o.logo_image)} alt="" className="w-5 h-5 rounded object-cover shrink-0 ring-1 ring-inset ring-black/5" />
                                 ) : (

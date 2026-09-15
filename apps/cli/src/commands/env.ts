@@ -11,47 +11,47 @@ const CATEGORIES: Record<string, { label: string; keys: string[] }> = {
   domain: {
     label: 'Domain & Hosting',
     keys: [
-      'LEARNHOUSE_DOMAIN', 'HTTP_PORT', 'NEXT_PUBLIC_LEARNHOUSE_API_URL',
-      'NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL', 'NEXT_PUBLIC_LEARNHOUSE_DOMAIN',
-      'NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN', 'NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG',
-      'NEXT_PUBLIC_LEARNHOUSE_DEFAULT_ORG', 'NEXT_PUBLIC_LEARNHOUSE_HTTPS',
+      'STARLAB_DOMAIN', 'HTTP_PORT', 'NEXT_PUBLIC_STARLAB_API_URL',
+      'NEXT_PUBLIC_STARLAB_BACKEND_URL', 'NEXT_PUBLIC_STARLAB_DOMAIN',
+      'NEXT_PUBLIC_STARLAB_TOP_DOMAIN', 'NEXT_PUBLIC_STARLAB_MULTI_ORG',
+      'NEXT_PUBLIC_STARLAB_DEFAULT_ORG', 'NEXT_PUBLIC_STARLAB_HTTPS',
       'NEXTAUTH_URL',
     ],
   },
   database: {
     label: 'Database & Redis',
     keys: [
-      'LEARNHOUSE_SQL_CONNECTION_STRING', 'LEARNHOUSE_REDIS_CONNECTION_STRING',
+      'STARLAB_SQL_CONNECTION_STRING', 'STARLAB_REDIS_CONNECTION_STRING',
       'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_DB',
     ],
   },
   security: {
     label: 'Security',
     keys: [
-      'NEXTAUTH_SECRET', 'LEARNHOUSE_AUTH_JWT_SECRET_KEY',
-      'LEARNHOUSE_INITIAL_ADMIN_EMAIL', 'LEARNHOUSE_INITIAL_ADMIN_PASSWORD',
-      'LEARNHOUSE_COOKIE_DOMAIN',
+      'NEXTAUTH_SECRET', 'STARLAB_AUTH_JWT_SECRET_KEY',
+      'STARLAB_INITIAL_ADMIN_EMAIL', 'STARLAB_INITIAL_ADMIN_PASSWORD',
+      'STARLAB_COOKIE_DOMAIN',
     ],
   },
   ai: {
     label: 'AI',
-    keys: ['LEARNHOUSE_GEMINI_API_KEY', 'LEARNHOUSE_IS_AI_ENABLED'],
+    keys: ['STARLAB_GEMINI_API_KEY', 'STARLAB_IS_AI_ENABLED'],
   },
   email: {
     label: 'Email',
-    keys: ['LEARNHOUSE_RESEND_API_KEY', 'LEARNHOUSE_SYSTEM_EMAIL_ADDRESS'],
+    keys: ['STARLAB_RESEND_API_KEY', 'STARLAB_SYSTEM_EMAIL_ADDRESS'],
   },
   s3: {
     label: 'S3 Storage',
     keys: [
-      'LEARNHOUSE_CONTENT_DELIVERY_TYPE', 'LEARNHOUSE_S3_API_BUCKET_NAME',
-      'LEARNHOUSE_S3_API_ENDPOINT_URL',
+      'STARLAB_CONTENT_DELIVERY_TYPE', 'STARLAB_S3_API_BUCKET_NAME',
+      'STARLAB_S3_API_ENDPOINT_URL',
     ],
   },
   oauth: {
     label: 'OAuth',
     keys: [
-      'LEARNHOUSE_GOOGLE_CLIENT_ID', 'LEARNHOUSE_GOOGLE_CLIENT_SECRET',
+      'STARLAB_GOOGLE_CLIENT_ID', 'STARLAB_GOOGLE_CLIENT_SECRET',
       'NEXT_PUBLIC_UNSPLASH_ACCESS_KEY',
     ],
   },
@@ -120,7 +120,7 @@ export async function envCommand() {
   const dir = findInstallDir()
   const config = readConfig(dir)
   if (!config) {
-    p.log.error('No LearnHouse installation found. Run setup first.')
+    p.log.error('No StarLab installation found. Run setup first.')
     process.exit(1)
   }
 
@@ -130,7 +130,7 @@ export async function envCommand() {
     process.exit(1)
   }
 
-  p.intro(pc.cyan('LearnHouse Environment Editor'))
+  p.intro(pc.cyan('StarLab Environment Editor'))
 
   const originalContent = fs.readFileSync(envPath, 'utf-8')
   const envMap = parseEnv(originalContent)

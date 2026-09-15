@@ -31,12 +31,6 @@ from src.db.roles import Role, RoleTypeEnum
 from src.db.user_organizations import UserOrganization
 from src.db.users import APITokenUser, User, UserCreate
 from src.security.rbac.constants import ADMIN_ROLE_ID
-from src.services.admin.admin import change_user_role
-from src.services.orgs.orgs import (
-    _try_record_org_admin_in_loops,
-    create_org,
-    create_org_with_config,
-)
 from src.services.orgs.users import update_user_role
 from src.services.setup.setup import (
     install_create_organization,
@@ -118,79 +112,9 @@ def _make_token_user(org_id: int) -> APITokenUser:
 # ---------------------------------------------------------------------------
 
 
-def test_try_record_org_admin_in_loops_forwards_creator_fields():
-    """The helper forwards the creator's email + name and the org slug."""
-    user = MagicMock()
-    user.email = "creator@test.com"
-    user.first_name = "Ada"
-    user.last_name = "Lovelace"
-    org = MagicMock()
-    org.slug = "team-alpha"
-
-    with patch(_LOOPS_TARGET) as loops_hook:
-        _try_record_org_admin_in_loops(user, org)
-
-    loops_hook.assert_called_once_with(
-        email="creator@test.com",
-        org_slug="team-alpha",
-        first_name="Ada",
-        last_name="Lovelace",
-    )
-
-
-def test_try_record_org_admin_in_loops_swallows_errors():
-    """A failure in the helper must never propagate out of the hook."""
-    user = MagicMock()
-    user.email = "creator@test.com"
-    org = MagicMock()
-    org.slug = "team-alpha"
-
-    with patch(_LOOPS_TARGET, side_effect=RuntimeError("loops down")):
-        # Must not raise.
-        _try_record_org_admin_in_loops(user, org)
-
-
 # ---------------------------------------------------------------------------
 # orgs.py :: create_org / create_org_with_config call the hook with the creator
 # ---------------------------------------------------------------------------
-
-
-@patch("src.services.orgs.orgs.is_multi_org_allowed", return_value=True)
-@patch("src.routers.users._invalidate_session_cache")
-async def test_create_org_records_creator_in_loops(
-    _cache, _multi, mock_request, db, admin_user
-):
-    new_org = OrganizationCreate(name="New Org", slug="new-org", email="new@org.com")
-
-    with patch(_LOOPS_TARGET) as loops_hook:
-        await create_org(mock_request, new_org, admin_user, db)
-
-    loops_hook.assert_called_once()
-    kwargs = loops_hook.call_args.kwargs
-    # Targets the CREATOR (the acting admin) and the new org's slug.
-    assert kwargs["email"] == admin_user.email
-    assert kwargs["org_slug"] == "new-org"
-
-
-@patch("src.services.orgs.orgs.is_multi_org_allowed", return_value=True)
-@patch("src.routers.users._invalidate_session_cache")
-async def test_create_org_with_config_records_creator_in_loops(
-    _cache, _multi, mock_request, db, admin_user
-):
-    new_org = OrganizationCreate(
-        name="Configured Org", slug="configured-org", email="c@org.com"
-    )
-    submitted_config = {"config_version": "2.0", "plan": "free", "admin_toggles": {}}
-
-    with patch(_LOOPS_TARGET) as loops_hook:
-        await create_org_with_config(
-            mock_request, new_org, admin_user, db, submitted_config
-        )
-
-    loops_hook.assert_called_once()
-    kwargs = loops_hook.call_args.kwargs
-    assert kwargs["email"] == admin_user.email
-    assert kwargs["org_slug"] == "configured-org"
 
 
 # ---------------------------------------------------------------------------
@@ -354,36 +278,6 @@ async def test_install_create_organization_user_swallows_loops_error(db):
 # ---------------------------------------------------------------------------
 # admin.py :: change_user_role admin branch — UNREACHABLE via API token
 # ---------------------------------------------------------------------------
-
-
-async def test_change_user_role_admin_branch_unreachable_via_token(
-    db, org, admin_role, user_role
-):
-    """The Loops hook inside change_user_role only runs when new_role_id ==
-    ADMIN_ROLE_ID. But _check_token_can_assign_role (called *before* the hook)
-    raises 403 for any Admin/Maintainer target, so an API token can never reach
-    the hook. This test documents that: promoting to Admin raises 403 and the
-    Loops hook is NEVER called. The admin branch at admin.py ~1933 is therefore
-    dead code via the token path and must be covered another way (or removed).
-    """
-    token_user = _make_token_user(org.id)
-
-    # Token creator must still be a member (defense-in-depth guard passes to the
-    # role-privilege check).
-    creator = await _make_user(
-        db, id=1, username="creator1", email="creator1@test.com"
-    )
-    await _link(db, creator.id, org.id, admin_role.id)
-
-    target = await _make_user(db, id=70, username="target70", email="t70@test.com")
-    await _link(db, target.id, org.id, user_role.id)
-
-    with patch(_LOOPS_TARGET) as loops_hook:
-        with pytest.raises(HTTPException) as exc:
-            await change_user_role(token_user, target.id, ADMIN_ROLE_ID, db)
-
-    assert exc.value.status_code == 403
-    loops_hook.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

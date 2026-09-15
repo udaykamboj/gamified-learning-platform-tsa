@@ -4,6 +4,8 @@ import { getConfig } from '@services/config/config'
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
+  ADMIN_ACCESS_TOKEN_COOKIE,
+  ADMIN_REFRESH_TOKEN_COOKIE,
   ACCESS_TOKEN_MAX_AGE,
   REFRESH_TOKEN_MAX_AGE,
   getDomainFromRequest,
@@ -11,7 +13,7 @@ import {
 } from '@services/auth/cookies'
 import { isLocalhost } from '@services/utils/ts/hostUtils'
 
-const BACKEND_URL = (getConfig('NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
+const BACKEND_URL = (getConfig('NEXT_PUBLIC_STARLAB_BACKEND_URL') || 'http://localhost:1338').replace(/\/+$/, '')
 
 // Paths that return tokens in response body (relative to /api/v1/auth/)
 // `verify-email` auto-signs-in the user on successful email verification, so
@@ -67,8 +69,8 @@ const REFRESH_FAST_PATH_HEADROOM_MS = 2 * 60 * 1000
 // LH_default_org) — those describe the deployment, are non-sensitive, are needed
 // by anonymous visitors, and the proxy re-sets them on the very next request, so
 // clearing them is both pointless and would briefly break tenancy resolution.
-const CLEAR_HTTPONLY = [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, 'LH_custom_domain']
-const CLEAR_MARKERS = ['LH_session', 'LH_org']
+const CLEAR_HTTPONLY = [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, ADMIN_ACCESS_TOKEN_COOKIE, ADMIN_REFRESH_TOKEN_COOKIE, 'LH_custom_domain']
+const CLEAR_MARKERS = ['LH_session', 'LH_admin_session', 'LH_org']
 
 // A refresh failure only justifies destroying the session when the backend
 // rejected the CREDENTIAL itself. 401/403 are terminal — the refresh cookie is
@@ -87,6 +89,9 @@ function appendClearAuthCookies(response: NextResponse, request: NextRequest) {
   const domainScoped =
     !isLocalhost(host) && topDomain && topDomain !== 'localhost' ? `.${topDomain}` : undefined
 
+  // ALWAYS try to clear .localhost if host is localhost, to clean up stuck cookies
+  const localhostScoped = isLocalhost(host) ? '.localhost' : undefined
+
   const clear = (name: string, httpOnly: boolean, domain?: string) => {
     const httpPart = httpOnly ? '; HttpOnly' : ''
     const domainPart = domain ? `; Domain=${domain}` : ''
@@ -99,10 +104,12 @@ function appendClearAuthCookies(response: NextResponse, request: NextRequest) {
   for (const n of CLEAR_HTTPONLY) {
     clear(n, true)
     if (domainScoped) clear(n, true, domainScoped)
+    if (localhostScoped) clear(n, true, localhostScoped)
   }
   for (const n of CLEAR_MARKERS) {
     clear(n, false)
     if (domainScoped) clear(n, false, domainScoped)
+    if (localhostScoped) clear(n, false, localhostScoped)
   }
 }
 
@@ -143,6 +150,9 @@ async function proxyRequest(
   // Build headers
   const headers: HeadersInit = {}
   const cookieStore = await cookies()
+  const isAdminPath = pathSegments.startsWith('admin/') || pathSegments === 'admin'
+  const reqAccessTokenCookie = isAdminPath ? ADMIN_ACCESS_TOKEN_COOKIE : ACCESS_TOKEN_COOKIE
+  const reqRefreshTokenCookie = isAdminPath ? ADMIN_REFRESH_TOKEN_COOKIE : REFRESH_TOKEN_COOKIE
 
   // Forward the caller's IP. This proxy builds its headers from scratch, so
   // without this the backend only ever sees the Next.js server's own address:
@@ -174,13 +184,13 @@ async function proxyRequest(
   }
 
   // Forward cookies to backend
-  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)
-  const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE)
+  const accessToken = cookieStore.get(reqAccessTokenCookie)
+  const refreshToken = cookieStore.get(reqRefreshTokenCookie)
 
   // Short-circuit: no refresh token cookie means nothing to refresh. Clear the
   // stale LH_session marker (and any orphaned cookies) too — otherwise the
   // client keeps seeing "a session exists" and loops on failed refreshes.
-  if (pathSegments === 'refresh' && !refreshToken?.value) {
+  if ((pathSegments === 'refresh' || pathSegments === 'admin/refresh') && !refreshToken?.value) {
     const response = NextResponse.json({ error: 'No refresh token' }, { status: 401 })
     appendClearAuthCookies(response, request)
     return response
@@ -190,7 +200,7 @@ async function proxyRequest(
   // expire, return it without round-tripping to the backend. Saves ~500ms+
   // on every cold page load where the cookie is still valid.
   if (
-    pathSegments === 'refresh'
+    (pathSegments === 'refresh' || pathSegments === 'admin/refresh')
     && method === 'GET'
     && accessToken?.value
   ) {
@@ -215,10 +225,10 @@ async function proxyRequest(
       // and skipped server-side revocation entirely.
       const logoutCookieParts: string[] = []
       if (accessToken?.value) {
-        logoutCookieParts.push(`${ACCESS_TOKEN_COOKIE}=${accessToken.value}`)
+        logoutCookieParts.push(`${reqAccessTokenCookie}=${accessToken.value}`)
       }
       if (refreshToken?.value) {
-        logoutCookieParts.push(`${REFRESH_TOKEN_COOKIE}=${refreshToken.value}`)
+        logoutCookieParts.push(`${reqRefreshTokenCookie}=${refreshToken.value}`)
       }
       if (logoutCookieParts.length > 0) {
         logoutHeaders['Cookie'] = logoutCookieParts.join('; ')
@@ -290,7 +300,12 @@ async function proxyRequest(
   let responseBody: BodyInit
 
   if (responseContentType?.includes('application/json')) {
-    responseData = await backendResponse.json()
+    const text = await backendResponse.text()
+    try {
+      responseData = text ? JSON.parse(text) : {}
+    } catch (e) {
+      responseData = { detail: { message: 'Invalid JSON from backend', raw: text } }
+    }
     responseBody = JSON.stringify(responseData)
   } else {
     responseBody = await backendResponse.text()
@@ -315,14 +330,14 @@ async function proxyRequest(
     const tokens = responseData.tokens || responseData
 
     if (tokens.access_token) {
-      response.cookies.set(ACCESS_TOKEN_COOKIE, tokens.access_token, {
+      response.cookies.set(reqAccessTokenCookie, tokens.access_token, {
         ...cookieOptions,
         maxAge: ACCESS_TOKEN_MAX_AGE,
       })
     }
 
     if (tokens.refresh_token) {
-      response.cookies.set(REFRESH_TOKEN_COOKIE, tokens.refresh_token, {
+      response.cookies.set(reqRefreshTokenCookie, tokens.refresh_token, {
         ...cookieOptions,
         maxAge: REFRESH_TOKEN_MAX_AGE,
       })
@@ -331,7 +346,8 @@ async function proxyRequest(
     // Set a non-httpOnly marker so the client knows a session exists
     // without making a network request (the actual tokens stay httpOnly)
     if (tokens.access_token || tokens.refresh_token) {
-      response.cookies.set('LH_session', '1', {
+      const marker = isAdminPath ? 'LH_admin_session' : 'LH_session'
+      response.cookies.set(marker, '1', {
         ...cookieOptions,
         httpOnly: false,
         maxAge: REFRESH_TOKEN_MAX_AGE,
@@ -351,7 +367,7 @@ async function proxyRequest(
   // weeks of life left, and because the httpOnly refresh cookie was deleted
   // the user could not recover except by signing in again. Whole classrooms
   // behind one NAT IP were being signed out together this way.
-  if (pathSegments === 'refresh' && isTerminalAuthFailure(backendResponse.status)) {
+  if ((pathSegments === 'refresh' || pathSegments === 'admin/refresh') && isTerminalAuthFailure(backendResponse.status)) {
     appendClearAuthCookies(response, request)
   }
 

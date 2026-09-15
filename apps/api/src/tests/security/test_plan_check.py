@@ -13,26 +13,7 @@ from src.db.communities.communities import Community
 from src.db.courses.certifications import CertificateUser, Certifications
 from src.db.organization_config import OrganizationConfig
 from src.db.playgrounds import Playground
-from src.db.usergroups import UserGroup
-from src.security.features_utils.plan_check import (
-    _check_mode_bypass,
-    get_org_plan,
-    require_plan,
-    require_plan_for_boards,
-    require_plan_for_certifications,
-    require_plan_for_community,
-    require_plan_for_playgrounds,
-    require_plan_for_usergroups,
-)
-
-PLAN_DEPENDENCIES = [
-    ("Analytics", require_plan("pro", "Analytics")),
-    ("Usergroups", require_plan_for_usergroups("pro", "Usergroups")),
-    ("Certificates", require_plan_for_certifications("pro", "Certificates")),
-    ("Boards", require_plan_for_boards("personal", "Boards")),
-    ("Playgrounds", require_plan_for_playgrounds("personal", "Playgrounds")),
-    ("Communities", require_plan_for_community("standard", "Communities")),
-]
+from src.security.features_utils.plan_check import (_check_mode_bypass, get_org_plan, require_plan, require_plan_for_certifications)
 
 
 def _request(path_params=None, query_params=None):
@@ -197,45 +178,6 @@ class TestPlanCheck:
             else:
                 assert await dependency(_request(**request_kwargs), db) is True
 
-    @pytest.mark.asyncio
-    async def test_require_plan_for_usergroups_success_and_no_org(self, db, org):
-        await _make_org_config(db, org, {"config_version": "2.0", "plan": "standard"})
-        usergroup = UserGroup(
-            org_id=org.id,
-            name="Group",
-            description="Desc",
-            usergroup_uuid="ug_plan",
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-        )
-        db.add(usergroup)
-        await db.commit()
-        await db.refresh(usergroup)
-
-        dependency = require_plan_for_usergroups("pro", "Usergroups")
-        with patch(
-            "src.security.features_utils.plan_check.get_deployment_mode",
-            return_value="saas",
-        ), patch(
-            "src.security.features_utils.plan_check.plan_meets_requirement",
-            return_value=True,
-        ):
-            # No discriminator → fall through (handler RBAC still runs).
-            # Resolvable discriminator → plan gate evaluates and returns True.
-            assert await dependency(_request(), db) is True
-            assert await dependency(_request(path_params={"usergroup_id": str(usergroup.id)}), db) is True
-
-        with patch(
-            "src.security.features_utils.plan_check.get_deployment_mode",
-            return_value="saas",
-        ), patch(
-            "src.security.features_utils.plan_check.plan_meets_requirement",
-            return_value=False,
-        ):
-            with pytest.raises(HTTPException) as exc:
-                await dependency(_request(path_params={"usergroup_id": str(usergroup.id)}), db)
-
-        assert exc.value.status_code == 403
 
     @pytest.mark.asyncio
     async def test_require_plan_for_certifications_variants(self, db, org, course, regular_user):
@@ -298,100 +240,3 @@ class TestPlanCheck:
 
         assert exc.value.status_code == 403
 
-    @pytest.mark.asyncio
-    async def test_require_plan_for_board_playground_and_community(self, db, org):
-        await _make_org_config(db, org, {"config_version": "2.0", "plan": "standard"})
-        board = Board(
-            org_id=org.id,
-            name="Board",
-            description="Desc",
-            public=True,
-            board_uuid="board_plan",
-            created_by=1,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-        )
-        playground = Playground(
-            org_id=org.id,
-            name="Playground",
-            description="Desc",
-            access_type="authenticated",
-            published=True,
-            playground_uuid="playground_plan",
-            created_by=1,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-        )
-        community = Community(
-            org_id=org.id,
-            name="Community",
-            description="Desc",
-            public=True,
-            community_uuid="community_plan",
-            moderation_words=[],
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-        )
-        db.add(board)
-        db.add(playground)
-        db.add(community)
-        await db.commit()
-
-        board_dependency = require_plan_for_boards("personal", "Boards")
-        playground_dependency = require_plan_for_playgrounds("personal", "Playgrounds")
-        community_dependency = require_plan_for_community("free", "Communities")
-
-        with patch(
-            "src.security.features_utils.plan_check.get_deployment_mode",
-            return_value="saas",
-        ), patch(
-            "src.security.features_utils.plan_check.plan_meets_requirement",
-            return_value=True,
-        ):
-            # No discriminator → fall through (handler RBAC still runs).
-            assert await board_dependency(_request(), db) is True
-            assert await playground_dependency(_request(), db) is True
-            assert await community_dependency(_request(), db) is True
-
-            assert (
-                await board_dependency(_request(path_params={"board_uuid": board.board_uuid}), db)
-                is True
-            )
-            assert (
-                await playground_dependency(
-                    _request(path_params={"playground_uuid": playground.playground_uuid}),
-                    db,
-                )
-                is True
-            )
-            assert (
-                await community_dependency(
-                    _request(path_params={"community_uuid": community.community_uuid}),
-                    db,
-                )
-                is True
-            )
-
-        with patch(
-            "src.security.features_utils.plan_check.get_deployment_mode",
-            return_value="saas",
-        ), patch(
-            "src.security.features_utils.plan_check.plan_meets_requirement",
-            return_value=False,
-        ):
-            with pytest.raises(HTTPException) as board_exc:
-                await board_dependency(_request(path_params={"board_uuid": board.board_uuid}), db)
-            with pytest.raises(HTTPException) as playground_exc:
-                await playground_dependency(
-                    _request(path_params={"playground_uuid": playground.playground_uuid}),
-                    db,
-                )
-            with pytest.raises(HTTPException) as community_exc:
-                await community_dependency(
-                    _request(path_params={"community_uuid": community.community_uuid}),
-                    db,
-                )
-
-        assert board_exc.value.status_code == 403
-        assert playground_exc.value.status_code == 403
-        assert community_exc.value.status_code == 403

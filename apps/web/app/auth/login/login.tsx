@@ -10,7 +10,7 @@ import { checkSSOEnabled, redirectToSSOLogin } from '@services/auth/sso'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@components/Contexts/AuthContext'
-import { getLEARNHOUSE_TOP_DOMAIN_VAL, getDeploymentMode, isOnCustomDomain } from '@services/config/config'
+import { getSTARLAB_TOP_DOMAIN_VAL, getDeploymentMode, isOnCustomDomain } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
 import { resendVerificationEmail } from '@services/auth/auth'
@@ -18,6 +18,7 @@ import AuthLayout from '@components/Auth/AuthLayout'
 import TurnstileWidget, { useTurnstileRequired, verifyTurnstileToken, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getAllowedAuthMethods } from '@services/auth/authMethods'
+import { postAuthHomePath } from '@services/auth/roles'
 
 interface LoginClientProps {
   org: any
@@ -25,7 +26,7 @@ interface LoginClientProps {
 
 const LoginClient = (props: LoginClientProps) => {
   const { t } = useTranslation()
-  const { signIn, completeMfaLogin, requestMagicLink } = useAuth()
+  const { signIn, signOut, status, completeMfaLogin, requestMagicLink, completeMagicLink } = useAuth()
   const { track } = useLHAnalytics('public')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ssoEnabled, setSsoEnabled] = useState(false)
@@ -55,8 +56,8 @@ const LoginClient = (props: LoginClientProps) => {
   // Guarded by !isSubmitting so a FRESH login (which flips the session to
   // authenticated) doesn't race the onSubmit's own post-login navigation.
   useEffect(() => {
-    if (isAuthenticated && !isSubmitting) router.replace('/home')
-  }, [isAuthenticated, isSubmitting, router])
+    if (isAuthenticated && !isSubmitting) router.replace(postAuthHomePath(session?.data))
+  }, [isAuthenticated, isSubmitting, router, session?.data])
 
   // Error state with type information
   const [error, setError] = useState('')
@@ -126,14 +127,14 @@ const LoginClient = (props: LoginClientProps) => {
   }, [])
 
   // Honor a post-login redirect via ?next / ?redirect, sanitized to an
-  // internal same-origin path (no open-redirect), defaulting to /home.
+  // internal same-origin path (no open-redirect), defaulting to /dashboard.
   // Forward it through the cross-domain /redirect_from_auth handoff.
   const buildCallbackUrl = () => {
     const params = new URLSearchParams(window.location.search)
     // `redirect_to` is what the magic-link consume endpoint forwards when it
     // bounces a 2FA-enabled user here instead of signing them straight in.
     const raw = params.get('next') ?? params.get('redirect') ?? params.get('redirect_to')
-    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : '/home'
+    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : '/dashboard'
     return `${window.location.origin}/redirect_from_auth?next=${encodeURIComponent(dest)}`
   }
 
@@ -156,7 +157,8 @@ const LoginClient = (props: LoginClientProps) => {
 
     if (res.ok) {
       track(AnalyticsEvent.LoginSucceeded, { method: 'credentials_mfa' })
-      window.location.href = callbackUrl
+      // res.url is the role-aware landing (admin console vs student dashboard).
+      window.location.href = res.url || callbackUrl
       return
     }
 
@@ -206,7 +208,7 @@ const LoginClient = (props: LoginClientProps) => {
     track(AnalyticsEvent.LoginGoogleClicked)
     // Store org context in cookies before OAuth redirect
     if (props.org?.slug) {
-      const topDomain = getLEARNHOUSE_TOP_DOMAIN_VAL();
+      const topDomain = getSTARLAB_TOP_DOMAIN_VAL();
       const isSecure = window.location.protocol === 'https:';
       const secureAttr = isSecure ? '; secure' : '';
       const baseAttributes = `; path=/; SameSite=Lax${secureAttr}`;
@@ -429,8 +431,23 @@ const LoginClient = (props: LoginClientProps) => {
         turnstileRef.current?.reset();
       } else {
         track(AnalyticsEvent.LoginSucceeded, { method: 'credentials' })
-        // First signIn already authenticated and set cookies — just redirect
-        window.location.href = callbackUrl;
+        
+        // STRICT PORTAL SEGREGATION: 
+        // If the resolved landing URL is /admin, this is an Admin account.
+        // They are not allowed to log in via the student portal.
+        if (res.url && res.url.endsWith('/admin')) {
+          // Immediately log them out
+          signOut({ redirect: false })
+          setErrorType('ADMIN_PORTAL_REQUIRED')
+          setError('Admin accounts must log in via the Admin Portal (/admin/login).')
+          setShowErrorModal(true)
+          setIsSubmitting(false)
+          return
+        }
+
+        // First signIn already authenticated and set cookies — just redirect.
+        // res.url is the role-aware landing (admin console vs student dashboard).
+        window.location.href = res.url || callbackUrl
       }
     },
   })
@@ -439,7 +456,7 @@ const LoginClient = (props: LoginClientProps) => {
     <AuthLayout
       org={props.org}
       welcomeText={t('auth.login_to')}
-      title={t('auth.image_title_login', { defaultValue: 'Welcome back to LearnHouse.' })}
+      title={t('auth.image_title_login', { defaultValue: 'Welcome back to StarLab.' })}
       subtitle={t('auth.image_subtitle_login', {
         defaultValue: 'Pick up where you left off — your courses, students, and tools are waiting.',
       })}
