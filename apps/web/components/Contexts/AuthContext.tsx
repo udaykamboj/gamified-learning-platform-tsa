@@ -50,10 +50,13 @@ export interface UseSessionReturn {
 }
 
 export interface SignInOptions {
-  redirect?: boolean
-  callbackUrl?: string
   email?: string
   password?: string
+  redirect?: boolean
+  callbackUrl?: string
+  orgSlug?: string
+  magicToken?: string
+  isAdmin?: boolean
   // SSO fields
   sso?: string
   sso_access_token?: string
@@ -808,7 +811,7 @@ export function SessionProvider({
   // Sign in function
   const handleSignIn = useCallback(
     async (provider: string, options: SignInOptions = {}): Promise<SignInResult | void> => {
-      const { redirect = true, callbackUrl = '/' } = options
+      const { redirect = true, callbackUrl = '/dashboard' } = options
 
       try {
         if (provider === 'credentials') {
@@ -876,7 +879,8 @@ export function SessionProvider({
 
           // Regular credentials login
           // Use Next.js API route to ensure cookies are set correctly
-          const response = await fetch('/api/auth/login', {
+          const endpoint = options.isAdmin ? '/api/auth/admin/login' : '/api/auth/login'
+          const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',

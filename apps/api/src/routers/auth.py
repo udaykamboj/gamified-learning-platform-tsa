@@ -26,7 +26,9 @@ from src.security.auth import (
     JWT_ACCESS_TOKEN_EXPIRES,
     JWT_REFRESH_TOKEN_EXPIRES,
     JWT_REFRESH_COOKIE_NAME,
+    JWT_ADMIN_REFRESH_COOKIE_NAME,
     JWT_COOKIE_NAME,
+    JWT_ADMIN_COOKIE_NAME,
 )
 from src.services.users.users import security_get_user
 from src.services.auth.utils import signWithGoogle, get_google_user_info
@@ -173,13 +175,16 @@ def is_request_secure(request: Request | None) -> bool:
     return not isDevModeEnabled()
 
 
-def set_auth_cookies(response: Response, access_token: str, refresh_token: str, request: Request = None):
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str, request: Request = None, is_admin: bool = False):
     """Helper to set authentication cookies."""
     is_secure = is_request_secure(request)
     cookie_domain = get_cookie_domain_for_request(request) if request else None
 
+    access_cookie = JWT_ADMIN_COOKIE_NAME if is_admin else JWT_COOKIE_NAME
+    refresh_cookie = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin else JWT_REFRESH_COOKIE_NAME
+
     response.set_cookie(
-        key=JWT_COOKIE_NAME,
+        key=access_cookie,
         value=access_token,
         httponly=True,
         secure=is_secure,
@@ -188,7 +193,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str, 
         max_age=int(timedelta(hours=8).total_seconds()),
     )
     response.set_cookie(
-        key=JWT_REFRESH_COOKIE_NAME,
+        key=refresh_cookie,
         value=refresh_token,
         httponly=True,
         secure=is_secure,
@@ -268,6 +273,11 @@ def _log_refresh_outcome(
 
 
 @router.get(
+    "/admin/refresh",
+    summary="Refresh admin access token",
+    description="Validate the admin refresh token and issue a new access token.",
+)
+@router.get(
     "/refresh",
     summary="Refresh access token",
     description=(
@@ -316,7 +326,9 @@ async def refresh(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    refresh_token = request.cookies.get(JWT_REFRESH_COOKIE_NAME)
+    is_admin_refresh = request.url.path.endswith("/admin/refresh")
+    cookie_name = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin_refresh else JWT_REFRESH_COOKIE_NAME
+    refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
         _log_refresh_outcome("cookie_missing")
         raise credentials_exception
@@ -336,6 +348,11 @@ async def refresh(
     user = await security_get_user(request, db_session, email=email)
     if user is None or user.id is None:
         _log_refresh_outcome("user_not_found", token_age_seconds=_token_age_seconds(payload))
+        raise credentials_exception
+
+    if is_admin_refresh and not user.is_superadmin:
+        raise credentials_exception
+    if not is_admin_refresh and user.is_superadmin:
         raise credentials_exception
 
     # Enforce password-change cutover: tokens minted before the user's last
@@ -424,8 +441,12 @@ async def refresh(
 
     cookie_domain = get_cookie_domain_for_request(request)
     is_secure = is_request_secure(request)
+    
+    access_cookie = JWT_ADMIN_COOKIE_NAME if is_admin_refresh else JWT_COOKIE_NAME
+    refresh_cookie = JWT_ADMIN_REFRESH_COOKIE_NAME if is_admin_refresh else JWT_REFRESH_COOKIE_NAME
+
     response.set_cookie(
-        key=JWT_COOKIE_NAME,
+        key=access_cookie,
         value=new_access_token,
         httponly=True,
         secure=is_secure,
@@ -434,7 +455,7 @@ async def refresh(
         max_age=int(timedelta(hours=8).total_seconds()),
     )
     response.set_cookie(
-        key=JWT_REFRESH_COOKIE_NAME,
+        key=refresh_cookie,
         value=new_refresh_token,
         httponly=True,
         secure=is_secure,
@@ -460,6 +481,11 @@ async def refresh(
 
 
 @router.post(
+    "/admin/login",
+    summary="Log in as an administrator",
+    description="Authenticate an admin. On success, sets admin-specific cookies.",
+)
+@router.post(
     "/login",
     summary="Log in with email and password",
     description=(
@@ -471,7 +497,7 @@ async def refresh(
     responses={
         200: {"description": "Login successful; cookies set and body contains user + tokens."},
         401: {"description": "Incorrect email or password"},
-        403: {"description": "Email not verified (SaaS mode)"},
+        403: {"description": "Email not verified (SaaS mode) or incorrect portal"},
         423: {"description": "Account is locked due to too many failed attempts"},
         429: {"description": "Too many login attempts from this IP"},
     },
@@ -531,6 +557,18 @@ async def login(
     # Password was correct. From here on, disclosing lockout/verification
     # state no longer enables enumeration since the caller has proven they
     # control the account.
+
+    is_admin_login = request.url.path.endswith("/admin/login")
+    if is_admin_login and not user.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "ADMIN_REQUIRED", "message": "This portal is for administrators only."}
+        )
+    if not is_admin_login and user.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "STUDENT_REQUIRED", "message": "Administrators must use the admin login portal."}
+        )
 
     # Step 3: Enforce lockout from prior failed attempts.
     is_pre_locked, pre_lock_remaining = check_account_locked(user)
@@ -593,7 +631,8 @@ async def login(
             "mfa_token": issue.mfa_token,
         }
 
-    set_auth_cookies(response, issue.access_token, issue.refresh_token, request)
+    is_admin_login = request.url.path.endswith("/admin/login")
+    set_auth_cookies(response, issue.access_token, issue.refresh_token, request, is_admin=is_admin_login)
 
     user = UserRead.model_validate(user)
 

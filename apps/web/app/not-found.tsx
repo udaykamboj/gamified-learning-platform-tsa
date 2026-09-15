@@ -28,7 +28,7 @@ export default function NotFound() {
       </div>
       <div className='pt-8 flex flex-col items-center'>
       <Link
-        href="/"
+        href="/dashboard"
         className="flex w-fit h-[50px] text-xl space-x-2 bg-black px-6 py-2 text-md rounded-lg font-bold text-white items-center shadow-md gap-2"
       >
         Go back to homepage

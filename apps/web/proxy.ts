@@ -257,6 +257,11 @@ export default async function proxy(req: NextRequest) {
     const target = pathname === '/admin' || pathname.startsWith('/admin/')
       ? pathname
       : `/admin${pathname}`
+      
+    if (target !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
+      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
+    }
+      
     const response = NextResponse.rewrite(new URL(`${target}${search}`, req.url))
     setInstanceCookies(response, instance)
     return response
@@ -268,6 +273,9 @@ export default async function proxy(req: NextRequest) {
   //     multi mode it's an alternative to the admin.{domain} subdomain.
   // -------------------------------------------------------------------------
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    if (pathname !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
+      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
+    }
     const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
     setInstanceCookies(response, instance)
     return response
@@ -291,6 +299,12 @@ export default async function proxy(req: NextRequest) {
   //     (or admin) area. Admins land on /admin after login, not here.
   // -------------------------------------------------------------------------
   if (pathname === '/dashboard') {
+    const hasSession = !!req.cookies.get('LH_session')?.value
+    if (!hasSession) {
+      const callbackUrl = encodeURIComponent(pathname + search)
+      return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+    }
+    
     const resolved = await resolveTenant(req, instance)
     const requestHeaders = tenantRequestHeaders(req, resolved, instance)
     const response = NextResponse.rewrite(
@@ -551,6 +565,10 @@ export default async function proxy(req: NextRequest) {
   // The apex is the public website. Keep it out of tenant resolution so the
   // marketing page owns `/` in every tenancy mode.
   if (pathname === '/') {
+    const hasSession = !!req.cookies.get('LH_session')?.value
+    if (hasSession) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
     return NextResponse.next()
   }
 
@@ -588,7 +606,17 @@ export default async function proxy(req: NextRequest) {
 
   // -------------------------------------------------------------------------
   // 11. Tenant-scoped rewrite — the catch-all that puts us under /orgs/{slug}
+  //     All routes at this level belong to the authenticated student application,
+  //     so we strictly enforce authentication at the edge.
   // -------------------------------------------------------------------------
+  const hasSession = !!req.cookies.get('LH_session')?.value
+  if (!hasSession) {
+    // If an unauthenticated user accesses a student route directly (e.g. /courses),
+    // redirect them to the login gateway.
+    const callbackUrl = encodeURIComponent(pathname + search)
+    return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+  }
+
   const resolved = await resolveTenant(req, instance)
   const requestHeaders = tenantRequestHeaders(req, resolved, instance)
   // `${search}` is load-bearing: a rewrite destination built from an absolute

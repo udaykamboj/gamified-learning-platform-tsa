@@ -1,88 +1,65 @@
-import {
-  House,
-  BookOpen,
-  Users,
-  CurrencyCircleDollar,
-  Buildings,
-  ChatsCircle,
-  FolderSimple,
-  Headphones,
-  ChartBar,
-  Code,
-} from '@phosphor-icons/react'
-
 export interface DashboardMenuItem {
-  id: string
+  key: string
+  label: string
+  iconName: string
   href: string
-  icon: typeof House
-  labelKey: string
-  /** Feature key used for plan-based gating. If undefined, item is always shown. */
-  featureKey?: string
-  /** If true, the feature defaults to disabled (must be explicitly enabled). */
-  defaultDisabled?: boolean
+  badge?: string
+  featureFlag?: string
 }
 
 export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
   {
-    id: 'home',
-    href: '/dash',
-    icon: House,
-    labelKey: 'common.home',
+    key: 'dashboard',
+    label: 'Dashboard',
+    iconName: 'LayoutDashboard',
+    href: '/dashboard',
   },
   {
-    id: 'courses',
-    href: '/dash/courses',
-    icon: BookOpen,
-    labelKey: 'courses.courses',
+    key: 'courses',
+    label: 'Courses',
+    iconName: 'BookOpen',
+    href: '/courses',
   },
   {
-    id: 'library',
-    href: '/dash/library',
-    icon: FolderSimple,
-    labelKey: 'library.library',
-    featureKey: 'folders',
+    key: 'skills',
+    label: 'Skills',
+    iconName: 'Award',
+    href: '/skills',
   },
   {
-    id: 'communities',
-    href: '/dash/communities',
-    icon: ChatsCircle,
-    labelKey: 'communities.title',
+    key: 'podcasts',
+    label: 'Podcasts',
+    iconName: 'Headphones',
+    href: '/podcasts',
   },
   {
-    id: 'podcasts',
-    href: '/dash/podcasts',
-    icon: Headphones,
-    labelKey: 'podcasts.podcasts',
+    key: 'library',
+    label: 'Library',
+    iconName: 'Folder',
+    href: '/library',
   },
   {
-    id: 'users',
-    href: '/dash/users/settings/users',
-    icon: Users,
-    labelKey: 'common.users',
+    key: 'playgrounds',
+    label: 'Playgrounds',
+    iconName: 'Code',
+    href: '/playgrounds',
   },
   {
-    id: 'payments',
-    href: '/dash/payments/overview',
-    icon: CurrencyCircleDollar,
-    labelKey: 'common.payments',
-    featureKey: 'payments',
+    key: 'boards',
+    label: 'Boards',
+    iconName: 'Kanban',
+    href: '/boards',
   },
   {
-    id: 'organization',
-    href: '/dash/org/settings/general',
-    icon: Buildings,
-    labelKey: 'common.organization',
+    key: 'community',
+    label: 'Community',
+    iconName: 'MessageSquare',
+    href: '/communities',
   },
   {
-    id: 'analytics',
-    href: '/dash/analytics',
-    icon: ChartBar,
-    labelKey: 'common.analytics',
-  },
-  {
-    id: 'developers',
-    href: '/dash/developers/api',
-    icon: Code,
-    labelKey: 'dashboard.developers.breadcrumb',
+    key: 'ai-agent',
+    label: 'AI Agent',
+    iconName: 'Sparkles',
+    href: '/ai-agent',
   },
 ]

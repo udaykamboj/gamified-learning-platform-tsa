@@ -22,6 +22,7 @@ export default function AdminLoginPage() {
         email,
         password,
         redirect: false,
+        isAdmin: true,
       })
 
       if (result?.error) {

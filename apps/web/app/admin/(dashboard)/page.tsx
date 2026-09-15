@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { Buildings, ShieldStar, Users } from '@phosphor-icons/react/dist/ssr'
+import { ChartBar, ShieldStar, Users } from '@phosphor-icons/react/dist/ssr'
 
 export default function AdminPage() {
   return (
@@ -14,20 +14,20 @@ export default function AdminPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* Course Dashboard Card */}
+          {/* Analytics Dashboard Card */}
           <Link 
-            href="/dash"
+            href="/admin/analytics"
             className="group relative flex flex-col items-center text-center p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             
             <div className="h-16 w-16 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-300">
-              <Buildings size={32} weight="fill" />
+              <ChartBar size={32} weight="fill" />
             </div>
             
-            <h2 className="text-xl font-bold text-white mb-2">Course Dashboard</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Platform Analytics</h2>
             <p className="text-white/60 text-sm leading-relaxed">
-              Manage courses, enrollments, student progress, activities, and organization branding.
+              Global system monitoring, metrics, and engagement analytics.
             </p>
           </Link>
 

@@ -284,7 +284,7 @@ export default function PlaygroundEditor({
         }}
       >
         {/* Logo */}
-        <Link href="/">
+        <Link href="/dashboard">
           <EditorStarLabLogo />
         </Link>
 

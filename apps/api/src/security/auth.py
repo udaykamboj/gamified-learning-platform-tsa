@@ -81,9 +81,11 @@ JWT_COOKIE_SAMESITE = "lax"
 JWT_COOKIE_SECURE = True
 JWT_COOKIE_DOMAIN = get_starlab_config().hosting_config.cookie_config.domain
 JWT_COOKIE_NAME = "LH_access"
+JWT_ADMIN_COOKIE_NAME = "LH_admin_access"
+JWT_REFRESH_COOKIE_NAME = "LH_refresh"
+JWT_ADMIN_REFRESH_COOKIE_NAME = "LH_admin_refresh"
 
-
-def extract_jwt_from_request(request: Request) -> Optional[str]:
+def extract_jwt_from_request(request: Request, cookie_name: str = JWT_COOKIE_NAME) -> Optional[str]:
     """Extract JWT token from Authorization header or cookies.
 
     Authorization header takes precedence over cookies to ensure
@@ -95,7 +97,7 @@ def extract_jwt_from_request(request: Request) -> Optional[str]:
         return auth_header[7:].strip()
 
     # Fall back to cookies (for browser-based requests without explicit token)
-    token = request.cookies.get(JWT_COOKIE_NAME)
+    token = request.cookies.get(cookie_name)
     if token:
         return token
 
@@ -597,7 +599,9 @@ async def get_current_user(
         raise credentials_exception
 
     # Step 2: Fall back to JWT logic using PyJWT
-    token = extract_jwt_from_request(request)
+    is_admin_route = request.url.path.startswith("/api/v1/admin")
+    cookie_name = JWT_ADMIN_COOKIE_NAME if is_admin_route else JWT_COOKIE_NAME
+    token = extract_jwt_from_request(request, cookie_name=cookie_name)
     username = None
 
     if token:
