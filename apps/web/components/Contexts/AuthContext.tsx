@@ -308,6 +308,14 @@ export function SessionProvider({
   // signed out" apart from "the request did not get through" and avoid tearing
   // down a healthy session over a server blip.
   const fetchUserSession = useCallback(async (token: string, expiry?: number): Promise<Session | null> => {
+    console.log("fetchUserSession token:", token)
+    
+    // SEND TO OUR LOGGER!
+    fetch('/api/log', {
+      method: 'POST',
+      body: JSON.stringify({ token: token, type: typeof token, len: token?.length })
+    })
+    
     const response = await fetch(`${getAPIUrl()}users/session`, {
       method: 'GET',
       headers: {
@@ -390,7 +398,7 @@ export function SessionProvider({
         return {
           status: 'ok',
           access_token: data.access_token,
-          expiry: typeof data.expiry === 'number' ? data.expiry : undefined,
+          expiry: data.expiry || null,
         } as const
       } catch (error) {
         // Network error, offline, DNS blip, aborted request. Says nothing
@@ -499,6 +507,10 @@ export function SessionProvider({
           // than signing the user out over a hiccup; the next tick retries.
           return currentToken
         }
+      }
+
+      if (!currentToken) {
+        return null
       }
 
       // Fetch session data with the CURRENT expiry (from refresh, not stale state)
@@ -945,6 +957,7 @@ export function SessionProvider({
             }
           }
 
+          console.log("handleSignIn data:", data)
           return await establishSession(data, callbackUrl, redirect)
         }
 

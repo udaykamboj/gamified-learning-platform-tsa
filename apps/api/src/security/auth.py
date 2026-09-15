@@ -128,7 +128,8 @@ def decode_jwt(token: str) -> Optional[dict]:
             options=decode_options
         )
         return payload
-    except PyJWTError:
+    except PyJWTError as e:
+        print(f"JWT Decode Error: {e}")
         return None
 
 
@@ -200,6 +201,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     # setdefault, not update: a caller that deliberately names its own type wins.
     to_encode.setdefault("type", "access")
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Created JWT: {encoded_jwt}")
     return encoded_jwt
 
 
@@ -259,6 +261,7 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
         "jti": _secrets.token_urlsafe(16),
     })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Created JWT: {encoded_jwt}")
     return encoded_jwt
 
 
@@ -347,7 +350,8 @@ def decode_refresh_token(token: str) -> Optional[dict]:
         if payload.get("type") != "refresh":
             return None
         return payload
-    except PyJWTError:
+    except PyJWTError as e:
+        print(f"JWT Decode Error: {e}")
         return None
 
 

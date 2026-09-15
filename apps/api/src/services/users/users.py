@@ -801,6 +801,8 @@ async def get_user_session(
     current_user: PublicUser | AnonymousUser,
 ) -> UserSession:
     # Get user
+    print(f"headers: {request.headers}")
+    print(f"current_user is: {current_user}")
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = (await db_session.execute(statement)).scalars().first()
 
@@ -863,6 +865,8 @@ async def authorize_user_action(
     action: Literal["create", "read", "update", "delete"],
 ):
     # Get user
+    print(f"headers: {request.headers}")
+    print(f"current_user is: {current_user}")
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = (await db_session.execute(statement)).scalars().first()
 
