@@ -425,9 +425,9 @@ def send_email(
     # reputation on a shared domain).
     from src.services.demo.flags import is_demo_email
 
-    if is_demo_email(to_addr):
+    if is_demo_email(to_addr) or lh_config.development_mode:
         logger.warning(
-            "Dropping email to demo address %s (subject=%r)", to_addr, subject
+            "Dropping email to %s (subject=%r) [demo/dev mode]", to_addr, subject
         )
         return None
 

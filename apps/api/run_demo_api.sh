@@ -37,14 +37,14 @@ export STARLAB_SQL_CONNECTION_STRING="postgresql+asyncpg://starlab:starlab@local
 export STARLAB_REDIS_CONNECTION_STRING="redis://localhost:6379/0"
 export STARLAB_DEVELOPMENT_MODE=true
 
-export STARLAB_TENANCY=single
+export STARLAB_TENANCY=multi
 export STARLAB_DOMAIN="lvh.me:3010"
 export STARLAB_FRONTEND_DOMAIN="lvh.me:3010"
 export STARLAB_COOKIE_DOMAIN=".lvh.me"
 # Multi tenancy is gated on "Enterprise Edition available OR SaaS mode", and
 # the demo needs nothing from the Enterprise Edition, so SaaS is the simpler
 # switch to flip for a local run.
-export STARLAB_SAAS=false
+export STARLAB_SAAS=true
 
 export STARLAB_DEMO_ENABLED=1
 export STARLAB_DEMO_SLUG=demo

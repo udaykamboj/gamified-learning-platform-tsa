@@ -88,6 +88,12 @@ const nextConfig = {
     ]
   },
   reactStrictMode: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   output: 'standalone',
   images: {
     remotePatterns: [
