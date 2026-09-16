@@ -20,7 +20,7 @@ from src.security.auth import get_current_user, get_authenticated_user
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
 from src.db.roles import Role
-from src.services.orgs.platform import require_platform_org
+from src.services.orgs.platform import get_platform_org_id, require_platform_org
 
 from src.db.users import (
     AnonymousUser,
@@ -210,30 +210,15 @@ async def api_register_student(
     Register a new student account in the platform's single organization.
 
     This is the primary public signup path for the single-org model. It
-    resolves the platform's default (first non-demo) organization automatically
-    and creates the user with the student role (role_id=4).
+    resolves the platform organization automatically and creates the user
+    with the student role (role_id=4).
     """
-    from sqlmodel import select as _select
-    from src.db.organizations import Organization
-    from src.services.orgs.orgs import get_org_join_mechanism
-
-    # Resolve the platform's default organization: the first non-demo org by id.
-    default_org = (
-        await db_session.execute(
-            _select(Organization)
-            .where(Organization.is_demo == False)  # noqa: E712
-            .order_by(Organization.id.asc())
-            .limit(1)
-        )
-    ).scalars().first()
-
-    if not default_org or not default_org.id:
-        raise HTTPException(
-            status_code=404,
-            detail="Platform organization not found. Please run the installation command first.",
-        )
-
-    org_id = int(default_org.id)
+    # Resolve the platform org through the one helper that owns that question.
+    # The inline "lowest-id non-demo org" query this replaced ignored
+    # STARLAB_INITIAL_ORG_SLUG, so whenever the installer-seeded org was not
+    # also the lowest id, signup attached the account to a different org than
+    # login, OAuth and /instance/info all resolve — see services/orgs/platform.
+    org_id = await get_platform_org_id(db_session)
 
     # Enforce password signup allowed for this org.
     await _enforce_password_signup_allowed(db_session, org_id)
@@ -268,6 +253,8 @@ async def api_create_user_with_orgid(
     user_object: UserCreate,
     org_id: int,
 ) -> UserRead:
+    """
+    Create a user and attach them to the given organization.
     """
     await require_platform_org(org_id, db_session)
 
@@ -309,6 +296,8 @@ async def api_create_user_with_orgid_and_invite(
     org_id: int,
 ) -> UserRead:
     """
+    Create a user and attach them to the given organization via an invite code.
+    """
     await require_platform_org(org_id, db_session)
     await _enforce_password_signup_allowed(db_session, org_id)
 
@@ -327,9 +316,19 @@ async def api_create_user_with_orgid_and_invite(
             headers={"Retry-After": str(retry_after)},
         )
 
-    return await create_user_with_invite(
-        request, db_session, current_user, user_object, org_id, invite_code
-    )
+    # TODO: This is temporary, logic should be moved to service
+    if (
+        await get_org_join_mechanism(request, org_id, current_user, db_session)
+        == "inviteOnly"
+    ):
+        return await create_user_with_invite(
+            request, db_session, current_user, user_object, org_id, invite_code
+        )
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail="This organization does not require an invite code",
+        )
 
 
 @router.post(

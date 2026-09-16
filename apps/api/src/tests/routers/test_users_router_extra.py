@@ -232,11 +232,21 @@ class TestAuthorizationAndCreationEndpoints:
         auth_mock.assert_awaited_once()
 
     async def test_create_user_without_org(self, client):
-        with patch(
-            "src.routers.users.create_user_without_org",
-            new_callable=AsyncMock,
-            return_value=_mock_user_read(username="new_user", user_uuid="user_new"),
-        ) as create_mock:
+        # In the single-org model there is no org-less account: POST /users/
+        # delegates to the student register path, which resolves the platform
+        # org itself and goes through create_user, not create_user_without_org.
+        with (
+            patch(
+                "src.routers.users.get_org_join_mechanism",
+                new_callable=AsyncMock,
+                return_value="open",
+            ),
+            patch(
+                "src.routers.users.create_user",
+                new_callable=AsyncMock,
+                return_value=_mock_user_read(username="new_user", user_uuid="user_new"),
+            ) as create_mock,
+        ):
             response = await client.post(
                 "/api/v1/users/",
                 json={
