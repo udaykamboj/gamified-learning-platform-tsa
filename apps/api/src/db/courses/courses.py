@@ -3,9 +3,32 @@ from sqlalchemy import Column, Enum as SAEnum, ForeignKey, Index, Integer
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 from enum import Enum
+from pydantic import BaseModel
 from src.db.users import UserRead
+from src.db.trails import TrailRead
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+
+
+class CourseSEO(BaseModel):
+    """SEO configuration for a course stored as JSON"""
+    # Basic SEO
+    title: Optional[str] = None
+    description: Optional[str] = None
+    keywords: Optional[str] = None
+    canonical_url: Optional[str] = None
+    # Open Graph
+    og_title: Optional[str] = None
+    og_description: Optional[str] = None
+    og_image: Optional[str] = None
+    # Twitter Card
+    twitter_card: Optional[str] = None  # 'summary' | 'summary_large_image'
+    twitter_title: Optional[str] = None
+    twitter_description: Optional[str] = None
+    # Robots & Structured Data
+    robots_noindex: bool = False
+    robots_nofollow: bool = False
+    enable_jsonld: bool = True
 
 
 class ThumbnailType(str, Enum):
@@ -56,6 +79,15 @@ class Course(CourseBase, table=True):
     extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
 
 
+class CourseCreate(CourseBase):
+    org_id: int = Field(default=None, foreign_key="organization.id")
+    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: Optional[str] = Field(default="")
+    thumbnail_video: Optional[str] = Field(default="")
+    extra_metadata: Optional[dict] = None
+    pass
+
+
 class CourseUpdate(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
@@ -104,3 +136,17 @@ class FullCourseRead(CourseBase):
     pass
 
 
+class FullCourseReadWithTrail(CourseBase):
+    id: int
+    course_uuid: Optional[str] = None
+    creation_date: Optional[str] = None
+    update_date: Optional[str] = None
+    org_id: int = Field(default=None, foreign_key="organization.id")
+    seo: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
+    authors: List[AuthorWithRole]
+    # Chapters, Activities
+    chapters: List[ChapterRead]
+    # Trail
+    trail: TrailRead | None = None
+    pass

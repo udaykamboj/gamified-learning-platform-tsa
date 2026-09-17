@@ -81,7 +81,7 @@ def decode_mfa_pending_provenance(token: str) -> tuple[Optional[str], Optional[i
 
 
 def mint_session_tokens(
-    email: str, amr: Optional[str] = None, org_id: Optional[int] = None
+    email: str, amr: Optional[str] = None, org_id: Optional[int] = None, role: Optional[str] = None
 ) -> SessionIssueResult:
     """Mint a real session unconditionally. Only for callers that have already
     satisfied (or deliberately bypassed) the second factor.
@@ -91,6 +91,8 @@ def mint_session_tokens(
     per-org auth-method / session-sharing policy can evaluate the session later.
     """
     claims = session_claims(amr, org_id)
+    if role:
+        claims["role"] = role
     return SessionIssueResult(
         mfa_required=False,
         access_token=create_access_token(data={"sub": email, "purpose": "session", **claims}),
@@ -103,13 +105,14 @@ async def issue_session_or_challenge(
     user: User,
     amr: Optional[str] = None,
     org_id: Optional[int] = None,
+    role: Optional[str] = None,
 ) -> SessionIssueResult:
     """Mint a session, unless the user has a confirmed second factor — in which
     case mint a short-lived pending token instead and demand a code. Provenance
     (``amr`` / ``org_id``) is carried through both branches."""
-    if await is_mfa_active(db_session, user.id):
+    if hasattr(user, "id") and user.id and await is_mfa_active(db_session, user.id):
         return SessionIssueResult(
             mfa_required=True,
             mfa_token=create_mfa_pending_token(user.email, amr, org_id),
         )
-    return mint_session_tokens(user.email, amr, org_id)
+    return mint_session_tokens(user.email, amr, org_id, role=role)

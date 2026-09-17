@@ -115,7 +115,7 @@ class UserReadAuthor(SQLModel):
 
 
 class PublicUser(UserRead):
-    pass
+    is_admin_user: bool = False
 
 
 class UserRoleWithOrg(BaseModel):
@@ -191,6 +191,28 @@ class User(UserBase, table=True):
     last_login_ip: Optional[str] = None
     signup_method: Optional[str] = None
     is_superadmin: bool = Field(default=False)
+    password_changed_at: Optional[datetime] = Field(default=None)
+    creation_date: str = ""
+    update_date: str = ""
+
+class AdminUser(SQLModel, table=True):
+    __table_args__ = (
+        Index("ix_admin_user_email", "email"),
+        {"extend_existing": True},
+    )
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str
+    email: str
+    password: str = ""
+    user_uuid: str = Field(default="", index=True)
+    first_name: str = ""
+    last_name: str = ""
+    is_superadmin: bool = Field(default=True)
+    email_verified: bool = True
+    failed_login_attempts: int = 0
+    locked_until: Optional[str] = None
+    last_login_at: Optional[str] = None
+    last_login_ip: Optional[str] = None
     password_changed_at: Optional[datetime] = Field(default=None)
     creation_date: str = ""
     update_date: str = ""

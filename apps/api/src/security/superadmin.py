@@ -42,8 +42,13 @@ def ensure_ee_superadmin_surface() -> None:
         )
 
 
-async def is_user_superadmin(user_id: int, db_session: AsyncSession) -> bool:
+async def is_user_superadmin(user_id: int, db_session: AsyncSession, is_admin_user: bool = False) -> bool:
     """Check if a user is a superadmin by querying the database directly."""
+    if is_admin_user:
+        from src.db.users import AdminUser
+        result = (await db_session.execute(select(AdminUser.is_superadmin).where(AdminUser.id == user_id))).scalars().first()
+        return bool(result)
+
     _cache = getattr(db_session, '_superadmin_cache', None)
     if _cache is None:
         db_session._superadmin_cache = {}
@@ -112,7 +117,8 @@ async def require_superadmin(
             )
         return current_user
 
-    if not await is_user_superadmin(current_user.id, db_session):
+    is_admin = getattr(current_user, "is_admin_user", False)
+    if not await is_user_superadmin(current_user.id, db_session, is_admin_user=is_admin):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Superadmin access required",

@@ -10,13 +10,14 @@ resetting, certificate awarding, cohort access or signing in as a user
 (docs/refactor/progress/00-requirements.md, R3, R19, R20).
 """
 
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from typing import Any, Dict, List, Optional, Union
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
-from src.db.users import UserRead
+from src.db.users import AnonymousUser, PublicUser, UserRead, UserSession
 from src.security.auth import get_current_user
+from src.services.users.users import get_user_session
 from src.services.admin.admin import (
     _require_api_token,
     _resolve_org_slug,
@@ -31,6 +32,25 @@ from src.services.admin.admin import (
 
 
 router = APIRouter()
+
+
+@router.get(
+    "/users/session",
+    response_model=UserSession,
+    summary="Get current admin user session",
+    description="Return the full session for the current admin user.",
+)
+async def api_get_admin_current_user_session(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    current_user: Union[PublicUser, AnonymousUser] = Depends(get_current_user),
+) -> UserSession:
+    if isinstance(current_user, AnonymousUser) or not getattr(current_user, "is_admin_user", False):
+        raise HTTPException(
+            status_code=401,
+            detail="Admin authentication required",
+        )
+    return await get_user_session(request, db_session, current_user)
 
 
 # ── Response models for OpenAPI documentation ────────────────────────────────

@@ -16,6 +16,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
+from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -50,6 +51,30 @@ def get_learning_role(activity: Any) -> LearningRole:
     return LearningRole.PRACTICE
 
 
+def validate_learning_role(activity_type: Any, details: Optional[dict]) -> None:
+    """Reject an unknown role, or practice/assessment on a non-assignment activity."""
+    if not isinstance(details, dict) or LEARNING_ROLE_KEY not in details:
+        return
+    raw = details[LEARNING_ROLE_KEY]
+    valid = {role.value for role in LearningRole}
+    if raw not in valid:
+        raise HTTPException(
+            status_code=400,
+            detail=f"learning_role must be one of: {', '.join(sorted(valid))}",
+        )
+    is_assignment = _type_value(activity_type) == ActivityTypeEnum.TYPE_ASSIGNMENT.value
+    if raw != LearningRole.LESSON.value and not is_assignment:
+        raise HTTPException(
+            status_code=400,
+            detail="Only assignment activities can be practice or assessment",
+        )
+    if raw == LearningRole.LESSON.value and is_assignment:
+        raise HTTPException(
+            status_code=400,
+            detail="An assignment activity must be practice or assessment",
+        )
+
+
 # Defaults applied to a new practice/assessment assignment. FORCED fields keep
 # the learning loop intact (instant score, unlimited tries, no deadline, no
 # letter grades); SOFT fields only fill in what the author didn't send.
@@ -72,6 +97,20 @@ _SOFT = {
         "pass_threshold_percentage": 80.0,
     },
 }
+
+
+def apply_assignment_preset(assignment: Any, role: LearningRole, fields_set: set[str]) -> None:
+    """Apply the practice/assessment preset to a new Assignment in place."""
+    if role not in SCORED_ROLES:
+        return
+    for field, value in _FORCED.items():
+        setattr(assignment, field, value)
+    for field, value in _SOFT[role].items():
+        if field not in fields_set:
+            setattr(assignment, field, value)
+    # A formative assignment never produces a score; everything else scores
+    # itself on submit.
+    assignment.auto_grading = not bool(assignment.ungraded)
 
 
 def attempt_passed_before(trailstep: Optional[TrailStep]) -> bool:
@@ -122,3 +161,7 @@ async def record_graded_attempt(
     return trailstep
 
 
+def reset_attempt_progress(trailstep: TrailStep) -> None:
+    """Clear scores and completion (an admin rejected the work). Caller commits."""
+    trailstep.data = {}
+    trailstep.complete = False

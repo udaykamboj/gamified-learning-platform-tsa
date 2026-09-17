@@ -20,7 +20,7 @@ const BACKEND_URL = (getConfig('NEXT_PUBLIC_STARLAB_BACKEND_URL') || 'http://loc
 // it returns tokens just like login/signup and its cookies must be mirrored.
 // `magic-link` covers /magic-link/verify, which mints a session (or an mfa_token)
 // from a passwordless login link.
-const TOKEN_RESPONSE_PATHS = ['login', 'refresh', 'oauth', 'signup', 'verify-email', 'magic-link']
+const TOKEN_RESPONSE_PATHS = ['login', 'refresh', 'oauth', 'signup', 'verify-email', 'magic-link', 'admin/login', 'admin/refresh']
 
 function shouldExtractTokens(path: string): boolean {
   return TOKEN_RESPONSE_PATHS.some(p => path.startsWith(p))
@@ -258,10 +258,10 @@ async function proxyRequest(
 
   const cookieParts: string[] = []
   if (accessToken?.value) {
-    cookieParts.push(`${ACCESS_TOKEN_COOKIE}=${accessToken.value}`)
+    cookieParts.push(`${reqAccessTokenCookie}=${accessToken.value}`)
   }
   if (refreshToken?.value) {
-    cookieParts.push(`${REFRESH_TOKEN_COOKIE}=${refreshToken.value}`)
+    cookieParts.push(`${reqRefreshTokenCookie}=${refreshToken.value}`)
   }
   if (cookieParts.length > 0) {
     headers['Cookie'] = cookieParts.join('; ')

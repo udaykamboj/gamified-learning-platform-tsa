@@ -803,6 +803,22 @@ async def get_user_session(
     # Get user
     print(f"headers: {request.headers}")
     print(f"current_user is: {current_user}")
+    if getattr(current_user, "is_admin_user", False):
+        from src.db.users import AdminUser
+        statement = select(AdminUser).where(AdminUser.user_uuid == current_user.user_uuid)
+        admin_user = (await db_session.execute(statement)).scalars().first()
+        if not admin_user:
+            raise HTTPException(
+                status_code=401,
+                detail="Admin user does not exist",
+            )
+        return UserSession(
+            user=UserRead.model_validate(admin_user),
+            roles=[],
+            platform_role="admin",
+            can_manage_platform=True,
+        )
+
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = (await db_session.execute(statement)).scalars().first()
 
@@ -963,6 +979,16 @@ async def security_get_user(request: Request, db_session: AsyncSession, email: s
     user = User(**user.model_dump())
 
     return user
+
+async def security_get_admin_user(request: Request, db_session: AsyncSession, email: str):
+    from src.db.users import AdminUser
+    statement = select(AdminUser).where(AdminUser.email == email)
+    user = (await db_session.execute(statement)).scalars().first()
+    
+    if not user:
+        return None
+        
+    return AdminUser(**user.model_dump())
 
 
 ## 🔒 RBAC Utils ##

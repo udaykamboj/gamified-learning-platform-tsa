@@ -155,7 +155,13 @@ async def authenticate_user(
     password: str,
     db_session: AsyncSession,
 ) -> User | bool:
-    user = await security_get_user(request, db_session, email)
+    is_admin_login = request.url.path.endswith("/admin/login")
+    if is_admin_login:
+        from src.services.users.users import security_get_admin_user
+        user = await security_get_admin_user(request, db_session, email)
+    else:
+        user = await security_get_user(request, db_session, email)
+        
     if not user:
         # SECURITY: run a real password-verify against a dummy hash so
         # unknown-user responses take roughly the same time as known-user
@@ -603,10 +609,25 @@ async def get_current_user(
         raise credentials_exception
 
     # Step 2: Fall back to JWT logic using PyJWT
-    is_admin_route = request.url.path.startswith("/api/v1/admin")
-    cookie_name = JWT_ADMIN_COOKIE_NAME if is_admin_route else JWT_COOKIE_NAME
-    token = extract_jwt_from_request(request, cookie_name=cookie_name)
+    has_admin_cookie = bool(request.cookies.get(JWT_ADMIN_COOKIE_NAME))
+    is_admin_route = (
+        request.url.path.startswith("/api/v1/admin")
+        or request.url.path.startswith("/api/v1/superadmin")
+        or request.url.path.startswith("/api/v1/platform")
+    )
+    
+    token = None
+    from_admin_cookie = False
+    if has_admin_cookie or is_admin_route:
+        token = extract_jwt_from_request(request, cookie_name=JWT_ADMIN_COOKIE_NAME)
+        if token and has_admin_cookie:
+            from_admin_cookie = True
+            
+    if not token:
+        token = extract_jwt_from_request(request, cookie_name=JWT_COOKIE_NAME)
+
     username = None
+    payload = None
 
     if token:
         payload = decode_jwt(token)
@@ -649,9 +670,29 @@ async def get_current_user(
 
     token_data = TokenData(username=username)
 
-    if username:
-        user = await security_get_user(request, db_session, email=token_data.username)  # type: ignore # treated as an email
+    if username and payload:
+        user = None
+        is_admin = False
+        
+        # Check admin user table first if admin cookie, admin route, or admin role
+        if from_admin_cookie or is_admin_route or payload.get("role") == "admin":
+            from src.services.users.users import security_get_admin_user
+            user = await security_get_admin_user(request, db_session, email=token_data.username)  # type: ignore
+            if user:
+                is_admin = True
+                
+        if not user and not is_admin_route:
+            from src.services.users.users import security_get_user
+            user = await security_get_user(request, db_session, email=token_data.username)  # type: ignore # treated as an email
+            if user:
+                is_admin = False
+            
         if user is None:
+            if is_admin_route:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Admin access required",
+                )
             raise credentials_exception
 
         token_iat_raw = payload.get("iat") if token else None
@@ -679,7 +720,7 @@ async def get_current_user(
         if user.id is not None and _is_token_revoked_for_user(user.id, issued_at):
             raise credentials_exception
 
-        public_user = PublicUser(**user.model_dump())
+        public_user = PublicUser(**user.model_dump(), is_admin_user=is_admin)
         request.state.user = public_user
         request.state.is_api_token = False
         # Publish this session's provenance (how the user authenticated, which

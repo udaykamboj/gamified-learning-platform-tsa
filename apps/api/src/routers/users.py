@@ -147,6 +147,7 @@ async def api_get_current_user_session(
     return session
 
 
+
 @router.get(
     "/authorize/ressource/{ressource_uuid}/action/{action}",
     summary="Check authorization for resource action",

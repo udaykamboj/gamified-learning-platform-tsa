@@ -345,7 +345,12 @@ async def refresh(
         _log_refresh_outcome("no_subject")
         raise credentials_exception
 
-    user = await security_get_user(request, db_session, email=email)
+    if is_admin_refresh:
+        from src.services.users.users import security_get_admin_user
+        user = await security_get_admin_user(request, db_session, email=email)
+    else:
+        user = await security_get_user(request, db_session, email=email)
+
     if user is None or user.id is None:
         _log_refresh_outcome("user_not_found", token_age_seconds=_token_age_seconds(payload))
         raise credentials_exception
@@ -429,6 +434,8 @@ async def refresh(
         # claim-less one that bypasses the org auth-method / sharing policy.
         # A session that records no method also picks up its grace deadline here.
         carried = carry_session_claims(payload)
+        if is_admin_refresh:
+            carried["role"] = "admin"
         new_access_token = create_access_token(
             data={"sub": email, **carried},
             expires_delta=JWT_ACCESS_TOKEN_EXPIRES,
@@ -532,12 +539,20 @@ async def login(
         request, username, password, db_session
     )
 
+    is_admin_login = request.url.path.endswith("/admin/login")
     if not user:
         # Unknown user OR wrong password — responses are indistinguishable.
         # The row lookup below runs behind that wall for lockout bookkeeping.
-        user_record = (await db_session.execute(
-            select(User).where(User.email == username)
-        )).scalars().first()
+        if is_admin_login:
+            from src.db.users import AdminUser
+            user_record = (await db_session.execute(
+                select(AdminUser).where(AdminUser.email == username)
+            )).scalars().first()
+        else:
+            user_record = (await db_session.execute(
+                select(User).where(User.email == username)
+            )).scalars().first()
+
         if user_record:
             await record_failed_login(
                 user_record,
@@ -558,7 +573,6 @@ async def login(
     # state no longer enables enumeration since the caller has proven they
     # control the account.
 
-    is_admin_login = request.url.path.endswith("/admin/login")
     if is_admin_login and not user.is_superadmin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -610,20 +624,22 @@ async def login(
 
     # Durable connection record for the per-student audit log. Org-agnostic —
     # a login authenticates the user, not a single org membership.
-    await record_audit_event(
-        event_type=UserAuditEventType.LOGIN,
-        user_id=user.id,
-        ip=client_ip,
-        user_agent=request.headers.get("user-agent"),
-        metadata={"method": "password"},
-    )
+    if not is_admin_login:
+        await record_audit_event(
+            event_type=UserAuditEventType.LOGIN,
+            user_id=user.id,
+            ip=client_ip,
+            user_agent=request.headers.get("user-agent"),
+            metadata={"method": "password"},
+        )
 
     # Step 7: Issue a session — unless the account carries a second factor, in
     # which case this returns a short-lived pending token instead and the caller
     # must complete /auth/login/mfa. No cookies and no user object are returned
     # on that branch: nothing is authenticated until the code is verified.
+    role = "admin" if is_admin_login else "student"
     issue = await issue_session_or_challenge(
-        db_session, user, amr=AUTH_METHOD_PASSWORD, org_id=session_org_id
+        db_session, user, amr=AUTH_METHOD_PASSWORD, org_id=session_org_id, role=role
     )
     if issue.mfa_required:
         return {

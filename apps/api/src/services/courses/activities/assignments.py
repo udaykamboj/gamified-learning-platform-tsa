@@ -22,14 +22,20 @@ from sqlalchemy.exc import IntegrityError
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import (
     Assignment,
+    AssignmentCreate,
     AssignmentRead,
     AssignmentTask,
+    AssignmentTaskCreate,
     AssignmentTaskRead,
     AssignmentTaskSubmission,
+    AssignmentTaskSubmissionCreate,
     AssignmentTaskSubmissionRead,
     AssignmentTaskSubmissionUpdate,
     AssignmentTaskTypeEnum,
+    AssignmentTaskUpdate,
+    AssignmentUpdate,
     AssignmentUserSubmission,
+    AssignmentUserSubmissionCreate,
     AssignmentUserSubmissionRead,
     AssignmentUserSubmissionStatus,
     GradingTypeEnum,
@@ -40,22 +46,35 @@ from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User, APITokenUser
+from src.security.features_utils.usage import (
+    check_limits_with_usage,
+    decrease_feature_usage,
+    increase_feature_usage,
+)
 from src.security.rbac import (
-    authorization_verify_based_on_org_admin_status,
+    authorization_verify_based_on_roles,
+    authorization_verify_api_token_permissions,
     check_resource_access,
     AccessAction,
 )
-from src.services.courses.locks import require_enrollment
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
+from src.services.courses.activities.uploads.tasks_ref_files import (
+    upload_reference_file,
+)
+from src.services.courses.activities.uploads.solution_files import (
+    upload_solution_file,
+)
 from src.services.courses.activities.quiz_modes import (
     resolve_grading_mode,
     resolve_response_type,
     score_question,
 )
 from src.services.courses.activities.learning import (
+    apply_assignment_preset,
     attempt_passed_before,
     get_learning_role,
     record_graded_attempt,
+    reset_attempt_progress,
 )
 from src.services.trail.trail import check_trail_presence
 from src.services.courses.certifications import (
@@ -63,6 +82,7 @@ from src.services.courses.certifications import (
     is_course_fully_completed,
     revoke_user_certificate,
     sync_trailrun_status,
+    are_course_assignments_passed,
 )
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
@@ -94,8 +114,11 @@ def _block_api_tokens(current_user: PublicUser | AnonymousUser | APITokenUser) -
     SECURITY: Assignments contain sensitive user submission data and grades.
     API tokens are not allowed to access this data - only user authentication is permitted.
 
-    Every assignment endpoint is a learner endpoint: students read, answer,
-    submit and retry their own work.
+    Still used on the learner-centric, session-only endpoints (the ``/me`` reads,
+    student submission upsert, file uploads, retry, "done"). The instructor-style
+    endpoints (authoring, reading submissions, grading) instead go through
+    ``authorize_assignment_access`` so API tokens with the ``assignments`` rights
+    bucket can drive assignments headlessly.
     """
     if isinstance(current_user, APITokenUser):
         raise HTTPException(
@@ -104,38 +127,63 @@ def _block_api_tokens(current_user: PublicUser | AnonymousUser | APITokenUser) -
         )
 
 
+_ACCESS_ACTION_TO_TOKEN_ACTION = {
+    AccessAction.CREATE: "create",
+    AccessAction.READ: "read",
+    AccessAction.UPDATE: "update",
+    AccessAction.DELETE: "delete",
+}
+
+
 async def authorize_assignment_access(
     request: Request,
     db_session: AsyncSession,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     course_uuid: str,
     access_action: AccessAction,
+    token_action: str | None = None,
 ) -> None:
-    """Authorize a read of assignment content for a signed-in session.
+    """Authorize an assignment operation for either a user session or an API token.
 
-    Assignments are platform course content that students complete themselves.
-    There is no headless authoring, grading or submit-on-behalf path, so API
-    tokens are refused (docs/refactor/progress/00-requirements.md, R3, R10).
+    Sessions keep the existing course-scoped RBAC (``check_resource_access``).
+    API tokens are authorized against the single ``assignments`` rights bucket,
+    with the organization boundary enforced via the parent course UUID.
+
+    ``token_action`` overrides the rights action checked for tokens when it should
+    differ from the session ``access_action`` (e.g. listing per-task submissions
+    requires instructor UPDATE for a session but is a ``read`` for a token; an
+    authoring token attaches reference files as part of ``create``).
     """
-    _block_api_tokens(current_user)
+    if isinstance(current_user, APITokenUser):
+        action = token_action or _ACCESS_ACTION_TO_TOKEN_ACTION[access_action]
+        await authorization_verify_api_token_permissions(
+            request,
+            current_user,
+            action,
+            course_uuid,
+            db_session,
+            resource_type_override="assignments",
+        )
+        return
     await check_resource_access(request, db_session, current_user, course_uuid, access_action)
 
 
-async def _is_course_monitor(
+async def _is_assignment_instructor(
     request: Request,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     course_uuid: str,
     db_session: AsyncSession,
 ) -> bool:
-    """Whether the caller monitors this course (an admin) rather than takes it.
+    """Whether the principal has instructor-level (grading) authority on the course.
 
-    Admins see course content unredacted (answer keys, drafts) so they can
-    check the platform content. They never grade or submit.
+    An API token that has already passed ``authorize_assignment_access`` for the
+    ``assignments`` bucket acts with instructor visibility (only org admins can
+    mint such tokens). Sessions fall back to the role check.
     """
-    if isinstance(current_user, AnonymousUser) or isinstance(current_user, APITokenUser):
-        return False
-    return await authorization_verify_based_on_org_admin_status(
-        request, current_user.id, "read", course_uuid, db_session
+    if isinstance(current_user, APITokenUser):
+        return True
+    return await authorization_verify_based_on_roles(
+        request, current_user.id, "update", course_uuid, db_session
     )
 
 
@@ -364,7 +412,7 @@ async def _resolve_solution_visibility(
     """
     if not ((assignment.solution or "").strip() or assignment.solution_file):
         return False
-    if await _is_course_monitor(request, current_user, course_uuid, db_session):
+    if await _is_assignment_instructor(request, current_user, course_uuid, db_session):
         return True
     return await _student_may_see_solution(current_user, assignment, db_session)
 
@@ -1045,6 +1093,84 @@ def compute_assignment_grade(
 ## > Assignments CRUD
 
 
+async def create_assignment(
+    request: Request,
+    assignment_object: AssignmentCreate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if org exists
+    statement = select(Course).where(Course.id == assignment_object.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
+
+    # Usage check
+    await check_limits_with_usage("assignments", course.org_id, db_session)
+
+    # Validate the parent activity actually belongs to the authorized course —
+    # RBAC only checked the course, so a client-supplied activity_id pointing at
+    # another course/org would otherwise create a dangling/cross-course
+    # assignment. chapter_id is derived from the activity's own row (not trusted
+    # from the body) so it always matches.
+    parent_activity = (await db_session.execute(
+        select(Activity).where(Activity.id == assignment_object.activity_id)
+    )).scalars().first()
+    if (
+        parent_activity is None
+        or parent_activity.course_id != course.id
+        or parent_activity.org_id != course.org_id
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Activity does not belong to the target course",
+        )
+
+    # Create Assignment
+    assignment = Assignment(**assignment_object.model_dump())
+
+    # Practice sets and unit tests score themselves, allow unlimited tries, and
+    # have no deadline or letter grade (docs/refactor/02-target-architecture.md).
+    apply_assignment_preset(
+        assignment, get_learning_role(parent_activity), assignment_object.model_fields_set
+    )
+
+    # Formative mode and auto-grading are contradictory: one says "never produce
+    # a grade", the other says "produce one on submit". Normalize here (rather
+    # than trusting the client to keep them consistent) so the submit path only
+    # ever has to check one flag.
+    if assignment.ungraded:
+        assignment.auto_grading = False
+
+    assignment.assignment_uuid = str(f"assignment_{uuid4()}")
+    assignment.creation_date = str(datetime.now())
+    assignment.update_date = str(datetime.now())
+    assignment.org_id = course.org_id
+    assignment.course_id = course.id
+    assignment.activity_id = parent_activity.id
+
+    # Insert Assignment in DB
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+
+    # Feature usage
+    await increase_feature_usage("assignments", course.org_id, db_session)
+
+    # return assignment read. The caller passed the CREATE authorization above,
+    # so they are an instructor and the corrige is theirs to see.
+    return _apply_solution_visibility(
+        AssignmentRead.model_validate(assignment), assignment, unlocked=True
+    )
+
+
 async def read_assignment(
     request: Request,
     assignment_uuid: str,
@@ -1117,7 +1243,344 @@ async def read_assignment_from_activity_uuid(
     return _apply_solution_visibility(result, assignment, unlocked=unlocked)
 
 
+async def update_assignment(
+    request: Request,
+    assignment_uuid: str,
+    assignment_object: AssignmentUpdate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    # Update only the fields that were passed in. Non-None values are applied;
+    # a null is normally read as "not sent" rather than "clear this", because
+    # every optional field on AssignmentUpdate defaults to None.
+    #
+    # Two fields need to be genuinely clearable, so an explicit null empties
+    # them: pass_threshold_percentage back to NULL (the grading-type default),
+    # otherwise a set threshold could never be removed and would keep
+    # over-gating certificates; and due_date, so an assignment can be moved to
+    # a self-paced course and lose its deadline instead of keeping one the
+    # teacher can only ever push further out.
+    #
+    # The structural foreign keys are never reassigned here: RBAC above only
+    # authorizes the assignment's *current* course, so honoring a client-supplied
+    # parent would let an instructor reparent the assignment into another
+    # org/course. AssignmentUpdate no longer exposes them; this guard keeps the
+    # invariant even if the model regains those fields later.
+    IMMUTABLE_FIELDS = frozenset({"org_id", "course_id", "chapter_id", "activity_id"})
+    CLEARABLE_FIELDS = frozenset({"pass_threshold_percentage", "due_date"})
+    provided = getattr(assignment_object, "model_fields_set", set())
+    for var, value in vars(assignment_object).items():
+        if var in IMMUTABLE_FIELDS:
+            continue
+        if value is not None:
+            setattr(assignment, var, value)
+        elif var in CLEARABLE_FIELDS and var in provided:
+            setattr(assignment, var, None)
+    # Turning on formative mode turns auto-grading off — see create_assignment.
+    if assignment.ungraded:
+        assignment.auto_grading = False
+    assignment.update_date = str(datetime.now())
+
+    # Insert Assignment in DB
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+
+    # return assignment read. The caller passed the UPDATE authorization above,
+    # so they are an instructor and the corrige is theirs to see.
+    return _apply_solution_visibility(
+        AssignmentRead.model_validate(assignment), assignment, unlocked=True
+    )
+
+
+async def put_assignment_solution_file(
+    request: Request,
+    db_session: AsyncSession,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    solution_file: UploadFile | None = None,
+):
+    """Attach (or replace) the assignment's model-answer document.
+
+    Mirrors ``put_assignment_task_reference_file`` but at the assignment level.
+    Instructor-only: the stored filename is the corrige, and handing it to a
+    learner before the reveal rule unlocks it would defeat the whole feature.
+    """
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    statement = select(Activity).where(Activity.id == assignment.activity_id)
+    activity = (await db_session.execute(statement)).scalars().first()
+
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    org_statement = select(Organization).where(Organization.id == course.org_id)
+    org = (await db_session.execute(org_statement)).scalars().first()
+
+    # RBAC check
+    await authorize_assignment_access(
+        request,
+        db_session,
+        current_user,
+        course.course_uuid,
+        AccessAction.UPDATE,
+        token_action="create",
+    )
+
+    if not (solution_file and solution_file.filename):
+        raise HTTPException(
+            status_code=400,
+            detail="No solution file provided",
+        )
+    if not (activity and org):
+        raise HTTPException(
+            status_code=404,
+            detail="Activity not found",
+        )
+
+    name_in_disk = await upload_solution_file(
+        solution_file,
+        activity.activity_uuid,
+        org.org_uuid,
+        course.course_uuid,
+        assignment.assignment_uuid,
+    )
+    assignment.solution_file = name_in_disk
+    assignment.update_date = str(datetime.now())
+
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+
+    return _apply_solution_visibility(
+        AssignmentRead.model_validate(assignment), assignment, unlocked=True
+    )
+
+
+async def delete_assignment_solution_file(
+    request: Request,
+    db_session: AsyncSession,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+):
+    """Detach the model-answer document from the assignment.
+
+    Only the reference is dropped; the uploaded blob is left in place, matching
+    how task reference files behave when replaced.
+    """
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(
+        request, db_session, current_user, course.course_uuid, AccessAction.UPDATE
+    )
+
+    assignment.solution_file = None
+    assignment.update_date = str(datetime.now())
+
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+
+    return _apply_solution_visibility(
+        AssignmentRead.model_validate(assignment), assignment, unlocked=True
+    )
+
+
+async def delete_assignment(
+    request: Request,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
+
+    # Feature usage
+    await decrease_feature_usage("assignments", course.org_id, db_session)
+
+    # Delete Assignment
+    await db_session.delete(assignment)
+    await db_session.commit()
+
+    return {"message": "Assignment deleted"}
+
+
+async def delete_assignment_from_activity_uuid(
+    request: Request,
+    activity_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if activity exists
+    statement = select(Activity).where(Activity.activity_uuid == activity_uuid)
+
+    activity = (await db_session.execute(statement)).scalars().first()
+
+    if not activity:
+        raise HTTPException(
+            status_code=404,
+            detail="Activity not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == activity.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.activity_id == activity.id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
+
+     # Feature usage
+    await decrease_feature_usage("assignments", course.org_id, db_session)
+
+    # Delete Assignment
+    await db_session.delete(assignment)
+
+    await db_session.commit()
+
+    return {"message": "Assignment deleted"}
+
+
 ## > Assignments Tasks CRUD
+
+
+async def create_assignment_task(
+    request: Request,
+    assignment_uuid: str,
+    assignment_task_object: AssignmentTaskCreate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.CREATE)
+
+    # Create Assignment Task
+    assignment_task = AssignmentTask(**assignment_task_object.model_dump())
+
+    assignment_task.assignment_task_uuid = str(f"assignmenttask_{uuid4()}")
+    assignment_task.creation_date = str(datetime.now())
+    assignment_task.update_date = str(datetime.now())
+    assignment_task.org_id = course.org_id
+    assignment_task.chapter_id = assignment.chapter_id
+    assignment_task.activity_id = assignment.activity_id
+    assignment_task.assignment_id = assignment.id  # type: ignore
+    assignment_task.course_id = assignment.course_id
+
+    # Insert Assignment Task in DB
+    db_session.add(assignment_task)
+    await db_session.commit()
+    await db_session.refresh(assignment_task)
+
+    # return assignment task read
+    return AssignmentTaskRead.model_validate(assignment_task)
 
 
 async def read_assignment_tasks(
@@ -1160,7 +1623,7 @@ async def read_assignment_tasks(
     # see everything; a reveal-eligible student (own submission GRADED +
     # show_correct_answers, no retries left) sees the per-answer keys but never
     # the CODE solution or hidden tests; everyone else gets a full strip.
-    is_instructor = await _is_course_monitor(request, current_user, course.course_uuid, db_session)
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
     reveal_to_student = (
         not is_instructor
         and await _student_may_see_answer_key(current_user, assignment, db_session)
@@ -1221,7 +1684,7 @@ async def read_assignment_task(
     # Strip the answer key unless instructor. A reveal-eligible student sees the
     # per-answer keys but never the CODE solution or hidden tests (keep_answer_keys).
     read = AssignmentTaskRead.model_validate(assignmenttask)
-    is_instructor = await _is_course_monitor(request, current_user, course.course_uuid, db_session)
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
     if not is_instructor:
         reveal_to_student = await _student_may_see_answer_key(
             current_user, assignment, db_session
@@ -1230,6 +1693,80 @@ async def read_assignment_task(
             read.contents, keep_answer_keys=reveal_to_student
         )
     return read
+
+
+async def put_assignment_task_reference_file(
+    request: Request,
+    db_session: AsyncSession,
+    assignment_task_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    reference_file: UploadFile | None = None,
+):
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_task_uuid == assignment_task_uuid
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check for activity
+    statement = select(Activity).where(Activity.id == assignment.activity_id)
+    activity = (await db_session.execute(statement)).scalars().first()
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # Get org uuid
+    org_statement = select(Organization).where(Organization.id == course.org_id)
+    org = (await db_session.execute(org_statement)).scalars().first()
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE, token_action="create")
+
+    # Upload reference file
+    if reference_file and reference_file.filename and activity and org:
+        name_in_disk = await upload_reference_file(
+            reference_file,
+            activity.activity_uuid,
+            org.org_uuid,
+            course.course_uuid,
+            assignment.assignment_uuid,
+            assignment_task_uuid,
+        )
+        # Update reference file
+        assignment_task.reference_file = name_in_disk
+
+    assignment_task.update_date = str(datetime.now())
+
+    # Insert Assignment Task in DB
+    db_session.add(assignment_task)
+    await db_session.commit()
+    await db_session.refresh(assignment_task)
+
+    # return assignment task read
+    return AssignmentTaskRead.model_validate(assignment_task)
 
 
 async def put_assignment_task_submission_file(
@@ -1283,10 +1820,20 @@ async def put_assignment_task_submission_file(
     # RBAC check - only need read permission to submit files
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
-    # Students work on courses they enrolled in themselves.
-    await require_enrollment(course.id, course.org_id, current_user, db_session)
+    # Check if user is enrolled in the course
+    if not await authorization_verify_based_on_roles(request, current_user.id, "read", course.course_uuid, db_session):
+        raise HTTPException(
+            status_code=403,
+            detail="You must be enrolled in this course to submit files"
+        )
 
-    if _is_assignment_past_due(assignment):
+    # Enforce the submission deadline for student sessions, matching the
+    # task-submission and submit-for-grading write paths (file uploads bypassed
+    # it, letting a student attach files after the deadline). Instructors exempt.
+    is_instructor = await authorization_verify_based_on_roles(
+        request, current_user.id, "update", course.course_uuid, db_session
+    )
+    if not is_instructor and _is_assignment_past_due(assignment):
         raise HTTPException(
             status_code=403,
             detail="Assignment deadline has passed",
@@ -1306,7 +1853,276 @@ async def put_assignment_task_submission_file(
         return {"file_uuid": name_in_disk}
 
 
+async def update_assignment_task(
+    request: Request,
+    assignment_task_uuid: str,
+    assignment_task_object: AssignmentTaskUpdate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_task_uuid == assignment_task_uuid
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    # A change to how a task is scored (its type, its answer key/definition, or
+    # its max points) invalidates the grades already stored for it. The delete
+    # path re-grades for exactly this reason; an in-place edit is the same
+    # hazard, so detect a scoring-relevant change and re-grade the same way.
+    _SCORING_FIELDS = ("assignment_type", "contents", "max_grade_value")
+    scoring_changed = any(
+        getattr(assignment_task_object, f, None) is not None
+        and getattr(assignment_task_object, f) != getattr(assignment_task, f)
+        for f in _SCORING_FIELDS
+    )
+
+    # Update only the fields that were passed in
+    for var, value in vars(assignment_task_object).items():
+        if value is not None:
+            setattr(assignment_task, var, value)
+    assignment_task.update_date = str(datetime.now())
+
+    # Insert Assignment Task in DB
+    db_session.add(assignment_task)
+    await db_session.commit()
+    await db_session.refresh(assignment_task)
+
+    if scoring_changed:
+        await _regrade_graded_submissions(
+            assignment=assignment,
+            course=course,
+            db_session=db_session,
+            request=request,
+        )
+
+    # return assignment task read
+    return AssignmentTaskRead.model_validate(assignment_task)
+
+
+async def delete_assignment_task(
+    request: Request,
+    assignment_task_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_task_uuid == assignment_task_uuid
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
+
+    # Delete Assignment Task
+    await db_session.delete(assignment_task)
+    await db_session.commit()
+
+    # Already-graded learners keep a frozen `grade` that still includes the
+    # points from the task we just removed, while the denominator is recomputed
+    # live from the surviving tasks. That desync is real corruption: with
+    # 60 + 100 = 160 stored, deleting the 100-point task leaves the read path
+    # clamping to "100/100 · A" for someone who actually scored 60/60. Re-run
+    # the aggregate for every graded submission so both halves of the fraction
+    # come from the same task set. Certificate eligibility reads the same
+    # numbers, so leaving them stale could also mis-award a certificate.
+    await _regrade_graded_submissions(
+        assignment=assignment,
+        course=course,
+        db_session=db_session,
+        request=request,
+    )
+
+    return {"message": "Assignment Task deleted"}
+
+
+async def _reconcile_certificate_after_grade_change(
+    request: Request | None,
+    user_id: int,
+    course: Course,
+    db_session: AsyncSession,
+) -> None:
+    """Bring a learner's certificate back in line with their current grades.
+
+    Recomputing a grade can flip a learner across the passing threshold. If they
+    no longer pass every gating assignment, a held certificate is revoked and the
+    enrollment status demoted; if they now pass and the course is otherwise
+    complete, a certificate is (re)issued. Best-effort: never abort the caller.
+    """
+    if not course.id:
+        return
+    try:
+        passed = await are_course_assignments_passed(user_id, course.id, db_session)
+        if not passed:
+            await revoke_user_certificate(
+                user_id, course.id, db_session, reason="regraded_below_threshold"
+            )
+            await sync_trailrun_status(user_id, course.id, db_session)
+        elif request is not None:
+            # Now passing — re-issue if the course is otherwise complete. Safe to
+            # call when a cert already exists (it no-ops on a duplicate).
+            await check_course_completion_and_create_certificate(
+                request, user_id, course.id, db_session
+            )
+    except Exception:
+        logger.exception(
+            "Failed to reconcile certificate for user %s on course %s after a grade change",
+            user_id,
+            course.id,
+        )
+
+
+async def _regrade_graded_submissions(
+    assignment: Assignment,
+    course: Course,
+    db_session: AsyncSession,
+    request: Request | None = None,
+) -> None:
+    """Recompute stored grades for every GRADED submission of ``assignment``.
+
+    Call after the task set changes, so the persisted numerator stops
+    disagreeing with the live denominator. Best-effort per learner: one
+    learner's failure must not abort the teacher's edit.
+
+    Recomputing can move a learner across the passing threshold, so each
+    regraded learner's certificate is reconciled — revoked if they now fail,
+    reissued if they now pass. Pass ``request`` to enable reissue.
+    """
+    graded = (await db_session.execute(
+        select(AssignmentUserSubmission).where(
+            AssignmentUserSubmission.assignment_id == assignment.id,
+            AssignmentUserSubmission.submission_status
+            == AssignmentUserSubmissionStatus.GRADED,
+        )
+    )).scalars().all()
+
+    for submission in graded:
+        if submission.user_id is None:
+            continue
+        try:
+            await _apply_grade_and_finalize(
+                assignment=assignment,
+                course=course,
+                user_id=submission.user_id,
+                assignment_user_submission=submission,
+                db_session=db_session,
+                overall_feedback=None,
+                auto_graded=True,
+                dispatch_webhook=False,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to recompute grade for user %s on assignment %s after a task change",
+                submission.user_id,
+                assignment.assignment_uuid,
+            )
+            continue
+        await _reconcile_certificate_after_grade_change(
+            request, submission.user_id, course, db_session
+        )
+
+
 ## > Assignments Tasks Submissions CRUD
+
+
+async def _resolve_token_submission_user(
+    request: Request,
+    db_session: AsyncSession,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    course,
+    on_behalf_of_user_id: int | None,
+):
+    """Resolve the learner an API token is submitting on behalf of.
+
+    Submit-on-behalf lets a headless/custom frontend write a learner's answer
+    via a token. The token must hold ``assignments.create`` and pass an explicit
+    ``on_behalf_of_user_id``; the target learner must already be a member of the
+    token's organization (learners are referenced by existing StarLab id).
+
+    Returns the learner as a ``PublicUser`` to act as, or ``None`` for non-token
+    callers (sessions act as themselves).
+    """
+    if not isinstance(current_user, APITokenUser):
+        return None
+    if on_behalf_of_user_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="API tokens must set on_behalf_of_user_id to submit on behalf of a learner",
+        )
+    # assignments.create gates writing learner submission data + enforces the
+    # org boundary via the parent course.
+    await authorize_assignment_access(
+        request, db_session, current_user, course.course_uuid, AccessAction.CREATE
+    )
+    from src.security.org_auth import is_org_member
+
+    learner = (
+        await db_session.execute(select(User).where(User.id == on_behalf_of_user_id))
+    ).scalars().first()
+    if not learner:
+        raise HTTPException(status_code=404, detail="Learner not found")
+    if not await is_org_member(learner.id, course.org_id, db_session):
+        raise HTTPException(
+            status_code=403,
+            detail="Learner is not a member of this organization",
+        )
+    return PublicUser(**learner.model_dump())
 
 
 _ASSIGNMENT_TASK_SUBMISSION_MUTABLE_FIELDS = {
@@ -1323,6 +2139,7 @@ async def handle_assignment_task_submission(
     assignment_task_submission_object: AssignmentTaskSubmissionUpdate,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
+    on_behalf_of_user_id: int | None = None,
 ):
     assignment_task_submission_uuid = assignment_task_submission_object.assignment_task_submission_uuid
     # Check if assignment task exists
@@ -1357,57 +2174,97 @@ async def handle_assignment_task_submission(
             detail="Course not found",
         )
 
-    # Only the student saves their own answers. Grades come from auto-grading on
-    # submit; nobody writes a grade by hand (docs/refactor/progress/00-requirements.md, R10).
-    _block_api_tokens(current_user)
-    submitter = current_user
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
-    await require_enrollment(course.id, course.org_id, current_user, db_session)
+    # Resolve who the submission is for. API tokens submit on behalf of a learner
+    # (assignments.create + explicit on_behalf_of_user_id); sessions act as self.
+    token_submitter = await _resolve_token_submission_user(
+        request, db_session, current_user, course, on_behalf_of_user_id
+    )
+    if token_submitter is not None:
+        submitter = token_submitter
+        is_instructor = False
+        is_token_submit = True
+    else:
+        _block_api_tokens(current_user)
+        submitter = current_user
+        # SECURITY: Check if user has instructor/admin permissions for grading
+        is_instructor = await authorization_verify_based_on_roles(request, current_user.id, "update", course.course_uuid, db_session)
+        is_token_submit = False
 
-    if _is_assignment_past_due(assignment):
-        raise HTTPException(
-            status_code=403,
-            detail="Assignment deadline has passed",
-        )
+    # For non-instructors (session students AND token submit-on-behalf), the call
+    # writes a learner ANSWER, never a grade.
+    if not is_instructor:
+        if not is_token_submit:
+            # Session students must be enrolled and within the deadline. A token
+            # acting for a learner is an authorized external writer — the custom
+            # frontend owns enrollment/deadline, so those gates are skipped.
+            if not await authorization_verify_based_on_roles(request, current_user.id, "read", course.course_uuid, db_session):
+                raise HTTPException(
+                    status_code=403,
+                    detail="You must be enrolled in this course to submit assignments"
+                )
 
-    # SECURITY: answers are frozen once the attempt has been handed in. Without
-    # this, a student could keep PUTting answers after SUBMITTED/GRADED and, with
-    # show_correct_answers, replay the key into a re-grade. Retry deletes the task
-    # rows and re-opens the submission as PENDING.
-    existing_user_submission = (await db_session.execute(
-        select(AssignmentUserSubmission).where(
-            AssignmentUserSubmission.user_id == current_user.id,
-            AssignmentUserSubmission.assignment_id == assignment.id,
-        )
-    )).scalars().first()
-    if existing_user_submission is not None and (
-        existing_user_submission.submission_status
-        not in (
-            AssignmentUserSubmissionStatus.PENDING,
-            AssignmentUserSubmissionStatus.NOT_SUBMITTED,
-        )
-    ):
-        raise HTTPException(
-            status_code=403,
-            detail=(
-                "This assignment has already been handed in. "
-                "Use retry to attempt it again."
-            ),
-        )
+            if _is_assignment_past_due(assignment):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Assignment deadline has passed",
+                )
 
-    # SECURITY: answer submissions cannot carry grades
-    if (assignment_task_submission_object.grade is not None and assignment_task_submission_object.grade != 0) or \
-       (assignment_task_submission_object.task_submission_grade_feedback is not None and assignment_task_submission_object.task_submission_grade_feedback != ""):
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to update grades"
-        )
+            # SECURITY: answers are frozen once the attempt has been handed in.
+            # Without this, a learner could keep PUTting task answers after
+            # SUBMITTED/GRADED. Combined with show_correct_answers (which hands
+            # the key over post-grade), they could replay the correct answers and
+            # any later re-grade — which re-derives every non-manually-graded task
+            # from the CURRENT stored answers — would score the tampered version.
+            # Editing an existing attempt in place is exactly what the retry flow
+            # exists to prevent; retry deletes the task rows first and re-opens
+            # the submission as PENDING.
+            existing_user_submission = (await db_session.execute(
+                select(AssignmentUserSubmission).where(
+                    AssignmentUserSubmission.user_id == current_user.id,
+                    AssignmentUserSubmission.assignment_id == assignment.id,
+                )
+            )).scalars().first()
+            if existing_user_submission is not None and (
+                existing_user_submission.submission_status
+                not in (
+                    AssignmentUserSubmissionStatus.PENDING,
+                    AssignmentUserSubmissionStatus.NOT_SUBMITTED,
+                )
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail=(
+                        "This assignment has already been handed in. "
+                        "Use retry to attempt it again."
+                    ),
+                )
 
-    assignment_task_submission_object.grade = None
-    assignment_task_submission_object.task_submission_grade_feedback = None
-    assignment_task_submission_object.assignment_task_id = None
-    assignment_task_submission_object.assignment_type = None
-    assignment_task_submission_object.manually_graded = False
+        # SECURITY: answer submissions cannot carry grades - only check if actual values are being set
+        if (assignment_task_submission_object.grade is not None and assignment_task_submission_object.grade != 0) or \
+           (assignment_task_submission_object.task_submission_grade_feedback is not None and assignment_task_submission_object.task_submission_grade_feedback != ""):
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to update grades"
+            )
+
+        assignment_task_submission_object.grade = None
+        assignment_task_submission_object.task_submission_grade_feedback = None
+        assignment_task_submission_object.assignment_task_id = None
+        assignment_task_submission_object.assignment_type = None
+
+        # Neither students nor tokens can flag a submission as manually graded —
+        # that's exclusively a teacher action. Also force-clear any prior flag so
+        # a new answer invalidates the teacher's earlier manual grade and the
+        # task re-enters the server-verified pool on the next grading pass.
+        assignment_task_submission_object.manually_graded = False
+
+        if not is_token_submit:
+            # Session students need READ on the course; the token was already
+            # authorized via assignments.create in _resolve_token_submission_user.
+            await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+    else:
+        # SECURITY: Instructors/admins need update permission to grade
+        await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
 
     if assignment_task_submission_uuid:
         statement = select(AssignmentTaskSubmission).where(
@@ -1420,6 +2277,34 @@ async def handle_assignment_task_submission(
                 status_code=404,
                 detail="Assignment Task Submission not found",
             )
+    elif is_instructor and (
+        (assignment_task_submission_object.grade is not None
+         and assignment_task_submission_object.grade != 0)
+        or (assignment_task_submission_object.task_submission_grade_feedback is not None
+            and assignment_task_submission_object.task_submission_grade_feedback != "")
+    ):
+        # An instructor writing a GRADE without naming a target submission has
+        # nothing to grade. Falling through to the save-progress lookup below
+        # keyed the write on submitter.id — the TEACHER — so grading a task the
+        # learner never submitted created a phantom instructor-owned row (scored
+        # 0 by the create branch) while the UI reported success and the learner's
+        # grade never moved. There is no safe target to guess: fail loudly.
+        #
+        # An instructor who is also taking their own course saves ANSWERS through
+        # this same path with no uuid, and that must keep working. The quiz
+        # autosave sends grade=0 and feedback="" on every keystroke, so match the
+        # "actual value" test the student branch above uses (grade != 0, feedback
+        # != "") — a zeroed placeholder is a save, only a real grade or real
+        # feedback is a grading attempt. Every UI grading path always carries a
+        # target uuid and is handled by the branch above, so this stays a
+        # defense-in-depth guard, never the normal grade route.
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Cannot grade this task: the learner has no submission for it. "
+                "A target submission is required to record a grade."
+            ),
+        )
     else:
         # Save-progress path: without an explicit UUID, update/create the
         # submitter's own submission for this task.
@@ -1431,8 +2316,9 @@ async def handle_assignment_task_submission(
 
     # If submission exists, update it
     if assignment_task_submission:
-        # SECURITY: students can only touch their own submission row.
-        if assignment_task_submission.user_id != submitter.id:
+        # SECURITY: non-instructors (students / token submit-on-behalf) can only
+        # touch the submitter's own submission row.
+        if not is_instructor and assignment_task_submission.user_id != submitter.id:
             raise HTTPException(
                 status_code=403,
                 detail="You can only update your own submissions"
@@ -1459,7 +2345,9 @@ async def handle_assignment_task_submission(
         assignment_task_submission = AssignmentTaskSubmission(
             assignment_task_submission_uuid=assignment_task_submission_uuid or f"assignmenttasksubmission_{uuid4()}",
             task_submission=model_data["task_submission"],
-            # Learner writes never carry a grade.
+            # Safe to hardcode: this branch is now reachable only on the learner
+            # save-progress path (instructors without a target uuid are rejected
+            # above), and learner writes never carry a grade.
             grade=0,  # Always start with 0 for new submissions
             task_submission_grade_feedback="",  # Start with empty feedback
             assignment_task_id=int(assignment_task.id),  # type: ignore
@@ -1501,6 +2389,73 @@ async def handle_assignment_task_submission(
             await db_session.commit()
             await db_session.refresh(existing)
             assignment_task_submission = existing
+
+    # return assignment task submission read
+    return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
+
+
+async def read_user_assignment_task_submissions(
+    request: Request,
+    assignment_task_uuid: str,
+    user_id: int,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_task_uuid == assignment_task_uuid
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+
+    # Ownership check: non-instructors may only read their own submissions
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+    if not is_instructor and int(user_id) != int(current_user.id):
+        raise HTTPException(
+            status_code=403,
+            detail="You can only view your own submissions",
+        )
+
+    # Check if assignment task submission exists
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_id == assignment_task.id,
+        AssignmentTaskSubmission.user_id == user_id,
+    )
+    assignment_task_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task Submission not found",
+        )
 
     # return assignment task submission read
     return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
@@ -1614,6 +2569,241 @@ async def read_user_assignment_task_submissions_me(
     return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
 
 
+async def read_assignment_task_submissions(
+    request: Request,
+    assignment_task_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+    limit: int = 50,
+    offset: int = 0,
+):
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_task_uuid == assignment_task_uuid,
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # Only instructors may list all submissions for a task
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE, token_action="read")
+
+    # Deterministic total order before limit/offset so pages don't skip or
+    # duplicate rows (an unordered LIMIT/OFFSET has no stable row order).
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_id == assignment_task.id
+    ).order_by(AssignmentTaskSubmission.id.desc()).limit(limit).offset(offset)
+    submissions = (await db_session.execute(statement)).scalars().all()
+    return [AssignmentTaskSubmissionRead.model_validate(s) for s in submissions]
+
+
+async def update_assignment_task_submission(
+    request: Request,
+    assignment_task_submission_uuid: str,
+    assignment_task_submission_object: AssignmentTaskSubmissionCreate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    _block_api_tokens(current_user)
+    # Check if assignment task submission exists
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_submission_uuid
+        == assignment_task_submission_uuid
+    )
+    assignment_task_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task Submission not found",
+        )
+
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.id == assignment_task_submission.assignment_task_id
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    is_instructor = await authorization_verify_based_on_roles(
+        request, current_user.id, "update", course.course_uuid, db_session
+    )
+
+    if is_instructor:
+        await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+    else:
+        await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+        if assignment_task_submission.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only update your own submissions",
+            )
+        assignment_task_submission_object.grade = None
+        assignment_task_submission_object.task_submission_grade_feedback = None
+        assignment_task_submission_object.assignment_task_id = None
+        assignment_task_submission_object.assignment_type = None
+
+    # Update only the fields that were passed in
+    for var, value in vars(assignment_task_submission_object).items():
+        if value is not None:
+            setattr(assignment_task_submission, var, value)
+    assignment_task_submission.update_date = str(datetime.now())
+
+    # Insert Assignment Task Submission in DB
+    db_session.add(assignment_task_submission)
+    await db_session.commit()
+    await db_session.refresh(assignment_task_submission)
+
+    # return assignment task submission read
+    return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
+
+
+async def delete_assignment_task_submission(
+    request: Request,
+    assignment_task_submission_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    _block_api_tokens(current_user)
+    # Check if assignment task submission exists
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_submission_uuid
+        == assignment_task_submission_uuid
+    )
+    assignment_task_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task Submission not found",
+        )
+
+    # Check if assignment task exists
+    statement = select(AssignmentTask).where(
+        AssignmentTask.id == assignment_task_submission.assignment_task_id
+    )
+    assignment_task = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_task:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task not found",
+        )
+
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
+
+    # Delete Assignment Task Submission
+    deleted_user_id = assignment_task_submission.user_id
+    await db_session.delete(assignment_task_submission)
+    await db_session.commit()
+
+    # Removing one per-task answer changes the learner's aggregate for this
+    # assignment. If their overall submission was already GRADED, its stored
+    # grade (and any certificate that depended on it) is now stale — recompute
+    # and reconcile, the same as when a whole task is deleted.
+    if deleted_user_id is not None:
+        graded_submission = (await db_session.execute(
+            select(AssignmentUserSubmission).where(
+                AssignmentUserSubmission.assignment_id == assignment.id,
+                AssignmentUserSubmission.user_id == deleted_user_id,
+                AssignmentUserSubmission.submission_status
+                == AssignmentUserSubmissionStatus.GRADED,
+            )
+        )).scalars().first()
+        if graded_submission is not None:
+            try:
+                await _apply_grade_and_finalize(
+                    assignment=assignment,
+                    course=course,
+                    user_id=deleted_user_id,
+                    assignment_user_submission=graded_submission,
+                    db_session=db_session,
+                    overall_feedback=None,
+                    auto_graded=True,
+                    dispatch_webhook=False,
+                )
+                await _reconcile_certificate_after_grade_change(
+                    request, deleted_user_id, course, db_session
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to recompute aggregate for user %s after deleting a task submission",
+                    deleted_user_id,
+                )
+
+    return {"message": "Assignment Task Submission deleted"}
+
+
 ## > Assignments Submissions CRUD
 
 
@@ -1622,6 +2812,7 @@ async def create_assignment_submission(
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
+    on_behalf_of_user_id: int | None = None,
 ):
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
@@ -1643,13 +2834,28 @@ async def create_assignment_submission(
             detail="Course not found",
         )
 
-    # Students hand in their own work in courses they enrolled in.
-    _block_api_tokens(current_user)
-    submitter = current_user
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
-    await require_enrollment(course.id, course.org_id, current_user, db_session)
+    # Resolve who is submitting. API tokens submit on behalf of a learner
+    # (assignments.create + explicit on_behalf_of_user_id); sessions act as self.
+    token_submitter = await _resolve_token_submission_user(
+        request, db_session, current_user, course, on_behalf_of_user_id
+    )
+    if token_submitter is not None:
+        submitter = token_submitter
+        is_instructor = False
+        is_token_submit = True
+    else:
+        _block_api_tokens(current_user)
+        submitter = current_user
+        # RBAC check
+        await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+        is_instructor = await authorization_verify_based_on_roles(
+            request, current_user.id, "update", course.course_uuid, db_session
+        )
+        is_token_submit = False
 
-    if _is_assignment_past_due(assignment):
+    # Session students are bound by the deadline; a token writing on behalf of a
+    # learner is an authorized external writer (the custom frontend owns it).
+    if not is_instructor and not is_token_submit and _is_assignment_past_due(assignment):
         raise HTTPException(
             status_code=403,
             detail="Assignment deadline has passed",
@@ -1979,6 +3185,107 @@ async def create_assignment_submission(
     return AssignmentUserSubmissionRead.model_validate(assignment_user_submission)
 
 
+async def read_assignment_submissions(
+    request: Request,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+    limit: int = 50,
+    offset: int = 0,
+):
+    # Find assignment
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+
+    # Check if user has instructor/admin privileges on this course
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+
+    # Non-instructors can only see their own submissions
+    statement = select(AssignmentUserSubmission).where(
+        AssignmentUserSubmission.assignment_id == assignment.id
+    )
+    if not is_instructor:
+        statement = statement.where(
+            AssignmentUserSubmission.user_id == current_user.id
+        )
+
+    # Stable total order so paginated results don't skip/duplicate rows.
+    statement = statement.order_by(AssignmentUserSubmission.id.desc()).limit(limit).offset(offset)
+
+    # Compute the assignment-level max_grade once so every row can render a
+    # formatted display_grade (e.g. "A", "85/100") rather than just the raw
+    # integer sum from AssignmentUserSubmission.grade. Without this the
+    # submissions list shows "80" while the evaluate modal and the student's
+    # own view show "B" / "80/100" — three places, three formats.
+    tasks_statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_id == assignment.id
+    )
+    assignment_tasks = (await db_session.execute(tasks_statement)).scalars().all()
+    max_grade = sum(int(t.max_grade_value or 0) for t in assignment_tasks)
+
+    submissions = (await db_session.execute(statement)).scalars().all()
+
+    # Per-task breakdown for the whole page in ONE query, keyed by (user, task).
+    # The analytics "task difficulty" chart reads grade_display.tasks, but this
+    # endpoint never populated it — only the single-submission endpoints did —
+    # so that chart rendered its empty state for every assignment ever shipped.
+    # Batched deliberately: a per-row query here would be N+1 over the page.
+    task_ids = [t.id for t in assignment_tasks if t.id is not None]
+    user_ids = [s.user_id for s in submissions if s.user_id is not None]
+    submissions_by_user_task: dict = {}
+    if task_ids and user_ids:
+        task_sub_rows = (await db_session.execute(
+            select(AssignmentTaskSubmission).where(
+                AssignmentTaskSubmission.assignment_task_id.in_(task_ids),  # type: ignore[attr-defined]
+                AssignmentTaskSubmission.user_id.in_(user_ids),  # type: ignore[attr-defined]
+            )
+        )).scalars().all()
+        for ts in task_sub_rows:
+            submissions_by_user_task.setdefault(ts.user_id, {})[ts.assignment_task_id] = ts
+
+    results = []
+    for sub in submissions:
+        row = AssignmentUserSubmissionRead.model_validate(sub).model_dump()
+        if sub.submission_status == AssignmentUserSubmissionStatus.GRADED:
+            grade_display = compute_assignment_grade(
+                int(sub.grade or 0),
+                max_grade,
+                assignment.grading_type,
+                pass_threshold_percentage=assignment.pass_threshold_percentage,
+            )
+            # Reuse the threshold compute_assignment_grade already resolved so
+            # the per-task `passed` flags agree with the overall verdict.
+            grade_display["tasks"] = _build_tasks_breakdown(
+                assignment_tasks,
+                submissions_by_user_task.get(sub.user_id, {}),
+                grade_display["passing_threshold"],
+            )
+            row["grade_display"] = grade_display
+        else:
+            row["grade_display"] = None
+        results.append(row)
+    return results
+
+
 async def read_user_assignment_submissions(
     request: Request,
     assignment_uuid: str,
@@ -2009,8 +3316,9 @@ async def read_user_assignment_submissions(
     # RBAC check
     await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
-    # Ownership check: a submission is only ever visible to its student
-    if int(user_id) != int(current_user.id):
+    # Ownership check: non-instructors may only read their own submissions
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+    if not is_instructor and int(user_id) != int(current_user.id):
         raise HTTPException(
             status_code=403,
             detail="You can only view your own submissions",
@@ -2043,6 +3351,173 @@ async def read_user_assignment_submissions_me(
         current_user,
         db_session,
     )
+
+
+async def update_assignment_submission(
+    request: Request,
+    user_id: int,
+    assignment_uuid: str,
+    assignment_user_submission_object: AssignmentUserSubmissionCreate,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if assignment user submission exists (scoped to this specific assignment)
+    statement = select(AssignmentUserSubmission).where(
+        AssignmentUserSubmission.user_id == user_id,
+        AssignmentUserSubmission.assignment_id == assignment.id,
+    )
+    assignment_user_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_user_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment User Submission not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # Check if user is an instructor/admin (has UPDATE permission)
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+
+    if is_instructor:
+        # Instructors/admins can update any submission (e.g., for grading)
+        await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+    else:
+        # Regular users need READ access and can only update their own submissions
+        await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+        if str(assignment_user_submission.user_id) != str(current_user.id):
+            raise HTTPException(
+                status_code=403,
+                detail="You can only update your own submissions",
+            )
+        # Students may not touch the grade or status either.
+        for protected_field in ("grade", "submission_status"):
+            if hasattr(assignment_user_submission_object, protected_field):
+                setattr(assignment_user_submission_object, protected_field, None)
+
+    # The row's identity (which user, which assignment) is fixed by the lookup
+    # keys above — never let the request body reassign them. Left writable, an
+    # instructor (or student) could reparent the submission onto another
+    # assignment/org (assignment ids are global integers) or onto another user.
+    for identity_field in ("user_id", "assignment_id"):
+        if hasattr(assignment_user_submission_object, identity_field):
+            setattr(assignment_user_submission_object, identity_field, None)
+
+    # Update only the fields that were passed in
+    for var, value in vars(assignment_user_submission_object).items():
+        if value is not None:
+            setattr(assignment_user_submission, var, value)
+    assignment_user_submission.update_date = str(datetime.now())
+
+    # Insert Assignment User Submission in DB
+    db_session.add(assignment_user_submission)
+    await db_session.commit()
+    await db_session.refresh(assignment_user_submission)
+
+    # return assignment user submission read
+    return AssignmentUserSubmissionRead.model_validate(assignment_user_submission)
+
+
+async def delete_assignment_submission(
+    request: Request,
+    user_id: int,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    _block_api_tokens(current_user)
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if assignment user submission exists
+    statement = select(AssignmentUserSubmission).where(
+        AssignmentUserSubmission.user_id == user_id,
+        AssignmentUserSubmission.assignment_id == assignment.id,
+    )
+    assignment_user_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_user_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment User Submission not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.DELETE)
+
+    # Rejecting a submission means the student is no longer "done" with this
+    # activity — reset the TrailStep so the activity is no longer complete,
+    # clear the teacher-verification flag, and drop any stored grade string.
+    # Leave the per-task AssignmentTaskSubmission rows intact so the student
+    # keeps the work they did and can edit + resubmit rather than starting
+    # from scratch.
+    trailstep_statement = select(TrailStep).where(
+        TrailStep.activity_id == assignment.activity_id,
+        TrailStep.user_id == user_id,
+    )
+    trailstep = (await db_session.execute(trailstep_statement)).scalars().first()
+    if trailstep:
+        # A rejection also clears earned scores: the work wasn't accepted.
+        reset_attempt_progress(trailstep)
+        trailstep.teacher_verified = False
+        trailstep.grade = ""
+        trailstep.update_date = str(datetime.now())
+        db_session.add(trailstep)
+
+    # Delete Assignment User Submission (so the student can create a new one)
+    await db_session.delete(assignment_user_submission)
+    await db_session.commit()
+
+    # If a course certificate was already issued to this user (the activity was
+    # previously counted as complete and this was the final one), revoke it — the
+    # student can't hold a certificate while a gating assignment is rejected. A
+    # new certificate is re-issued automatically once the rework is accepted.
+    # revoke_user_certificate emits a certificate_revoked event so consumers
+    # learn it's no longer valid.
+    if course.id:
+        await revoke_user_certificate(
+            user_id, course.id, db_session, reason="assignment_rejected"
+        )
+        # The activity is no longer complete — demote the enrollment status so
+        # analytics/enrollment stop reporting this learner as "completed".
+        await sync_trailrun_status(user_id, course.id, db_session)
+
+    return {"message": "Assignment User Submission deleted"}
 
 
 async def retry_assignment_submission(
@@ -2143,7 +3618,9 @@ async def retry_assignment_submission(
     # every write path 403s — so allowing it here destroyed graded work with no
     # way back. Every other learner write is deadline-gated (file upload, task
     # submission, submit-for-grading); this one was the sole gap.
-    if _is_assignment_past_due(assignment):
+    if _is_assignment_past_due(assignment) and not await _is_assignment_instructor(
+        request, current_user, course.course_uuid, db_session
+    ):
         raise HTTPException(
             status_code=403,
             detail="Assignment deadline has passed",
@@ -2444,6 +3921,286 @@ async def _apply_grade_and_finalize(
     return computed
 
 
+async def grade_assignment_submission(
+    request: Request,
+    user_id: int,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+    overall_feedback: str | None = None,
+):
+    # SECURITY: This function should only be accessible by course owners or instructors
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # SECURITY: Require course ownership or instructor role for grading
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    # Check if assignment user submission exists
+    statement = select(AssignmentUserSubmission).where(
+        AssignmentUserSubmission.user_id == user_id,
+        AssignmentUserSubmission.assignment_id == assignment.id,
+    )
+    assignment_user_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_user_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment User Submission not found",
+        )
+
+    # A PENDING row is a retry in flight: the previous task submissions have
+    # been deleted and the learner has not handed anything in yet. Grading it
+    # sums an empty set, writes 0, flips the row to GRADED and fires the graded
+    # webhook — after which the learner's resubmit 400s (only PENDING /
+    # NOT_SUBMITTED are resubmittable), permanently at the retry cap. The retry
+    # path has the mirror guard ("Only graded submissions can be retried"); this
+    # side was missing it. The submissions list rendering PENDING as "Submitted"
+    # made hitting this easy.
+    if assignment_user_submission.submission_status in (
+        AssignmentUserSubmissionStatus.PENDING,
+        AssignmentUserSubmissionStatus.NOT_SUBMITTED,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="This learner has not handed in an attempt yet — nothing to grade.",
+        )
+
+    computed = await _apply_grade_and_finalize(
+        assignment=assignment,
+        course=course,
+        user_id=user_id,
+        assignment_user_submission=assignment_user_submission,
+        db_session=db_session,
+        overall_feedback=overall_feedback,
+        auto_graded=False,
+    )
+
+    # Grading this submission may have made the course fully passed (e.g. the
+    # teacher just graded the last outstanding assignment). The activities are
+    # already complete, so no other trigger would fire — re-run the certificate
+    # check here so a now-eligible learner is certified. No-ops when the course
+    # has no certification, isn't complete, or an assignment still isn't passed.
+    if course.id:
+        try:
+            await check_course_completion_and_create_certificate(
+                request, user_id, course.id, db_session
+            )
+            # Conversely, a regrade DOWN below the pass threshold must pull a
+            # previously issued certificate — the create path only ever adds one,
+            # so without this a learner keeps a valid certificate after failing a
+            # gating assignment on re-grade. No-op when they still pass or hold none.
+            if not await are_course_assignments_passed(user_id, course.id, db_session):
+                await revoke_user_certificate(
+                    user_id, course.id, db_session, reason="regraded_below_threshold"
+                )
+        except Exception:
+            pass
+
+    return {
+        "message": f"Assignment User Submission graded: {computed['display_grade']}",
+        **computed,
+    }
+
+
+async def get_grade_assignment_submission(
+    request: Request,
+    user_id: int,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    # Check if assignment exists
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await authorize_assignment_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+
+    # A formative assignment has no grade to read. Returning a computed 0 here
+    # would hand every caller a "0/100, not passed" object for work that was
+    # never meant to be scored, and any UI rendering it would look like a fail.
+    if assignment.ungraded:
+        raise HTTPException(
+            status_code=400,
+            detail="This assignment is ungraded (formative) and has no grade.",
+        )
+
+    # Ownership check: non-instructors may only read their own grade
+    is_instructor = await _is_assignment_instructor(request, current_user, course.course_uuid, db_session)
+    if not is_instructor and str(user_id) != str(current_user.id):
+        raise HTTPException(
+            status_code=403,
+            detail="You can only view your own grade",
+        )
+
+    # Check if assignment user submission exists
+    statement = select(AssignmentUserSubmission).where(
+        AssignmentUserSubmission.user_id == user_id,
+        AssignmentUserSubmission.assignment_id == assignment.id,
+    )
+    assignment_user_submission = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment_user_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment User Submission not found",
+        )
+
+    # Recompute max_grade from current task configuration. Doing this on read
+    # (rather than storing a stale value) means instructor edits to task
+    # max_grade_value are reflected immediately.
+    tasks_statement = select(AssignmentTask).where(
+        AssignmentTask.assignment_id == assignment.id
+    )
+    assignment_tasks = (await db_session.execute(tasks_statement)).scalars().all()
+    max_grade = 0
+    for task in assignment_tasks:
+        max_grade += int(task.max_grade_value or 0)
+
+    # Load this user's per-task submissions so the response can include a
+    # per-task breakdown. The UI uses this to show "Task N · 85%" badges
+    # instead of re-fetching one request per task.
+    task_ids = [task.id for task in assignment_tasks if task.id is not None]
+    task_submissions_by_task_id: dict = {}
+    if task_ids:
+        ts_statement = select(AssignmentTaskSubmission).where(
+            AssignmentTaskSubmission.user_id == user_id,
+            AssignmentTaskSubmission.assignment_task_id.in_(task_ids),  # type: ignore[attr-defined]
+        )
+        for ts in (await db_session.execute(ts_statement)).scalars().all():
+            task_submissions_by_task_id[ts.assignment_task_id] = ts
+
+    grade_obj = compute_assignment_grade(
+        int(assignment_user_submission.grade or 0),
+        max_grade,
+        assignment.grading_type,
+        overall_feedback=assignment_user_submission.overall_feedback,
+        pass_threshold_percentage=assignment.pass_threshold_percentage,
+    )
+    grade_obj["tasks"] = _build_tasks_breakdown(
+        assignment_tasks,
+        task_submissions_by_task_id,
+        grade_obj["passing_threshold"],
+    )
+    return grade_obj
+
+
+async def mark_activity_as_done_for_user(
+    request: Request,
+    user_id: int,
+    assignment_uuid: str,
+    current_user: PublicUser | AnonymousUser | APITokenUser,
+    db_session: AsyncSession,
+):
+    _block_api_tokens(current_user)
+    # SECURITY: This function should only be accessible by course owners or instructors
+    # Get Assignment
+    statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
+    assignment = (await db_session.execute(statement)).scalars().first()
+
+    if not assignment:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found",
+        )
+
+    # Check if activity exists
+    statement = select(Activity).where(Activity.id == assignment.activity_id)
+    activity = (await db_session.execute(statement)).scalars().first()
+
+    statement = select(Course).where(Course.id == assignment.course_id)
+    course = (await db_session.execute(statement)).scalars().first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # SECURITY: Require course ownership or instructor role for marking activities as done
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    if not activity:
+        raise HTTPException(
+            status_code=404,
+            detail="Activity not found",
+        )
+
+    # Check if user exists
+    statement = select(User).where(User.id == user_id)
+    user = (await db_session.execute(statement)).scalars().first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    # Check if user is enrolled in the course
+    trailsteps = select(TrailStep).where(
+        TrailStep.activity_id == activity.id,
+        TrailStep.user_id == user_id,
+    )
+    trailstep = (await db_session.execute(trailsteps)).scalars().first()
+
+    if not trailstep:
+        raise HTTPException(
+            status_code=404,
+            detail="User not enrolled in the course",
+        )
+
+    # Mark activity as done
+    trailstep.complete = True
+    trailstep.update_date = str(datetime.now())
+
+    # Insert TrailStep in DB
+    db_session.add(trailstep)
+    await db_session.commit()
+    await db_session.refresh(trailstep)
+
+    # Check if all activities in the course are completed and create certificate if so
+    if course and course.id:
+        await check_course_completion_and_create_certificate(
+            request, user_id, course.id, db_session
+        )
+
+    # return OK
+    return {"message": "Activity marked as done for user"}
+
+
 async def get_assignments_from_course(
     request: Request,
     course_uuid: str,
@@ -2471,7 +4228,7 @@ async def get_assignments_from_course(
     # exposure — but the parent Activity's `published` flag is what hides drafts
     # in navigation, and these direct endpoints bypassed it.
     statement = select(Assignment).where(Assignment.course_id == course.id)
-    is_instructor = await _is_course_monitor(
+    is_instructor = await _is_assignment_instructor(
         request, current_user, course.course_uuid, db_session
     )
     if not is_instructor:

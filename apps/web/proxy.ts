@@ -248,41 +248,17 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 1. Admin subdomain (multi only) → rewrite to /admin route group.
-  //    Idempotent: if the path already starts with /admin (e.g. internal nav
-  //    uses /admin/organizations so it works in both subdomain and path mode),
-  //    don't double-prefix.
-  // -------------------------------------------------------------------------
-  if (await isAdminSubdomain(fullhost, instance)) {
-    const target = pathname === '/admin' || pathname.startsWith('/admin/')
-      ? pathname
-      : `/admin${pathname}`
-      
-    if (target !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
-      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
-    }
-      
-    const response = NextResponse.rewrite(new URL(`${target}${search}`, req.url))
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  // -------------------------------------------------------------------------
-  // 1b. Admin path — direct /admin access works in any tenancy mode.
-  //     In single mode this is the only way to reach the admin panel; in
-  //     multi mode it's an alternative to the admin.{domain} subdomain.
+  // 1. Admin paths do NOT exist in the student application (apps/web).
+  //    Seamlessly redirect to the dedicated Admin Portal (apps/admin on port 3020).
   // -------------------------------------------------------------------------
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    if (pathname !== '/admin/login' && !req.cookies.get('LH_admin_session')?.value) {
-      return NextResponse.redirect(new URL(`/admin/login${search}`, req.url))
-    }
-    const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
-    setInstanceCookies(response, instance)
-    return response
+    const adminBase = process.env.ADMIN_PORTAL_URL || 'http://localhost:3020'
+    const targetPath = pathname.replace(/^\/admin/, '') || '/'
+    return NextResponse.redirect(new URL(`${targetPath}${search}`, adminBase), 307)
   }
 
   // -------------------------------------------------------------------------
-  // 1b. Legacy /dashboard/* → hub redirects
+  // 2. Legacy /dashboard/* → hub redirects
   //
   //    The old platform (starlab.app) used /dashboard/{slug}/plan, /dashboard/
   //    new, /dashboard/account, etc. Those paths do NOT exist on .io and would

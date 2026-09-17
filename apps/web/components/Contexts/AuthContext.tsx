@@ -210,6 +210,8 @@ function clearSessionMarker(): void {
   const expired = 'expires=Thu, 01 Jan 1970 00:00:00 GMT'
   document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}${domainAttr}; ${expired}`
   document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}; ${expired}`
+  document.cookie = `LH_admin_session=; path=/${sameSiteAttr}${secureAttr}${domainAttr}; ${expired}`
+  document.cookie = `LH_admin_session=; path=/${sameSiteAttr}${secureAttr}; ${expired}`
 }
 
 // Session Provider Component
@@ -348,7 +350,7 @@ export function SessionProvider({
   // names like `LH_session_backup`, falsely reporting a session.
   const hasSessionMarker = useCallback((): boolean => {
     if (typeof document === 'undefined') return false
-    return document.cookie.split('; ').some((c) => c.startsWith('LH_session='))
+    return document.cookie.split('; ').some((c) => c.startsWith('LH_session=') || c.startsWith('LH_admin_session='))
   }, [])
 
   // Refresh access token using refresh token cookie.
@@ -369,7 +371,9 @@ export function SessionProvider({
     refreshPromiseRef.current = (async () => {
       try {
         // Use Next.js API route to ensure cookies are set correctly
-        const response = await fetch('/api/auth/refresh', {
+        const isAdminPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')
+        const endpoint = isAdminPath ? '/api/auth/admin/refresh' : '/api/auth/refresh'
+        const response = await fetch(endpoint, {
           method: 'GET',
           credentials: 'include',
         })

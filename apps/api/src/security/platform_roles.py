@@ -133,6 +133,8 @@ async def require_admin_account(
 ):
     """Dependency: the caller must be an admin account (403 for students)."""
     user = await _require_session_user(current_user)
+    if getattr(user, "is_admin_user", False):
+        return user
     access = await resolve_platform_access(int(user.id), db_session)
     if not access.is_admin:
         raise HTTPException(
@@ -151,6 +153,8 @@ async def require_platform_admin(
     Superadmins and members holding the Admin role. Students get 403.
     """
     user = await _require_session_user(current_user)
+    if getattr(user, "is_admin_user", False):
+        return user
     access = await resolve_platform_access(int(user.id), db_session)
     if not access.can_manage_platform:
         raise HTTPException(

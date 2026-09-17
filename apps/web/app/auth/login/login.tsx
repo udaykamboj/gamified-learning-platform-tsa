@@ -439,7 +439,7 @@ const LoginClient = (props: LoginClientProps) => {
           // Immediately log them out
           signOut({ redirect: false })
           setErrorType('ADMIN_PORTAL_REQUIRED')
-          setError('Admin accounts must log in via the Admin Portal (/admin/login).')
+          setError('Admin accounts must log in via the Admin Portal at http://localhost:3020/login.')
           setShowErrorModal(true)
           setIsSubmitting(false)
           return

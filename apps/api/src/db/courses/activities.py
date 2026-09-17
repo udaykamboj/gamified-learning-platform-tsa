@@ -38,7 +38,7 @@ class ActivitySubTypeEnum(str, Enum):
 class ActivityLockType(str, Enum):
     PUBLIC = "public"                # anyone, including anonymous, can view
     AUTHENTICATED = "authenticated"  # must be signed in
-    RESTRICTED = "restricted"        # legacy value; course content is gated by enrollment (services/courses/locks.py)
+    RESTRICTED = "restricted"        # only members of assigned usergroups
 
 
 class ActivityBase(SQLModel):
@@ -70,6 +70,26 @@ class Activity(ActivityBase, table=True):
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
     )
+
+
+class ActivityCreate(ActivityBase):
+    chapter_id: int
+    activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
+    activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
+    details: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    extra_metadata: Optional[dict] = None
+    pass
+
+
+class ActivityUpdate(SQLModel):
+    name: Optional[str] = None
+    content: Optional[dict] = None
+    activity_type: Optional[ActivityTypeEnum] = None
+    activity_sub_type: Optional[ActivitySubTypeEnum] = None
+    details: Optional[dict] = None
+    published: Optional[bool] = None
+    lock_type: Optional[ActivityLockType] = None
+    extra_metadata: Optional[dict] = None
 
 
 class ActivityRead(ActivityBase):
