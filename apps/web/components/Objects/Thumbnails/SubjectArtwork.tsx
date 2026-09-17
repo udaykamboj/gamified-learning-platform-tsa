@@ -26,8 +26,16 @@ function hash(value: string): number {
   return h >>> 0
 }
 
+// Accepts a raw uuid ("course_abc"), a bare uuid ("abc") or a link
+// ("/course/abc") and reduces all of them to the same identity, so one item
+// gets the same planet on every page.
+function normalizeSeed(seed: string): string {
+  const last = (seed || '').split('?')[0].split('/').filter(Boolean).pop() || 'starlab'
+  return last.replace(/^[a-z]+_/, '')
+}
+
 export default function SubjectArtwork({ seed, className }: { seed: string; className?: string }) {
-  const h = hash(seed || 'starlab')
+  const h = hash(normalizeSeed(seed))
   const palette = PALETTES[h % PALETTES.length]
   // Small deterministic variation in composition.
   const x = 58 + (h >> 3) % 18

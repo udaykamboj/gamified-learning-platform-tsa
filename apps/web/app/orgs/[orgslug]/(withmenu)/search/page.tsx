@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import SubjectArtwork from '@components/Objects/Thumbnails/SubjectArtwork'
 import {
   BookCopy,
   Folder,
@@ -224,7 +225,7 @@ const sections: SectionDescriptor<any>[] = [
                 rounded="rounded-full"
                 backgroundColor="bg-gray-100"
               />
-              <span className="text-xs text-foreground/50">
+              <span className="text-meta text-muted-foreground">
                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
               </span>
             </div>
@@ -356,10 +357,10 @@ const sections: SectionDescriptor<any>[] = [
           backgroundColor="bg-gray-100"
         />
         <div className="min-w-0">
-          <h3 className="text-sm font-medium text-foreground/80 truncate">
+          <h3 className="text-sm font-semibold text-foreground truncate">
             {user.first_name} {user.last_name}
           </h3>
-          <p className="text-xs text-foreground/50 truncate">@{user.username}</p>
+          <p className="text-meta text-muted-foreground truncate">@{user.username}</p>
         </div>
       </Link>
     ),
@@ -629,7 +630,7 @@ function TabButton({
 function ResourceCard({
   href,
   imageUrl,
-  fallbackIcon: FallbackIcon,
+  fallbackIcon: _FallbackIcon,
   title,
   subtitle,
   footer,
@@ -644,9 +645,9 @@ function ResourceCard({
   return (
     <Link
       href={href}
-      className="bg-card rounded-lg border border-border hover:border-border transition-colors overflow-hidden group flex flex-col"
+      className="sl-card sl-card-interactive overflow-hidden group flex flex-col"
     >
-      <div className="relative aspect-video bg-foreground/5 flex items-center justify-center">
+      <div className="relative aspect-video bg-muted flex items-center justify-center">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -654,13 +655,13 @@ function ResourceCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <FallbackIcon size={28} className="text-foreground/30" />
+          <SubjectArtwork seed={href} />
         )}
       </div>
-      <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-sm font-medium text-foreground/80 line-clamp-1">{title}</h3>
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="text-card-title font-semibold text-foreground line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-foreground/50 line-clamp-2 mt-1">{subtitle}</p>
+          <p className="text-ui text-muted-foreground line-clamp-2 mt-1">{subtitle}</p>
         )}
         {footer}
       </div>
@@ -684,15 +685,15 @@ function InlineCard({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border hover:border-border transition-colors"
+      className="sl-card sl-card-interactive flex items-start gap-3 p-4"
     >
-      <div className="w-9 h-9 bg-foreground/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
-        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-foreground/50" />}
+      <div className="size-10 bg-muted rounded-[10px] flex items-center justify-center flex-shrink-0 text-base">
+        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-muted-foreground" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium text-foreground/80 line-clamp-1">{title}</h3>
+        <h3 className="text-card-title font-semibold text-foreground line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-foreground/50 line-clamp-2 mt-0.5">{subtitle}</p>
+          <p className="text-meta text-muted-foreground line-clamp-2 mt-0.5">{subtitle}</p>
         )}
       </div>
     </Link>
@@ -701,13 +702,13 @@ function InlineCard({
 
 function LoadingGrid() {
   return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
           className="bg-card rounded-lg border border-border p-3 animate-pulse"
         >
-          <div className="w-full aspect-video bg-foreground/5 rounded mb-3" />
+          <div className="w-full aspect-video bg-muted rounded-[10px] mb-3" />
           <div className="w-3/4 h-3 bg-foreground/5 rounded mb-1.5" />
           <div className="w-1/2 h-3 bg-foreground/5 rounded" />
         </div>
@@ -805,7 +806,7 @@ function Pagination({
 function gridClass(key: ResourceKey): string {
   // Dense list for inline types (folders/discussions), card grid for rich types.
   if (key === 'folders' || key === 'discussions' || key === 'users') {
-    return 'grid gap-3 md:grid-cols-2 lg:grid-cols-3'
+    return 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
   }
   return 'grid gap-4 md:grid-cols-2 lg:grid-cols-3'
 }

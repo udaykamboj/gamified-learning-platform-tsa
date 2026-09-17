@@ -1,4 +1,5 @@
 'use client'
+import SubjectArtwork from '@components/Objects/Thumbnails/SubjectArtwork'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { BookOpenCheck, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Loader2, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon } from 'lucide-react'
@@ -624,18 +625,17 @@ function ActivityClient(props: ActivityClientProps) {
                             <Link
                               href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
                             >
-                              <img
-                                className="w-[60px] h-[34px] rounded-md drop-shadow-md"
-                                src={course.thumbnail_image
-                                  ? getCourseThumbnailMediaDirectory(
-                                      org?.org_uuid,
-                                      course.course_uuid,
-                                      course.thumbnail_image
-                                    )
-                                  : '/empty_thumbnail.png'
-                                }
-                                alt=""
-                              />
+                              {course.thumbnail_image ? (
+                                <img
+                                  className="w-[60px] h-[34px] rounded-[10px] border border-border object-cover"
+                                  src={getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}
+                                  alt=""
+                                />
+                              ) : (
+                                <span className="block overflow-hidden w-[60px] h-[34px] rounded-[10px] border border-border">
+                                  <SubjectArtwork seed={course.course_uuid} />
+                                </span>
+                              )}
                             </Link>
                           </div>
                           <div className="flex flex-col gap-0.5">
@@ -815,18 +815,17 @@ function ActivityClient(props: ActivityClientProps) {
                               <Link
                                 href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
                               >
-                                <img
-                                  className="w-[60px] h-[34px] sm:w-[88px] sm:h-[50px] rounded-[10px] border border-border object-cover"
-                                  src={course.thumbnail_image
-                                    ? getCourseThumbnailMediaDirectory(
-                                        org?.org_uuid,
-                                        course.course_uuid,
-                                        course.thumbnail_image
-                                      )
-                                    : '/empty_thumbnail.png'
-                                  }
-                                  alt=""
-                                />
+                                {course.thumbnail_image ? (
+                                  <img
+                                    className="w-[60px] h-[34px] sm:w-[88px] sm:h-[50px] rounded-[10px] border border-border object-cover object-cover"
+                                    src={getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}
+                                    alt=""
+                                  />
+                                ) : (
+                                  <span className="block overflow-hidden w-[60px] h-[34px] sm:w-[88px] sm:h-[50px] rounded-[10px] border border-border">
+                                    <SubjectArtwork seed={course.course_uuid} />
+                                  </span>
+                                )}
                               </Link>
                             </div>
                             <div className="flex flex-col gap-0.5">

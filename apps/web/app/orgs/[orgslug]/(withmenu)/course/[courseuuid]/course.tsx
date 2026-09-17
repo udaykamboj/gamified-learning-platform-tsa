@@ -1,4 +1,5 @@
 'use client'
+import SubjectArtwork from '@components/Objects/Thumbnails/SubjectArtwork'
 import Link from 'next/link'
 import React, { useEffect, useState, Suspense } from 'react'
 import { getUriWithOrg } from '@services/config/config'
@@ -460,13 +461,9 @@ const CourseClient = (props: any) => {
                     );
                   } else {
                     return (
-                      <div
-                        className="inset-0 ring-1 ring-inset ring-border rounded-lg shadow-xl relative w-full h-[400px] bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url('/empty_thumbnail.png')`,
-                          backgroundSize: 'auto',
-                        }}
-                      ></div>
+                      <div className="relative w-full aspect-video max-h-[400px] overflow-hidden rounded-3xl border border-border shadow-card">
+                        <SubjectArtwork seed={course.course_uuid} />
+                      </div>
                     );
                   }
                 })()}
