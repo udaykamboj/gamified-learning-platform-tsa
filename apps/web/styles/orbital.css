@@ -790,6 +790,12 @@
     border-radius: 16px;
     box-shadow: var(--sl-shadow-card);
   }
+  /* Blocks inside lesson/editor content already sit on a card: render them as
+     flat nested panels instead of a second elevated card. */
+  .ProseMirror .sl-card {
+    box-shadow: none;
+    border-radius: 10px;
+  }
 
   .sl-card-interactive {
     transition:

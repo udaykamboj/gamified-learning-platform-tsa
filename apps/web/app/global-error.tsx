@@ -33,6 +33,24 @@ export default function GlobalError({
 
   const { category, detail, status } = classifyError(error)
 
+  // This boundary replaces the root layout, so the pre-paint theme script and
+  // ThemeProvider are gone. Re-apply the stored appearance (same key and class
+  // contract as public/theme-init.js) so the error screen matches the app.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('starlab-appearance')
+      const dark =
+        stored === 'dark' ||
+        ((stored === null || stored === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      const root = document.documentElement
+      root.classList.toggle('dark', dark)
+      root.setAttribute('data-theme', dark ? 'dark' : 'light')
+      root.style.colorScheme = dark ? 'dark' : 'light'
+    } catch {
+      /* storage or matchMedia unavailable: light tokens still render */
+    }
+  }, [])
+
   useEffect(() => {
     const msg = error?.message || ''
     if (
@@ -81,10 +99,6 @@ export default function GlobalError({
 
   return (
     <html lang="en" dir={dir} suppressHydrationWarning>
-      <head>
-        {/* Same pre-paint appearance script as the root layout. */}
-        <script src="/theme-init.js" />
-      </head>
       <body className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
         <div className="sl-card flex flex-col items-center gap-6 w-full max-w-xl p-6 md:p-8 text-center">
           <div className="bg-error-surface p-4 rounded-2xl">

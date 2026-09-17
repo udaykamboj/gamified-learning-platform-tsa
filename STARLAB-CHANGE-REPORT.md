@@ -1,7 +1,7 @@
 # StarLab Orbital — Frontend Change Report
 
 Scope: `apps/web` only. No API contracts, access rules, payment behavior or backend code changed.
-Branch: `dev`. Commits: `775b0bb0` → `982a15d3` (8 commits).
+Branch: `dev`. Commits: `775b0bb0` onward on `dev`.
 
 ## 1. What changed
 
@@ -59,7 +59,7 @@ Status key:
 
 | Source page | Template | Status | Notes |
 | --- | --- | --- | --- |
-| `app/page.tsx` | A | Verified L/D | Signed-in users are redirected to the org home. |
+| `app/page.tsx` | A | Verified L/D | Re-checked after all codemods, logged out through 127.0.0.1 (server render plus pre-paint theme; the dev server blocks hydration on that host). Signed-in users are redirected to the org home. |
 | `app/dashboard/page.tsx` | — | Redirect | Proxy rewrites to the learner home. |
 | `app/home/page.tsx` | C | Styled | Org chooser; in single tenancy `/home` resolves to the default org home. |
 | `app/(hub)/account/page.tsx` | F | Styled | Hub routes are multi-tenant only. |
@@ -67,7 +67,7 @@ Status key:
 | `app/(hub)/subscriptions/page.tsx` | F | Gated | Redirects to the learner home in single tenancy. |
 | `app/auth/login` · `signup` · `forgot` · `reset` · `verify-email` | G | Verified L/D | |
 | `app/auth/magic/page.tsx` | G | Verified D | Missing-token state. |
-| `app/auth/sso/callback/page.tsx` | G | Verified D | Missing-params state. |
+| `app/auth/sso/callback/page.tsx` | G | Verified L/D | Missing-params state. |
 | `app/auth/callback/google/page.tsx` | G | Styled | Google OAuth isn't configured locally. |
 | `app/auth/token-exchange/page.tsx` | G | Styled | No legacy classes. |
 | `app/admin/login/page.tsx` | G | Verified L/D | |
@@ -83,7 +83,7 @@ Status key:
 | `(withmenu)/library` · `library/folder/[folderid]` | C | Library verified; folder styled | No folders in seed data. |
 | `(withmenu)/podcasts` · `podcast/[podcastuuid]` | C / D | List verified; detail styled | No podcasts. |
 | `(withmenu)/playgrounds` · `playground/[playgrounduuid]` | C / D | List verified; detail styled | No playgrounds. |
-| `(withmenu)/boards` · `boards/[boarduuid]` · `boards/[boarduuid]/[subpage]` | C / F | Verified L/D, 320 | Test board "Design QA board" created for QA. |
+| `(withmenu)/boards` · `boards/[boarduuid]` · `boards/[boarduuid]/[subpage]` | C / F | List D; settings general and sharing L/D; members D; 320 | Test board "Design QA board" created for QA. |
 | `(withmenu)/communities` · `community/[communityuuid]` | C / D | Verified L/D, 320 | |
 | `(withmenu)/community/.../discussion/[discussionuuid]` | D | Styled | No discussions. |
 | `(withmenu)/certificates/[uuid]/verify` | G | Styled | No certificates issued. |
@@ -91,7 +91,7 @@ Status key:
 | `(withmenu)/account` · `account/[subpage]` | F | General and security verified L/D, 320 | Profile and purchases styled. |
 | `(withmenu)/user/[username]` | D | Verified L/D | |
 | `(withmenu)/store` · `store/offers/[offerid]` | C / D | Gated | Store feature is disabled, so it redirects. |
-| `app/not-found.tsx`, `app/global-error.tsx`, `error.tsx`, `loading.tsx` boundaries | G | 404 verified L/D; others styled | |
+| `app/not-found.tsx`, `app/global-error.tsx`, `error.tsx`, `loading.tsx` boundaries | G | 404 verified L/D; others styled, not rendered | The global error boundary re-applies the stored appearance itself, because it replaces the root layout. |
 
 ## 3. Checks performed
 
@@ -116,7 +116,8 @@ Status key:
 4. **Gated routes:**
    - Multi-tenant hub routes (`/home` chooser, `/account`, `/billing`, `/subscriptions`) can't be reached locally, because multi-tenancy rejects a `localhost` domain and `lvh.me` doesn't resolve on this machine.
    - The store is feature-gated.
-5. **Test data:** the local database now holds a private test board ("Design QA board") and a saved quiz answer for the test student. Delete the board from its card menu if you don't want it.
+5. **Unrendered this session:** `global-error.tsx`, route `error.tsx` boundaries, the Google callback and the Stripe OAuth page were migrated but never triggered. Editor blocks inside lesson content use a flat nested-panel rule (`.ProseMirror .sl-card`); only the quiz lesson was re-checked.
+6. **Test data:** the local database now holds a private test board ("Design QA board") and a saved quiz answer for the test student. Delete the board from its card menu if you don't want it.
 
 ## 5. Pending production assets
 
