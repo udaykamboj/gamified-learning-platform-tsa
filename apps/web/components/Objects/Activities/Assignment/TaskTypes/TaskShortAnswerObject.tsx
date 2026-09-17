@@ -339,7 +339,7 @@ function TaskShortAnswerObject({
         {view === 'teacher' && (
           <>
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.short_answer.prompt_label')}
               </label>
               <textarea
@@ -351,12 +351,12 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
+                className="sl-input text-sm resize-y"
               />
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.short_answer.match_mode_label')}
               </label>
               <select
@@ -367,7 +367,7 @@ function TaskShortAnswerObject({
                     match_mode: e.target.value as MatchMode,
                   }))
                 }
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                className="sl-input text-sm"
               >
                 <option value="case_insensitive">
                   {t('dashboard.assignments.editor.task_editor.short_answer.match_modes.case_insensitive')}
@@ -386,13 +386,13 @@ function TaskShortAnswerObject({
 
             <div className="flex flex-col space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-500">
+                <label className="text-meta font-semibold text-muted-foreground">
                   {t('dashboard.assignments.editor.task_editor.short_answer.answers_label')}
                 </label>
                 <button
                   onClick={addAnswer}
                   type="button"
-                  className="flex items-center space-x-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                  className="flex items-center gap-1 text-meta font-semibold text-link hover:underline"
                 >
                   <Plus size={14} />
                   <span>{t('dashboard.assignments.editor.task_editor.short_answer.add_answer')}</span>
@@ -406,13 +406,13 @@ function TaskShortAnswerObject({
                     placeholder={t(
                       'dashboard.assignments.editor.task_editor.short_answer.answer_placeholder'
                     )}
-                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                    className="sl-input flex-1 text-sm"
                   />
                   {contents.correct_answers.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeAnswer(index)}
-                      className="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-400 hover:bg-red-100 hover:text-red-500"
+                      className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-hover hover:text-error"
                     >
                       <X size={13} />
                     </button>
@@ -422,7 +422,7 @@ function TaskShortAnswerObject({
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.short_answer.explanation_label')}
               </label>
               <textarea
@@ -434,7 +434,7 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
+                className="sl-input text-sm resize-y"
               />
             </div>
           </>
@@ -447,7 +447,7 @@ function TaskShortAnswerObject({
         {view === 'student' && (
           <>
             {contents.prompt && (
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{contents.prompt}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{contents.prompt}</p>
             )}
             <input
               value={studentAnswer}
@@ -456,14 +456,14 @@ function TaskShortAnswerObject({
               placeholder={t(
                 'dashboard.assignments.editor.task_editor.short_answer.your_answer_placeholder'
               )}
-              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              className="sl-input w-full text-sm"
             />
             {/* No answer-key panel at all when the key was withheld — the
                 learner still sees their own answer and their score. A panel
                 holding one blank chip would be worse than nothing. */}
             {revealAnswerKey && (
-              <div className="flex flex-col space-y-1.5 p-3 rounded-md bg-emerald-50 border border-emerald-200">
-                <div className="flex items-center space-x-1.5 text-xs font-semibold text-emerald-700">
+              <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-success-surface border border-success/30">
+                <div className="flex items-center gap-1.5 text-meta font-semibold text-success">
                   <CheckCircle2 size={13} />
                   <span>{t('dashboard.assignments.editor.task_editor.short_answer.accepted_answers_label')}</span>
                 </div>
@@ -471,14 +471,14 @@ function TaskShortAnswerObject({
                   {contents.correct_answers.map((answer, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-xs font-medium bg-card text-emerald-700 rounded-md"
+                      className="sl-badge text-success"
                     >
                       {answer}
                     </span>
                   ))}
                 </div>
                 {contents.explanation && (
-                  <p className="text-xs text-emerald-800/80 mt-1 whitespace-pre-wrap">{contents.explanation}</p>
+                  <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">{contents.explanation}</p>
                 )}
               </div>
             )}
@@ -489,29 +489,29 @@ function TaskShortAnswerObject({
         {view === 'grading' && (
           <>
             {contents.prompt && (
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{contents.prompt}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{contents.prompt}</p>
             )}
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.short_answer.student_answer_label')}
               </label>
-              <div className="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md">
+              <div className="px-3 py-2 text-sm bg-muted border border-border rounded-lg">
                 {studentAnswer || (
-                  <span className="text-gray-400 italic">
+                  <span className="text-muted-foreground italic">
                     {t('dashboard.assignments.editor.task_editor.short_answer.no_answer')}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.short_answer.accepted_answers_label')}
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {contents.correct_answers.map((answer, i) => (
                   <span
                     key={i}
-                    className="px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-md"
+                    className="sl-badge sl-badge-success"
                   >
                     {answer}
                   </span>

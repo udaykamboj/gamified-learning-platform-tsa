@@ -295,8 +295,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
     return (
         <AssignmentBoxUI submitFC={submitFC} dirtyValue={userSubmissions.fileUUID ?? ''} savedValue={initialUserSubmissions.fileUUID ?? ''} taskUUID={assignmentTaskUUID} view={view} gradeCustomFC={gradeCustomFC} currentPoints={userSubmissionObject?.grade} currentFeedback={userSubmissionObject?.task_submission_grade_feedback} maxPoints={assignmentTaskOutsideProvider?.max_grade_value} type="file">
             {view === 'teacher' && (
-                <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-xs sm:text-sm justify-center mx-auto space-y-2 sm:space-y-0 sm:space-x-3 text-slate-600 px-4 sm:px-2 text-center sm:text-start bg-slate-50 rounded-lg border border-slate-100'>
-                    <Info size={18} className="mx-auto sm:mx-0 text-slate-500" />
+                <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-sm justify-center mx-auto gap-2 sm:gap-3 text-muted-foreground px-4 sm:px-2 text-center sm:text-start bg-muted/40 rounded-xl border border-border'>
+                    <Info size={18} className="mx-auto sm:mx-0 text-muted-foreground" />
                     <p>User will be able to submit a file for this task, you'll be able to review it in the Submissions Tab</p>
                 </div>
             )}
@@ -304,8 +304,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                 <div className='flex flex-col space-y-4 w-full px-2 sm:px-0'>
                     {/* On a formative assignment there is no grade to input, so
                         the instruction to enter one would be wrong. */}
-                    <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-xs sm:text-sm justify-center mx-auto space-y-2 sm:space-y-0 sm:space-x-3 text-slate-600 px-4 sm:px-2 text-center sm:text-start bg-slate-50 rounded-lg border border-slate-100'>
-                        <Download size={18} className="mx-auto sm:mx-0 text-slate-500" />
+                    <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-sm justify-center mx-auto gap-2 sm:gap-3 text-muted-foreground px-4 sm:px-2 text-center sm:text-start bg-muted/40 rounded-xl border border-border'>
+                        <Download size={18} className="mx-auto sm:mx-0 text-muted-foreground" />
                         <p>
                             {assignment?.assignment_object?.ungraded
                                 ? t('dashboard.assignments.submissions.download_to_review', { defaultValue: 'Download the file to review what the learner handed in.' })
@@ -316,13 +316,13 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                         <Link
                             href={getTaskFileSubmissionDir(org?.org_uuid, assignment.course_object.course_uuid, assignment.activity_object.activity_uuid, assignment.assignment_object.assignment_uuid, assignmentTaskUUID, userSubmissions.fileUUID)}
                             target='_blank'
-                            className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs hover:shadow-md transition-shadow border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mx-auto'>
-                            <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
+                            className='flex flex-col rounded-xl bg-card text-muted-foreground border border-border hover:bg-hover transition-colors px-4 sm:px-5 py-4 gap-1 items-center relative w-full sm:w-auto mx-auto'>
+                            <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-success rounded-full p-1.5 text-white flex justify-center items-center'>
                                 <Cloud size={14} />
                             </div>
 
                             <div className='flex space-x-2 mt-2 items-center'>
-                                <File size={18} className="text-emerald-500" />
+                                <File size={18} className="text-success" />
                                 <div className='font-medium text-xs sm:text-sm uppercase break-all'>
                                     {`${userSubmissions.fileUUID.slice(0, 8)}...${userSubmissions.fileUUID.slice(-4)}`}
                                 </div>
@@ -333,7 +333,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
             )}
             {view === 'student' && (
                 <>
-                    <div className="w-full bg-card rounded-lg border border-gray-100 min-h-[200px] shadow-xs px-4 sm:px-6 py-5 sm:py-6">
+                    <div className="w-full bg-card rounded-xl border border-border min-h-[200px] px-4 sm:px-6 py-5 sm:py-6">
                         <div className="flex flex-col justify-center items-center h-full w-full">
                             <div className="flex flex-col justify-center items-center w-full max-w-full">
                                 <div className="flex flex-col justify-center items-center w-full">
@@ -344,13 +344,13 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                     )}
                                 </div>
                                 {localUploadFile && !isLoading && (
-                                    <div className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
-                                        <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
+                                    <div className='flex flex-col rounded-xl bg-card text-muted-foreground border border-border px-4 sm:px-5 py-4 gap-1 items-center relative w-full sm:w-auto mt-3'>
+                                        <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-success rounded-full p-1.5 text-white flex justify-center items-center'>
                                             <Cloud size={14} />
                                         </div>
 
                                         <div className='flex space-x-2 mt-2 items-center'>
-                                            <File size={18} className="text-emerald-500" />
+                                            <File size={18} className="text-success" />
                                             <div className='font-medium text-xs sm:text-sm uppercase break-all'>
                                                 {localUploadFile.name.length > 20 
                                                     ? `${localUploadFile.name.slice(0, 10)}...${localUploadFile.name.slice(-10)}`
@@ -360,27 +360,27 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                     </div>
                                 )}
                                 {userSubmissions.fileUUID && !isLoading && !localUploadFile && (
-                                    <div className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
-                                        <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
+                                    <div className='flex flex-col rounded-xl bg-card text-muted-foreground border border-border px-4 sm:px-5 py-4 gap-1 items-center relative w-full sm:w-auto mt-3'>
+                                        <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-success rounded-full p-1.5 text-white flex justify-center items-center'>
                                             <Cloud size={14} />
                                         </div>
 
                                         <div className='flex space-x-2 mt-2 items-center'>
-                                            <File size={18} className="text-emerald-500" />
+                                            <File size={18} className="text-success" />
                                             <div className='font-medium text-xs sm:text-sm uppercase break-all'>
                                                 {`${userSubmissions.fileUUID.slice(0, 8)}...${userSubmissions.fileUUID.slice(-4)}`}
                                             </div>
                                         </div>
                                     </div>
                                 )}
-                                <div className='flex flex-col sm:flex-row pt-5 font-medium space-y-1 sm:space-y-0 sm:space-x-2 text-xs items-center text-slate-500 text-center sm:text-start bg-slate-50 rounded-lg px-3 py-2 mt-5 border border-slate-100 w-full sm:w-auto'>
-                                    <Info size={15} className="mx-auto sm:mx-0 text-slate-400" />
+                                <div className='flex flex-col sm:flex-row font-medium gap-1 sm:gap-2 text-meta items-center text-muted-foreground text-center sm:text-start bg-muted/40 rounded-lg px-3 py-2 mt-5 border border-border w-full sm:w-auto'>
+                                    <Info size={15} className="mx-auto sm:mx-0 text-muted-foreground" />
                                     <p>{t('dashboard.assignments.editor.task_editor.general.allowed_formats')}</p>
                                 </div>
                                 {!access_token ? (
                                     <div className="flex justify-center items-center w-full mt-5">
-                                        <div className="flex justify-center bg-amber-50 border border-amber-100 rounded-md text-amber-600 space-x-2 items-center p-3 transition-all shadow-xs w-full sm:w-auto">
-                                            <Info size={15} className="text-amber-500" />
+                                        <div className="flex justify-center bg-warning-surface border border-warning/30 rounded-lg text-warning gap-2 items-center p-3 w-full sm:w-auto">
+                                            <Info size={15} className="text-warning" />
                                             <div className="text-xs sm:text-sm font-medium">{t('dashboard.assignments.editor.task_editor.general.sign_in_required')}</div>
                                         </div>
                                     </div>
@@ -392,7 +392,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                             style={{ display: 'none' }}
                                             onChange={handleFileChange}
                                         />
-                                        <div className="font-medium animate-pulse antialiased items-center bg-slate-100 text-slate-600 text-xs sm:text-sm rounded-md px-4 sm:px-5 py-2.5 flex">
+                                        <div className="sl-btn animate-pulse bg-muted text-muted-foreground">
                                             <Loader size={15} className="me-2" />
                                             <span>Loading</span>
                                         </div>
@@ -403,8 +403,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                     // off once SUBMITTED/GRADED), so the teacher
                                     // would keep grading the previous file.
                                     <div className="flex justify-center items-center w-full mt-5">
-                                        <div className="flex justify-center bg-slate-50 border border-slate-200 rounded-md text-slate-500 space-x-2 items-center p-3 transition-all shadow-xs w-full sm:w-auto">
-                                            <Lock size={15} className="text-slate-400" />
+                                        <div className="flex justify-center bg-muted/40 border border-border rounded-lg text-muted-foreground gap-2 items-center p-3 w-full sm:w-auto">
+                                            <Lock size={15} className="text-muted-foreground" />
                                             <div className="text-xs sm:text-sm font-medium">
                                                 {submissionIsGraded
                                                     ? t('dashboard.assignments.editor.task_editor.general.upload_locked_graded', {
@@ -425,7 +425,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                             onChange={handleFileChange}
                                         />
                                         <button
-                                            className="font-medium antialiased items-center text-white text-xs sm:text-sm rounded-md px-4 sm:px-5 py-2.5 flex bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-xs"
+                                            className="sl-btn sl-btn-primary"
                                             onClick={() => document.getElementById("fileInput_" + assignmentTaskUUID)?.click()}
                                         >
                                             <UploadCloud size={15} className="me-2" />

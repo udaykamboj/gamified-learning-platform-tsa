@@ -340,7 +340,7 @@ function EpisodeRow({
               confirmationMessage={t('podcasts.dashboard.episodes.delete_confirm')}
               dialogTitle={t('podcasts.dashboard.episodes.delete_title')}
               dialogTrigger={
-                <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-sm">
+                <button className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-error hover:bg-error-surface">
                   <Trash2 size={14} className="me-2" />
                   {t('podcasts.dashboard.episodes.delete')}
                 </button>

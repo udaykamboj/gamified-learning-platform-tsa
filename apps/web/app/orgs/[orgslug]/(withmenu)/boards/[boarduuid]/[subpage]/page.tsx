@@ -75,31 +75,35 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     },
   ]
 
+  const container = 'mx-auto w-full max-w-[1280px] px-4 md:px-6 xl:px-8'
+
   if (isLoading || !board) {
     return (
-      <div className="h-screen w-full bg-muted grid grid-rows-[auto_1fr]">
-        <div className="ps-10 pe-10 bg-[#fcfbfc] nice-shadow animate-pulse">
-          <div className="pt-6 pb-4">
-            <div className="h-4 w-40 bg-gray-200 rounded" />
-          </div>
-          <div className="flex py-3 items-center gap-5">
-            <div className="w-[100px] h-[57px] bg-gray-200 rounded-md" />
-            <div className="flex flex-col gap-2">
-              <div className="h-3 w-24 bg-gray-200 rounded" />
-              <div className="h-5 w-48 bg-gray-200 rounded" />
+      <div className="w-full bg-background" aria-busy="true">
+        <div className="border-b border-border bg-card">
+          <div className={`${container} animate-pulse`}>
+            <div className="pt-6 pb-4">
+              <div className="h-4 w-40 rounded bg-muted" />
+            </div>
+            <div className="flex items-center gap-5 py-3">
+              <div className="h-[57px] w-[100px] rounded-lg bg-muted" />
+              <div className="flex flex-col gap-2">
+                <div className="h-3 w-24 rounded bg-muted" />
+                <div className="h-5 w-48 rounded bg-muted" />
+              </div>
+            </div>
+            <div className="mt-2 flex gap-3 pb-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 w-24 rounded bg-muted" />
+              ))}
             </div>
           </div>
-          <div className="flex space-x-3 pb-2 mt-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-8 w-24 bg-gray-200 rounded" />
-            ))}
-          </div>
         </div>
-        <div className="p-10">
-          <div className="bg-card rounded-xl shadow-sm p-6 space-y-4 animate-pulse">
-            <div className="h-4 w-32 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-100 rounded" />
-            <div className="h-10 bg-gray-100 rounded" />
+        <div className={`${container} py-8`}>
+          <div className="sl-card space-y-4 p-6 animate-pulse">
+            <div className="h-4 w-32 rounded bg-muted" />
+            <div className="h-11 rounded-lg bg-muted" />
+            <div className="h-11 rounded-lg bg-muted" />
           </div>
         </div>
       </div>
@@ -111,52 +115,47 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     : '/empty_thumbnail.png'
 
   return (
-    <div className="h-screen w-full bg-muted grid grid-rows-[auto_1fr] grid-cols-1">
-      <div className="ps-4 pe-4 sm:ps-10 sm:pe-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow relative min-w-0 overflow-hidden">
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: 'Boards', href: '/boards', icon: <ChalkboardSimple size={14} /> },
-            { label: board.name },
-          ]} />
-        </div>
+    <div className="w-full bg-background pb-16">
+      <div className="border-b border-border bg-card">
+        <div className={`${container} min-w-0`}>
+          <div className="pt-6 pb-4">
+            <Breadcrumbs items={[
+              { label: 'Boards', href: '/boards', icon: <ChalkboardSimple size={14} /> },
+              { label: board.name },
+            ]} />
+          </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex py-3 grow min-w-0 items-center">
-            <Link href={`/board/${boardUuid.replace('board_', '')}`} className="shrink-0">
-              <img
-                className="w-[72px] sm:w-[100px] h-[41px] sm:h-[57px] rounded-md drop-shadow-md object-cover"
-                src={thumbnailUrl}
-                alt=""
-              />
-            </Link>
-            <div className="flex flex-col justify-center ps-3 sm:ps-5 min-w-0">
-              <div className="text-gray-400 font-semibold text-xs sm:text-sm">Board Settings</div>
-              <div className="text-foreground font-bold text-base sm:text-xl -mt-1 first-letter:uppercase truncate">
-                {board.name}
+          <div className="flex flex-wrap items-center gap-3 pb-2">
+            <div className="flex min-w-0 grow items-center gap-3 sm:gap-5">
+              <Link href={`/board/${boardUuid.replace('board_', '')}`} className="shrink-0">
+                <img
+                  className="h-[41px] w-[72px] rounded-lg border border-border object-cover sm:h-[57px] sm:w-[100px]"
+                  src={thumbnailUrl}
+                  alt=""
+                />
+              </Link>
+              <div className="flex min-w-0 flex-col justify-center">
+                <p className="sl-telemetry text-muted-foreground">Board settings</p>
+                <h1 className="sl-page-title truncate first-letter:uppercase">{board.name}</h1>
               </div>
             </div>
-          </div>
-          <div className="flex items-center self-center rounded-lg shadow-sm shadow-neutral-300/40 ring-1 ring-neutral-200/60 overflow-hidden shrink-0">
-            <div className={`px-2.5 sm:px-3.5 py-2 text-sm font-semibold flex items-center space-x-2 ${
-              board.public
-                ? 'bg-green-50/70 text-green-700'
-                : 'bg-amber-50/70 text-amber-700'
-            }`}>
-              {board.public ? <Globe className="w-4 h-4" /> : <Users className="w-4 h-4" />}
-              <span className="hidden sm:inline">{board.public ? 'Public' : 'Private'}</span>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className={`sl-badge min-h-9 px-3 ${board.public ? 'sl-badge-success' : 'sl-badge-warning'}`}>
+                {board.public ? <Globe className="h-4 w-4" aria-hidden /> : <Users className="h-4 w-4" aria-hidden />}
+                {board.public ? 'Public' : 'Private'}
+              </span>
+              <Link
+                href={`/board/${boardUuid.replace('board_', '')}`}
+                className="sl-btn sl-btn-secondary sl-btn-sm"
+              >
+                <Eye className="h-4 w-4" aria-hidden />
+                View board
+              </Link>
             </div>
-            <div className="w-px self-stretch bg-neutral-200/80" />
-            <Link
-              href={`/board/${boardUuid.replace('board_', '')}`}
-              className="px-2.5 sm:px-3.5 py-2 text-sm font-semibold text-neutral-600 bg-neutral-50/70 hover:bg-neutral-100/70 transition-colors flex items-center space-x-2"
-            >
-              <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline">View Board</span>
-            </Link>
           </div>
-        </div>
 
-        <DashTabBar tabs={tabs} />
+          <DashTabBar tabs={tabs} />
+        </div>
       </div>
 
       <motion.div
@@ -164,7 +163,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="h-full overflow-y-auto overflow-x-hidden"
+        className={`${container} py-8`}
       >
         {params.subpage === 'general' && (
           <BoardGeneralTab board={board} boardUuid={boardUuid} boardKey={boardKey} />

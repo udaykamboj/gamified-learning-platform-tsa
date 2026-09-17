@@ -518,7 +518,7 @@ function BoardCardOptions({ board, orgslug, isOwner, onDuplicate, onDelete }: {
                 confirmationMessage={t('boards.duplicate_board_confirm')}
                 dialogTitle={t('boards.duplicate_board_title', { name: board.name })}
                 dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                  <button className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent">
                     <Copy className="me-2 h-4 w-4" /> {t('boards.duplicate_board')}
                   </button>
                 }
@@ -533,7 +533,7 @@ function BoardCardOptions({ board, orgslug, isOwner, onDuplicate, onDelete }: {
                 confirmationMessage={t('boards.delete_board_confirm')}
                 dialogTitle={t('boards.delete_board_title', { name: board.name })}
                 dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                  <button className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-error hover:bg-error-surface">
                     <Trash2 className="me-2 h-4 w-4" /> {t('boards.delete_board')}
                   </button>
                 }

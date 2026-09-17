@@ -117,13 +117,12 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
 
   return (
     <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.thumbnail.title')}</h1>
-          <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.thumbnail.description')}</h2>
+      <div className="sl-card p-4 sm:p-6">
+        <div className="flex flex-col gap-1 pb-4 mb-4 border-b border-border">
+          <h1 className="sl-section-title">{t('boards.thumbnail.title')}</h1>
+          <h2 className="text-ui text-muted-foreground">{t('boards.thumbnail.description')}</h2>
         </div>
-        <div className="px-3 sm:px-5 py-3 space-y-4">
+        <div className="space-y-4">
           <div className="max-w-[480px]">
             <img
               src={thumbnailUrl}

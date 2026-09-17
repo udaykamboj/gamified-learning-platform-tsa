@@ -51,28 +51,27 @@ function BoardGeneralTab({ board, boardUuid, boardKey }: BoardGeneralTabProps) {
 
   return (
     <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.general.title')}</h1>
-          <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.general.description')}</h2>
+      <div className="sl-card p-4 sm:p-6">
+        <div className="flex flex-col gap-1 pb-4 mb-4 border-b border-border">
+          <h1 className="sl-section-title">{t('boards.general.title')}</h1>
+          <h2 className="text-ui text-muted-foreground">{t('boards.general.description')}</h2>
         </div>
-        <div className="px-3 sm:px-5 space-y-4 py-3">
+        <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700">{t('boards.name')}</label>
+            <label className="text-sm font-medium text-foreground">{t('boards.name')}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+              className="sl-input w-full mt-1"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">{t('boards.description')}</label>
+            <label className="text-sm font-medium text-foreground">{t('boards.description')}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+              className="sl-input w-full mt-1"
               rows={3}
             />
           </div>
@@ -81,7 +80,7 @@ function BoardGeneralTab({ board, boardUuid, boardKey }: BoardGeneralTabProps) {
               <button
                 onClick={handleSave}
                 disabled={isSaving || !name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors disabled:opacity-50"
+                className="sl-btn sl-btn-primary"
               >
                 <Save size={14} />
                 {isSaving ? t('boards.general.saving') : t('boards.general.save_changes')}

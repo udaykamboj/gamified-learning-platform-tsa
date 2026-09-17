@@ -302,7 +302,7 @@ function TaskNumberAnswerObject({
         {view === 'teacher' && (
           <>
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.prompt_label')}
               </label>
               <textarea
@@ -314,13 +314,13 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
+                className="sl-input text-sm resize-y"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col space-y-1">
-                <label className="text-xs font-semibold text-slate-500">
+                <label className="text-meta font-semibold text-muted-foreground">
                   {t('dashboard.assignments.editor.task_editor.number_answer.correct_value_label')}
                 </label>
                 <input
@@ -333,11 +333,11 @@ function TaskNumberAnswerObject({
                       correct_value: Number.parseFloat(e.target.value) || 0,
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                  className="sl-input text-sm"
                 />
               </div>
               <div className="flex flex-col space-y-1">
-                <label className="text-xs font-semibold text-slate-500">
+                <label className="text-meta font-semibold text-muted-foreground">
                   {t('dashboard.assignments.editor.task_editor.number_answer.tolerance_label')}
                 </label>
                 <input
@@ -351,13 +351,13 @@ function TaskNumberAnswerObject({
                       tolerance: Math.max(0, Number.parseFloat(e.target.value) || 0),
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                  className="sl-input text-sm"
                 />
               </div>
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.unit_label')}
               </label>
               <input
@@ -368,15 +368,15 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.unit_placeholder'
                 )}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                className="sl-input text-sm"
               />
-              <p className="text-[11px] text-slate-400">
+              <p className="text-meta text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.unit_hint')}
               </p>
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.explanation_label')}
               </label>
               <textarea
@@ -388,13 +388,13 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
+                className="sl-input text-sm resize-y"
               />
             </div>
 
-            <div className="flex items-center space-x-1.5 text-[11px] text-slate-500 bg-slate-50 rounded-md px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5 text-meta text-muted-foreground bg-muted rounded-lg px-2.5 py-1.5">
               <span>{t('dashboard.assignments.editor.task_editor.number_answer.preview_label')}:</span>
-              <span className="font-mono font-semibold text-slate-700">
+              <span className="font-mono font-semibold text-foreground">
                 {acceptedRange}
               </span>
             </div>
@@ -408,7 +408,7 @@ function TaskNumberAnswerObject({
         {view === 'student' && (
           <>
             {contents.prompt && (
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{contents.prompt}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{contents.prompt}</p>
             )}
             <div className="flex items-center space-x-2">
               <input
@@ -420,24 +420,24 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.your_answer_placeholder'
                 )}
-                className="w-full max-w-[200px] px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none font-mono"
+                className="sl-input w-full max-w-[200px] text-sm font-mono"
               />
               {contents.unit && (
-                <span className="text-sm font-medium text-slate-500">{contents.unit}</span>
+                <span className="text-sm font-medium text-muted-foreground">{contents.unit}</span>
               )}
             </div>
             {/* No answer-key panel at all when the key was withheld — the
                 learner still sees their own answer and their score. A
                 fabricated "Accepted range: 0" would be worse than nothing. */}
             {revealAnswerKey && (
-              <div className="flex flex-col space-y-1.5 p-3 rounded-md bg-emerald-50 border border-emerald-200">
-                <div className="flex items-center space-x-1.5 text-xs font-semibold text-emerald-700">
+              <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-success-surface border border-success/30">
+                <div className="flex items-center gap-1.5 text-meta font-semibold text-success">
                   <CheckCircle2 size={13} />
                   <span>{t('dashboard.assignments.editor.task_editor.number_answer.accepted_range_label')}</span>
                 </div>
-                <div className="text-sm font-mono text-emerald-800">{acceptedRange}</div>
+                <div className="text-sm font-mono text-success">{acceptedRange}</div>
                 {contents.explanation && (
-                  <p className="text-xs text-emerald-800/80 mt-1 whitespace-pre-wrap">{contents.explanation}</p>
+                  <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">{contents.explanation}</p>
                 )}
               </div>
             )}
@@ -448,30 +448,30 @@ function TaskNumberAnswerObject({
         {view === 'grading' && (
           <>
             {contents.prompt && (
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{contents.prompt}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{contents.prompt}</p>
             )}
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.student_answer_label')}
               </label>
-              <div className="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md font-mono">
+              <div className="px-3 py-2 text-sm bg-muted border border-border rounded-lg font-mono">
                 {studentAnswer ? (
                   <>
                     {studentAnswer}
-                    {contents.unit && <span className="text-slate-500 ms-1.5 font-sans">{contents.unit}</span>}
+                    {contents.unit && <span className="text-muted-foreground ms-1.5 font-sans">{contents.unit}</span>}
                   </>
                 ) : (
-                  <span className="text-gray-400 italic font-sans">
+                  <span className="text-muted-foreground italic font-sans">
                     {t('dashboard.assignments.editor.task_editor.number_answer.no_answer')}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">
+              <label className="text-meta font-semibold text-muted-foreground">
                 {t('dashboard.assignments.editor.task_editor.number_answer.accepted_range_label')}
               </label>
-              <div className="px-3 py-2 text-sm bg-emerald-50 border border-emerald-200 rounded-md font-mono text-emerald-700">
+              <div className="px-3 py-2 text-sm bg-success-surface border border-success/30 rounded-lg font-mono text-success">
                 {acceptedRange}
               </div>
             </div>

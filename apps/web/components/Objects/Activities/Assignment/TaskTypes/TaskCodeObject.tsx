@@ -47,7 +47,7 @@ import { applyManualGrade } from './applyManualGrade'
 
 const CodeMirror = dynamic(() => import('@uiw/react-codemirror'), {
   ssr: false,
-  loading: () => <div className="h-[200px] bg-neutral-900 animate-pulse rounded-md" />,
+  loading: () => <div className="h-[200px] bg-[#0b1424] animate-pulse rounded-lg" />,
 })
 
 async function getTheme() {
@@ -717,7 +717,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
             {/* Language & Grading Mode */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex flex-col space-y-1 flex-1">
-                <label className="text-xs font-semibold text-slate-500">Language</label>
+                <label className="text-meta font-semibold text-muted-foreground">Language</label>
                 <select
                   value={contents.language_id}
                   onChange={(e) => {
@@ -730,7 +730,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                     }))
                     setCode(lang?.defaultCode || code)
                   }}
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                  className="sl-input text-sm"
                 >
                   {PLAYGROUND_LANGUAGES.map((lang) => (
                     <option key={lang.id} value={lang.id}>
@@ -740,13 +740,13 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                 </select>
               </div>
               <div className="flex flex-col space-y-1 flex-1">
-                <label className="text-xs font-semibold text-slate-500">Grading Mode</label>
+                <label className="text-meta font-semibold text-muted-foreground">Grading Mode</label>
                 <select
                   value={contents.grading_mode}
                   onChange={(e) =>
                     setContents((prev) => ({ ...prev, grading_mode: e.target.value as any }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
+                  className="sl-input text-sm"
                 >
                   <option value="equal_weight">Equal Weight</option>
                   <option value="binary">Binary (All or Nothing)</option>
@@ -757,7 +757,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
 
             {/* Starter Code */}
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Starter Code</label>
+              <label className="text-meta font-semibold text-muted-foreground">Starter Code</label>
               <div dir="ltr" className={`rounded-md overflow-hidden ${cmClassName}`}>
                 {cmTheme && (
                   <CodeMirror
@@ -777,7 +777,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
             <div className="flex flex-col space-y-1">
               <button
                 onClick={() => setShowSolution(!showSolution)}
-                className="flex items-center space-x-1 text-xs font-semibold text-slate-500 hover:text-slate-700"
+                className="flex items-center gap-1 text-meta font-semibold text-muted-foreground hover:text-foreground"
               >
                 {showSolution ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 <span>Solution Code (optional, for instructor reference)</span>
@@ -802,10 +802,10 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
             {/* Test Cases */}
             <div className="flex flex-col space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-500">Test Cases</label>
+                <label className="text-meta font-semibold text-muted-foreground">Test Cases</label>
                 <button
                   onClick={addTestCase}
-                  className="flex items-center space-x-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                  className="flex items-center gap-1 text-meta font-semibold text-link hover:underline"
                 >
                   <Plus size={14} />
                   <span>Add Test Case</span>
@@ -814,7 +814,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               {contents.test_cases.map((tc, index) => (
                 <div
                   key={tc.id}
-                  className="flex flex-col space-y-2 p-3 border border-gray-200 rounded-md bg-card"
+                  className="flex flex-col gap-2 p-3 border border-border rounded-lg bg-card"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 flex-1">
@@ -822,7 +822,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                         value={tc.label}
                         onChange={(e) => updateTestCase(index, 'label', e.target.value)}
                         placeholder="Test label"
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md flex-1"
+                        className="sl-input text-sm flex-1"
                       />
                       <button
                         onClick={() => updateTestCase(index, 'hidden', !tc.hidden)}
@@ -841,7 +841,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                           type="number"
                           value={tc.weight}
                           onChange={(e) => updateTestCase(index, 'weight', Math.max(1, Number(e.target.value)))}
-                          className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-md text-center"
+                          className="sl-input w-20 text-sm text-center"
                           min={1}
                           title="Weight"
                         />
@@ -849,30 +849,30 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                     </div>
                     <button
                       onClick={() => removeTestCase(index)}
-                      className="w-6 h-6 flex items-center justify-center rounded-md bg-slate-100 text-slate-400 hover:bg-red-100 hover:text-red-500 ms-2"
+                      className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-hover hover:text-error ms-2"
                     >
                       <Minus size={12} />
                     </button>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="sl-telemetry text-slate-400">Stdin</label>
+                      <label className="sl-telemetry text-muted-foreground">Stdin</label>
                       <textarea
                         value={tc.stdin}
                         onChange={(e) => updateTestCase(index, 'stdin', e.target.value)}
                         placeholder="Input"
                         rows={2}
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
+                        className="sl-input text-sm font-mono resize-y"
                       />
                     </div>
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="sl-telemetry text-slate-400">Expected Stdout</label>
+                      <label className="sl-telemetry text-muted-foreground">Expected Stdout</label>
                       <textarea
                         value={tc.expectedStdout}
                         onChange={(e) => updateTestCase(index, 'expectedStdout', e.target.value)}
                         placeholder="Expected output"
                         rows={2}
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
+                        className="sl-input text-sm font-mono resize-y"
                       />
                     </div>
                   </div>
@@ -882,7 +882,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
 
             {/* Student behavior options */}
             <div className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-1.5 text-slate-500">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Settings2 size={13} />
                 <p className="text-xs font-semibold">{t('dashboard.assignments.editor.task_editor.code.student_behavior_label')}</p>
               </div>
@@ -931,7 +931,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-slate-700 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
+                className="sl-btn sl-btn-secondary sl-btn-sm"
               >
                 {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                 <span>{isRunning ? 'Running...' : 'Run Tests'}</span>
@@ -948,12 +948,12 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
           <>
             {/* Language badge */}
             <div className="flex items-center space-x-2">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">
+              <span className="sl-badge">
                 {selectedLang?.name || 'Unknown'}
               </span>
               {/* Hidden-test badge only if the task allows showing the count */}
               {hiddenTestCount > 0 && contents.show_hidden_test_count !== false && (
-                <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">
+                <span className="sl-badge sl-badge-warning">
                   {hiddenTestCount} hidden test{hiddenTestCount > 1 ? 's' : ''}
                 </span>
               )}
@@ -984,7 +984,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               )}
             </div>
             {!canStudentSave && (
-              <div className="flex items-center space-x-1.5 text-[11px] text-slate-500 bg-slate-100 rounded-md px-2 py-1 w-fit">
+              <div className="sl-badge w-fit">
                 <Lock size={11} />
                 <span>
                   {submissionIsGraded
@@ -998,7 +998,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               </div>
             )}
             {antiPasteEnabled && (
-              <div className="flex items-center space-x-1.5 text-[11px] text-amber-600 bg-amber-50 rounded-md px-2 py-1 w-fit">
+              <div className="sl-badge sl-badge-warning w-fit">
                 <span>🔒</span>
                 <span>{t('dashboard.assignments.editor.task_editor.general.paste_blocked_hint')}</span>
               </div>
@@ -1010,7 +1010,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                 <button
                   onClick={runCode}
                   disabled={isRunning}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-500 disabled:opacity-50"
+                  className="sl-btn sl-btn-primary sl-btn-sm"
                 >
                   {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                   <span>{isRunning ? 'Running...' : 'Run Tests'}</span>
@@ -1021,7 +1021,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
             {/* Submission gating notice — when the teacher requires passing
                 all visible tests before save. */}
             {submissionGatedByPassing && !allVisiblePassing && (
-              <div className="flex items-center space-x-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5 w-fit">
+              <div className="flex items-center gap-1.5 text-meta text-warning bg-warning-surface border border-warning/30 rounded-lg px-2.5 py-1.5 w-fit">
                 <ShieldCheck size={13} />
                 <span>{t('dashboard.assignments.editor.task_editor.code.must_pass_hint')}</span>
               </div>
@@ -1054,7 +1054,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
           <>
             {/* Language badge */}
             <div className="flex items-center space-x-2">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">
+              <span className="sl-badge">
                 {selectedLang?.name || 'Unknown'}
               </span>
               <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
@@ -1064,7 +1064,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
 
             {/* Student's Code (read-only) */}
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Student&apos;s Code</label>
+              <label className="text-meta font-semibold text-muted-foreground">Student&apos;s Code</label>
               <div dir="ltr" className={`rounded-md overflow-hidden ${cmClassName}`}>
                 {cmTheme && (
                   <CodeMirror
@@ -1086,7 +1086,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               <div className="flex flex-col space-y-1">
                 <button
                   onClick={() => setShowSolution(!showSolution)}
-                  className="flex items-center space-x-1 text-xs font-semibold text-slate-500 hover:text-slate-700"
+                  className="flex items-center gap-1 text-meta font-semibold text-muted-foreground hover:text-foreground"
                 >
                   {showSolution ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <span>Reference Solution</span>
@@ -1112,7 +1112,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
 
             {/* Run & Grade */}
             {isRunning && (
-              <div className="flex items-center space-x-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 size={14} className="animate-spin" />
                 <span>Running tests...</span>
               </div>
@@ -1150,9 +1150,9 @@ function TestResultsPanel({
   const maskedShown = showMaskedCount ? maskedTestCases : []
 
   return (
-    <div className="flex flex-col space-y-2 p-3 bg-slate-50 rounded-md border border-slate-200">
+    <div className="flex flex-col gap-2 p-3 bg-muted/40 rounded-lg border border-border">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-600">
+        <span className="text-sm font-semibold text-foreground">
           Results: {passedCount}/{totalCount} passed
         </span>
         <span
@@ -1185,45 +1185,45 @@ function TestResultsPanel({
             >
               <div className="flex items-center space-x-2">
                 {result.passed ? (
-                  <CheckCircle2 size={14} className="text-emerald-600 flex-none" />
+                  <CheckCircle2 size={14} className="text-success flex-none" />
                 ) : (
                   <XCircle size={14} className="text-red-600 flex-none" />
                 )}
-                <span className="font-medium text-slate-700">{result.label}</span>
+                <span className="font-medium text-foreground">{result.label}</span>
                 {result.time && (
-                  <span className="text-[11px] text-slate-400 ms-auto">{result.time}s</span>
+                  <span className="text-meta text-muted-foreground ms-auto">{result.time}s</span>
                 )}
               </div>
               {!result.passed && !isHidden && !detailsSuppressed && (
                 <div className="mt-1.5 ps-6 text-xs space-y-0.5">
                   {result.expected_stdout !== null && (
                     <div>
-                      <span className="text-slate-400">Expected: </span>
-                      <code className="text-slate-600 bg-card px-1 rounded">{result.expected_stdout}</code>
+                      <span className="text-muted-foreground">Expected: </span>
+                      <code className="text-foreground bg-card px-1 rounded">{result.expected_stdout}</code>
                     </div>
                   )}
                   {result.actual_stdout !== null && (
                     <div>
-                      <span className="text-slate-400">Got: </span>
+                      <span className="text-muted-foreground">Got: </span>
                       <code className="text-red-600 bg-card px-1 rounded">{result.actual_stdout}</code>
                     </div>
                   )}
                   {result.stderr && (
                     <div>
-                      <span className="text-slate-400">Error: </span>
-                      <code className="text-red-600 bg-card px-1 rounded text-[11px] break-all">{result.stderr}</code>
+                      <span className="text-muted-foreground">Error: </span>
+                      <code className="text-error bg-card px-1 rounded text-meta break-all">{result.stderr}</code>
                     </div>
                   )}
                   {result.compile_output && (
                     <div>
-                      <span className="text-slate-400">Compile: </span>
-                      <code className="text-red-600 bg-card px-1 rounded text-[11px] break-all">{result.compile_output}</code>
+                      <span className="text-muted-foreground">Compile: </span>
+                      <code className="text-error bg-card px-1 rounded text-meta break-all">{result.compile_output}</code>
                     </div>
                   )}
                 </div>
               )}
               {isHidden && !result.passed && (
-                <div className="mt-1 ps-6 text-xs text-slate-400 italic">
+                <div className="mt-1 ps-6 text-meta text-muted-foreground italic">
                   Details hidden — this is a hidden test case
                 </div>
               )}
@@ -1236,13 +1236,13 @@ function TestResultsPanel({
         {maskedShown.map((tc) => (
           <div
             key={tc.id}
-            className="flex flex-col p-2 rounded-md text-sm bg-slate-100 border border-slate-200"
+            className="flex flex-col p-2 rounded-lg text-sm bg-muted border border-border"
           >
             <div className="flex items-center space-x-2">
-              <EyeOff size={14} className="text-slate-400 flex-none" />
-              <span className="font-medium text-slate-500">{tc.label}</span>
+              <EyeOff size={14} className="text-muted-foreground flex-none" />
+              <span className="font-medium text-muted-foreground">{tc.label}</span>
             </div>
-            <div className="mt-1 ps-6 text-xs text-slate-400 italic">
+            <div className="mt-1 ps-6 text-meta text-muted-foreground italic">
               Hidden test — run when your work is graded
             </div>
           </div>
@@ -1266,12 +1266,12 @@ function CodeOptionToggle({
   onChange: (_next: boolean) => void
 }) {
   return (
-    <div className="flex items-start justify-between gap-2 p-2 rounded-md bg-card border border-slate-200">
+    <div className="flex items-start justify-between gap-2 p-2 rounded-lg bg-card border border-border">
       <div className="flex items-start gap-2 flex-1 min-w-0">
-        <div className="mt-0.5 flex-none text-slate-500">{icon}</div>
+        <div className="mt-0.5 flex-none text-muted-foreground">{icon}</div>
         <div className="flex flex-col min-w-0">
-          <p className="text-[11px] font-bold text-slate-700">{label}</p>
-          <p className="text-[11px] text-slate-500 leading-snug mt-0.5">{description}</p>
+          <p className="text-meta font-semibold text-foreground">{label}</p>
+          <p className="text-meta text-muted-foreground mt-0.5">{description}</p>
         </div>
       </div>
       <button

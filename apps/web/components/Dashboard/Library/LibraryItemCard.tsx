@@ -152,7 +152,7 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
               <DropdownMenuItem asChild>
                 <button
                   onClick={() => setPreviewOpen(true)}
-                  className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                  className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent"
                 >
                   <Eye className="me-2 h-4 w-4" /> {t('library.preview')}
                 </button>
@@ -183,7 +183,7 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
                       t('library.link_copy_error'),
                     )
                   }
-                  className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                  className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent"
                 >
                   <LinkSimple className="me-2 h-4 w-4" /> {t('library.copy_link')}
                 </button>
@@ -191,7 +191,7 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
             )}
             {type === 'media' && (
               <DropdownMenuItem asChild>
-                <button onClick={() => setAccessOpen(true)} className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                <button onClick={() => setAccessOpen(true)} className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent">
                   <Lock className="me-2 h-4 w-4" /> {t('library.manage_access')}
                 </button>
               </DropdownMenuItem>
@@ -202,7 +202,7 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
                 confirmationMessage={t('library.remove_from_folder_confirm')}
                 dialogTitle={t('library.remove_from_folder')}
                 dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                  <button className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-error hover:bg-error-surface">
                     <FolderMinus className="me-2 h-4 w-4" /> {t('library.remove_from_folder')}
                   </button>
                 }

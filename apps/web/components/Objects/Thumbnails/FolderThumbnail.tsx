@@ -85,18 +85,18 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
                 <DropdownMenuItem asChild>
                   <button
                     onClick={() => shareFolderLink(orgslug, folder.folder_uuid, folder.name, t('library.link_copied'), t('library.link_copy_error'))}
-                    className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                    className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent"
                   >
                     <LinkSimple className="me-2 h-4 w-4" /> {t('library.copy_link')}
                   </button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <button onClick={() => setEditOpen(true)} className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                  <button onClick={() => setEditOpen(true)} className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent">
                     <PencilSimple className="me-2 h-4 w-4" /> {t('library.edit')}
                   </button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <button onClick={() => setAccessOpen(true)} className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                  <button onClick={() => setAccessOpen(true)} className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-foreground hover:bg-accent">
                     <Lock className="me-2 h-4 w-4" /> {t('library.manage_access')}
                   </button>
                 </DropdownMenuItem>
@@ -106,7 +106,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
                     confirmationMessage={t('library.delete_folder_confirm')}
                     dialogTitle={t('library.delete_folder_title', { name: folder.name })}
                     dialogTrigger={
-                      <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                      <button className="w-full text-start flex items-center gap-2 min-h-9 px-2.5 py-2 text-sm rounded-[6px] transition-colors cursor-pointer text-error hover:bg-error-surface">
                         <Trash className="me-2 h-4 w-4" /> {t('library.delete_folder')}
                       </button>
                     }

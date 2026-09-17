@@ -164,8 +164,8 @@ function EmbedActivityClient({ activityId, courseuuid, orgslug, bgcolor }: Embed
 
   if (!isEmbeddable) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-        <div className="bg-card rounded-2xl nice-shadow p-8 max-w-md w-full text-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
+        <div className="sl-card p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <Image
               src="/starlab_bigicon.png"
@@ -175,17 +175,17 @@ function EmbedActivityClient({ activityId, courseuuid, orgslug, bgcolor }: Embed
               className="mx-auto"
             />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">
+          <h1 className="sl-section-title mb-2">
             {t('embed.not_supported_title')}
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-ui text-muted-foreground mb-6">
             {t('embed.not_supported_description')}
           </p>
           <a
             href={getActivityUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary transition-colors"
+            className="sl-btn sl-btn-primary"
           >
             {t('embed.visit_activity')}
           </a>

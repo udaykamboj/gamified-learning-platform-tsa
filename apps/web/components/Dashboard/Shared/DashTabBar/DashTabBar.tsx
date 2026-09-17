@@ -81,14 +81,14 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
     <div className="relative min-w-0 overflow-hidden">
       {/* Left gradient + button */}
       <div
-        className={`absolute start-0 inset-y-0 w-12 bg-gradient-to-r from-[#fcfbfc] to-transparent z-10 flex items-center pointer-events-none transition-opacity duration-200 ${
+        className={`absolute start-0 inset-y-0 w-12 bg-gradient-to-r from-card to-transparent z-10 flex items-center pointer-events-none transition-opacity duration-200 ${
           canScrollLeft ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <button
           onClick={() => scroll('left')}
           aria-label="Scroll tabs left"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-card nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-7 h-7 rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors duration-150"
         >
           <ChevronLeft size={13} strokeWidth={2.5} />
         </button>
@@ -96,7 +96,7 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
       <div
         ref={scrollRef}
-        className="flex space-x-1 font-black text-sm overflow-x-auto scrollbar-hide"
+        className="flex gap-1 font-semibold text-sm overflow-x-auto scrollbar-hide"
       >
         {tabs.map((tab) => {
           const inner = (
@@ -113,7 +113,7 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
           if (tab.disabled) {
             const el = (
-              <div className="py-2 w-fit text-center border-black transition-all ease-linear opacity-30 cursor-not-allowed">
+              <div className="py-3 w-fit text-center text-muted-foreground opacity-50 cursor-not-allowed">
                 {inner}
               </div>
             )
@@ -126,8 +126,8 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
             )
           }
 
-          const tabClass = `py-2 w-fit text-center border-black transition-all ease-linear cursor-pointer ${
-            tab.active ? 'border-b-4' : 'opacity-50 hover:opacity-75'
+          const tabClass = `py-3 w-fit text-center border-b-2 transition-colors cursor-pointer ${
+            tab.active ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
           }`
 
           if (tab.href) {
@@ -156,14 +156,14 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
 
       {/* Right gradient + button */}
       <div
-        className={`absolute end-0 inset-y-0 w-12 bg-gradient-to-l from-[#fcfbfc] to-transparent z-10 flex items-center justify-end pointer-events-none transition-opacity duration-200 ${
+        className={`absolute end-0 inset-y-0 w-12 bg-gradient-to-l from-card to-transparent z-10 flex items-center justify-end pointer-events-none transition-opacity duration-200 ${
           canScrollRight ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <button
           onClick={() => scroll('right')}
           aria-label="Scroll tabs right"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-card nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-7 h-7 rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors duration-150"
         >
           <ChevronRight size={13} strokeWidth={2.5} />
         </button>

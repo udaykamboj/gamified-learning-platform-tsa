@@ -77,38 +77,42 @@ export default function GlobalError({
     window.location.href = '/login'
   }
 
-  const btn = 'flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm transition-colors shadow-sm'
+  const btn = 'sl-btn'
 
   return (
     <html lang="en" dir={dir} suppressHydrationWarning>
-      <body className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-        <div className="flex flex-col items-center space-y-6 max-w-xl text-center">
-          <div className="bg-rose-100 p-4 rounded-2xl">
-            <AlertTriangle className="text-rose-700" size={44} />
+      <head>
+        {/* Same pre-paint appearance script as the root layout. */}
+        <script src="/theme-init.js" />
+      </head>
+      <body className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
+        <div className="sl-card flex flex-col items-center gap-6 w-full max-w-xl p-6 md:p-8 text-center">
+          <div className="bg-error-surface p-4 rounded-2xl">
+            <AlertTriangle className="text-error" size={36} aria-hidden />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-rose-700">{category.title}</h2>
-            <span className="sl-telemetry text-rose-400">
+            <h1 className="sl-page-title">{category.title}</h1>
+            <span className="sl-telemetry text-muted-foreground">
               {category.kind.replace(/_/g, ' ')}
             </span>
           </div>
-          <p className="text-gray-600">{category.description}</p>
+          <p className="text-ui text-muted-foreground">{category.description}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => reset()} className={`${btn} text-white bg-rose-600 hover:bg-rose-500`}>
+            <button onClick={() => reset()} className={`${btn} sl-btn-primary`}>
               <RefreshCcw size={16} />
               <span>Try again</span>
             </button>
-            <a href="/home" className={`${btn} text-gray-100 bg-gray-700 hover:bg-gray-800`}>
+            <a href="/home" className={`${btn} sl-btn-secondary`}>
               <Home size={16} />
               <span>Home</span>
             </a>
-            <button onClick={doSignOut} disabled={signingOut} className={`${btn} text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-50`}>
+            <button onClick={doSignOut} disabled={signingOut} className={`${btn} sl-btn-ghost`}>
               <LogOut size={16} />
               <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
             </button>
             {Sentry.isInitialized() && (
-              <button onClick={report} className={`${btn} text-rose-700 bg-rose-100 hover:bg-rose-200`}>
+              <button onClick={report} className={`${btn} sl-btn-ghost`}>
                 <MessageSquareWarning size={16} />
                 <span>Report this problem</span>
               </button>
@@ -119,17 +123,17 @@ export default function GlobalError({
             <div className="w-full max-w-lg">
               <button
                 onClick={() => setShowDetails((s) => !s)}
-                className="flex items-center gap-1 mx-auto text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                className="flex items-center gap-1 mx-auto text-meta font-semibold text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showDetails ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 <span>{showDetails ? 'Hide technical details' : 'Show technical details'}</span>
               </button>
               {showDetails && (
-                <div className="mt-3 bg-gray-100 border border-gray-200 rounded-xl p-4 text-start text-xs font-mono text-gray-700 break-all space-y-1.5">
-                  {detail && <div><span className="text-gray-400">cause </span>{detail}</div>}
-                  {status !== undefined && <div><span className="text-gray-400">status </span>{status}</div>}
-                  {error?.digest && <div><span className="text-gray-400">digest </span>{error.digest}</div>}
-                  {eventId && <div><span className="text-gray-400">ref </span>{eventId}</div>}
+                <div className="mt-3 bg-muted border border-border rounded-xl p-4 text-start text-xs font-mono text-foreground break-all space-y-1.5">
+                  {detail && <div><span className="text-muted-foreground">cause </span>{detail}</div>}
+                  {status !== undefined && <div><span className="text-muted-foreground">status </span>{status}</div>}
+                  {error?.digest && <div><span className="text-muted-foreground">digest </span>{error.digest}</div>}
+                  {eventId && <div><span className="text-muted-foreground">ref </span>{eventId}</div>}
                 </div>
               )}
             </div>

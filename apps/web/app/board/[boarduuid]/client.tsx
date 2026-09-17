@@ -57,27 +57,33 @@ export default function BoardCanvasClient({ boardUuid, accessToken, orgslug, use
   // spinner rather than falling through to "not found".
   if (!token || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-muted">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-black" />
+      <div className="flex h-screen items-center justify-center bg-background" aria-busy="true">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
       </div>
     )
   }
 
   if (error || !board) {
     return (
-      <div className="flex h-screen items-center justify-center bg-muted">
-        <p className="text-gray-500">Board not found or access denied.</p>
+      <div className="flex h-screen items-center justify-center bg-background p-4">
+        <div className="sl-card max-w-sm p-6 text-center">
+          <p className="text-ui text-muted-foreground">Board not found or access denied.</p>
+        </div>
       </div>
     )
   }
 
+  // The whiteboard is a light drawing surface in both appearances: pin its
+  // chrome to the light tokens so toolbars never mix dark controls onto it.
   return (
-    <BoardCanvas
-      board={board}
-      accessToken={token}
-      orgslug={orgslug}
-      username={displayName}
-      orgUuid={orgData?.org_uuid || ''}
-    />
+    <div className="sl-theme-light contents">
+      <BoardCanvas
+        board={board}
+        accessToken={token}
+        orgslug={orgslug}
+        username={displayName}
+        orgUuid={orgData?.org_uuid || ''}
+      />
+    </div>
   )
 }

@@ -502,22 +502,22 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
             >
                 {view === 'grading' && (
                     <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                        <h3 className="text-sm font-semibold text-gray-800 mb-2">Submission Summary</h3>
+                        <h3 className="text-sm font-semibold text-foreground mb-2">Submission Summary</h3>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div className="text-center">
                                 <div className="text-lg font-bold text-blue-600">
                                     {questions.flatMap(q => q.blanks).length}
                                 </div>
-                                <div className="text-gray-600">Total Blanks</div>
+                                <div className="text-muted-foreground">Total Blanks</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-lg font-bold text-green-600">
+                                <div className="font-display text-lg font-semibold text-success">
                                     {questions.flatMap(q => q.blanks).filter(blank => {
                                         const userAnswer = userSubmissions.submissions.find(s => s.blankUUID === blank.blankUUID);
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">Correct</div>
+                                <div className="text-muted-foreground">Correct</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-lg font-bold text-red-600">
@@ -526,7 +526,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">Incorrect</div>
+                                <div className="text-muted-foreground">Incorrect</div>
                             </div>
                         </div>
                     </div>
@@ -540,16 +540,16 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                         value={question.questionText}
                                         onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
                                         placeholder="Enter your question with blanks (use ___ for blanks)"
-                                        className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                        className="sl-input w-full text-sm font-semibold"
                                     />
                                 ) : (
-                                    <p className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold">
+                                    <p className="sl-input w-full text-sm font-semibold">
                                         {question.questionText}
                                     </p>
                                 )}
                                 {view === 'teacher' && (
                                     <div
-                                        className="w-[20px] flex-none flex items-center h-[20px] rounded-lg bg-slate-200/60 text-slate-500 hover:bg-slate-300 text-sm transition-all ease-linear cursor-pointer"
+                                        className="grid place-items-center size-7 flex-none rounded-md text-muted-foreground hover:bg-hover hover:text-error transition-colors cursor-pointer"
                                         onClick={() => removeQuestion(qIndex)}
                                     >
                                         <Minus size={12} className="mx-auto" />
@@ -562,7 +562,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                 {question.blanks.map((blank, bIndex) => (
                                     <div key={bIndex} className="flex">
                                         <div className={"blank-item outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 min-h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card text-sm duration-150 ease-linear nice-shadow " + (view == 'student' ? 'active:scale-105' : '')}>
-                                            <div className="font-bold text-base flex items-center justify-center h-full w-[40px] rounded-s-md text-slate-800 bg-slate-100/80">
+                                            <div className="flex items-center justify-center self-stretch w-10 flex-none border-e border-border bg-muted text-muted-foreground font-semibold text-sm">
                                                 <Type size={14} />
                                             </div>
                                             {view === 'teacher' ? (
@@ -571,19 +571,19 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                                         value={blank.placeholder}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
                                                         placeholder="Placeholder text for the blank"
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                                        className="sl-input w-full mx-2 text-sm font-semibold"
                                                     />
                                                     <input
                                                         value={blank.correctAnswer}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
                                                         placeholder="Correct answer"
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-lime-50 border-2 border-lime-200 rounded-md border-dotted text-sm font-bold"
+                                                        className="sl-input w-full mx-2 text-sm font-semibold !border-success bg-success-surface"
                                                     />
                                                     <input
                                                         value={blank.hint || ''}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'hint', e.target.value)}
                                                         placeholder={t('dashboard.assignments.editor.task_editor.general.hint_optional')}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-blue-50 border-2 border-blue-200 rounded-md border-dotted text-xs"
+                                                        className="sl-input w-full mx-2 text-sm bg-info-surface"
                                                     />
                                                 </div>
                                             ) : view === 'grading' ? (
@@ -594,10 +594,10 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                                                 (submission) => submission.questionUUID === question.questionUUID && submission.blankUUID === blank.blankUUID
                                                             )?.answer || ''}
                                                             readOnly
-                                                            className="flex-1 px-3 pe-6 text-neutral-600 bg-gray-50 border-2 border-gray-200 rounded-md text-sm font-bold"
+                                                            className="sl-input flex-1 text-sm font-semibold bg-muted"
                                                         />
                                                     </div>
-                                                    <div className="mx-2 text-xs text-gray-600">
+                                                    <div className="mx-2 text-sm text-muted-foreground">
                                                         <span className="font-semibold">Expected:</span> {blank.correctAnswer}
                                                     </div>
                                                     {blank.hint && (
@@ -616,7 +616,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                                         readOnly={submissionIsGraded}
                                                         placeholder={blank.placeholder}
                                                         data-blank-id={blank.blankUUID}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md focus:border-blue-400 focus:ring-2 focus:ring-blue-200 text-sm font-bold transition-all"
+                                                        className="sl-input w-full mx-2 text-sm"
                                                     />
                                                     {/* Render nothing at all when this blank's key
                                                         was withheld — the learner still sees their
@@ -625,7 +625,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                                         Checked per blank too, so a partially
                                                         stripped payload can't leak a blank chip. */}
                                                     {revealAnswerKey && typeof blank.correctAnswer === 'string' && (
-                                                        <div className="mx-2 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md inline-flex items-center space-x-1 w-fit">
+                                                        <div className="mx-2 sl-badge sl-badge-success w-fit">
                                                             <Check size={11} />
                                                             <span className="font-semibold">{t('assignments.form.expected_answer')}:</span>
                                                             <span>{blank.correctAnswer}</span>
@@ -638,7 +638,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                             )}
                                             {view === 'teacher' && (
                                                 <div
-                                                    className="w-[20px] flex-none flex items-center h-[20px] rounded-lg bg-slate-200/60 text-slate-500 hover:bg-slate-300 text-sm transition-all ease-linear cursor-pointer"
+                                                    className="grid place-items-center size-7 flex-none rounded-md text-muted-foreground hover:bg-hover hover:text-error transition-colors cursor-pointer"
                                                     onClick={() => removeBlank(qIndex, bIndex)}
                                                 >
                                                     <Minus size={12} className="mx-auto" />
@@ -688,7 +688,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                         {view === 'teacher' && bIndex === question.blanks.length - 1 && question.blanks.length <= 4 && (
                                             <div className="flex justify-center mx-auto px-2">
                                                 <div
-                                                    className="outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card duration-150 cursor-pointer ease-linear nice-shadow"
+                                                    className="w-full flex items-center justify-center min-h-11 px-3 rounded-lg border border-dashed border-line-control bg-card text-muted-foreground hover:bg-hover cursor-pointer transition-colors"
                                                     onClick={() => addBlank(qIndex)}
                                                 >
                                                     <Plus size={14} className="inline-block" />
@@ -705,7 +705,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                 {view === 'teacher' && questions.length <= 5 && (
                     <div className="flex justify-center mx-auto px-2">
                         <div
-                            className="flex w-full my-2 py-2 px-4 bg-card text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
+                            className="flex w-full my-2 min-h-11 px-4 gap-2 items-center justify-center rounded-lg border border-dashed border-line-control bg-card text-sm font-semibold text-muted-foreground hover:bg-hover cursor-pointer transition-colors"
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />
