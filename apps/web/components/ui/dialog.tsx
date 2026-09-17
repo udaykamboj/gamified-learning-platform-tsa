@@ -20,7 +20,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn("lh-modal-overlay fixed inset-0 bg-black/40", className)}
+    className={cn("lh-modal-overlay fixed inset-0 bg-scrim", className)}
     style={{ zIndex: 'var(--z-modal-backdrop)', willChange: 'opacity' }}
     {...props}
   />
@@ -60,14 +60,14 @@ const DialogContent = React.forwardRef<
         }
       }}
       className={cn(
-        "lh-modal-content fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 border border-gray-200/80 bg-white shadow-2xl shadow-black/10 rounded-2xl",
+        "lh-modal-content fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 border border-border bg-popover text-popover-foreground shadow-overlay rounded-3xl max-h-[calc(100dvh-2rem)] overflow-y-auto",
         className
       )}
       {...props}
     >
       {children}
       <DialogPrimitive.Close
-        className="absolute end-4 top-4 p-1.5 rounded-lg bg-gray-100/80 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none"
+        className="absolute end-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-[10px] text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none"
         aria-label="Close dialog"
       >
         <Cross2Icon className="h-4 w-4" />
@@ -113,7 +113,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-tight tracking-tight text-gray-900",
+      "font-display text-xl font-semibold leading-tight tracking-tight text-foreground",
       className
     )}
     {...props}
@@ -127,7 +127,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-gray-500", className)}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))

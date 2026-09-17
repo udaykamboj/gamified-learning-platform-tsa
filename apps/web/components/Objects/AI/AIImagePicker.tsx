@@ -152,7 +152,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
     <button
       onClick={() => setTab(id)}
       className={`px-3.5 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 transition-colors ${
-        tab === id ? 'bg-neutral-900 text-white nice-shadow' : 'text-neutral-500 hover:bg-neutral-100'
+        tab === id ? 'bg-primary text-primary-foreground nice-shadow' : 'text-neutral-500 hover:bg-neutral-100'
       }`}
     >
       {icon} {label}
@@ -163,7 +163,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
     <button
       onClick={() => handleUse(key, fileId, url)}
       disabled={usingKey === key}
-      className="px-3 py-1.5 rounded-lg bg-white text-neutral-900 text-sm font-medium flex items-center gap-1.5 nice-shadow disabled:opacity-60"
+      className="px-3 py-1.5 rounded-lg bg-card text-neutral-900 text-sm font-medium flex items-center gap-1.5 nice-shadow disabled:opacity-60"
     >
       {usingKey === key ? <CircleNotch weight="duotone" size={15} className="animate-spin" /> : <ArrowUpRight weight="duotone" size={15} data-dir-flip />}
       Use
@@ -171,7 +171,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
   )
 
   const modalContent = (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       {/* Tabs */}
       <div className="flex items-center gap-1.5 px-5 pt-4 pb-3 border-b border-neutral-100">
         {tabBtn('generate', <MagicWand weight="duotone" size={15} />, 'Generate')}
@@ -211,7 +211,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                 <button
                   onClick={handleGenerate}
                   disabled={generating || !prompt.trim()}
-                  className="ms-auto px-4 py-2 rounded-xl bg-neutral-900 text-white text-sm font-medium flex items-center gap-2 nice-shadow disabled:opacity-40 transition-opacity hover:bg-neutral-800"
+                  className="ms-auto px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 nice-shadow disabled:opacity-40 transition-opacity hover:bg-primary"
                 >
                   {generating ? <CircleNotch weight="duotone" size={15} className="animate-spin" /> : <Sparkle weight="duotone" size={15} />}
                   {generating ? 'Generating…' : refineFrom ? 'Refine' : 'Generate'}
@@ -287,7 +287,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                           {renderUseButton(item.ai_generation_uuid, item.file_id, item.url)}
                           <button
                             onClick={() => stageRefine(item)}
-                            className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white text-sm font-medium flex items-center gap-1.5 nice-shadow"
+                            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center gap-1.5 nice-shadow"
                           >
                             <MagicWand weight="duotone" size={15} /> Refine
                           </button>
@@ -325,7 +325,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                         {renderUseButton(h.ai_generation_uuid, h.file_id, url)}
                         <button
                           onClick={() => handleDeleteHistory(h.ai_generation_uuid)}
-                          className="p-1.5 rounded-lg bg-neutral-900 text-white nice-shadow"
+                          className="p-1.5 rounded-lg bg-primary text-primary-foreground nice-shadow"
                           title="Delete"
                         >
                           <Trash weight="duotone" size={15} />

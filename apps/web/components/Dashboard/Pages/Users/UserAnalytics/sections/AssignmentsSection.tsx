@@ -14,7 +14,7 @@ function TaskRow({ task }: { task: any }) {
     <div className="text-xs border border-gray-100 rounded p-2">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="flex-none text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">
+          <span className="flex-none text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">
             {typeLabel}
           </span>
           {task.title && <span className="font-semibold truncate">{task.title}</span>}

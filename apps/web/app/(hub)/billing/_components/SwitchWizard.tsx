@@ -162,18 +162,18 @@ export default function SwitchWizard({
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
-          className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-black/[0.04] transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-foreground/[0.04] transition-colors"
           aria-label={t('billing.back', { defaultValue: 'Back' })}
         >
-          <ArrowLeft size={16} className="text-black/50" />
+          <ArrowLeft size={16} className="text-foreground/50" />
         </button>
         <div>
-          <h1 className="font-black text-2xl tracking-tight text-black">
+          <h1 className="font-black text-2xl tracking-tight text-foreground">
             {hasExistingSub
               ? t('billing.switch_plan', { defaultValue: 'Switch Plan' })
               : t('billing.upgrade_plan', { defaultValue: 'Upgrade Plan' })}
           </h1>
-          <p className="mt-0.5 text-sm text-black/40">
+          <p className="mt-0.5 text-sm text-foreground/40">
             {hasExistingSub
               ? t('billing.switch_subtitle', { defaultValue: 'Choose a new plan. Changes are prorated automatically.' })
               : t('billing.upgrade_subtitle', { defaultValue: 'Choose a plan to get started.' })}
@@ -190,10 +190,10 @@ export default function SwitchWizard({
           const isDone = i < currentIdx
           return (
             <React.Fragment key={step.key}>
-              {i > 0 && <div className={`w-8 h-px ${isDone || isActive ? 'bg-black/20' : 'bg-black/[0.08]'}`} />}
+              {i > 0 && <div className={`w-8 h-px ${isDone || isActive ? 'bg-black/20' : 'bg-foreground/[0.08]'}`} />}
               <div
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  isActive ? 'bg-black text-white' : isDone ? 'bg-black/[0.06] text-black/60' : 'bg-black/[0.04] text-black/25'
+                  isActive ? 'bg-primary text-primary-foreground' : isDone ? 'bg-foreground/[0.06] text-foreground/60' : 'bg-foreground/[0.04] text-foreground/25'
                 }`}
               >
                 {isDone ? <Check size={12} /> : <span>{i + 1}</span>}
@@ -223,7 +223,7 @@ export default function SwitchWizard({
               const cls = 'block w-full text-center px-5 py-2.5 rounded-lg text-[14px] font-bold transition-colors'
               if (isCurrent) {
                 return (
-                  <span className={`${cls} bg-black/[0.04] text-black/30 cursor-default`}>
+                  <span className={`${cls} bg-foreground/[0.04] text-foreground/30 cursor-default`}>
                     {t('billing.your_plan', { defaultValue: 'Your plan' })}
                   </span>
                 )
@@ -232,7 +232,7 @@ export default function SwitchWizard({
                 <button
                   type="button"
                   onClick={() => handlePlanSelect(plan.id, billing)}
-                  className={`${cls} cursor-pointer ${isUpgradeOption ? plan.ctaStyle : 'bg-neutral-900 text-white hover:bg-neutral-800'}`}
+                  className={`${cls} cursor-pointer ${isUpgradeOption ? plan.ctaStyle : 'bg-primary text-primary-foreground hover:bg-primary'}`}
                 >
                   {isUpgradeOption
                     ? t('billing.upgrade', { defaultValue: 'Upgrade' })
@@ -247,9 +247,9 @@ export default function SwitchWizard({
       {/* Confirm View */}
       {view === 'confirm' && selectedPlanData && (
         <div className="max-w-md mx-auto space-y-5">
-          <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-            <div className="px-6 py-5 border-b border-black/[0.06]">
-              <h2 className="font-bold text-base tracking-tight text-black">
+          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+            <div className="px-6 py-5 border-b border-border">
+              <h2 className="font-bold text-base tracking-tight text-foreground">
                 {isUpgrade
                   ? t('billing.upgrade_summary', { defaultValue: 'Upgrade Summary' })
                   : t('billing.downgrade_summary', { defaultValue: 'Downgrade Summary' })}
@@ -258,23 +258,23 @@ export default function SwitchWizard({
             <div className="px-6 py-5 space-y-4">
               {/* From → To */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 bg-black/[0.03] rounded-xl px-4 py-3">
-                  <p className="text-[10px] font-semibold text-black/30 uppercase tracking-wider">
+                <div className="flex-1 bg-foreground/[0.03] rounded-xl px-4 py-3">
+                  <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
                     {t('billing.current', { defaultValue: 'Current' })}
                   </p>
-                  <p className="mt-1 text-sm font-bold text-black/50 capitalize">{currentPlanData?.name ?? currentPlanId}</p>
-                  <p className="text-xs text-black/30 font-medium">
+                  <p className="mt-1 text-sm font-bold text-foreground/50 capitalize">{currentPlanData?.name ?? currentPlanId}</p>
+                  <p className="text-xs text-foreground/30 font-medium">
                     {getCurrencySymbol(currentPlanId, priceOverrides)}
                     {currentPrice}/mo
                   </p>
                 </div>
-                <ArrowRight size={16} className="text-black/20 flex-shrink-0" />
-                <div className="flex-1 rounded-xl px-4 py-3 border-2 border-black/[0.08]" style={{ background: selectedPlanData.topGlow }}>
-                  <p className="text-[10px] font-semibold text-black/30 uppercase tracking-wider">
+                <ArrowRight size={16} className="text-foreground/20 flex-shrink-0" />
+                <div className="flex-1 rounded-xl px-4 py-3 border-2 border-border" style={{ background: selectedPlanData.topGlow }}>
+                  <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
                     {t('billing.new', { defaultValue: 'New' })}
                   </p>
-                  <p className="mt-1 text-sm font-bold text-black">{selectedPlanData.name}</p>
-                  <p className="text-xs text-black/50 font-medium">
+                  <p className="mt-1 text-sm font-bold text-foreground">{selectedPlanData.name}</p>
+                  <p className="text-xs text-foreground/50 font-medium">
                     {getCurrencySymbol(selectedPlan!, priceOverrides)}
                     {newPrice}/mo
                   </p>
@@ -282,18 +282,18 @@ export default function SwitchWizard({
               </div>
 
               {/* Billing info */}
-              <div className="bg-black/[0.02] rounded-xl px-4 py-3 space-y-1.5">
+              <div className="bg-foreground/[0.02] rounded-xl px-4 py-3 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-black/40">{t('billing.billing', { defaultValue: 'Billing' })}</span>
-                  <span className="text-xs font-semibold text-black/70 capitalize">{billing}</span>
+                  <span className="text-xs font-medium text-foreground/40">{t('billing.billing', { defaultValue: 'Billing' })}</span>
+                  <span className="text-xs font-semibold text-foreground/70 capitalize">{billing}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-black/40">
+                  <span className="text-xs font-medium text-foreground/40">
                     {billing === 'annual'
                       ? t('billing.annual_total', { defaultValue: 'Annual total' })
                       : t('billing.monthly_total', { defaultValue: 'Monthly total' })}
                   </span>
-                  <span className="text-xs font-semibold text-black/70">
+                  <span className="text-xs font-semibold text-foreground/70">
                     {getCurrencySymbol(selectedPlan!, priceOverrides)}
                     {billing === 'annual' ? priceOverrides?.[selectedPlan!]?.annualTotal || newPrice * 12 : newPrice}
                     {billing === 'annual' ? '/yr' : '/mo'}
@@ -345,14 +345,14 @@ export default function SwitchWizard({
               {/* Features */}
               {selectedPlanData.features.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-black/25 mb-2.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25 mb-2.5">
                     {t('billing.whats_included', { defaultValue: "What's included" })}
                   </p>
                   <ul className="space-y-1.5">
                     {selectedPlanData.features.map((f) => (
                       <li key={f.label} className="flex items-center gap-2">
                         <Check size={13} className={`flex-shrink-0 ${selectedPlanData.accentColor} opacity-60`} />
-                        <span className="text-xs font-medium text-black/50">{f.label}</span>
+                        <span className="text-xs font-medium text-foreground/50">{f.label}</span>
                       </li>
                     ))}
                   </ul>
@@ -362,10 +362,10 @@ export default function SwitchWizard({
 
             {/* Discount Code */}
             {selectedPlan !== 'free' && (
-              <div className="px-6 py-4 border-t border-black/[0.06]">
+              <div className="px-6 py-4 border-t border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <Tag size={12} className="text-black/30" />
-                  <span className="text-xs font-semibold text-black/40">
+                  <Tag size={12} className="text-foreground/30" />
+                  <span className="text-xs font-semibold text-foreground/40">
                     {t('billing.discount_code', { defaultValue: 'Discount code' })}
                   </span>
                 </div>
@@ -379,13 +379,13 @@ export default function SwitchWizard({
                       setPromoDetail(null)
                     }}
                     placeholder={t('billing.enter_code', { defaultValue: 'Enter code' })}
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-black/[0.08] bg-black/[0.02] focus:outline-none focus:border-black/20 transition-colors"
+                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-foreground/[0.02] focus:outline-none focus:border-border transition-colors"
                   />
                   <button
                     type="button"
                     onClick={handleApplyPromo}
                     disabled={!promoCode.trim() || promoStatus === 'validating'}
-                    className="px-4 py-2 text-xs font-bold rounded-lg bg-black/[0.06] text-black/60 hover:bg-black/[0.1] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-xs font-bold rounded-lg bg-foreground/[0.06] text-foreground/60 hover:bg-foreground/[0.1] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {promoStatus === 'validating'
                       ? t('billing.checking', { defaultValue: 'Checking...' })
@@ -409,7 +409,7 @@ export default function SwitchWizard({
             )}
 
             {/* CTA */}
-            <div className="px-6 py-5 border-t border-black/[0.06]">
+            <div className="px-6 py-5 border-t border-border">
               <button
                 type="button"
                 onClick={handleConfirm}
@@ -439,8 +439,8 @@ export default function SwitchWizard({
                 )}
               </button>
               {!hasExistingSub && (
-                <p className="flex items-center justify-center gap-1.5 text-[11px] text-black/25 font-medium mt-3">
-                  <Lock size={10} className="text-black/20" />
+                <p className="flex items-center justify-center gap-1.5 text-[11px] text-foreground/25 font-medium mt-3">
+                  <Lock size={10} className="text-foreground/20" />
                   {t('billing.secure_checkout', { defaultValue: 'Secure checkout powered by Stripe' })}
                 </p>
               )}
@@ -450,7 +450,7 @@ export default function SwitchWizard({
                   setView('choose-plan')
                   setSelectedPlan(null)
                 }}
-                className="w-full mt-2 text-center text-xs font-medium text-black/30 hover:text-black/50 transition-colors py-1.5"
+                className="w-full mt-2 text-center text-xs font-medium text-foreground/30 hover:text-foreground/50 transition-colors py-1.5"
               >
                 {t('billing.back_to_plans', { defaultValue: 'Back to plans' })}
               </button>
@@ -462,18 +462,18 @@ export default function SwitchWizard({
       {/* Success View */}
       {view === 'success' && selectedPlanData && (
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-2xl nice-shadow overflow-hidden text-center px-8 py-12">
+          <div className="bg-card rounded-2xl nice-shadow overflow-hidden text-center px-8 py-12">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-center mb-5">
               <Check size={24} className="text-green-600" />
             </div>
-            <h2 className="text-xl font-black tracking-tight text-black">
+            <h2 className="text-xl font-black tracking-tight text-foreground">
               {isUpgrade
                 ? t('billing.plan_updated', { defaultValue: 'Plan updated!' })
                 : selectedPlan === 'free'
                   ? t('billing.subscription_canceled', { defaultValue: 'Subscription canceled' })
                   : t('billing.downgrade_scheduled', { defaultValue: 'Downgrade scheduled' })}
             </h2>
-            <p className="mt-2 text-sm text-black/40 leading-relaxed">
+            <p className="mt-2 text-sm text-foreground/40 leading-relaxed">
               {isUpgrade
                 ? t('billing.updated_desc', {
                     defaultValue: `You've been switched to the ${selectedPlanData.name} plan. Any billing adjustments will appear on your next invoice.`,
@@ -491,7 +491,7 @@ export default function SwitchWizard({
             </p>
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-black/80 transition-colors"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-action-hover transition-colors"
             >
               {t('billing.back_to_plan_usage', { defaultValue: 'Back to Plan & Usage' })}
               <ArrowRight size={14} />

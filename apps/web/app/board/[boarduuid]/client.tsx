@@ -57,7 +57,7 @@ export default function BoardCanvasClient({ boardUuid, accessToken, orgslug, use
   // spinner rather than falling through to "not found".
   if (!token || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#f8f8f8]">
+      <div className="flex h-screen items-center justify-center bg-muted">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-black" />
       </div>
     )
@@ -65,7 +65,7 @@ export default function BoardCanvasClient({ boardUuid, accessToken, orgslug, use
 
   if (error || !board) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#f8f8f8]">
+      <div className="flex h-screen items-center justify-center bg-muted">
         <p className="text-gray-500">Board not found or access denied.</p>
       </div>
     )

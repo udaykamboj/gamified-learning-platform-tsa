@@ -480,7 +480,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
           </div>
           <button
             onClick={refreshContent}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors font-medium text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary dark:bg-card text-primary-foreground dark:text-neutral-900 rounded-lg hover:bg-primary dark:hover:bg-neutral-100 transition-colors font-medium text-sm"
           >
             <RefreshCw size={15} />
             <span>Try Again</span>
@@ -491,7 +491,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
   }
 
   return (
-    <div className="relative w-full bg-white dark:bg-neutral-950">
+    <div className="relative w-full bg-card dark:bg-neutral-950">
       {/* Save-failure warning — makes silent progress loss visible */}
       {saveError && (
         <div
@@ -537,7 +537,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
 
       {/* Loading overlay */}
       {isLoading && apiInjected && (
-        <div role="status" aria-live="polite" className="absolute inset-0 flex items-center justify-center bg-white dark:bg-neutral-950 z-10">
+        <div role="status" aria-live="polite" className="absolute inset-0 flex items-center justify-center bg-card dark:bg-neutral-950 z-10">
           <div className="text-center space-y-4">
             <div className="relative w-10 h-10 mx-auto">
               <div className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-neutral-800"></div>

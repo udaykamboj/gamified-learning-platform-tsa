@@ -303,7 +303,7 @@ function ImageBlockComponent(props: any) {
                       ? 'border-red-300 bg-red-50/30 hover:border-red-400 hover:bg-red-50/50'
                       : isDragging
                       ? 'border-neutral-400 bg-neutral-100'
-                      : 'border-neutral-200 bg-white hover:border-neutral-400 hover:bg-neutral-50'
+                      : 'border-neutral-200 bg-card hover:border-neutral-400 hover:bg-neutral-50'
                   }
                 `}
               >
@@ -349,7 +349,7 @@ function ImageBlockComponent(props: any) {
                 type="button"
                 onClick={() => setIsUnsplashOpen(true)}
                 disabled={isLoading}
-                className="border border-neutral-200 rounded-lg text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[160px] p-6 bg-white hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed outline-none"
+                className="border border-neutral-200 rounded-lg text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[160px] p-6 bg-card hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed outline-none"
               >
                 <div className="space-y-2">
                   <svg
@@ -367,7 +367,7 @@ function ImageBlockComponent(props: any) {
               </button>
               <AIImageButton
                 onSelect={handleUnsplashSelect}
-                className="border border-neutral-200 rounded-lg text-center cursor-pointer transition-all flex flex-col gap-2 items-center justify-center min-h-[160px] p-6 bg-white hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed outline-none text-sm font-medium text-neutral-700"
+                className="border border-neutral-200 rounded-lg text-center cursor-pointer transition-all flex flex-col gap-2 items-center justify-center min-h-[160px] p-6 bg-card hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed outline-none text-sm font-medium text-neutral-700"
               />
             </div>
           )}
@@ -426,7 +426,7 @@ function ImageBlockComponent(props: any) {
                     className="rounded-lg nice-shadow max-w-full h-auto"
                     style={{ width: '100%' }}
                   />
-                  <div className="absolute top-2 end-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 end-2 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-lg p-1 opacity-80 hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleAlignmentChange('left')}
                       className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'left' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-500'}`}

@@ -119,7 +119,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
       <div className="h-full">
         <div className="h-6" />
         <div className="px-10 pb-10">
-          <div className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+          <div className="bg-card rounded-xl shadow-sm p-6 animate-pulse">
             <div className="space-y-6">
               {/* Thumbnail placeholder */}
               <div>
@@ -166,7 +166,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     <div className="h-full">
       <div className="h-6" />
       <div className="px-10 pb-10">
-        <div className="bg-white rounded-xl shadow-sm">
+        <div className="bg-card rounded-xl shadow-sm">
           <FormLayout onSubmit={formik.handleSubmit} className="p-6">
             <div className="space-y-6">
               {/* Thumbnail */}
@@ -207,7 +207,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                     />
                     <label
                       htmlFor="thumbnail-upload"
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-card border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <Upload size={16} className="me-2" />
                       {t('podcasts.dashboard.form.upload_thumbnail')}
@@ -296,7 +296,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                       name="public"
                       checked={formik.values.public}
                       onChange={formik.handleChange}
-                      className="w-4 h-4 text-black rounded border-gray-300 focus:ring-black/20"
+                      className="w-4 h-4 text-foreground rounded border-gray-300 focus:ring-border"
                     />
                     <div>
                       <span className="text-sm font-medium text-gray-700">
@@ -314,7 +314,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                       name="published"
                       checked={formik.values.published}
                       onChange={formik.handleChange}
-                      className="w-4 h-4 text-black rounded border-gray-300 focus:ring-black/20"
+                      className="w-4 h-4 text-foreground rounded border-gray-300 focus:ring-border"
                     />
                     <div>
                       <span className="text-sm font-medium text-gray-700">
@@ -333,7 +333,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 <button
                   type="submit"
                   disabled={isSaving || !formik.isValid}
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSaving ? (
                     <Loader2 size={16} className="me-2 animate-spin" />

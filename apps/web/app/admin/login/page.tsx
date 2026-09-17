@@ -48,23 +48,23 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0f0f10]">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center mb-8">
-          <Shield className="w-10 h-10 text-white/70 mb-3" />
-          <h1 className="text-2xl font-bold text-white">StarLab Admin</h1>
-          <p className="text-white/40 text-sm mt-1">Sign in to continue</p>
+          <Shield className="w-10 h-10 text-muted-foreground mb-3" />
+          <h1 className="text-2xl font-bold text-foreground">StarLab Admin</h1>
+          <p className="text-muted-foreground text-sm mt-1">Sign in to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
+            <div className="bg-red-100 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white/60 mb-1.5">
+            <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1.5">
               Email
             </label>
             <input
@@ -74,13 +74,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+              className="w-full px-3 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-colors"
               placeholder="admin@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-1.5">
+            <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-1.5">
               Password
             </label>
             <input
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+              className="w-full px-3 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-colors"
               placeholder="Enter your password"
             />
           </div>
@@ -98,7 +98,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-2.5 bg-card text-foreground font-medium rounded-lg hover:bg-card/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>

@@ -14,28 +14,28 @@ function TypeOfContentTitle({ title, type }: TypeOfContentTitleProps) {
   const getIcon = () => {
     switch (type) {
       case 'col':
-        return <SquareLibrary className="w-4 h-4 text-black" />
+        return <SquareLibrary className="w-5 h-5" />
       case 'cou':
-        return <BookCopy className="w-4 h-4 text-black" />
+        return <BookCopy className="w-5 h-5" />
       case 'tra':
-        return <Signpost className="w-4 h-4 text-black" />
+        return <Signpost className="w-5 h-5" />
       case 'pod':
-        return <Headphones className="w-4 h-4 text-black" />
+        return <Headphones className="w-5 h-5" />
       case 'board':
-        return <ChalkboardSimple size={16} className="text-black" weight="fill" />
+        return <ChalkboardSimple size={20} />
       case 'pg':
-        return <Cube size={16} className="text-black" weight="fill" />
+        return <Cube size={20} />
       default:
         return null
     }
   }
 
   return (
-    <div className="flex items-center gap-2.5 my-4 group cursor-default">
-      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white nice-shadow">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-center size-10 shrink-0 rounded-[10px] border border-border bg-card text-link shadow-sm">
         {getIcon()}
       </div>
-      <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+      <h1 className="sl-page-title">
         {title}
       </h1>
     </div>

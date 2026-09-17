@@ -104,7 +104,7 @@ function OfferCard({ offer, orgslug, orgUuid, position }: { offer: Offer; orgslu
       href={getUriWithOrg(orgslug, `/store/offers/${offer.offer_uuid}`)}
       onClick={() => track(AnalyticsEvent.StoreOfferCardClicked, { offer_type: offer.offer_type, amount: offer.amount, position })}
     >
-      <div className="group bg-white rounded-xl nice-shadow overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200 hover:scale-[1.01]">
+      <div className="group bg-card rounded-xl nice-shadow overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200 hover:scale-[1.01]">
 
         {/* Thumbnail area */}
         <div className={`relative aspect-video overflow-hidden flex items-center justify-center ${
@@ -125,7 +125,7 @@ function OfferCard({ offer, orgslug, orgUuid, position }: { offer: Offer; orgslu
                 <RefreshCcw size={10} /> Subscription
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-700 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-0.5">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-700 bg-card/90 backdrop-blur-sm rounded-full px-2.5 py-0.5">
                 <SquareCheck size={10} /> One-time
               </span>
             )}
@@ -197,8 +197,8 @@ function OfferCard({ offer, orgslug, orgUuid, position }: { offer: Offer; orgslu
             </div>
             <div className={`flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-xl transition-colors ${
               isSubscription
-                ? 'bg-indigo-600 text-white group-hover:bg-indigo-700'
-                : 'bg-gray-900 text-white group-hover:bg-gray-800'
+                ? 'bg-indigo-600 text-primary-foreground group-hover:bg-indigo-700'
+                : 'bg-primary text-primary-foreground group-hover:bg-primary'
             }`}>
               {isSubscription ? 'Subscribe' : 'Get access'}
               <ArrowRight size={13} />
@@ -219,7 +219,7 @@ function Store({ orgslug, offers }: StoreProps) {
     <div className="w-full">
       <GeneralWrapperStyled>
         <div className="flex items-center gap-3 my-6">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white nice-shadow">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-card nice-shadow">
             <ShoppingBag size={18} className="text-gray-800" />
           </div>
           <div>
@@ -232,7 +232,7 @@ function Store({ orgslug, offers }: StoreProps) {
 
         {offers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-4 nice-shadow">
+            <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center mb-4 nice-shadow">
               <ShoppingBag size={28} className="text-gray-300" strokeWidth={1.5} />
             </div>
             <h2 className="text-xl font-bold text-gray-600 mb-2">No offers available yet</h2>

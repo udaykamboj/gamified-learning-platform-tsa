@@ -239,19 +239,19 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade(String(maxPoints))}
-                                    className='cursor-pointer text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors'>
+                                    className='cursor-pointer text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors'>
                                     {t('assignments.quick_grade.full', { defaultValue: 'Full' })}
                                 </button>
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade(String(Math.round(maxPoints / 2)))}
-                                    className='cursor-pointer text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors'>
+                                    className='cursor-pointer text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors'>
                                     {t('assignments.quick_grade.half', { defaultValue: 'Half' })}
                                 </button>
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade('0')}
-                                    className='cursor-pointer text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors'>
+                                    className='cursor-pointer text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors'>
                                     {t('assignments.quick_grade.zero', { defaultValue: 'Zero' })}
                                 </button>
                             </div>
@@ -297,7 +297,7 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                         onChange={(e) => setManualFeedback(e.target.value)}
                         placeholder={t('assignments.task_feedback_placeholder', { defaultValue: 'Note for this task (saved with grade)' })}
                         rows={1}
-                        className='w-full px-2.5 py-1.5 text-xs text-gray-700 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-200 placeholder:text-gray-400 resize-y'
+                        className='w-full px-2.5 py-1.5 text-xs text-gray-700 bg-card border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-200 placeholder:text-gray-400 resize-y'
                     />
                 </div>
             )}

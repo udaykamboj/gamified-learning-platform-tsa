@@ -59,12 +59,12 @@ export default function TokenList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-white/50">
-          {tokens.length === 0 ? 'No tokens yet' : `${tokens.length} token${tokens.length === 1 ? '' : 's'}`}
+        <div className="text-sm text-muted-foreground">
+          {isLoading || isError ? '' : tokens.length === 0 ? 'No tokens yet' : `${tokens.length} token${tokens.length === 1 ? '' : 's'}`}
         </div>
         <button
           onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-2 px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors"
+          className="sl-btn sl-btn-primary"
         >
           <Plus size={14} weight="bold" />
           Create token
@@ -72,32 +72,40 @@ export default function TokenList() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-white/40 text-sm py-12 justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground text-sm py-12 justify-center">
           <CircleNotch size={16} className="animate-spin" />
           Loading tokens…
         </div>
       )}
 
       {isError && (
-        <div className="text-sm text-red-400 py-8 text-center">
-          Failed to load tokens.
+        <div role="alert" className="flex items-start gap-3 rounded-2xl border border-error/30 bg-error-surface p-4 text-error">
+          <Key size={20} className="mt-0.5 shrink-0" aria-hidden />
+          <div>
+            <p className="text-ui font-semibold">Couldn&apos;t load API tokens</p>
+            <p className="mt-0.5 text-ui text-foreground">
+              The token service did not respond. It may not be enabled on this deployment. Try again later.
+            </p>
+          </div>
         </div>
       )}
 
       {!isLoading && !isError && tokens.length === 0 && (
-        <div className="border border-dashed border-white/10 rounded-2xl py-16 text-center">
-          <Key size={28} weight="fill" className="text-white/30 mx-auto mb-3" />
-          <p className="text-white/60 text-sm">No superadmin API tokens yet.</p>
-          <p className="text-white/30 text-xs mt-1">
+        <div className="sl-card py-16 text-center">
+          <span className="mx-auto mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+            <Key size={22} aria-hidden />
+          </span>
+          <p className="text-card-title font-semibold text-foreground">No superadmin API tokens yet</p>
+          <p className="text-ui text-muted-foreground mt-1">
             Create one to automate org provisioning and feature toggling.
           </p>
         </div>
       )}
 
       {!isLoading && !isError && tokens.length > 0 && (
-        <div className="overflow-hidden border border-white/[0.08] rounded-2xl bg-[#111112]">
+        <div className="sl-card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-white/[0.03] text-white/40 text-xs uppercase tracking-wider">
+            <thead className="bg-card text-muted-foreground text-xs uppercase tracking-wider">
               <tr>
                 <th className="text-start px-4 py-3 font-medium">Name</th>
                 <th className="text-start px-4 py-3 font-medium">Prefix</th>
@@ -108,31 +116,31 @@ export default function TokenList() {
                 <th className="text-end px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
+            <tbody className="divide-y divide-border">
               {tokens.map((t) => {
                 const status = tokenStatus(t)
                 return (
-                  <tr key={t.token_uuid} className="text-white/80">
+                  <tr key={t.token_uuid} className="text-foreground">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-white">{t.name}</div>
+                      <div className="font-medium text-foreground">{t.name}</div>
                       {t.description && (
-                        <div className="text-xs text-white/40 mt-0.5">{t.description}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{t.description}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-white/60">{t.token_prefix}…</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{t.token_prefix}…</td>
                     <td className="px-4 py-3">
                       <StatusBadge status={status} />
                     </td>
-                    <td className="px-4 py-3 text-xs text-white/50">{fmtDate(t.creation_date)}</td>
-                    <td className="px-4 py-3 text-xs text-white/50">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(t.creation_date)}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {t.expires_at ? fmtDate(t.expires_at) : 'Never'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-white/50">{fmtDate(t.last_used_at)}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(t.last_used_at)}</td>
                     <td className="px-4 py-3 text-end">
                       {status === 'active' && (
                         <button
                           onClick={() => setRevoking(t)}
-                          className="text-red-400/80 hover:text-red-400 inline-flex items-center gap-1 text-xs"
+                          className="text-red-400/80 hover:text-red-700 inline-flex items-center gap-1 text-xs"
                           title="Revoke token"
                         >
                           <Trash size={14} weight="fill" />
@@ -172,12 +180,12 @@ export default function TokenList() {
 
 function StatusBadge({ status }: { status: 'active' | 'revoked' | 'expired' }) {
   const cfg = {
-    active: { label: 'Active', cls: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' },
-    revoked: { label: 'Revoked', cls: 'bg-white/[0.04] text-white/40 border-white/10' },
-    expired: { label: 'Expired', cls: 'bg-amber-400/10 text-amber-300 border-amber-400/20' },
+    active: { label: 'Active', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    revoked: { label: 'Revoked', cls: 'bg-card text-muted-foreground border-border' },
+    expired: { label: 'Expired', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
   }[status]
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider border ${cfg.cls}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider border ${cfg.cls}`}>
       {cfg.label}
     </span>
   )

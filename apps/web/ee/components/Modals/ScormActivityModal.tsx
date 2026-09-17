@@ -345,7 +345,7 @@ function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }:
             <button
               type="submit"
               disabled={!scormFile || isAnalyzing}
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:bg-primary transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
             >
               {isAnalyzing ? (
                 <span>
@@ -412,7 +412,7 @@ function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }:
               <div
                 key={assignment.scoIdentifier}
                 className={`p-4 rounded-xl border transition-colors ${
-                  assignment.include ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50 opacity-60'
+                  assignment.include ? 'border-gray-200 bg-card' : 'border-gray-100 bg-gray-50 opacity-60'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -421,7 +421,7 @@ function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }:
                     type="checkbox"
                     checked={assignment.include}
                     onChange={(e) => handleAssignmentChange(index, 'include', e.target.checked)}
-                    className="mt-1 rounded border-gray-300 text-black focus:ring-black h-4 w-4"
+                    className="mt-1 rounded border-gray-300 text-foreground focus:ring-black h-4 w-4"
                   />
 
                   <div className="flex-1 space-y-3">
@@ -448,7 +448,7 @@ function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }:
                           value={assignment.chapterId}
                           onChange={(e) => handleAssignmentChange(index, 'chapterId', e.target.value)}
                           disabled={!assignment.include}
-                          className="flex-1 h-9 text-sm border border-gray-200 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                          className="flex-1 h-9 text-sm border border-gray-200 rounded-lg px-3 bg-card focus:outline-none focus:ring-2 focus:ring-black"
                         >
                           <option value="">Select chapter...</option>
                           {chapters.map((chapter) => (
@@ -505,7 +505,7 @@ function ScormActivityModal({ course, closeModal, onImportComplete, chapterId }:
                 type="button"
                 onClick={handleImport}
                 disabled={selectedCount === 0 || isImporting}
-                className="inline-flex items-center justify-center px-6 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
+                className="inline-flex items-center justify-center px-6 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:bg-primary transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
               >
                 {isImporting ? (
                   <BarLoader width={60} color="#ffffff" cssOverride={{ borderRadius: 60 }} />

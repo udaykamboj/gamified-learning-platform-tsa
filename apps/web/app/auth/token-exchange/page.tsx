@@ -89,7 +89,7 @@ function TokenExchangeInner() {
           <p className="text-gray-600 mb-6">{error}</p>
           <a
             href="/login"
-            className="inline-block px-6 py-2.5 bg-black text-white rounded-lg hover:bg-black/90 transition-colors text-sm font-semibold"
+            className="inline-block px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-action-hover transition-colors text-sm font-semibold"
           >
             Go to Login
           </a>

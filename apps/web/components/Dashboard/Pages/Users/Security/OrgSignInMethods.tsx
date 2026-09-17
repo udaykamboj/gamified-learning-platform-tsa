@@ -95,7 +95,7 @@ const OrgSignInMethods: React.FC = () => {
 
       {readOnly && <ReadOnlyNotice />}
 
-      <div className="bg-white rounded-xl nice-shadow p-5 space-y-5">
+      <div className="bg-card rounded-xl nice-shadow p-5 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {AUTH_METHOD_OPTIONS.map((m) => {
             const checked = draftMethods.includes(m.key)
@@ -187,7 +187,7 @@ const OrgSignInMethods: React.FC = () => {
               })
             }
             disabled={controlsDisabled || !isDirty || draftMethods.length === 0}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {saving && <Loader2 className="w-4 h-4 me-2 animate-spin" />}
             {saving

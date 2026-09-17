@@ -144,7 +144,7 @@ export default function CourseActivityTypeBreakdown({
                     {getTypeLabel(row.activity_type)}
                   </span>
                   <span className="text-xs text-gray-400">{pct}%</span>
-                  <span className="text-[10px] text-emerald-500">{row.completion_rate}% {t('analytics.course_analytics.units.done')}</span>
+                  <span className="text-[11px] text-emerald-500">{row.completion_rate}% {t('analytics.course_analytics.units.done')}</span>
                 </div>
               )
             })}

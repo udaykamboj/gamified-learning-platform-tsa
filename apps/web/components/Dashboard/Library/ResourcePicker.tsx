@@ -149,7 +149,7 @@ function ResourceList({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('library.search')}
-          className="w-full ps-10 pe-3 py-2 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black/10 border-0"
+          className="w-full ps-10 pe-3 py-2 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border border-0"
         />
       </div>
 
@@ -186,7 +186,7 @@ function ResourceList({
                   )}
                 </div>
                 {item.public === false && (
-                  <p className="px-2 pb-2 text-[10px] text-amber-600 leading-tight">
+                  <p className="px-2 pb-2 text-[11px] text-amber-600 leading-tight">
                     {t('library.private_media_warning')}
                   </p>
                 )}
@@ -217,7 +217,7 @@ function ResourceList({
                     <button
                       onClick={() => handleAdd(uuid)}
                       disabled={pending === uuid}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-xs font-semibold text-white nice-shadow hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground nice-shadow hover:bg-primary transition-colors disabled:opacity-50"
                     >
                       {pending === uuid ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -232,8 +232,8 @@ function ResourceList({
                     onClick={() => handleSelect(item)}
                     className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold nice-shadow transition-colors ${
                       isSelected
-                        ? 'bg-green-600 text-white'
-                        : 'bg-black text-white hover:bg-neutral-800'
+                        ? 'bg-green-600 text-primary-foreground'
+                        : 'bg-primary text-primary-foreground hover:bg-primary'
                     }`}
                   >
                     {isSelected ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
@@ -289,7 +289,7 @@ function TabButton({
       {count !== undefined && (
         <span
           className={`ms-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-semibold ${
-            active ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'
+            active ? 'bg-primary text-primary-foreground' : 'bg-gray-100 text-gray-500'
           }`}
         >
           {count}

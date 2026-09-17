@@ -258,9 +258,9 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                             <DropdownMenuItem key={o.id} asChild>
                               <Link href={getUriWithOrg(o.slug, '/dashboard')} className="flex items-center space-x-2">
                                 {o.logo_image ? (
-                                  <img src={getOrgLogoMediaDirectory(o.org_uuid, o.logo_image)} alt="" className="w-5 h-5 rounded object-cover shrink-0 ring-1 ring-inset ring-black/5" />
+                                  <img src={getOrgLogoMediaDirectory(o.org_uuid, o.logo_image)} alt="" className="w-5 h-5 rounded object-cover shrink-0 ring-1 ring-inset ring-border" />
                                 ) : (
-                                  <span className="w-5 h-5 rounded bg-gray-100 text-gray-600 text-[10px] font-bold flex items-center justify-center shrink-0">{(o.name || '?').charAt(0).toUpperCase()}</span>
+                                  <span className="w-5 h-5 rounded bg-gray-100 text-gray-600 text-[11px] font-bold flex items-center justify-center shrink-0">{(o.name || '?').charAt(0).toUpperCase()}</span>
                                 )}
                                 <span className="truncate flex-1">{o.name}</span>
                                 {o.id === org?.id && <Check size={14} weight="bold" className="text-green-600 shrink-0" />}

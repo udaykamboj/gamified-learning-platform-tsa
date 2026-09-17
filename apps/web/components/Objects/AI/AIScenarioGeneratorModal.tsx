@@ -148,7 +148,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
         <button
           onClick={() => setTab('generate')}
           className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
-            tab === 'generate' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+            tab === 'generate' ? 'bg-primary text-primary-foreground' : 'text-neutral-500 hover:bg-neutral-100'
           }`}
         >
           <MagicWand weight="duotone" size={15} /> Generate
@@ -156,7 +156,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
         <button
           onClick={() => setTab('history')}
           className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
-            tab === 'history' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+            tab === 'history' ? 'bg-primary text-primary-foreground' : 'text-neutral-500 hover:bg-neutral-100'
           }`}
         >
           <ClockCounterClockwise weight="duotone" size={15} /> History
@@ -193,7 +193,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
               <button
                 onClick={handleGenerate}
                 disabled={generating || !prompt.trim()}
-                className="px-3 py-2 rounded-lg bg-neutral-900 text-white text-sm flex items-center gap-1.5 nice-shadow disabled:opacity-40 transition-opacity"
+                className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm flex items-center gap-1.5 nice-shadow disabled:opacity-40 transition-opacity"
               >
                 {generating ? <CircleNotch weight="duotone" size={15} className="animate-spin" /> : <Sparkle weight="duotone" size={15} />}
                 {block ? 'Regenerate' : generating ? 'Generating' : 'Generate'}
@@ -217,7 +217,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
                   <GitBranch weight="duotone" size={15} className="text-neutral-400" /> {block.title}
                 </p>
                 {block.scenarios.map((node, ni) => (
-                  <div key={node.id} className="bg-white rounded-lg p-4 nice-shadow">
+                  <div key={node.id} className="bg-card rounded-lg p-4 nice-shadow">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-bold text-neutral-400">
                         Node {ni + 1}
@@ -254,7 +254,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
             <div className="border-t border-neutral-100 p-3 flex justify-end">
               <button
                 onClick={handleInsert}
-                className="px-4 py-2 rounded-lg bg-neutral-900 text-white text-sm flex items-center gap-1.5 nice-shadow"
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm flex items-center gap-1.5 nice-shadow"
               >
                 <ArrowElbowDownLeft weight="duotone" size={15} data-dir-flip /> Insert into editor
               </button>
@@ -270,7 +270,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
           ) : (
             <div className="space-y-2">
               {history.map((h) => (
-                <div key={h.ai_generation_uuid} className="flex items-center gap-3 bg-white rounded-lg p-3 nice-shadow">
+                <div key={h.ai_generation_uuid} className="flex items-center gap-3 bg-card rounded-lg p-3 nice-shadow">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-neutral-700 truncate">{h.prompt}</p>
                     <p className="text-[11px] text-neutral-400">{h.scenario?.scenarios?.length || 0} node(s)</p>

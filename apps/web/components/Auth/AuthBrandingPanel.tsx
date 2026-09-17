@@ -6,6 +6,7 @@ import starlabIcon from 'public/starlab_bigicon_1.png'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 import { cn } from '@/lib/utils'
+import { StarLabLogo } from '@components/Objects/Menus/StarLabLogo'
 import { usePlan } from '@components/Hooks/usePlan'
 
 interface AuthBrandingPanelProps {
@@ -16,6 +17,12 @@ interface AuthBrandingPanelProps {
   title?: string
   subtitle?: string
 }
+
+// Decorative observatory backdrop for the default (no custom image) panel.
+// Intentionally the dark Deep Orbit art in both themes: it is a bounded
+// illustration with its own text layer, not an application surface.
+const ORBITAL_OBSERVATORY =
+  'radial-gradient(120% 80% at 85% 110%, rgba(139,99,217,0.45) 0%, rgba(139,99,217,0) 55%), radial-gradient(90% 60% at 10% -10%, rgba(77,212,188,0.18) 0%, rgba(77,212,188,0) 60%), linear-gradient(160deg, #0b1424 0%, #172844 55%, #252045 100%)'
 
 export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }: AuthBrandingPanelProps) {
   const authBranding = org?.config?.config?.customization?.auth_branding || org?.config?.config?.general?.auth_branding || {}
@@ -49,9 +56,9 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
       }
     }
     if (background_type === 'gradient' || !background_image) {
-      // Keep the original black gradient
+      // Orbital observatory: deep navy atmosphere with a violet horizon
       return {
-        background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
+        background: ORBITAL_OBSERVATORY,
       }
     }
     if (background_type === 'custom' && background_image) {
@@ -69,7 +76,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
       }
     }
     return {
-      background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
+      background: ORBITAL_OBSERVATORY,
     }
   }
 
@@ -85,29 +92,40 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
   return (
     <div className="relative h-full w-full">
       {/* Inset rounded card (platform-style) */}
-      <div className="absolute inset-16 rounded-2xl overflow-hidden">
+      <div className="absolute inset-8 xl:inset-12 rounded-3xl overflow-hidden border border-border shadow-overlay">
         {/* Base layer: org's chosen background (gradient | custom | unsplash) */}
         <div className="absolute inset-0" style={getBackgroundStyle()} />
 
         {/* Blueprint + dot overlays — ONLY for gradient fallback (no photo) */}
         {!hasCustomBackground && (
           <>
+            {/* Sparse starfield */}
             <div
-              className="absolute inset-0 opacity-[0.14]"
+              aria-hidden
+              className="absolute inset-0 opacity-70"
               style={{
-                backgroundImage: `linear-gradient(rgba(120,165,255,0.6) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(120,165,255,0.6) 1px, transparent 1px),
-                  linear-gradient(rgba(120,165,255,0.3) 0.5px, transparent 0.5px),
-                  linear-gradient(90deg, rgba(120,165,255,0.3) 0.5px, transparent 0.5px)`,
-                backgroundSize: '120px 120px, 120px 120px, 24px 24px, 24px 24px',
+                backgroundImage: `radial-gradient(1px 1px at 12% 18%, rgba(243,246,252,0.9), transparent 60%),
+                  radial-gradient(1px 1px at 72% 12%, rgba(243,246,252,0.7), transparent 60%),
+                  radial-gradient(1.5px 1.5px at 38% 34%, rgba(154,185,255,0.8), transparent 60%),
+                  radial-gradient(1px 1px at 88% 44%, rgba(243,246,252,0.6), transparent 60%),
+                  radial-gradient(1px 1px at 22% 62%, rgba(243,246,252,0.5), transparent 60%),
+                  radial-gradient(1.5px 1.5px at 60% 78%, rgba(114,227,206,0.7), transparent 60%),
+                  radial-gradient(1px 1px at 8% 88%, rgba(243,246,252,0.6), transparent 60%),
+                  radial-gradient(1px 1px at 94% 86%, rgba(243,246,252,0.5), transparent 60%)`,
+              }}
+            />
+            {/* Planet horizon with amber rim light and one orbital arc */}
+            <div
+              aria-hidden
+              className="absolute -bottom-[55%] -end-[25%] w-[120%] aspect-square rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 35% 30%, #315ca8 0%, #17263d 45%, #0b1424 75%)',
+                boxShadow: 'inset 18px 18px 60px rgba(244,189,100,0.28), 0 0 80px rgba(80,124,216,0.25)',
               }}
             />
             <div
-              className="absolute inset-0 opacity-[0.18]"
-              style={{
-                backgroundImage: 'radial-gradient(circle, rgba(120,165,255,0.9) 1.5px, transparent 1.5px)',
-                backgroundSize: '120px 120px',
-              }}
+              aria-hidden
+              className="absolute -bottom-[40%] -end-[40%] w-[150%] aspect-square rounded-full border border-[rgba(154,185,255,0.18)]"
             />
           </>
         )}
@@ -146,16 +164,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
           {!isEnterprise && !noOrg && (
             <div className="login-topbar">
               <Link prefetch href="https://starlab.app" target="_blank">
-                <img
-                  src="/starlab.svg"
-                  alt="StarLab"
-                  width={110}
-                  height={22}
-                  className={cn(
-                    "transition-opacity hover:opacity-100",
-                    text_color === 'light' ? "opacity-60 invert" : "opacity-40"
-                  )}
-                />
+<StarLabLogo className={cn("h-7 w-auto transition-opacity hover:opacity-100", text_color === 'light' ? "text-white opacity-70" : "text-[#0b1424] opacity-60")} />
               </Link>
             </div>
           )}
@@ -164,7 +173,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
             /* No-org apex panel — platform layout: heading at the TOP, no logo
                box, platform copy. */
             <div className="max-w-md text-white">
-              <h1 className="font-black text-[28px] leading-tight tracking-tight">
+              <h1 className="font-display font-semibold text-[28px] leading-tight tracking-tight">
                 {noOrgTitle}
               </h1>
               <p className="mt-3 text-white/55 text-base font-medium leading-relaxed">
@@ -181,7 +190,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                 )}>
                   {/* Organization logo */}
                   <Link prefetch href={getUriWithOrg(org?.slug, '/')}>
-                    <div className="w-24 h-24 rounded-2xl ring-1 ring-inset ring-white/10 bg-white flex items-center justify-center overflow-hidden">
+                    <div className="w-24 h-24 rounded-2xl ring-1 ring-inset ring-white/15 bg-white flex items-center justify-center overflow-hidden shadow-overlay">
                       {org?.logo_image ? (
                         <img
                           src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
@@ -203,7 +212,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
 
                   {/* Text content */}
                   <div className="space-y-1">
-                    <h1 className="font-black text-3xl tracking-tight">{org?.name || 'StarLab'}</h1>
+                    <h1 className="font-display font-semibold text-3xl tracking-tight">{org?.name || 'StarLab'}</h1>
                     {displayMessage && (
                       <p className={cn(
                         "text-lg max-w-sm leading-relaxed",

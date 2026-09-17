@@ -41,7 +41,7 @@ function EnrollmentRow({
           <p className="text-xs text-gray-400 truncate">{user.email}</p>
         )}
       </div>
-      <span className={`${compact ? 'text-[10px]' : 'text-xs'} text-gray-400 whitespace-nowrap`}>
+      <span className={`${compact ? 'text-[11px]' : 'text-xs'} text-gray-400 whitespace-nowrap`}>
         {new Date(row.enrolled_at ?? row.timestamp).toLocaleDateString()}
       </span>
     </div>
@@ -117,7 +117,7 @@ export default function CourseRecentEnrollments({
             ))}
           </div>
           {rows.length > 3 && (
-            <p className="text-[10px] text-gray-300 text-center mt-1">
+            <p className="text-[11px] text-gray-300 text-center mt-1">
               {t('analytics.course_analytics.common.more_expand', { count: rows.length - 3 })}
             </p>
           )}

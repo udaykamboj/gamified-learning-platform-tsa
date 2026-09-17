@@ -22,11 +22,11 @@ function Verdict({ correct }: { correct: boolean | null }) {
   const { t } = useTranslation()
   if (correct === null || correct === undefined) return null
   return correct ? (
-    <span className="flex-none flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">
+    <span className="flex-none flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">
       <Check size={10} /> {t(`${P}.answer.correct`, { defaultValue: 'Correct' })}
     </span>
   ) : (
-    <span className="flex-none flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-600">
+    <span className="flex-none flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-600">
       <X size={10} /> {t(`${P}.answer.incorrect`, { defaultValue: 'Wrong' })}
     </span>
   )
@@ -56,7 +56,7 @@ function QuizItem({ item }: { item: any }) {
         {(item.options || []).map((option: any, i: number) => (
           <div
             key={i}
-            className={`flex items-center gap-2 rounded-lg pe-2 nice-shadow bg-white ${option.selected ? 'ring-1 ring-blue-200' : ''}`}
+            className={`flex items-center gap-2 rounded-lg pe-2 nice-shadow bg-card ${option.selected ? 'ring-1 ring-blue-200' : ''}`}
           >
             <div className="font-bold flex items-center h-[28px] w-[32px] rounded-s-md text-slate-800 bg-slate-100/80">
               <p className="mx-auto text-xs">{option.letter}</p>
@@ -65,19 +65,19 @@ function QuizItem({ item }: { item: any }) {
               {option.text}
             </p>
             {keyPresent && option.selected && option.is_correct && (
-              <span className="flex-none flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">
+              <span className="flex-none flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">
                 <Check size={10} /> {t(`${P}.answer.correct`, { defaultValue: 'Correct' })}
               </span>
             )}
             {keyPresent && option.selected && !option.is_correct && (
-              <span className="flex-none flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-600">
+              <span className="flex-none flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-600">
                 <X size={10} /> {t(`${P}.answer.incorrect`, { defaultValue: 'Wrong' })}
               </span>
             )}
             {/* Correct but not chosen. Options that were neither chosen nor correct
                 get no badge — labelling every option reads as "all of these wrong". */}
             {keyPresent && !option.selected && option.is_correct && (
-              <span className="flex-none flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50/70 text-emerald-700 border border-emerald-200">
+              <span className="flex-none flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50/70 text-emerald-700 border border-emerald-200">
                 <Check size={10} /> {t(`${P}.answer.correct_answer`, { defaultValue: 'Correct answer' })}
               </span>
             )}
@@ -100,7 +100,7 @@ function WrittenItem({ item }: { item: any }) {
       <QuestionHeader item={item} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="bg-gray-50 rounded-lg p-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {t(`${P}.answer.answered`, { defaultValue: 'Answered' })}
           </div>
           <div className="text-xs text-gray-700 break-words">
@@ -113,7 +113,7 @@ function WrittenItem({ item }: { item: any }) {
         </div>
         {item.expected_text && (
           <div className="bg-emerald-50/60 rounded-lg p-2">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">
               {t(`${P}.answer.expected`, { defaultValue: 'Expected answer' })}
             </div>
             <div className="text-xs text-emerald-800 break-words">{item.expected_text}</div>
@@ -129,7 +129,7 @@ function CodeAnswer({ code }: { code: any }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">
+        <span className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">
           <Code2 size={10} /> {code.language || '—'}
         </span>
         <span className="text-[11px] text-gray-500">
@@ -148,13 +148,13 @@ function CodeAnswer({ code }: { code: any }) {
       )}
       {(code.test_results || []).length > 0 && (
         <div className="space-y-1">
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {t(`${P}.answer.test_cases`, { defaultValue: 'Test cases' })}
           </div>
           {code.test_results.map((tr: any, i: number) => (
             <div
               key={i}
-              className={`flex items-center gap-2 text-[11px] rounded p-1.5 ${tr.hidden ? 'bg-gray-50 text-gray-400' : 'bg-white nice-shadow'}`}
+              className={`flex items-center gap-2 text-[11px] rounded p-1.5 ${tr.hidden ? 'bg-gray-50 text-gray-400' : 'bg-card nice-shadow'}`}
             >
               <span className="font-semibold flex-none">{tr.name}</span>
               <Verdict correct={tr.passed} />

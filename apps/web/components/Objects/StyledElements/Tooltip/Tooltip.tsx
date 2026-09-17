@@ -32,10 +32,10 @@ const ToolTip = (props: TooltipProps) => {
                   data-[state=closed]:animate-out data-[state=closed]:fade-out-0
                   rounded-md px-2.5 py-[5px] text-[11px] font-medium leading-none
                   shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-4px_rgba(0,0,0,0.05)]
-                  outline outline-1 outline-black/[0.06]
+                  outline outline-1 outline-border
                   ${props.slateBlack
                     ? 'bg-[#0d0d0d] text-white'
-                    : 'bg-white/95 text-gray-600'
+                    : 'bg-card/95 text-gray-600'
                   }`
             }
           >

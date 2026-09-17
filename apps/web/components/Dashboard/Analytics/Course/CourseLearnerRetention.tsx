@@ -96,11 +96,11 @@ export default function CourseLearnerRetention({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.learner_retention.cohort_size')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.learner_retention.cohort_size')}</p>
                 <p className="text-2xl font-bold text-indigo-600">{cohortSize}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.learner_retention.current_retention')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.learner_retention.current_retention')}</p>
                 <p className="text-2xl font-bold text-gray-700">{latestRetention}%</p>
               </div>
             </div>

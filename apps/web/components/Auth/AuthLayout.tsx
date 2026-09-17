@@ -16,19 +16,14 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ org, welcomeText, title, subtitle, children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen lg:h-screen bg-white flex flex-col lg:flex-row relative overflow-hidden">
-      {/* Page-level blueprint grid, bottom-anchored */}
+    <div className="min-h-screen lg:h-screen bg-background flex flex-col lg:flex-row relative overflow-hidden">
+      {/* Soft atmospheric light, bottom-anchored */}
       <div
-        className="absolute inset-0 pointer-events-none z-0"
+        aria-hidden
+        className="absolute inset-0 pointer-events-none z-0 sl-atmosphere opacity-70"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px),
-            linear-gradient(rgba(0,0,0,0.018) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,0,0,0.018) 1px, transparent 1px)`,
-          backgroundSize: '80px 80px, 80px 80px, 16px 16px, 16px 16px',
-          maskImage: 'linear-gradient(to top, black 0%, transparent 60%)',
-          WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 60%)',
+          maskImage: 'linear-gradient(to top, black 0%, transparent 55%)',
+          WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 55%)',
         }}
       />
 

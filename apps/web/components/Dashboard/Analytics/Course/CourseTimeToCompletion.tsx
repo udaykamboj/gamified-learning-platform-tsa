@@ -44,19 +44,19 @@ export default function CourseTimeToCompletion({
             </div>
             <div className="flex justify-center gap-4">
               <div className="text-center px-5 py-4 bg-blue-50 rounded-xl flex-1 max-w-[160px]">
-                <p className="text-[10px] uppercase tracking-wider text-blue-400 font-semibold">{t('analytics.course_analytics.time_to_completion.fast_p25')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-blue-400 font-semibold">{t('analytics.course_analytics.time_to_completion.fast_p25')}</p>
                 <p className="text-2xl font-bold text-blue-600 mt-1">{p25} {t('analytics.course_analytics.time_to_completion.days_unit')}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.top_25_finish')}</p>
+                <p className="text-[11px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.top_25_finish')}</p>
               </div>
               <div className="text-center px-5 py-4 bg-gray-100 rounded-xl flex-1 max-w-[160px]">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.time_to_completion.median')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.time_to_completion.median')}</p>
                 <p className="text-2xl font-bold text-gray-700 mt-1">{median} {t('analytics.course_analytics.time_to_completion.days_unit')}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.half_finish')}</p>
+                <p className="text-[11px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.half_finish')}</p>
               </div>
               <div className="text-center px-5 py-4 bg-amber-50 rounded-xl flex-1 max-w-[160px]">
-                <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.course_analytics.time_to_completion.slow_p75')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.course_analytics.time_to_completion.slow_p75')}</p>
                 <p className="text-2xl font-bold text-amber-600 mt-1">{p75} {t('analytics.course_analytics.time_to_completion.days_unit')}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.pct_75_finish')}</p>
+                <p className="text-[11px] text-gray-400 mt-1">{t('analytics.course_analytics.time_to_completion.pct_75_finish')}</p>
               </div>
             </div>
             <p className="text-sm text-center text-gray-400">
@@ -81,7 +81,7 @@ export default function CourseTimeToCompletion({
           <div>
             <p className="text-4xl font-black text-gray-900">{median}</p>
             <p className="text-sm text-gray-500">{t('analytics.course_analytics.units.median_days')}</p>
-            <div className="flex gap-3 mt-2 text-[10px]">
+            <div className="flex gap-3 mt-2 text-[11px]">
               <span className="bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full font-medium">P25: {p25}d</span>
               <span className="bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full font-medium">P75: {p75}d</span>
             </div>

@@ -13,7 +13,9 @@ import { removeCourse, startCourse } from '@services/courses/activity'
 import { useTrail } from '@/hooks/queries/useTrail'
 import { queryKeys } from '@/lib/query/keys'
 
-const ACCENTS = ['#4ed6c6', '#89a6ff', '#e97687', '#b88cff', '#f5b85c']
+// Subject identity accents (teal, blue, coral, violet, amber), assigned by
+// position so a course keeps the same color on every render.
+const ACCENTS = ['var(--sl-teal-400)', 'var(--sl-blue-400)', 'var(--sl-coral-400)', 'var(--sl-violet-400)', 'var(--sl-amber-400)']
 
 type CourseCard = {
   course_uuid: string
@@ -71,20 +73,36 @@ export default function SkillsEnrollment({ orgslug }: { orgslug: string }) {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(240,244,255,0.5)', fontSize: 13 }}>
-        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Loading courses…
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading courses">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="sl-card h-52 animate-pulse p-6">
+            <div className="h-5 w-2/3 rounded-[6px] bg-muted" />
+            <div className="mt-4 h-3 w-full rounded-[6px] bg-muted" />
+            <div className="mt-2 h-3 w-4/5 rounded-[6px] bg-muted" />
+          </div>
+        ))}
+        <span className="sr-only">
+          <Loader2 size={14} /> Loading courses…
+        </span>
       </div>
     )
   }
 
   const list: CourseCard[] = Array.isArray(courses) ? courses : []
   if (list.length === 0) {
-    return <p style={{ color: 'rgba(240,244,255,0.5)', fontSize: 14 }}>No courses are available yet.</p>
+    return (
+      <div className="sl-card flex flex-col items-center px-6 py-12 text-center">
+        <span className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+          <Plus size={22} aria-hidden />
+        </span>
+        <h2 className="mt-4 text-card-title font-semibold text-foreground">No courses are available yet</h2>
+        <p className="mt-1 text-ui text-muted-foreground">When your learning space publishes courses, they will appear here.</p>
+      </div>
+    )
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {list.map((course, index) => {
         const run = runsByCourse.get(course.course_uuid)
         const enrolled = !!run
@@ -96,76 +114,77 @@ export default function SkillsEnrollment({ orgslug }: { orgslug: string }) {
         const busy = pending === course.course_uuid
 
         return (
-          <div
+          <li
             key={course.course_uuid}
-            style={{
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${enrolled ? `${color}55` : 'rgba(255,255,255,0.08)'}`,
-              borderRadius: 12, padding: '24px', position: 'relative', overflow: 'hidden',
-              display: 'flex', flexDirection: 'column', gap: 12,
-            }}
+            className={`sl-card relative flex flex-col gap-3 overflow-hidden p-5 md:p-6 ${enrolled ? 'border-primary/50' : ''}`}
           >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: color }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-              <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 17, fontWeight: 600, color: '#fff', margin: 0 }}>{course.name}</h2>
+            <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: color }} />
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-card-title font-semibold text-foreground">{course.name}</h2>
               {enrolled && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase', color, border: `1px solid ${color}40`, padding: '3px 8px', borderRadius: 4, whiteSpace: 'nowrap' }}>
-                  <Check size={10} /> Enrolled
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-surface px-2.5 py-0.5 text-meta font-semibold text-success">
+                  <Check size={12} aria-hidden /> Enrolled
                 </span>
               )}
             </div>
             {course.description && (
-              <p style={{ fontSize: 13, color: 'rgba(240,244,255,0.5)', lineHeight: 1.7, margin: 0 }}>{course.description}</p>
+              <p className="line-clamp-3 text-ui text-muted-foreground">{course.description}</p>
             )}
 
             {enrolled && (
               <div>
-                <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                  <div style={{ width: `${percent}%`, height: '100%', background: color }} />
+                <div
+                  className="h-2 overflow-hidden rounded-full bg-muted"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={percent}
+                  aria-label={`${course.name} progress`}
+                >
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
                 </div>
-                <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'monospace', color: 'rgba(240,244,255,0.45)' }}>
+                <p className="mt-1.5 font-mono text-meta tabular-nums text-muted-foreground">
                   {done} / {total} activities · {percent}%
                 </p>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 8, marginTop: 'auto', flexWrap: 'wrap' }}>
+            <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
               {enrolled ? (
                 <>
-                  <Link
-                    href={courseHref}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: color, color: '#050810', borderRadius: 6, padding: '8px 14px', fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}
-                  >
-                    Continue <ArrowRight size={12} />
+                  <Link href={courseHref} className="sl-btn sl-btn-primary min-h-10 px-4">
+                    Continue <ArrowRight size={16} aria-hidden />
                   </Link>
                   <button
+                    type="button"
                     onClick={() => toggle(course, true)}
                     disabled={busy}
-                    style={{ background: 'transparent', color: 'rgba(240,244,255,0.5)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '8px 14px', fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: busy ? 'wait' : 'pointer' }}
+                    className="sl-btn sl-btn-ghost min-h-10 px-4 text-muted-foreground"
                   >
+                    {busy && <Loader2 size={16} className="animate-spin" aria-hidden />}
                     {busy ? 'Leaving…' : 'Leave'}
                   </button>
                 </>
               ) : (
                 <>
                   <button
+                    type="button"
                     onClick={() => toggle(course, false)}
                     disabled={busy}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.08)', color: '#fff', border: `1px solid ${color}66`, borderRadius: 6, padding: '8px 14px', fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: busy ? 'wait' : 'pointer' }}
+                    className="sl-btn sl-btn-secondary min-h-10 px-4"
                   >
-                    <Plus size={12} /> {busy ? 'Enrolling…' : 'Enroll'}
+                    {busy ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <Plus size={16} aria-hidden />}
+                    {busy ? 'Enrolling…' : 'Enroll'}
                   </button>
-                  <Link
-                    href={courseHref}
-                    style={{ display: 'flex', alignItems: 'center', color: 'rgba(240,244,255,0.5)', padding: '8px 6px', fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}
-                  >
+                  <Link href={courseHref} className="sl-btn sl-btn-ghost min-h-10 px-4">
                     Preview
                   </Link>
                 </>
               )}
             </div>
-          </div>
+          </li>
         )
       })}
-    </div>
+    </ul>
   )
 }

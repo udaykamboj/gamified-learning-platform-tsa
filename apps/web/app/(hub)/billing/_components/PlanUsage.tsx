@@ -190,17 +190,17 @@ export default function PlanUsage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-bold text-2xl tracking-tight text-black">
+          <h1 className="font-bold text-2xl tracking-tight text-foreground">
             {t('billing.plan_and_usage', { defaultValue: 'Plan & Usage' })}
           </h1>
-          <p className="mt-1 text-sm text-black/40">
+          <p className="mt-1 text-sm text-foreground/40">
             {t('billing.plan_and_usage_subtitle', { defaultValue: 'Manage your subscription and monitor resource usage.' })}
           </p>
         </div>
         {subscription && (
           <button
             onClick={handleManageBilling}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-black/[0.08] text-black/60 rounded-xl text-[13px] font-semibold hover:bg-black/[0.03] transition-colors flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground/60 rounded-xl text-[13px] font-semibold hover:bg-foreground/[0.03] transition-colors flex-shrink-0"
           >
             <ExternalLink size={13} />
             {t('billing.billing', { defaultValue: 'Billing' })}
@@ -232,7 +232,7 @@ export default function PlanUsage({
 
       {/* Free plan upgrade prompt */}
       {!subscription && !subLoading && currentPlanId === 'free' && (
-        <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
+        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
           <div className="px-6 py-6 flex items-center justify-between gap-6 flex-wrap">
             <div className="flex items-center gap-4">
               {plan && (
@@ -241,17 +241,17 @@ export default function PlanUsage({
                 </span>
               )}
               <div>
-                <p className="text-[15px] font-bold text-black">
+                <p className="text-[15px] font-bold text-foreground">
                   {t('billing.on_free_plan', { defaultValue: "You're on the free plan" })}
                 </p>
-                <p className="text-[13px] text-black/40 mt-0.5">
+                <p className="text-[13px] text-foreground/40 mt-0.5">
                   {t('billing.free_upsell', { defaultValue: 'Upgrade to unlock AI features, custom domains, and more.' })}
                 </p>
               </div>
             </div>
             <button
               onClick={onSwitch}
-              className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl text-[13px] font-semibold hover:bg-black/80 transition-colors flex-shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-[13px] font-semibold hover:bg-action-hover transition-colors flex-shrink-0"
             >
               <Boxes size={14} />
               {t('billing.upgrade', { defaultValue: 'Upgrade' })}
@@ -262,7 +262,7 @@ export default function PlanUsage({
 
       {/* Non-Stripe managed plan (e.g. enterprise) */}
       {!subscription && !subLoading && currentPlanId !== 'free' && (
-        <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
+        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
           <div className="px-6 py-6 flex items-center justify-between gap-6 flex-wrap">
             <div className="flex items-center gap-4">
               {plan && (
@@ -271,16 +271,16 @@ export default function PlanUsage({
                 </span>
               )}
               <div>
-                <p className="text-[15px] font-bold text-black">
+                <p className="text-[15px] font-bold text-foreground">
                   {t('billing.on_named_plan', { defaultValue: `You're on the ${plan?.name ?? currentPlanId} plan`, plan: plan?.name ?? currentPlanId })}
                 </p>
-                <p className="text-[13px] text-black/40 mt-0.5">
+                <p className="text-[13px] text-foreground/40 mt-0.5">
                   {t('billing.managed_outside', { defaultValue: 'This plan is managed outside of Stripe billing.' })}
                 </p>
               </div>
             </div>
             <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                 isOrgActive
                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                   : 'bg-red-50 text-red-600 border border-red-200'
@@ -296,14 +296,14 @@ export default function PlanUsage({
       {subscription && (
         <div className="grid md:grid-cols-3 gap-5">
           {/* Plan card */}
-          <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-            <div className="px-5 py-4 border-b border-black/[0.05]">
+          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-black/35 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
                   {t('billing.current_plan', { defaultValue: 'Current plan' })}
                 </p>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                     subscription.cancelAtPeriodEnd
                       ? 'bg-amber-50 text-amber-600 border border-amber-200'
                       : isOrgActive
@@ -326,22 +326,22 @@ export default function PlanUsage({
                 </span>
               )}
               <div className="flex items-baseline gap-1">
-                <span className="text-[36px] font-black leading-none text-black">
+                <span className="text-[36px] font-black leading-none text-foreground">
                   {getCurrencySymbol(currentPlanId, priceOverrides)}
                   {price}
                 </span>
-                <span className="text-sm font-medium text-black/30">/mo</span>
+                <span className="text-sm font-medium text-foreground/30">/mo</span>
               </div>
-              <p className="text-[11px] text-black/30 font-medium">
+              <p className="text-[11px] text-foreground/30 font-medium">
                 {subscription.billing === 'annual'
                   ? `${getCurrencySymbol(currentPlanId, priceOverrides)}${price * 12}/yr · ${t('billing.billed_annually', { defaultValue: 'billed annually' })}`
                   : t('billing.billed_monthly', { defaultValue: 'billed monthly' })}
               </p>
             </div>
-            <div className="px-5 py-3 border-t border-black/[0.04] bg-black/[0.01] flex items-center justify-between">
+            <div className="px-5 py-3 border-t border-border bg-foreground/[0.01] flex items-center justify-between">
               <button
                 onClick={onSwitch}
-                className="flex items-center gap-1.5 text-[12px] font-semibold text-black/50 hover:text-black/70 transition-colors"
+                className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/50 hover:text-foreground/70 transition-colors"
               >
                 <Boxes size={12} />
                 {t('billing.change_plan', { defaultValue: 'Change plan' })}
@@ -362,32 +362,32 @@ export default function PlanUsage({
           </div>
 
           {/* Billing card */}
-          <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-            <div className="px-5 py-4 border-b border-black/[0.05]">
-              <p className="text-xs font-semibold text-black/35 uppercase tracking-wider">
+          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
+              <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
                 {t('billing.billing', { defaultValue: 'Billing' })}
               </p>
             </div>
             <div className="px-5 py-5 space-y-5">
               <div>
-                <p className="text-[11px] font-semibold text-black/30 uppercase tracking-wider">
+                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
                   {t('billing.cycle', { defaultValue: 'Cycle' })}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-black capitalize">{subscription.billing}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground capitalize">{subscription.billing}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-black/30 uppercase tracking-wider">
+                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
                   {subscription.cancelAtPeriodEnd
                     ? t('billing.access_until', { defaultValue: 'Access until' })
                     : t('billing.next_payment', { defaultValue: 'Next payment' })}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-black">{periodEnd ?? '—'}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{periodEnd ?? '—'}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-black/30 uppercase tracking-wider">
+                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
                   {t('billing.status', { defaultValue: 'Status' })}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-black capitalize">
+                <p className="mt-1 text-sm font-semibold text-foreground capitalize">
                   {subscription.cancelAtPeriodEnd ? t('billing.canceling', { defaultValue: 'Canceling' }) : subscription.status}
                 </p>
               </div>
@@ -396,14 +396,14 @@ export default function PlanUsage({
 
           {/* Included features */}
           {plan && plan.features.length > 0 && (
-            <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-              <div className="px-5 py-4 border-b border-black/[0.05]">
+            <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+              <div className="px-5 py-4 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-semibold text-black/35 uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
                     {t('billing.included_in', { defaultValue: `Included in ${plan.name}`, plan: plan.name })}
                   </p>
                   {plan.inheritsFrom && (
-                    <span className="text-[10px] font-medium text-black/25">+ {plan.inheritsFrom}</span>
+                    <span className="text-[11px] font-medium text-foreground/25">+ {plan.inheritsFrom}</span>
                   )}
                 </div>
               </div>
@@ -412,7 +412,7 @@ export default function PlanUsage({
                   {plan.features.map((f) => (
                     <span
                       key={f.label}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-black/45 bg-black/[0.03] rounded-md"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-foreground/45 bg-foreground/[0.03] rounded-md"
                     >
                       {f.label}
                       {f.badge ? ` · ${f.badge}` : ''}
@@ -433,12 +433,12 @@ export default function PlanUsage({
       />
 
       {/* Usage breakdown */}
-      <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-        <div className="px-6 py-5 border-b border-black/[0.05]">
-          <h2 className="font-bold text-base tracking-tight text-black">
+      <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+        <div className="px-6 py-5 border-b border-border">
+          <h2 className="font-bold text-base tracking-tight text-foreground">
             {t('billing.usage', { defaultValue: 'Usage' })}
           </h2>
-          <p className="text-[11px] text-black/35 font-medium mt-0.5">
+          <p className="text-[11px] text-foreground/35 font-medium mt-0.5">
             {isFreePlan
               ? t('billing.usage_subtitle_free', {
                   defaultValue: 'Free plans are capped. Upgrade to go past a limit.',
@@ -453,8 +453,8 @@ export default function PlanUsage({
           {features ? (
             // gap-px over a tinted background paints the hairlines between
             // cells, so dividers stay correct however the grid wraps.
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-black/[0.06]">
-              <div className="px-6 py-6 bg-white">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-foreground/[0.06]">
+              <div className="px-6 py-6 bg-card">
                 <UsageBar
                   label={t('billing.courses', { defaultValue: 'Courses' })}
                   icon={<BookOpen size={14} className="text-blue-600" />}
@@ -465,7 +465,7 @@ export default function PlanUsage({
                 />
               </div>
 
-              <div className="px-6 py-6 bg-white">
+              <div className="px-6 py-6 bg-card">
                 <UsageBar
                   label={t('billing.members', { defaultValue: 'Members' })}
                   icon={<Users size={14} className="text-violet-600" />}
@@ -475,7 +475,7 @@ export default function PlanUsage({
                   soft={!isFreePlan}
                   footer={
                     isFreePlan ? undefined : (
-                      <p className="text-[11px] font-medium text-black/30">
+                      <p className="text-[11px] font-medium text-foreground/30">
                         {membersBeyondPlan > 0
                           ? t('billing.members_beyond_plan', {
                               defaultValue: `${includedMembersLabel} included · ${membersBeyondPlan} beyond your plan`,
@@ -490,7 +490,7 @@ export default function PlanUsage({
                     )
                   }
                 />
-                <p className="text-[10px] text-black/25 font-medium mt-1.5">
+                <p className="text-[11px] text-foreground/25 font-medium mt-1.5">
                   {t('billing.members_hint', {
                     defaultValue: 'Everyone who has joined your organization.',
                   })}
@@ -498,7 +498,7 @@ export default function PlanUsage({
               </div>
 
               {showActiveMembers && (
-                <div className="px-6 py-6 bg-white">
+                <div className="px-6 py-6 bg-card">
                   <UsageBar
                     label={t('billing.active_members', { defaultValue: 'Active members' })}
                     icon={<UserCheck size={14} className="text-emerald-600" />}
@@ -515,7 +515,7 @@ export default function PlanUsage({
                           })}
                         </p>
                       ) : (
-                        <p className="text-[11px] font-medium text-black/30">
+                        <p className="text-[11px] font-medium text-foreground/30">
                           {t('billing.no_extra_charges', {
                             defaultValue: 'No extra charges this month',
                           })}
@@ -523,7 +523,7 @@ export default function PlanUsage({
                       )
                     }
                   />
-                  <p className="text-[10px] text-black/25 font-medium mt-1.5 leading-relaxed">
+                  <p className="text-[11px] text-foreground/25 font-medium mt-1.5 leading-relaxed">
                     {t('billing.active_members_hint', {
                       defaultValue: `Counted when a member is active on 2+ days this month. The ${includedMembersLabel} seats your plan includes are free — you're billed $1/month for each active member beyond them.`,
                       included: includedMembersLabel,
@@ -532,7 +532,7 @@ export default function PlanUsage({
                 </div>
               )}
 
-              <div className="px-6 py-6 bg-white">
+              <div className="px-6 py-6 bg-card">
                 <UsageBar
                   label={t('billing.admin_seats', { defaultValue: 'Admin seats' })}
                   icon={<ShieldCheck size={14} className="text-amber-600" />}
@@ -540,7 +540,7 @@ export default function PlanUsage({
                   limit={features.admin_seats.limit}
                   color="bg-amber-50"
                 />
-                <p className="text-[10px] text-black/25 font-medium mt-1.5">
+                <p className="text-[11px] text-foreground/25 font-medium mt-1.5">
                   {t('billing.admin_seats_hint', {
                     defaultValue: 'Members who can access the dashboard. A subset of your members.',
                   })}
@@ -548,7 +548,7 @@ export default function PlanUsage({
               </div>
 
               {aiCredits && (aiCredits.total_credits === 'unlimited' || aiCredits.total_credits > 0) && (
-                <div className="px-6 py-6 bg-white">
+                <div className="px-6 py-6 bg-card">
                   <UsageBar
                     label={t('billing.ai_credits', { defaultValue: 'AI Credits' })}
                     icon={<Sparkles size={14} className="text-violet-600" />}
@@ -557,7 +557,7 @@ export default function PlanUsage({
                     color="bg-violet-50"
                   />
                   {aiCredits.purchased_credits > 0 && (
-                    <p className="text-[10px] text-black/25 font-medium mt-1">
+                    <p className="text-[11px] text-foreground/25 font-medium mt-1">
                       {t('billing.base_plus_purchased', {
                         defaultValue: `Base: ${aiCredits.base_credits.toLocaleString()} + Purchased: ${aiCredits.purchased_credits.toLocaleString()}`,
                         base: aiCredits.base_credits.toLocaleString(),
@@ -566,7 +566,7 @@ export default function PlanUsage({
                     </p>
                   )}
                   {periodEnd && (
-                    <p className="text-[10px] text-black/25 font-medium mt-1.5">
+                    <p className="text-[11px] text-foreground/25 font-medium mt-1.5">
                       {t('billing.credits_reset_on', {
                         defaultValue: `Resets on ${periodEnd}`,
                         date: periodEnd,
@@ -578,19 +578,19 @@ export default function PlanUsage({
             </div>
           ) : usageError ? (
             <div className="py-8 px-6 text-center">
-              <p className="text-sm font-medium text-black/50">
+              <p className="text-sm font-medium text-foreground/50">
                 {t('billing.usage_load_failed', { defaultValue: "Couldn't load usage right now." })}
               </p>
               <button
                 onClick={onChanged}
-                className="mt-2 text-sm font-semibold text-black/70 hover:text-black underline underline-offset-2"
+                className="mt-2 text-sm font-semibold text-foreground/70 hover:text-foreground underline underline-offset-2"
               >
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>
             </div>
           ) : (
             <div className="py-8 flex items-center justify-center">
-              <div className="w-5 h-5 border-2 border-black/10 border-t-black/40 rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-border border-t-black/40 rounded-full animate-spin" />
             </div>
           )}
         </div>
@@ -598,12 +598,12 @@ export default function PlanUsage({
 
       {/* Add-ons (paid plans only) */}
       {!subLoading && currentPlanId !== 'free' && (
-        <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-          <div className="px-6 py-5 border-b border-black/[0.05]">
-            <h2 className="font-bold text-base tracking-tight text-black">
+        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+          <div className="px-6 py-5 border-b border-border">
+            <h2 className="font-bold text-base tracking-tight text-foreground">
               {t('billing.addons', { defaultValue: 'Add-ons' })}
             </h2>
-            <p className="text-[11px] text-black/35 font-medium mt-0.5">
+            <p className="text-[11px] text-foreground/35 font-medium mt-0.5">
               {t('billing.addons_subtitle', { defaultValue: 'Purchase additional AI credits as monthly subscriptions.' })}
             </p>
           </div>
@@ -618,7 +618,7 @@ export default function PlanUsage({
                 }, {})
                 return (
                   <div className="space-y-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-black/25">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25">
                       {t('billing.active_subscriptions', { defaultValue: 'Active subscriptions' })}
                     </p>
                     <div className="grid md:grid-cols-2 gap-3">
@@ -627,7 +627,7 @@ export default function PlanUsage({
                         const isAI = packs[0].pack_type === 'ai_credits'
                         const totalQty = packs.reduce((sum: number, p: any) => sum + p.quantity, 0)
                         return (
-                          <div key={packId} className="rounded-2xl bg-white nice-shadow overflow-hidden">
+                          <div key={packId} className="rounded-2xl bg-card nice-shadow overflow-hidden">
                             <div className="px-4 py-4 space-y-3">
                               <div className="flex items-center gap-3">
                                 <div className={`p-1.5 rounded-lg ${isAI ? 'bg-violet-50' : 'bg-emerald-50'}`}>
@@ -638,21 +638,21 @@ export default function PlanUsage({
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <p className="text-[13px] font-semibold text-black">{packInfo?.label ?? packId}</p>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/[0.06] text-black/50">
+                                  <p className="text-[13px] font-semibold text-foreground">{packInfo?.label ?? packId}</p>
+                                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-foreground/[0.06] text-foreground/50">
                                     x{packs.length}
                                   </span>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
                                     {t('billing.active', { defaultValue: 'Active' })}
                                   </span>
                                 </div>
                               </div>
                               <div className="flex flex-wrap items-center gap-1.5">
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-black/[0.04] text-black/50">
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-foreground/[0.04] text-foreground/50">
                                   {totalQty.toLocaleString()} {isAI ? t('billing.credits', { defaultValue: 'credits' }) : t('billing.seats', { defaultValue: 'seats' })}
                                 </span>
                                 {packInfo && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-black/[0.04] text-black/50">
+                                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-foreground/[0.04] text-foreground/50">
                                     {getPackCurrencySymbol(packId, packPrices, priceOverrides)}
                                     {getPackPrice(packId, packPrices) * packs.length}/mo
                                   </span>
@@ -670,7 +670,7 @@ export default function PlanUsage({
             {/* Available add-ons */}
             <div className="space-y-3">
               {activePacks.length > 0 && (
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-black/25">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25">
                   {t('billing.available', { defaultValue: 'Available' })}
                 </p>
               )}
@@ -678,7 +678,7 @@ export default function PlanUsage({
                 {PACK_CATALOG.map((pack) => (
                   <div
                     key={pack.id}
-                    className="flex items-center justify-between rounded-2xl bg-white nice-shadow px-4 py-3 hover:shadow-md transition-shadow"
+                    className="flex items-center justify-between rounded-2xl bg-card nice-shadow px-4 py-3 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`p-1.5 rounded-lg ${pack.type === 'ai_credits' ? 'bg-violet-50' : 'bg-emerald-50'}`}>
@@ -689,8 +689,8 @@ export default function PlanUsage({
                         )}
                       </div>
                       <div>
-                        <p className="text-[13px] font-semibold text-black">{pack.label}</p>
-                        <p className="text-[11px] text-black/30 font-medium">
+                        <p className="text-[13px] font-semibold text-foreground">{pack.label}</p>
+                        <p className="text-[11px] text-foreground/30 font-medium">
                           {getPackCurrencySymbol(pack.id, packPrices, priceOverrides)}
                           {getPackPrice(pack.id, packPrices)}/mo {t('billing.per_pack', { defaultValue: 'per pack' })}
                         </p>
@@ -699,7 +699,7 @@ export default function PlanUsage({
                     <button
                       onClick={() => setDisclaimerPack(pack)}
                       disabled={packLoading === pack.id}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-lg text-[11px] font-bold hover:bg-black/80 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-[11px] font-bold hover:bg-action-hover transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     >
                       {packLoading === pack.id ? (
                         <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -735,10 +735,10 @@ export default function PlanUsage({
                       )}
                     </div>
                     <div>
-                      <p className="text-[15px] font-bold text-black">
+                      <p className="text-[15px] font-bold text-foreground">
                         {t('billing.add_pack', { defaultValue: `Add ${disclaimerPack.label}`, pack: disclaimerPack.label })}
                       </p>
-                      <p className="text-[13px] text-black/40 mt-0.5 font-normal">
+                      <p className="text-[13px] text-foreground/40 mt-0.5 font-normal">
                         {getPackCurrencySymbol(disclaimerPack.id, packPrices, priceOverrides)}
                         {getPackPrice(disclaimerPack.id, packPrices)}/mo {t('billing.recurring_subscription', { defaultValue: 'recurring subscription' })}
                       </p>
@@ -746,28 +746,28 @@ export default function PlanUsage({
                   </div>
                 </DialogTitle>
 
-                <div className="bg-black/[0.02] rounded-xl px-4 py-3 space-y-2.5">
-                  <p className="text-[12px] font-semibold text-black/50">
+                <div className="bg-foreground/[0.02] rounded-xl px-4 py-3 space-y-2.5">
+                  <p className="text-[12px] font-semibold text-foreground/50">
                     {t('billing.what_youre_getting', { defaultValue: "What you're getting" })}
                   </p>
                   <ul className="space-y-1.5">
-                    <li className="text-[12px] text-black/60 flex items-start gap-2">
+                    <li className="text-[12px] text-foreground/60 flex items-start gap-2">
                       <span className="text-emerald-500 mt-0.5">&#10003;</span>
                       {t('billing.pack_ai_desc', {
                         defaultValue: `${disclaimerPack.quantity.toLocaleString()} additional AI credits added to your organization`,
                         quantity: disclaimerPack.quantity.toLocaleString(),
                       })}
                     </li>
-                    <li className="text-[12px] text-black/60 flex items-start gap-2">
+                    <li className="text-[12px] text-foreground/60 flex items-start gap-2">
                       <span className="text-emerald-500 mt-0.5">&#10003;</span>
                       {t('billing.pack_immediate', { defaultValue: 'Takes effect immediately after payment' })}
                     </li>
-                    <li className="text-[12px] text-black/60 flex items-start gap-2">
+                    <li className="text-[12px] text-foreground/60 flex items-start gap-2">
                       <span className="text-emerald-500 mt-0.5">&#10003;</span>
                       {t('billing.pack_cancel_anytime', { defaultValue: 'Cancel anytime — stays active until end of billing period' })}
                     </li>
                     {disclaimerPack.type === 'ai_credits' && (
-                      <li className="text-[12px] text-black/60 flex items-start gap-2">
+                      <li className="text-[12px] text-foreground/60 flex items-start gap-2">
                         <span className="text-emerald-500 mt-0.5">&#10003;</span>
                         {t('billing.pack_credits_reset', { defaultValue: 'Credits reset each billing cycle' })}
                       </li>
@@ -776,11 +776,11 @@ export default function PlanUsage({
                 </div>
 
                 {aiCredits && disclaimerPack.type === 'ai_credits' && (
-                  <div className="bg-black/[0.02] rounded-xl px-4 py-3">
-                    <p className="text-[11px] font-semibold text-black/40 uppercase tracking-wider mb-1.5">
+                  <div className="bg-foreground/[0.02] rounded-xl px-4 py-3">
+                    <p className="text-[11px] font-semibold text-foreground/40 uppercase tracking-wider mb-1.5">
                       {t('billing.after_purchase', { defaultValue: 'After purchase' })}
                     </p>
-                    <p className="text-[13px] font-semibold text-black">
+                    <p className="text-[13px] font-semibold text-foreground">
                       {t('billing.ai_credits', { defaultValue: 'AI Credits' })}:{' '}
                       {aiCredits.total_credits === 'unlimited' ? t('billing.unlimited', { defaultValue: 'Unlimited' }) : aiCredits.total_credits.toLocaleString()}
                       <span className="text-emerald-600">
@@ -791,20 +791,20 @@ export default function PlanUsage({
                   </div>
                 )}
 
-                <p className="text-[11px] text-black/30 font-medium">
+                <p className="text-[11px] text-foreground/30 font-medium">
                   {t('billing.pack_redirect_notice', { defaultValue: "You'll be redirected to Stripe to complete payment. You can purchase multiple packs of the same type." })}
                 </p>
               </div>
-              <div className="px-6 py-4 border-t border-black/[0.05] bg-black/[0.01] flex items-center justify-end gap-3">
+              <div className="px-6 py-4 border-t border-border bg-foreground/[0.01] flex items-center justify-end gap-3">
                 <button
                   onClick={() => setDisclaimerPack(null)}
-                  className="px-4 py-2 text-[13px] font-semibold text-black/50 hover:text-black/70 rounded-xl hover:bg-black/[0.04] transition-colors"
+                  className="px-4 py-2 text-[13px] font-semibold text-foreground/50 hover:text-foreground/70 rounded-xl hover:bg-foreground/[0.04] transition-colors"
                 >
                   {t('billing.cancel', { defaultValue: 'Cancel' })}
                 </button>
                 <button
                   onClick={handleConfirmPurchase}
-                  className="flex items-center gap-2 px-5 py-2 bg-black text-white rounded-xl text-[13px] font-semibold hover:bg-black/80 transition-colors"
+                  className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-xl text-[13px] font-semibold hover:bg-action-hover transition-colors"
                 >
                   <ExternalLink size={13} />
                   {t('billing.continue_to_payment', { defaultValue: 'Continue to payment' })}

@@ -176,7 +176,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
           previewUrl ? <iframe
             src={previewUrl}
             title={t('editor.blocks.web_preview_block.embedded_preview')}
-            className="w-full h-full border-0 bg-white"
+            className="w-full h-full border-0 bg-card"
             style={{ display: 'block', borderRadius: 0 }}
             allowFullScreen
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
@@ -185,7 +185,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
         }
       />
       <div className={`flex w-full ${alignClass}`}> {/* CardWrapper */}
-        <div className="bg-white nice-shadow rounded-xl max-w-[420px] min-w-[260px] my-2 px-6 pt-6 pb-4 relative "> {/* PreviewCard */}
+        <div className="bg-card nice-shadow rounded-xl max-w-[420px] min-w-[260px] my-2 px-6 pt-6 pb-4 relative "> {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
           {isEditable && !editing && (
             <div className="flex flex-col gap-2 absolute -top-3 -end-3 z-20">
@@ -280,7 +280,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                         size="sm"
                         aria-pressed={alignment === opt.value}
                         onClick={() => handleAlignmentChange(opt.value)}
-                        className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-black text-white' : ''}`}
+                        className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-primary text-primary-foreground' : ''}`}
                       >
                         {opt.label}
                       </Button>
@@ -347,7 +347,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                 openInPopup ? (
                   <button
                     type="button"
-                    className="block w-full mt-4 rounded-xl bg-black nice-shadow text-[16px] font-semibold text-white py-2.5 px-4 text-center no-underline hover:bg-gray-900 hover:shadow-lg transition-all"
+                    className="block w-full mt-4 rounded-xl bg-primary nice-shadow text-[16px] font-semibold text-primary-foreground py-2.5 px-4 text-center no-underline hover:bg-primary hover:shadow-lg transition-all"
                     style={{ textDecoration: 'none', color: 'white' }}
                     onClick={() => setPopupOpen(true)}
                   >
@@ -358,7 +358,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                     href={previewUrl ?? undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full mt-4 rounded-xl bg-black nice-shadow text-[16px] font-semibold text-white py-2.5 px-4 text-center no-underline hover:bg-gray-900 hover:shadow-lg transition-all"
+                    className="block w-full mt-4 rounded-xl bg-primary nice-shadow text-[16px] font-semibold text-primary-foreground py-2.5 px-4 text-center no-underline hover:bg-primary hover:shadow-lg transition-all"
                     style={{ textDecoration: 'none', color: 'white' }}
                   >
                     {buttonLabel || t('editor.blocks.web_preview_block.visit_site')}
@@ -380,7 +380,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                         className={`flex items-center justify-center border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-neutral-300 p-1.5 rounded-full text-gray-600
                           ${alignment === opt.value
                             ? 'bg-gray-600 text-white border-gray-600 hover:bg-gray-700'
-                            : 'bg-white border-gray-200 hover:bg-gray-100'}
+                            : 'bg-card border-gray-200 hover:bg-gray-100'}
                         `}
                       >
                         {opt.label}

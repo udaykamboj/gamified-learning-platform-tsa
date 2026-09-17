@@ -254,7 +254,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           />
         </div>
         
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6 relative z-10">
+        <div className="bg-card rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6 relative z-10">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage && (
               <img
@@ -352,7 +352,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           <div className="pt-6">
             <Link
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
-              className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-6 py-3 rounded-full hover:bg-action-hover transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>{t('courses.back_to_course')}</span>
@@ -365,7 +365,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
     // Show progress and encouragement for incomplete course
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
+        <div className="bg-card rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage && (
               <img

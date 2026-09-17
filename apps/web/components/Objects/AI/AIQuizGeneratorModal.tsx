@@ -189,7 +189,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
         <button
           onClick={() => setTab('generate')}
           className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
-            tab === 'generate' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+            tab === 'generate' ? 'bg-primary text-primary-foreground' : 'text-neutral-500 hover:bg-neutral-100'
           }`}
         >
           <MagicWand weight="duotone" size={15} /> Generate
@@ -197,7 +197,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
         <button
           onClick={() => setTab('history')}
           className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
-            tab === 'history' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+            tab === 'history' ? 'bg-primary text-primary-foreground' : 'text-neutral-500 hover:bg-neutral-100'
           }`}
         >
           <ClockCounterClockwise weight="duotone" size={15} /> History
@@ -237,7 +237,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
                     key={d}
                     onClick={() => setDifficulty(d)}
                     className={`px-2.5 py-1 rounded-lg text-xs capitalize transition-colors ${
-                      difficulty === d ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      difficulty === d ? 'bg-primary text-primary-foreground' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                     }`}
                   >
                     {d}
@@ -248,7 +248,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
               <button
                 onClick={handleGenerate}
                 disabled={generating || !prompt.trim()}
-                className="px-3 py-2 rounded-lg bg-neutral-900 text-white text-sm flex items-center gap-1.5 nice-shadow disabled:opacity-40 transition-opacity"
+                className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm flex items-center gap-1.5 nice-shadow disabled:opacity-40 transition-opacity"
               >
                 {generating ? <CircleNotch weight="duotone" size={15} className="animate-spin" /> : <Sparkle weight="duotone" size={15} />}
                 {quiz ? 'Regenerate' : generating ? 'Generating' : 'Generate'}
@@ -269,7 +269,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
             {quiz && (
               <div className="space-y-4">
                 {quiz.questions.map((q, qi) => (
-                  <div key={q.question_id} className="bg-white rounded-lg p-4 nice-shadow">
+                  <div key={q.question_id} className="bg-card rounded-lg p-4 nice-shadow">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-bold text-neutral-400">Q{qi + 1}</span>
                       <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 text-[11px] font-bold">
@@ -319,7 +319,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
             <div className="border-t border-neutral-100 p-3 flex justify-end">
               <button
                 onClick={handleInsert}
-                className="px-4 py-2 rounded-lg bg-neutral-900 text-white text-sm flex items-center gap-1.5 nice-shadow"
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm flex items-center gap-1.5 nice-shadow"
               >
                 <ArrowElbowDownLeft weight="duotone" size={15} data-dir-flip /> Insert into editor
               </button>
@@ -337,7 +337,7 @@ const AIQuizGeneratorModal: React.FC<AIQuizGeneratorModalProps> = ({
               {history.map((h) => (
                 <div
                   key={h.ai_generation_uuid}
-                  className="flex items-center gap-3 bg-white rounded-lg p-3 nice-shadow"
+                  className="flex items-center gap-3 bg-card rounded-lg p-3 nice-shadow"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-neutral-700 truncate">{h.prompt}</p>

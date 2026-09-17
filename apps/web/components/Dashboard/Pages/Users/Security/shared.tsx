@@ -434,12 +434,12 @@ export function AdminMfaCallout({ href, message }: { href: string; message?: str
 export function SecuritySkeleton() {
   return (
     <div className="sm:mx-10 mx-0 space-y-4">
-      <div className="bg-white rounded-xl nice-shadow p-6 animate-pulse space-y-4">
+      <div className="bg-card rounded-xl nice-shadow p-6 animate-pulse space-y-4">
         <div className="h-4 w-48 bg-gray-200 rounded" />
         <div className="h-2 w-full bg-gray-100 rounded-full" />
         <div className="h-3 w-64 bg-gray-100 rounded" />
       </div>
-      <div className="bg-white rounded-xl nice-shadow p-6 animate-pulse space-y-3">
+      <div className="bg-card rounded-xl nice-shadow p-6 animate-pulse space-y-3">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="h-10 bg-gray-50 rounded-lg" />
         ))}
@@ -452,7 +452,7 @@ export function NotAdminNotice() {
   const { t } = useTranslation()
   return (
     <div className="sm:mx-10 mx-0">
-      <div className="bg-white rounded-xl nice-shadow p-6 flex items-start gap-3">
+      <div className="bg-card rounded-xl nice-shadow p-6 flex items-start gap-3">
         <ShieldAlert className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
         <div>
           <h2 className="font-semibold text-gray-800">

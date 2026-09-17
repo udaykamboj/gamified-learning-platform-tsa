@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next'
 import type { SignupFieldItem } from '@services/settings/org'
 
 const INPUT_CLASS =
-  'box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm'
+  'sl-input'
 
 const TEXTAREA_CLASS =
-  'box-border w-full bg-neutral-50 text-black rounded-lg px-4 py-3 border border-neutral-200 appearance-none focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm resize-none min-h-[80px]'
+  'sl-input resize-none'
 
 /** Formik field name for a custom field's answer. */
 export function customFieldName(key: string): string {
@@ -123,7 +123,7 @@ export default function CustomSignupFields({
           <FormField key={field.key} name={name}>
             {field.type !== 'checkbox' && (
               <div className="flex items-center space-x-2 mb-1.5">
-                <Form.Label className="grow text-[13px] font-semibold text-black/70">
+                <Form.Label className="grow text-[13px] font-semibold text-foreground/70">
                   {field.required ? label : `${label} (${t('common.optional')})`}
                 </Form.Label>
                 {error && (
@@ -182,7 +182,7 @@ export default function CustomSignupFields({
                     className="mt-0.5 h-4 w-4 rounded border-neutral-300 accent-black"
                   />
                 </Form.Control>
-                <span className="text-[13px] text-black/70 leading-snug">
+                <span className="text-[13px] text-foreground/70 leading-snug">
                   {label}
                   {error && (
                     <span className="ms-2 text-red-500 text-xs">{error}</span>
@@ -209,7 +209,7 @@ export default function CustomSignupFields({
             )}
 
             {field.help_text && (
-              <p className="mt-1 text-[11px] text-black/35">{field.help_text}</p>
+              <p className="mt-1 text-[11px] text-foreground/35">{field.help_text}</p>
             )}
           </FormField>
         )

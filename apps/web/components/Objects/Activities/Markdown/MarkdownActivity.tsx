@@ -112,7 +112,7 @@ function MarkdownActivity({ activity, editable = false, style }: MarkdownActivit
         <p className="text-sm text-gray-600">{error}</p>
         <button
           onClick={() => fetchMarkdown(markdownUrl)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <ArrowClockwise size={16} />
           Retry
@@ -136,7 +136,7 @@ function MarkdownActivity({ activity, editable = false, style }: MarkdownActivit
           <button
             onClick={handleSaveUrl}
             disabled={saving || editUrl.trim() === markdownUrl}
-            className="inline-flex items-center gap-2 h-9 px-4 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 flex-shrink-0"
+            className="inline-flex items-center gap-2 h-9 px-4 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary transition-colors disabled:opacity-50 flex-shrink-0"
           >
             {saving ? (
               <SpinnerGap size={16} className="animate-spin" />

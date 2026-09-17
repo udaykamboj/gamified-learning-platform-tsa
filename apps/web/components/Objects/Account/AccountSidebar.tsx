@@ -27,7 +27,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
   return (
     <div className="space-y-4">
       {/* User Info Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden">
         {/* User Profile Header */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex flex-col items-center text-center">
@@ -66,7 +66,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
                   href={getUriWithOrg(orgslug, `/account/${item.id}`)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-gray-900 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >

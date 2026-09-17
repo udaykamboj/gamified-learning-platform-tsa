@@ -103,7 +103,7 @@ export default function PlaygroundsClient({
                 <button
                   onClick={openCreateModal}
                   disabled={isCreating}
-                  className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
+                  className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
                 >
                   <div>{t('playgrounds.new_playground')}</div>
                   <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
@@ -122,7 +122,7 @@ export default function PlaygroundsClient({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     aria-label="Search playgrounds"
                     placeholder={t('playgrounds.search_placeholder')}
-                    className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                    className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
                   />
                   {searchQuery && (
                     <button
@@ -164,7 +164,7 @@ export default function PlaygroundsClient({
 
               {playgrounds.length === 0 && !searchQuery && (
                 <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                  <div className="p-4 bg-white rounded-full nice-shadow mb-4">
+                  <div className="p-4 bg-card rounded-full nice-shadow mb-4">
                     <Cube className="w-8 h-8 text-gray-300" />
                   </div>
                   <h1 className="text-xl font-bold text-gray-600 mb-2">{t('playgrounds.no_playgrounds_yet')}</h1>
@@ -175,7 +175,7 @@ export default function PlaygroundsClient({
                     <button
                       onClick={openCreateModal}
                       disabled={isCreating}
-                      className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
+                      className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
                     >
                       <div>{t('playgrounds.new_playground')}</div>
                       <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
@@ -207,7 +207,7 @@ export default function PlaygroundsClient({
     {/* Create name modal */}
     {showNameModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowNameModal(false)}>
-        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-card rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
           <h2 className="text-base font-bold text-gray-900 mb-1">{t('playgrounds.new_playground_modal_title')}</h2>
           <p className="text-xs text-gray-400 mb-4">{t('playgrounds.new_playground_modal_desc')}</p>
           <input
@@ -226,7 +226,7 @@ export default function PlaygroundsClient({
             <button
               onClick={handleCreate}
               disabled={isCreating}
-              className="px-4 py-2 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary disabled:opacity-50 transition-colors"
             >
               {isCreating ? t('playgrounds.creating') : t('playgrounds.create')}
             </button>

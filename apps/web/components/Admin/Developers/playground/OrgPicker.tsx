@@ -44,7 +44,7 @@ export default function OrgPicker({
         const v = e.target.value
         onChange(v === '' ? '' : Number(v))
       }}
-      className="w-full bg-white/[0.04] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30"
+      className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
     >
       <option value="">
         {isLoading ? 'Loading…' : items.length === 0 ? 'No organizations yet' : 'Select an organization'}

@@ -61,7 +61,7 @@ function FileCard({
       {downloadUrl && (
         <a
           href={downloadUrl}
-          className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white nice-shadow hover:bg-neutral-800 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground nice-shadow hover:bg-primary transition-colors"
         >
           <Download size={16} /> {t('media.download')}
         </a>
@@ -162,7 +162,7 @@ export default function MediaViewer({
       <iframe
         src={fileUrl}
         title={name || 'PDF document'}
-        className={`w-full ${maxHeightClass} h-[70vh] rounded-xl border border-gray-200 bg-white`}
+        className={`w-full ${maxHeightClass} h-[70vh] rounded-xl border border-gray-200 bg-card`}
       />
     )
   }

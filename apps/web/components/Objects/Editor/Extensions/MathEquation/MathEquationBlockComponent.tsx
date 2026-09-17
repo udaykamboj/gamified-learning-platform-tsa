@@ -186,7 +186,7 @@ function MathEquationBlockComponent(props: any) {
         </div>
 
         {/* Equation Display */}
-        <div className="bg-white p-4 rounded-lg nice-shadow">
+        <div className="bg-card p-4 rounded-lg nice-shadow">
           <Suspense fallback={<div className="text-gray-400 text-sm p-2">Loading math...</div>}><BlockMath>{equation}</BlockMath></Suspense>
         </div>
 
@@ -207,7 +207,7 @@ function MathEquationBlockComponent(props: any) {
                 </button>
 
                 {showTemplates && (
-                  <div className="absolute left-0 mt-1 z-10 w-64 max-h-80 overflow-y-auto bg-white rounded-lg border border-neutral-200 nice-shadow">
+                  <div className="absolute left-0 mt-1 z-10 w-64 max-h-80 overflow-y-auto bg-card rounded-lg border border-neutral-200 nice-shadow">
                     <div className="p-2 text-xs text-neutral-500 border-b border-neutral-100">
                       {t('editor.blocks.math_block.select_template')}
                     </div>
@@ -239,7 +239,7 @@ function MathEquationBlockComponent(props: any) {
                 </button>
 
                 {showSymbols && (
-                  <div className="absolute left-0 mt-1 z-10 w-64 bg-white rounded-lg border border-neutral-200 nice-shadow">
+                  <div className="absolute left-0 mt-1 z-10 w-64 bg-card rounded-lg border border-neutral-200 nice-shadow">
                     <div className="p-2 text-xs text-neutral-500 border-b border-neutral-100">
                       {t('editor.blocks.math_block.click_symbol')}
                     </div>
@@ -271,7 +271,7 @@ function MathEquationBlockComponent(props: any) {
                 </button>
 
                 {showHelp && (
-                  <div className="absolute left-0 mt-1 z-10 w-72 bg-white rounded-lg border border-neutral-200 nice-shadow">
+                  <div className="absolute left-0 mt-1 z-10 w-72 bg-card rounded-lg border border-neutral-200 nice-shadow">
                     <div className="p-2 text-xs font-medium text-neutral-700 border-b border-neutral-100">
                       {t('editor.blocks.math_block.quick_reference')}
                     </div>
@@ -311,7 +311,7 @@ function MathEquationBlockComponent(props: any) {
             </div>
 
             {/* Input Bar */}
-            <div className="flex items-center gap-2 bg-white rounded-lg border border-neutral-200 p-1.5 focus-within:border-neutral-300 transition-colors">
+            <div className="flex items-center gap-2 bg-card rounded-lg border border-neutral-200 p-1.5 focus-within:border-neutral-300 transition-colors">
               <input
                 ref={inputRef}
                 value={equation}

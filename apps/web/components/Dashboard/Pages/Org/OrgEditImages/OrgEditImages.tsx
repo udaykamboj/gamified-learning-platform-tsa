@@ -409,7 +409,7 @@ export default function OrgEditImages() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mb-2 rounded-md">
         <h1 className="font-bold text-xl text-gray-800">
           {t('dashboard.organization.images.title')}
@@ -450,7 +450,7 @@ export default function OrgEditImages() {
                 <div className="relative group">
                   <div
                     className={cn(
-                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
+                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-card",
                       "border-2 border-gray-100 hover:border-blue-200 transition-all duration-300",
                       isLogoUploading && "opacity-50"
                     )}
@@ -486,7 +486,7 @@ export default function OrgEditImages() {
                   <AIImageButton
                     onSelect={handleLogoAISelect}
                     onSelectFile={handleLogoAIImageFile}
-                    className="font-medium text-sm px-6 py-2.5 rounded-full bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs hover:shadow-sm transition-all duration-300 flex items-center space-x-2"
+                    className="font-medium text-sm px-6 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary shadow-xs hover:shadow-sm transition-all duration-300 flex items-center space-x-2"
                   />
 
                   <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
@@ -509,7 +509,7 @@ export default function OrgEditImages() {
                 <div className="relative group">
                   <div
                     className={cn(
-                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
+                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-card",
                       "border-2 border-gray-100 hover:border-purple-200 transition-all duration-300",
                       isThumbnailUploading && "opacity-50"
                     )}
@@ -609,7 +609,7 @@ export default function OrgEditImages() {
                                 {preview.type === 'image' ? (
                                   <div
                                     className={cn(
-                                      `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-white`,
+                                      `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-card`,
                                       "border border-gray-200 hover:border-gray-300",
                                       "transition-colors duration-200",
                                       snapshot.isDragging ? "shadow-lg" : "shadow-xs hover:shadow-md"

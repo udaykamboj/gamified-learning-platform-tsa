@@ -98,7 +98,7 @@ export default function PlaygroundChatPanel({
   const canSend = !!input.trim() && !isGenerating && !disabled && remaining > 0
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -114,13 +114,13 @@ export default function PlaygroundChatPanel({
         {/* Source toggle — only shown before session starts and when courses exist */}
         {orgCourses.length > 0 && !sessionStarted && (
           <div className="mt-3 space-y-2">
-            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Source</p>
+            <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Source</p>
             <div className="flex gap-1.5">
               <button
                 onClick={() => handleSourceMode('ai')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   sourceMode === 'ai'
-                    ? 'bg-neutral-800 text-white nice-shadow'
+                    ? 'bg-primary text-primary-foreground nice-shadow'
                     : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
                 }`}
               >
@@ -145,7 +145,7 @@ export default function PlaygroundChatPanel({
               <select
                 value={selectedCourseUuid}
                 onChange={(e) => onCourseChange?.(e.target.value)}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 bg-card focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               >
                 {orgCourses.map((c) => (
                   <option key={c.course_uuid} value={c.course_uuid}>
@@ -195,7 +195,7 @@ export default function PlaygroundChatPanel({
               <div
                 className={`max-w-[88%] px-3 py-2 rounded-xl text-sm leading-relaxed nice-shadow ${
                   msg.role === 'user'
-                    ? 'bg-neutral-800 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-neutral-100 text-neutral-500'
                 }`}
               >
@@ -262,7 +262,7 @@ export default function PlaygroundChatPanel({
             style={{ minHeight: 56, maxHeight: 120 }}
           />
           <div className="flex items-center justify-between px-3 pb-2">
-            <span className="text-[10px] text-neutral-400 font-medium">
+            <span className="text-[11px] text-neutral-400 font-medium">
               {remaining === 0 ? (
                 <span className="text-red-400">No generations left</span>
               ) : (

@@ -399,7 +399,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all",
                 isDragging
                   ? "border-blue-400 bg-blue-50"
-                  : "border-neutral-200 bg-white hover:border-blue-400 hover:bg-blue-50/50"
+                  : "border-neutral-200 bg-card hover:border-blue-400 hover:bg-blue-50/50"
               )}
             >
               {isLoading ? (
@@ -475,7 +475,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               >
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black nice-shadow">
                   {isLoading && (
-                    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+                    <div className="absolute inset-0 z-40 flex items-center justify-center bg-foreground/10 backdrop-blur-sm">
                       <CircleNotch weight="duotone" className="w-8 h-8 animate-spin text-white" />
                     </div>
                   )}

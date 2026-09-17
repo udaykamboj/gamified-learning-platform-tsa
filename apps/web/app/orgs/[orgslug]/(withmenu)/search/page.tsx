@@ -224,7 +224,7 @@ const sections: SectionDescriptor<any>[] = [
                 rounded="rounded-full"
                 backgroundColor="bg-gray-100"
               />
-              <span className="text-xs text-black/50">
+              <span className="text-xs text-foreground/50">
                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
               </span>
             </div>
@@ -344,7 +344,7 @@ const sections: SectionDescriptor<any>[] = [
     renderCard: (user: ApiUser, ctx) => (
       <Link
         href={getUriWithOrg(ctx.orgSlug, `/user/${user.username}`)}
-        className="flex items-center gap-4 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+        className="flex items-center gap-4 p-3 bg-card rounded-lg border border-border hover:border-border transition-colors"
       >
         <UserAvatar
           width={40}
@@ -356,10 +356,10 @@ const sections: SectionDescriptor<any>[] = [
           backgroundColor="bg-gray-100"
         />
         <div className="min-w-0">
-          <h3 className="text-sm font-medium text-black/80 truncate">
+          <h3 className="text-sm font-medium text-foreground/80 truncate">
             {user.first_name} {user.last_name}
           </h3>
-          <p className="text-xs text-black/50 truncate">@{user.username}</p>
+          <p className="text-xs text-foreground/50 truncate">@{user.username}</p>
         </div>
       </Link>
     ),
@@ -477,10 +477,10 @@ function SearchPage() {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 pt-10 pb-4 max-w-5xl">
-        <h1 className="text-2xl font-semibold text-black/80 mb-1">
+        <h1 className="text-2xl font-semibold text-foreground/80 mb-1">
           {t('common.search')}
         </h1>
-        <p className="text-sm text-black/50 mb-6">{t('search.start_subtitle')}</p>
+        <p className="text-sm text-foreground/50 mb-6">{t('search.start_subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="relative group">
           <input
@@ -495,13 +495,13 @@ function SearchPage() {
           />
           <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
             <SearchIcon
-              className="text-black/40 group-focus-within:text-black/70 transition-colors"
+              className="text-foreground/40 group-focus-within:text-foreground/70 transition-colors"
               size={18}
             />
           </div>
           <button
             type="submit"
-            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-black text-white text-xs font-semibold hover:bg-black/85 transition-colors"
+            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-action-hover transition-colors"
           >
             {t('common.search')}
           </button>
@@ -539,7 +539,7 @@ function SearchPage() {
           <EmptyState query={urlQuery} t={t} />
         ) : (
           <>
-            <p className="text-xs text-black/50 mb-5">
+            <p className="text-xs text-foreground/50 mb-5">
               {t('search.found_results', { count: activeTotal, query: urlQuery })}
             </p>
 
@@ -552,10 +552,10 @@ function SearchPage() {
                 const items = section.items(results)
                 return (
                   <section key={section.key}>
-                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-black/50 mb-3 flex items-center gap-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50 mb-3 flex items-center gap-2">
                       <section.icon size={13} />
                       {t(`search.types.${section.key}`)}
-                      <span className="text-black/30 font-normal normal-case tracking-normal">
+                      <span className="text-foreground/30 font-normal normal-case tracking-normal">
                         ({section.total(results)})
                       </span>
                     </h2>
@@ -615,13 +615,13 @@ function TabButton({
       onClick={onClick}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
         active
-          ? 'bg-black text-white'
-          : 'bg-black/5 text-black/70 hover:bg-black/10'
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-foreground/5 text-foreground/70 hover:bg-foreground/10'
       }`}
     >
       <Icon size={14} />
       {label}
-      <span className={active ? 'text-white/70' : 'text-black/40'}>{count}</span>
+      <span className={active ? 'text-white/70' : 'text-foreground/40'}>{count}</span>
     </button>
   )
 }
@@ -644,9 +644,9 @@ function ResourceCard({
   return (
     <Link
       href={href}
-      className="bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors overflow-hidden group flex flex-col"
+      className="bg-card rounded-lg border border-border hover:border-border transition-colors overflow-hidden group flex flex-col"
     >
-      <div className="relative aspect-video bg-black/5 flex items-center justify-center">
+      <div className="relative aspect-video bg-foreground/5 flex items-center justify-center">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -654,13 +654,13 @@ function ResourceCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <FallbackIcon size={28} className="text-black/30" />
+          <FallbackIcon size={28} className="text-foreground/30" />
         )}
       </div>
       <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 className="text-sm font-medium text-foreground/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-1">{subtitle}</p>
+          <p className="text-xs text-foreground/50 line-clamp-2 mt-1">{subtitle}</p>
         )}
         {footer}
       </div>
@@ -684,15 +684,15 @@ function InlineCard({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+      className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border hover:border-border transition-colors"
     >
-      <div className="w-9 h-9 bg-black/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
-        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-black/50" />}
+      <div className="w-9 h-9 bg-foreground/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
+        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-foreground/50" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 className="text-sm font-medium text-foreground/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-foreground/50 line-clamp-2 mt-0.5">{subtitle}</p>
         )}
       </div>
     </Link>
@@ -705,11 +705,11 @@ function LoadingGrid() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-lg border border-black/5 p-3 animate-pulse"
+          className="bg-card rounded-lg border border-border p-3 animate-pulse"
         >
-          <div className="w-full aspect-video bg-black/5 rounded mb-3" />
-          <div className="w-3/4 h-3 bg-black/5 rounded mb-1.5" />
-          <div className="w-1/2 h-3 bg-black/5 rounded" />
+          <div className="w-full aspect-video bg-foreground/5 rounded mb-3" />
+          <div className="w-3/4 h-3 bg-foreground/5 rounded mb-1.5" />
+          <div className="w-1/2 h-3 bg-foreground/5 rounded" />
         </div>
       ))}
     </div>
@@ -719,13 +719,13 @@ function LoadingGrid() {
 function EmptyState({ query, t }: { query: string; t: (_k: string, _o?: any) => string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-foreground/5 rounded-full">
+        <SearchIcon className="w-8 h-8 text-foreground/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/80 mb-2">
+      <h3 className="text-lg font-medium text-foreground/80 mb-2">
         {t('search.no_results_found')}
       </h3>
-      <p className="text-sm text-black/50 max-w-md">
+      <p className="text-sm text-foreground/50 max-w-md">
         {t('search.no_results_description', { query })}
       </p>
     </div>
@@ -735,10 +735,10 @@ function EmptyState({ query, t }: { query: string; t: (_k: string, _o?: any) => 
 function StartState({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-foreground/5 rounded-full">
+        <SearchIcon className="w-8 h-8 text-foreground/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/70">{label}</h3>
+      <h3 className="text-lg font-medium text-foreground/70">{label}</h3>
     </div>
   )
 }
@@ -767,7 +767,7 @@ function Pagination({
       <button
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-foreground/60 hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.previous')}
       >
         <ChevronLeft size={14} />
@@ -780,8 +780,8 @@ function Pagination({
             onClick={() => onChange(p)}
             className={`w-8 h-8 rounded-md text-xs font-medium transition-colors ${
               p === page
-                ? 'bg-black text-white'
-                : 'text-black/60 hover:bg-black/5'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-foreground/60 hover:bg-foreground/5'
             }`}
             aria-current={p === page ? 'page' : undefined}
           >
@@ -792,7 +792,7 @@ function Pagination({
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-foreground/60 hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.next')}
       >
         <span className="hidden sm:inline">{t('search.next')}</span>

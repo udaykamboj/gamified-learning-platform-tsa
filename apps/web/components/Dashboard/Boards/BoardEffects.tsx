@@ -1054,7 +1054,7 @@ export default function BoardEffects({ ydoc, provider }: BoardEffectsProps) {
             className="mb-2 rounded-[15px] px-3 py-3 nice-shadow pointer-events-auto animate-fade-in"
             style={frostedStyle}
           >
-            <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-2 px-1">{t('boards.effects.title')}</p>
+            <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 px-1">{t('boards.effects.title')}</p>
             <div className="grid grid-cols-5 gap-1">
               {PAGE_EFFECTS.map((e) => (
                 <button

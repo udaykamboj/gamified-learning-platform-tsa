@@ -271,7 +271,7 @@ function CreatePodcastModal({ closeModal, orgslug }: any) {
         <button
           type="submit"
           disabled={formik.isSubmitting}
-          className="px-4 py-2 bg-black text-white text-sm font-bold rounded-md"
+          className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-md"
         >
           {formik.isSubmitting ? (
             <BarLoader

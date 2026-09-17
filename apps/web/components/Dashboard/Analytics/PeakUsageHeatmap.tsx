@@ -27,7 +27,7 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
+    <div className="bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
       <h3 className="text-sm font-semibold text-gray-700 mb-1">Peak Usage Hours</h3>
       <p className="text-xs text-gray-400 mb-4">Event volume by day and hour</p>
       {isLoading ? (
@@ -37,7 +37,7 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
           <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: `60px repeat(24, 20px)` }}>
             <div />
             {HOURS.map((h) => (
-              <div key={h} className="text-[9px] text-gray-400 text-center">{h}</div>
+              <div key={h} className="text-[11px] text-gray-400 text-center">{h}</div>
             ))}
             {DAYS.map((day, di) => (
               <React.Fragment key={day}>
@@ -47,7 +47,7 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
                   return (
                     <div
                       key={h}
-                      className={`w-5 h-5 rounded-sm ${intensity(count)} text-[8px] flex items-center justify-center`}
+                      className={`w-5 h-5 rounded-sm ${intensity(count)} text-[11px] flex items-center justify-center`}
                       title={`${day} ${h}:00 — ${count} events`}
                     />
                   )

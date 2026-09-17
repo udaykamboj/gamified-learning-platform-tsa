@@ -60,7 +60,7 @@ function CardChip({ brand, last4 }: { brand?: string; last4?: string }) {
   if (!brand) return <span className="text-gray-400">—</span>
   return (
     <div className="flex items-center space-x-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
         {labels[brand.toLowerCase()] ?? brand}
       </span>
       {last4 && <span className="text-sm text-gray-600 font-mono">••••&nbsp;{last4}</span>}
@@ -97,7 +97,7 @@ function MetricCard({
   label, value, sub, icon: Icon, color,
 }: { label: string; value: string; sub?: string; icon: any; color: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center space-x-4">
+    <div className="bg-card border border-gray-200 rounded-xl px-5 py-4 flex items-center space-x-4">
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
         <Icon size={18} />
       </div>
@@ -151,7 +151,7 @@ function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: strin
       </div>
 
       {/* Recent charges */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-card border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
           <span className="font-semibold text-gray-800 text-sm">Recent transactions</span>
         </div>
@@ -204,7 +204,7 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="bg-card border border-gray-200 rounded-xl overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -321,7 +321,7 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
 
   return (
     <div className="space-y-3">
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-card border border-gray-200 rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -409,7 +409,7 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
             key={s}
             onClick={() => setStatus(s)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${
-              status === s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              status === s ? 'bg-primary text-primary-foreground' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             {s}
@@ -418,7 +418,7 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
       </div>
 
       {(!data?.data?.length) ? <Empty message={`No ${status} subscriptions`} /> : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-card border border-gray-200 rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -480,12 +480,12 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
 // Shared utility components
 // ---------------------------------------------------------------------------
 function Empty({ message }: { message: string }) {
-  return <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-sm text-gray-400">{message}</div>
+  return <div className="bg-card border border-gray-200 rounded-xl py-12 text-center text-sm text-gray-400">{message}</div>
 }
 
 function StripeUnavailable() {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl py-10 text-center space-y-1">
+    <div className="bg-card border border-gray-200 rounded-xl py-10 text-center space-y-1">
       <AlertCircle size={20} className="mx-auto text-gray-400" />
       <p className="text-sm text-gray-500">Could not reach Stripe. Check your connection or configuration.</p>
     </div>
@@ -515,7 +515,7 @@ function PaymentsCustomersPage() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === id
-                ? 'bg-white text-gray-900 shadow-sm'
+                ? 'bg-card text-gray-900 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >

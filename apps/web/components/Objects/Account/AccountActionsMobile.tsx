@@ -22,7 +22,7 @@ export function AccountActionsMobile({ orgslug, currentSubpage }: AccountActions
 
   return (
     <nav aria-label="Account mobile actions" className="fixed bottom-0 start-0 end-0 z-50 md:hidden">
-      <div className="mx-3 mb-4 bg-white/95 backdrop-blur-sm rounded-xl nice-shadow p-2">
+      <div className="mx-3 mb-4 bg-card/95 backdrop-blur-sm rounded-xl nice-shadow p-2">
         <div className="flex items-center justify-around">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
@@ -33,12 +33,12 @@ export function AccountActionsMobile({ orgslug, currentSubpage }: AccountActions
                 href={getUriWithOrg(orgslug, `/account/${item.id}`)}
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <Icon size={18} />
-                <span className="text-[10px] font-medium truncate max-w-[60px]">
+                <span className="text-[11px] font-medium truncate max-w-[60px]">
                   {t(item.labelKey)}
                 </span>
               </Link>

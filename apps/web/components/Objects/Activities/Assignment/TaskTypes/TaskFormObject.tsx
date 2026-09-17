@@ -561,7 +561,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                             <div className="flex flex-col space-y-2">
                                 {question.blanks.map((blank, bIndex) => (
                                     <div key={bIndex} className="flex">
-                                        <div className={"blank-item outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 min-h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white text-sm duration-150 ease-linear nice-shadow " + (view == 'student' ? 'active:scale-105' : '')}>
+                                        <div className={"blank-item outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 min-h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card text-sm duration-150 ease-linear nice-shadow " + (view == 'student' ? 'active:scale-105' : '')}>
                                             <div className="font-bold text-base flex items-center justify-center h-full w-[40px] rounded-s-md text-slate-800 bg-slate-100/80">
                                                 <Type size={14} />
                                             </div>
@@ -688,7 +688,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                                         {view === 'teacher' && bIndex === question.blanks.length - 1 && question.blanks.length <= 4 && (
                                             <div className="flex justify-center mx-auto px-2">
                                                 <div
-                                                    className="outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white duration-150 cursor-pointer ease-linear nice-shadow"
+                                                    className="outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card duration-150 cursor-pointer ease-linear nice-shadow"
                                                     onClick={() => addBlank(qIndex)}
                                                 >
                                                     <Plus size={14} className="inline-block" />
@@ -705,7 +705,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskFor
                 {view === 'teacher' && questions.length <= 5 && (
                     <div className="flex justify-center mx-auto px-2">
                         <div
-                            className="flex w-full my-2 py-2 px-4 bg-white text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
+                            className="flex w-full my-2 py-2 px-4 bg-card text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />

@@ -103,7 +103,7 @@ const OrgEditSEO: React.FC = () => {
 
   return (
     <FeatureGate feature="seo">
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
       <Formik
         enableReinitialize
         initialValues={initialValues}
@@ -350,7 +350,7 @@ const OrgEditSEO: React.FC = () => {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-action-hover"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </Button>

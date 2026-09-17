@@ -22,7 +22,7 @@ const STEPS = [
 
 function UnconfiguredPaymentsDisclaimer() {
   return (
-    <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
+    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4">
       {/* Empty state */}
       <div className="flex flex-col items-center py-12 px-6 text-center">
         {/* Icon cluster */}
@@ -44,7 +44,7 @@ function UnconfiguredPaymentsDisclaimer() {
               key={i}
               className="flex items-start space-x-3 border border-gray-100 rounded-xl px-4 py-3 bg-gray-50"
             >
-              <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-white border border-gray-200 shrink-0 mt-0.5">
+              <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-card border border-gray-200 shrink-0 mt-0.5">
                 <Icon size={14} className="text-gray-500" />
               </div>
               <div>
@@ -58,7 +58,7 @@ function UnconfiguredPaymentsDisclaimer() {
         {/* CTA */}
         <Link
           href="./configuration"
-          className="inline-flex items-center space-x-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-150"
+          className="inline-flex items-center space-x-1.5 bg-primary hover:bg-primary text-primary-foreground text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-150"
         >
           <Settings size={13} />
           <span>Go to Payment Configuration</span>

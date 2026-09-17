@@ -93,7 +93,7 @@ export default function ExportAnalyticsButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[120px]">
+        <div className="absolute right-0 mt-1 bg-card border border-gray-200 rounded-lg shadow-lg z-20 min-w-[120px]">
           <button
             onClick={() => handleExport('json')}
             className="w-full text-left px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-t-lg"

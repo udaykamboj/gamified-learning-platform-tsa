@@ -1,0 +1,943 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   StarLab Orbital — design tokens
+   ───────────────────────────────────────────────────────────────────────────
+   The single source of color, type, geometry, elevation and motion for the
+   whole frontend. See STARLAB-REDESIGN-PROMPT.md §3–4.
+
+   Layers:
+   1. Raw semantic roles (--sl-*), defined once for Day Observatory (light)
+      and once for Deep Orbit (dark). Complete CSS color values only.
+   2. Tailwind theme mapping (@theme inline). shadcn role names
+      (background, card, primary…) and Orbital role names (panel, fg-muted,
+      line…) both resolve to the --sl-* roles.
+   3. Palette ramps. Tailwind's gray/neutral/slate/zinc/stone ramps resolve to
+      one theme-aware Orbital blue ramp, and the chromatic ramps collapse onto
+      the five Orbital hues. Legacy `bg-gray-50` / `text-blue-700` call sites
+      therefore render inside the system in both themes instead of drifting.
+
+   New code should use the semantic utilities (bg-panel, text-fg-muted,
+   border-line, bg-primary…), never raw hex or ramp names.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Semantic roles ─────────────────────────────────────────────────── */
+
+/* .sl-theme-light / .sl-theme-dark pin a bounded region (printable
+   certificates, naturally dark artwork) to one theme regardless of the root. */
+:root,
+:root[data-theme='light'],
+.sl-theme-light {
+  color-scheme: light;
+
+  /* Surfaces */
+  --sl-canvas: #f3f6fc;
+  --sl-sunken: #e8eef8;
+  --sl-panel: #ffffff;
+  --sl-raised: #ffffff;
+  --sl-hover: #e8eef8;
+  --sl-selected: #ddf3ed;
+
+  /* Text */
+  --sl-fg: #17263d;
+  --sl-fg-secondary: #465a73;
+  --sl-fg-muted: #53637a;
+  --sl-link: #006b60;
+
+  /* Lines */
+  --sl-line: #d8e0ed;
+  --sl-line-control: #70839d;
+
+  /* Actions */
+  --sl-action: #006b60;
+  --sl-action-fg: #ffffff;
+  --sl-action-hover: #00564d;
+  --sl-action-pressed: #00483f;
+  --sl-danger: #a82947;
+  --sl-danger-fg: #ffffff;
+  --sl-danger-hover: #8a2039;
+  --sl-focus: #315ca8;
+
+  /* Accents */
+  --sl-discovery: #6941b8;
+  --sl-reward: #805008;
+
+  /* Status */
+  --sl-success: #006b60;
+  --sl-success-surface: #e0f5f1;
+  --sl-warning: #805008;
+  --sl-warning-surface: #fff1d5;
+  --sl-error: #a82947;
+  --sl-error-surface: #ffe8ed;
+  --sl-info: #315ca8;
+  --sl-info-surface: #e8f0ff;
+
+  /* Disabled */
+  --sl-disabled: #e3e9f2;
+  --sl-disabled-fg: #63718a;
+
+  /* Overlay + elevation */
+  --sl-scrim: rgba(16, 30, 51, 0.38);
+  --sl-shadow-card: 0 4px 16px rgba(23, 38, 61, 0.06);
+  --sl-shadow-card-hover: 0 8px 24px rgba(23, 38, 61, 0.1);
+  --sl-shadow-overlay: 0 20px 60px rgba(23, 38, 61, 0.16);
+  --sl-glow: 0 0 0 1px rgba(0, 107, 96, 0.25), 0 8px 24px rgba(0, 107, 96, 0.14);
+
+  /* Atmosphere (decorative headers only — never behind body text) */
+  --sl-atmosphere: linear-gradient(120deg, #f3f6fc 0%, #e7f5f3 55%, #eee9fc 100%);
+
+  /* Orbital blue ramp — backs every neutral Tailwind ramp */
+  --sl-g-50: #f3f6fc;
+  --sl-g-100: #e8eef8;
+  --sl-g-200: #d8e0ed;
+  --sl-g-300: #cad6e8;
+  --sl-g-400: #8c9fbc;
+  --sl-g-500: #53637a;
+  --sl-g-600: #465a73;
+  --sl-g-700: #263a55;
+  --sl-g-800: #17263d;
+  --sl-g-900: #111d30;
+  --sl-g-950: #0b1424;
+
+  /* Aurora teal */
+  --sl-teal-50: #e0f5f1;
+  --sl-teal-100: #cdefe8;
+  --sl-teal-200: #b0e8dc;
+  --sl-teal-300: #72e3ce;
+  --sl-teal-400: #4dd4bc;
+  --sl-teal-500: #0e9384;
+  --sl-teal-600: #087f72;
+  --sl-teal-700: #006b60;
+  --sl-teal-800: #00564d;
+  --sl-teal-900: #00483f;
+  --sl-teal-950: #08241f;
+
+  /* Signal blue */
+  --sl-blue-50: #e8f0ff;
+  --sl-blue-100: #d6e3ff;
+  --sl-blue-200: #bdd0ff;
+  --sl-blue-300: #9ab9ff;
+  --sl-blue-400: #7599ec;
+  --sl-blue-500: #507cd8;
+  --sl-blue-600: #3f68c0;
+  --sl-blue-700: #315ca8;
+  --sl-blue-800: #264a8a;
+  --sl-blue-900: #1d3a6e;
+  --sl-blue-950: #132746;
+
+  /* Nebula violet */
+  --sl-violet-50: #f5f0ff;
+  --sl-violet-100: #f0eaff;
+  --sl-violet-200: #d4c1ff;
+  --sl-violet-300: #b8a0ff;
+  --sl-violet-400: #a284f0;
+  --sl-violet-500: #8b63d9;
+  --sl-violet-600: #7a50c9;
+  --sl-violet-700: #6941b8;
+  --sl-violet-800: #563596;
+  --sl-violet-900: #432a75;
+  --sl-violet-950: #2a1a4a;
+
+  /* Solar amber */
+  --sl-amber-50: #fff8e8;
+  --sl-amber-100: #fff1d5;
+  --sl-amber-200: #ffe3ae;
+  --sl-amber-300: #ffd78c;
+  --sl-amber-400: #f4bd64;
+  --sl-amber-500: #d99a32;
+  --sl-amber-600: #b77716;
+  --sl-amber-700: #955f0e;
+  --sl-amber-800: #805008;
+  --sl-amber-900: #5e3b06;
+  --sl-amber-950: #3a2404;
+
+  /* Coral */
+  --sl-coral-50: #fff3f5;
+  --sl-coral-100: #ffe8ed;
+  --sl-coral-200: #ffd0da;
+  --sl-coral-300: #ffbac8;
+  --sl-coral-400: #ff9aaf;
+  --sl-coral-500: #d95c79;
+  --sl-coral-600: #c2415f;
+  --sl-coral-700: #a82947;
+  --sl-coral-800: #8a2039;
+  --sl-coral-900: #6b192d;
+  --sl-coral-950: #3b1020;
+}
+
+/* Dark: Deep Orbit. Declared for the pre-paint class and for an explicit
+   data-theme, so portals and nested scopes agree with the root owner. */
+.dark,
+:root[data-theme='dark'],
+.sl-theme-dark {
+  color-scheme: dark;
+
+  --sl-canvas: #0b1424;
+  --sl-sunken: #08101d;
+  --sl-panel: #111d30;
+  --sl-raised: #17263d;
+  --sl-hover: #20324b;
+  --sl-selected: #123a38;
+
+  --sl-fg: #f3f6fc;
+  --sl-fg-secondary: #b7c5da;
+  --sl-fg-muted: #95a8c4;
+  --sl-link: #72e3ce;
+
+  --sl-line: #263a55;
+  --sl-line-control: #657d9e;
+
+  --sl-action: #4dd4bc;
+  --sl-action-fg: #08241f;
+  --sl-action-hover: #72e3ce;
+  --sl-action-pressed: #2bb59e;
+  --sl-danger: #ff9aaf;
+  --sl-danger-fg: #3b1020;
+  --sl-danger-hover: #ffbac8;
+  --sl-focus: #9ab9ff;
+
+  --sl-discovery: #b8a0ff;
+  --sl-reward: #f4bd64;
+
+  --sl-success: #72e3ce;
+  --sl-success-surface: #123a38;
+  --sl-warning: #ffd78c;
+  --sl-warning-surface: #382c19;
+  --sl-error: #ff9aaf;
+  --sl-error-surface: #3b2030;
+  --sl-info: #9ab9ff;
+  --sl-info-surface: #182e50;
+
+  --sl-disabled: #1c2a3e;
+  --sl-disabled-fg: #8292ab;
+
+  --sl-scrim: rgba(3, 8, 18, 0.72);
+  --sl-shadow-card: 0 6px 20px rgba(0, 0, 0, 0.18);
+  --sl-shadow-card-hover: 0 10px 28px rgba(0, 0, 0, 0.28);
+  --sl-shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.4);
+  --sl-glow: 0 0 0 1px rgba(77, 212, 188, 0.35), 0 8px 28px rgba(77, 212, 188, 0.16);
+
+  --sl-atmosphere: linear-gradient(120deg, #0b1424 0%, #172844 55%, #252045 100%);
+
+  /* Neutral ramp inverts: low steps are quiet surfaces, high steps are ink. */
+  --sl-g-50: #0e1929;
+  --sl-g-100: #17263d;
+  --sl-g-200: #263a55;
+  --sl-g-300: #34496a;
+  --sl-g-400: #657d9e;
+  --sl-g-500: #95a8c4;
+  --sl-g-600: #b7c5da;
+  --sl-g-700: #cad6e8;
+  --sl-g-800: #e8eef8;
+  --sl-g-900: #f3f6fc;
+  --sl-g-950: #ffffff;
+
+  /* Chromatic ramps: tints (50–300) become deep tinted surfaces, solid fills
+     (400–600) stay saturated, ink steps (700–950) become light. */
+  --sl-teal-50: #0f2a2a;
+  --sl-teal-100: #123a38;
+  --sl-teal-200: #175049;
+  --sl-teal-300: #1f6f63;
+  --sl-teal-400: #2bb59e;
+  --sl-teal-500: #13a08f;
+  --sl-teal-600: #0e8a7c;
+  --sl-teal-700: #72e3ce;
+  --sl-teal-800: #b0e8dc;
+  --sl-teal-900: #e0f5f1;
+  --sl-teal-950: #f3fbf9;
+
+  --sl-blue-50: #131f36;
+  --sl-blue-100: #182e50;
+  --sl-blue-200: #203d69;
+  --sl-blue-300: #2e5391;
+  --sl-blue-400: #6a90e6;
+  --sl-blue-500: #507cd8;
+  --sl-blue-600: #3f68c0;
+  --sl-blue-700: #9ab9ff;
+  --sl-blue-800: #bdd0ff;
+  --sl-blue-900: #e8f0ff;
+  --sl-blue-950: #f3f7ff;
+
+  --sl-violet-50: #1c1733;
+  --sl-violet-100: #251e45;
+  --sl-violet-200: #33295e;
+  --sl-violet-300: #4a3a85;
+  --sl-violet-400: #a284f0;
+  --sl-violet-500: #8b63d9;
+  --sl-violet-600: #7a50c9;
+  --sl-violet-700: #b8a0ff;
+  --sl-violet-800: #d4c1ff;
+  --sl-violet-900: #f0eaff;
+  --sl-violet-950: #f8f5ff;
+
+  --sl-amber-50: #2a2114;
+  --sl-amber-100: #382c19;
+  --sl-amber-200: #4a3a1f;
+  --sl-amber-300: #6b5226;
+  --sl-amber-400: #f4bd64;
+  --sl-amber-500: #d99a32;
+  --sl-amber-600: #b77716;
+  --sl-amber-700: #f4bd64;
+  --sl-amber-800: #ffd78c;
+  --sl-amber-900: #fff1d5;
+  --sl-amber-950: #fff8e8;
+
+  --sl-coral-50: #2e1824;
+  --sl-coral-100: #3b2030;
+  --sl-coral-200: #4e2a3e;
+  --sl-coral-300: #6e3551;
+  --sl-coral-400: #ff9aaf;
+  --sl-coral-500: #e0708a;
+  --sl-coral-600: #c94766;
+  --sl-coral-700: #ff9aaf;
+  --sl-coral-800: #ffbac8;
+  --sl-coral-900: #ffe8ed;
+  --sl-coral-950: #fff3f5;
+}
+
+/* ─── 2 + 3. Tailwind theme mapping ─────────────────────────────────────── */
+
+@theme inline {
+  /* Type roles */
+  --font-sans: var(--font-default), 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-heading), 'Space Grotesk', var(--font-default), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-telemetry), 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Orbital type scale (rem, 16px root) */
+  --text-telemetry: 0.75rem;
+  --text-telemetry--line-height: 1.125rem;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.25rem;
+  --text-ui: 0.9375rem;
+  --text-ui--line-height: 1.5rem;
+  --text-reading: 1.0625rem;
+  --text-reading--line-height: 1.75rem;
+  --text-card-title: 1.125rem;
+  --text-card-title--line-height: 1.625rem;
+  --text-section: 1.5rem;
+  --text-section--line-height: 2rem;
+  --text-page: 2.25rem;
+  --text-page--line-height: 2.75rem;
+  --text-hero: 4rem;
+  --text-hero--line-height: 4.25rem;
+
+  /* Geometry: 6 labels · 10 controls · 16 cards · 24 feature panels */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 24px;
+
+  /* Elevation: one card shadow, one overlay shadow */
+  --shadow-2xs: none;
+  --shadow-xs: var(--sl-shadow-card);
+  --shadow-sm: var(--sl-shadow-card);
+  --shadow: var(--sl-shadow-card);
+  --shadow-md: var(--sl-shadow-card);
+  --shadow-lg: var(--sl-shadow-card-hover);
+  --shadow-xl: var(--sl-shadow-overlay);
+  --shadow-2xl: var(--sl-shadow-overlay);
+  --shadow-card: var(--sl-shadow-card);
+  --shadow-card-hover: var(--sl-shadow-card-hover);
+  --shadow-overlay: var(--sl-shadow-overlay);
+  --shadow-glow: var(--sl-glow);
+  --shadow-orbital: var(--sl-glow);
+
+  /* Weights: Space Grotesk and Manrope top out at 700; 800/900 requests
+     resolve to the heaviest real cut instead of faux-bold. */
+  --font-weight-extrabold: 700;
+  --font-weight-black: 700;
+
+  /* Motion */
+  --ease-orbital: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --default-transition-duration: 180ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* shadcn roles */
+  --color-background: var(--sl-canvas);
+  --color-foreground: var(--sl-fg);
+  --color-card: var(--sl-panel);
+  --color-card-foreground: var(--sl-fg);
+  --color-popover: var(--sl-raised);
+  --color-popover-foreground: var(--sl-fg);
+  --color-primary: var(--sl-action);
+  --color-primary-foreground: var(--sl-action-fg);
+  --color-secondary: var(--sl-sunken);
+  --color-secondary-foreground: var(--sl-fg);
+  --color-muted: var(--sl-sunken);
+  --color-muted-foreground: var(--sl-fg-muted);
+  --color-accent: var(--sl-hover);
+  --color-accent-foreground: var(--sl-fg);
+  --color-destructive: var(--sl-danger);
+  --color-destructive-foreground: var(--sl-danger-fg);
+  --color-border: var(--sl-line);
+  --color-input: var(--sl-line-control);
+  --color-ring: var(--sl-focus);
+  --color-chart-1: var(--sl-teal-600);
+  --color-chart-2: var(--sl-blue-600);
+  --color-chart-3: var(--sl-violet-600);
+  --color-chart-4: var(--sl-amber-600);
+  --color-chart-5: var(--sl-coral-600);
+  --color-sidebar: var(--sl-panel);
+  --color-sidebar-foreground: var(--sl-fg);
+  --color-sidebar-primary: var(--sl-action);
+  --color-sidebar-primary-foreground: var(--sl-action-fg);
+  --color-sidebar-accent: var(--sl-hover);
+  --color-sidebar-accent-foreground: var(--sl-fg);
+  --color-sidebar-border: var(--sl-line);
+  --color-sidebar-ring: var(--sl-focus);
+
+  /* Orbital roles */
+  --color-canvas: var(--sl-canvas);
+  --color-sunken: var(--sl-sunken);
+  --color-panel: var(--sl-panel);
+  --color-raised: var(--sl-raised);
+  --color-hover: var(--sl-hover);
+  --color-selected: var(--sl-selected);
+  --color-fg: var(--sl-fg);
+  --color-fg-secondary: var(--sl-fg-secondary);
+  --color-fg-muted: var(--sl-fg-muted);
+  --color-link: var(--sl-link);
+  --color-line: var(--sl-line);
+  --color-line-control: var(--sl-line-control);
+  --color-action: var(--sl-action);
+  --color-action-fg: var(--sl-action-fg);
+  --color-action-hover: var(--sl-action-hover);
+  --color-action-pressed: var(--sl-action-pressed);
+  --color-danger: var(--sl-danger);
+  --color-danger-fg: var(--sl-danger-fg);
+  --color-danger-hover: var(--sl-danger-hover);
+  --color-focus: var(--sl-focus);
+  --color-discovery: var(--sl-discovery);
+  --color-reward: var(--sl-reward);
+  --color-success: var(--sl-success);
+  --color-success-surface: var(--sl-success-surface);
+  --color-warning: var(--sl-warning);
+  --color-warning-surface: var(--sl-warning-surface);
+  --color-error: var(--sl-error);
+  --color-error-surface: var(--sl-error-surface);
+  --color-info: var(--sl-info);
+  --color-info-surface: var(--sl-info-surface);
+  --color-disabled: var(--sl-disabled);
+  --color-disabled-fg: var(--sl-disabled-fg);
+  --color-scrim: var(--sl-scrim);
+
+  /* Legacy universe aliases */
+  --color-surface: var(--sl-panel);
+  --color-void: var(--sl-sunken);
+  --color-launch: var(--sl-amber-400);
+  --color-launch-foreground: #2a1a04;
+
+  /* Neutral ramps → Orbital blue */
+  --color-gray-50: var(--sl-g-50);
+  --color-gray-100: var(--sl-g-100);
+  --color-gray-200: var(--sl-g-200);
+  --color-gray-300: var(--sl-g-300);
+  --color-gray-400: var(--sl-g-400);
+  --color-gray-500: var(--sl-g-500);
+  --color-gray-600: var(--sl-g-600);
+  --color-gray-700: var(--sl-g-700);
+  --color-gray-800: var(--sl-g-800);
+  --color-gray-900: var(--sl-g-900);
+  --color-gray-950: var(--sl-g-950);
+  --color-neutral-50: var(--sl-g-50);
+  --color-neutral-100: var(--sl-g-100);
+  --color-neutral-200: var(--sl-g-200);
+  --color-neutral-300: var(--sl-g-300);
+  --color-neutral-400: var(--sl-g-400);
+  --color-neutral-500: var(--sl-g-500);
+  --color-neutral-600: var(--sl-g-600);
+  --color-neutral-700: var(--sl-g-700);
+  --color-neutral-800: var(--sl-g-800);
+  --color-neutral-900: var(--sl-g-900);
+  --color-neutral-950: var(--sl-g-950);
+  --color-slate-50: var(--sl-g-50);
+  --color-slate-100: var(--sl-g-100);
+  --color-slate-200: var(--sl-g-200);
+  --color-slate-300: var(--sl-g-300);
+  --color-slate-400: var(--sl-g-400);
+  --color-slate-500: var(--sl-g-500);
+  --color-slate-600: var(--sl-g-600);
+  --color-slate-700: var(--sl-g-700);
+  --color-slate-800: var(--sl-g-800);
+  --color-slate-900: var(--sl-g-900);
+  --color-slate-950: var(--sl-g-950);
+  --color-zinc-50: var(--sl-g-50);
+  --color-zinc-100: var(--sl-g-100);
+  --color-zinc-200: var(--sl-g-200);
+  --color-zinc-300: var(--sl-g-300);
+  --color-zinc-400: var(--sl-g-400);
+  --color-zinc-500: var(--sl-g-500);
+  --color-zinc-600: var(--sl-g-600);
+  --color-zinc-700: var(--sl-g-700);
+  --color-zinc-800: var(--sl-g-800);
+  --color-zinc-900: var(--sl-g-900);
+  --color-zinc-950: var(--sl-g-950);
+  --color-stone-50: var(--sl-g-50);
+  --color-stone-100: var(--sl-g-100);
+  --color-stone-200: var(--sl-g-200);
+  --color-stone-300: var(--sl-g-300);
+  --color-stone-400: var(--sl-g-400);
+  --color-stone-500: var(--sl-g-500);
+  --color-stone-600: var(--sl-g-600);
+  --color-stone-700: var(--sl-g-700);
+  --color-stone-800: var(--sl-g-800);
+  --color-stone-900: var(--sl-g-900);
+  --color-stone-950: var(--sl-g-950);
+
+  /* Aurora teal ← teal, emerald, green, cyan, lime */
+  --color-teal-50: var(--sl-teal-50);
+  --color-teal-100: var(--sl-teal-100);
+  --color-teal-200: var(--sl-teal-200);
+  --color-teal-300: var(--sl-teal-300);
+  --color-teal-400: var(--sl-teal-400);
+  --color-teal-500: var(--sl-teal-500);
+  --color-teal-600: var(--sl-teal-600);
+  --color-teal-700: var(--sl-teal-700);
+  --color-teal-800: var(--sl-teal-800);
+  --color-teal-900: var(--sl-teal-900);
+  --color-teal-950: var(--sl-teal-950);
+  --color-emerald-50: var(--sl-teal-50);
+  --color-emerald-100: var(--sl-teal-100);
+  --color-emerald-200: var(--sl-teal-200);
+  --color-emerald-300: var(--sl-teal-300);
+  --color-emerald-400: var(--sl-teal-400);
+  --color-emerald-500: var(--sl-teal-500);
+  --color-emerald-600: var(--sl-teal-600);
+  --color-emerald-700: var(--sl-teal-700);
+  --color-emerald-800: var(--sl-teal-800);
+  --color-emerald-900: var(--sl-teal-900);
+  --color-emerald-950: var(--sl-teal-950);
+  --color-green-50: var(--sl-teal-50);
+  --color-green-100: var(--sl-teal-100);
+  --color-green-200: var(--sl-teal-200);
+  --color-green-300: var(--sl-teal-300);
+  --color-green-400: var(--sl-teal-400);
+  --color-green-500: var(--sl-teal-500);
+  --color-green-600: var(--sl-teal-600);
+  --color-green-700: var(--sl-teal-700);
+  --color-green-800: var(--sl-teal-800);
+  --color-green-900: var(--sl-teal-900);
+  --color-green-950: var(--sl-teal-950);
+  --color-cyan-50: var(--sl-teal-50);
+  --color-cyan-100: var(--sl-teal-100);
+  --color-cyan-200: var(--sl-teal-200);
+  --color-cyan-300: var(--sl-teal-300);
+  --color-cyan-400: var(--sl-teal-400);
+  --color-cyan-500: var(--sl-teal-500);
+  --color-cyan-600: var(--sl-teal-600);
+  --color-cyan-700: var(--sl-teal-700);
+  --color-cyan-800: var(--sl-teal-800);
+  --color-cyan-900: var(--sl-teal-900);
+  --color-cyan-950: var(--sl-teal-950);
+  --color-lime-50: var(--sl-teal-50);
+  --color-lime-100: var(--sl-teal-100);
+  --color-lime-200: var(--sl-teal-200);
+  --color-lime-300: var(--sl-teal-300);
+  --color-lime-400: var(--sl-teal-400);
+  --color-lime-500: var(--sl-teal-500);
+  --color-lime-600: var(--sl-teal-600);
+  --color-lime-700: var(--sl-teal-700);
+  --color-lime-800: var(--sl-teal-800);
+  --color-lime-900: var(--sl-teal-900);
+  --color-lime-950: var(--sl-teal-950);
+
+  /* Signal blue ← blue, sky, indigo */
+  --color-blue-50: var(--sl-blue-50);
+  --color-blue-100: var(--sl-blue-100);
+  --color-blue-200: var(--sl-blue-200);
+  --color-blue-300: var(--sl-blue-300);
+  --color-blue-400: var(--sl-blue-400);
+  --color-blue-500: var(--sl-blue-500);
+  --color-blue-600: var(--sl-blue-600);
+  --color-blue-700: var(--sl-blue-700);
+  --color-blue-800: var(--sl-blue-800);
+  --color-blue-900: var(--sl-blue-900);
+  --color-blue-950: var(--sl-blue-950);
+  --color-sky-50: var(--sl-blue-50);
+  --color-sky-100: var(--sl-blue-100);
+  --color-sky-200: var(--sl-blue-200);
+  --color-sky-300: var(--sl-blue-300);
+  --color-sky-400: var(--sl-blue-400);
+  --color-sky-500: var(--sl-blue-500);
+  --color-sky-600: var(--sl-blue-600);
+  --color-sky-700: var(--sl-blue-700);
+  --color-sky-800: var(--sl-blue-800);
+  --color-sky-900: var(--sl-blue-900);
+  --color-sky-950: var(--sl-blue-950);
+  --color-indigo-50: var(--sl-blue-50);
+  --color-indigo-100: var(--sl-blue-100);
+  --color-indigo-200: var(--sl-blue-200);
+  --color-indigo-300: var(--sl-blue-300);
+  --color-indigo-400: var(--sl-blue-400);
+  --color-indigo-500: var(--sl-blue-500);
+  --color-indigo-600: var(--sl-blue-600);
+  --color-indigo-700: var(--sl-blue-700);
+  --color-indigo-800: var(--sl-blue-800);
+  --color-indigo-900: var(--sl-blue-900);
+  --color-indigo-950: var(--sl-blue-950);
+
+  /* Nebula violet ← violet, purple, fuchsia */
+  --color-violet-50: var(--sl-violet-50);
+  --color-violet-100: var(--sl-violet-100);
+  --color-violet-200: var(--sl-violet-200);
+  --color-violet-300: var(--sl-violet-300);
+  --color-violet-400: var(--sl-violet-400);
+  --color-violet-500: var(--sl-violet-500);
+  --color-violet-600: var(--sl-violet-600);
+  --color-violet-700: var(--sl-violet-700);
+  --color-violet-800: var(--sl-violet-800);
+  --color-violet-900: var(--sl-violet-900);
+  --color-violet-950: var(--sl-violet-950);
+  --color-purple-50: var(--sl-violet-50);
+  --color-purple-100: var(--sl-violet-100);
+  --color-purple-200: var(--sl-violet-200);
+  --color-purple-300: var(--sl-violet-300);
+  --color-purple-400: var(--sl-violet-400);
+  --color-purple-500: var(--sl-violet-500);
+  --color-purple-600: var(--sl-violet-600);
+  --color-purple-700: var(--sl-violet-700);
+  --color-purple-800: var(--sl-violet-800);
+  --color-purple-900: var(--sl-violet-900);
+  --color-purple-950: var(--sl-violet-950);
+  --color-fuchsia-50: var(--sl-violet-50);
+  --color-fuchsia-100: var(--sl-violet-100);
+  --color-fuchsia-200: var(--sl-violet-200);
+  --color-fuchsia-300: var(--sl-violet-300);
+  --color-fuchsia-400: var(--sl-violet-400);
+  --color-fuchsia-500: var(--sl-violet-500);
+  --color-fuchsia-600: var(--sl-violet-600);
+  --color-fuchsia-700: var(--sl-violet-700);
+  --color-fuchsia-800: var(--sl-violet-800);
+  --color-fuchsia-900: var(--sl-violet-900);
+  --color-fuchsia-950: var(--sl-violet-950);
+
+  /* Solar amber ← amber, yellow, orange */
+  --color-amber-50: var(--sl-amber-50);
+  --color-amber-100: var(--sl-amber-100);
+  --color-amber-200: var(--sl-amber-200);
+  --color-amber-300: var(--sl-amber-300);
+  --color-amber-400: var(--sl-amber-400);
+  --color-amber-500: var(--sl-amber-500);
+  --color-amber-600: var(--sl-amber-600);
+  --color-amber-700: var(--sl-amber-700);
+  --color-amber-800: var(--sl-amber-800);
+  --color-amber-900: var(--sl-amber-900);
+  --color-amber-950: var(--sl-amber-950);
+  --color-yellow-50: var(--sl-amber-50);
+  --color-yellow-100: var(--sl-amber-100);
+  --color-yellow-200: var(--sl-amber-200);
+  --color-yellow-300: var(--sl-amber-300);
+  --color-yellow-400: var(--sl-amber-400);
+  --color-yellow-500: var(--sl-amber-500);
+  --color-yellow-600: var(--sl-amber-600);
+  --color-yellow-700: var(--sl-amber-700);
+  --color-yellow-800: var(--sl-amber-800);
+  --color-yellow-900: var(--sl-amber-900);
+  --color-yellow-950: var(--sl-amber-950);
+  --color-orange-50: var(--sl-amber-50);
+  --color-orange-100: var(--sl-amber-100);
+  --color-orange-200: var(--sl-amber-200);
+  --color-orange-300: var(--sl-amber-300);
+  --color-orange-400: var(--sl-amber-400);
+  --color-orange-500: var(--sl-amber-500);
+  --color-orange-600: var(--sl-amber-600);
+  --color-orange-700: var(--sl-amber-700);
+  --color-orange-800: var(--sl-amber-800);
+  --color-orange-900: var(--sl-amber-900);
+  --color-orange-950: var(--sl-amber-950);
+
+  /* Coral ← red, rose, pink */
+  --color-red-50: var(--sl-coral-50);
+  --color-red-100: var(--sl-coral-100);
+  --color-red-200: var(--sl-coral-200);
+  --color-red-300: var(--sl-coral-300);
+  --color-red-400: var(--sl-coral-400);
+  --color-red-500: var(--sl-coral-500);
+  --color-red-600: var(--sl-coral-600);
+  --color-red-700: var(--sl-coral-700);
+  --color-red-800: var(--sl-coral-800);
+  --color-red-900: var(--sl-coral-900);
+  --color-red-950: var(--sl-coral-950);
+  --color-rose-50: var(--sl-coral-50);
+  --color-rose-100: var(--sl-coral-100);
+  --color-rose-200: var(--sl-coral-200);
+  --color-rose-300: var(--sl-coral-300);
+  --color-rose-400: var(--sl-coral-400);
+  --color-rose-500: var(--sl-coral-500);
+  --color-rose-600: var(--sl-coral-600);
+  --color-rose-700: var(--sl-coral-700);
+  --color-rose-800: var(--sl-coral-800);
+  --color-rose-900: var(--sl-coral-900);
+  --color-rose-950: var(--sl-coral-950);
+  --color-pink-50: var(--sl-coral-50);
+  --color-pink-100: var(--sl-coral-100);
+  --color-pink-200: var(--sl-coral-200);
+  --color-pink-300: var(--sl-coral-300);
+  --color-pink-400: var(--sl-coral-400);
+  --color-pink-500: var(--sl-coral-500);
+  --color-pink-600: var(--sl-coral-600);
+  --color-pink-700: var(--sl-coral-700);
+  --color-pink-800: var(--sl-coral-800);
+  --color-pink-900: var(--sl-coral-900);
+  --color-pink-950: var(--sl-coral-950);
+
+  /* Stacking roles */
+  --z-index-content: 10;
+  --z-index-sticky: 20;
+  --z-index-nav: 30;
+  --z-index-dropdown: 40;
+  --z-index-modal-backdrop: 50;
+  --z-index-modal: 60;
+  --z-index-tooltip: 70;
+  --z-index-toast: 80;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--sl-line);
+  }
+
+  html,
+  body {
+    background-color: var(--sl-canvas);
+    color: var(--sl-fg);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /* Organization fonts replace the interface role; headings follow them so an
+     org-branded product stays in one typeface. */
+  .lh-org-font-root[style*='font-family'] :is(h1, h2, h3) {
+    font-family: inherit;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--sl-action) 28%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--sl-focus);
+    outline-offset: 3px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--sl-fg-muted);
+    opacity: 1;
+  }
+
+  hr {
+    border-color: var(--sl-line);
+  }
+
+  .tabular-nums,
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ─── Component utilities ───────────────────────────────────────────────── */
+
+@layer components {
+  /* Standard content card: one border, one elevation, one radius. */
+  .sl-card {
+    background-color: var(--sl-panel);
+    border: 1px solid var(--sl-line);
+    border-radius: 16px;
+    box-shadow: var(--sl-shadow-card);
+  }
+
+  .sl-card-interactive {
+    transition:
+      box-shadow 180ms var(--ease-orbital),
+      border-color 180ms var(--ease-orbital),
+      background-color 180ms var(--ease-orbital);
+  }
+  .sl-card-interactive:hover {
+    border-color: color-mix(in srgb, var(--sl-line-control) 55%, var(--sl-line));
+    box-shadow: var(--sl-shadow-card-hover);
+  }
+
+  .sl-atmosphere {
+    background-image: var(--sl-atmosphere);
+  }
+
+  .sl-telemetry {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sl-page-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--sl-fg);
+  }
+  @media (min-width: 768px) {
+    .sl-page-title {
+      font-size: 2.25rem;
+      line-height: 2.75rem;
+    }
+  }
+
+  .sl-section-title {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--sl-fg);
+  }
+  @media (min-width: 768px) {
+    .sl-section-title {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+}
+
+@layer components {
+  /* Form control: 44px, 10px radius, control border, visible focus. */
+  .sl-input {
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--sl-line-control);
+    background-color: var(--sl-panel);
+    color: var(--sl-fg);
+    font-size: 0.9375rem;
+    line-height: 1.5rem;
+    appearance: none;
+    transition:
+      border-color 120ms var(--ease-orbital),
+      box-shadow 120ms var(--ease-orbital);
+  }
+  .sl-input:hover {
+    border-color: color-mix(in srgb, var(--sl-fg-muted) 70%, var(--sl-line-control));
+  }
+  .sl-input:focus,
+  .sl-input:focus-visible {
+    outline: none;
+    border-color: var(--sl-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sl-focus) 28%, transparent);
+  }
+  .sl-input::placeholder {
+    color: var(--sl-fg-muted);
+  }
+  .sl-input:disabled {
+    background-color: var(--sl-disabled);
+    color: var(--sl-disabled-fg);
+    cursor: not-allowed;
+  }
+  .sl-input[aria-invalid='true'] {
+    border-color: var(--sl-error);
+  }
+  textarea.sl-input {
+    padding: 10px 14px;
+    min-height: 88px;
+  }
+
+  /* Buttons: primary / secondary / ghost / destructive, 44px standard. */
+  .sl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 120ms var(--ease-orbital),
+      border-color 120ms var(--ease-orbital),
+      color 120ms var(--ease-orbital);
+  }
+  .sl-btn:disabled,
+  .sl-btn[aria-disabled='true'] {
+    background-color: var(--sl-disabled);
+    border-color: transparent;
+    color: var(--sl-disabled-fg);
+    cursor: not-allowed;
+  }
+  .sl-btn-primary {
+    background-color: var(--sl-action);
+    color: var(--sl-action-fg);
+  }
+  .sl-btn-primary:hover {
+    background-color: var(--sl-action-hover);
+  }
+  .sl-btn-primary:active {
+    background-color: var(--sl-action-pressed);
+  }
+  .sl-btn-secondary {
+    background-color: var(--sl-panel);
+    color: var(--sl-fg);
+    border-color: var(--sl-line-control);
+  }
+  .sl-btn-secondary:hover {
+    background-color: var(--sl-hover);
+  }
+  .sl-btn-ghost {
+    background-color: transparent;
+    color: var(--sl-fg);
+  }
+  .sl-btn-ghost:hover {
+    background-color: var(--sl-hover);
+  }
+  .sl-btn-destructive {
+    background-color: var(--sl-danger);
+    color: var(--sl-danger-fg);
+  }
+  .sl-btn-destructive:hover {
+    background-color: var(--sl-danger-hover);
+  }
+}

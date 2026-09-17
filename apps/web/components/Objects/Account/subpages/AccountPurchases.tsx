@@ -39,7 +39,7 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
     : null
 
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
       {/* Type stripe */}
       <div className={`px-4 py-2 flex items-center justify-between ${isSubscription ? 'bg-indigo-50' : 'bg-gray-50'}`}>
         <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${isSubscription ? 'text-indigo-700' : 'text-gray-600'}`}>
@@ -141,7 +141,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-12 flex items-center justify-center">
+      <div className="bg-card rounded-xl nice-shadow p-12 flex items-center justify-center">
         <Loader2 size={24} className="animate-spin text-gray-300" />
       </div>
     )
@@ -149,7 +149,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-8 text-center text-sm text-red-400">
+      <div className="bg-card rounded-xl nice-shadow p-8 text-center text-sm text-red-400">
         Could not load purchases. Please refresh and try again.
       </div>
     )
@@ -158,7 +158,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="bg-white rounded-xl nice-shadow p-5">
+      <div className="bg-card rounded-xl nice-shadow p-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center nice-shadow">
             <ShoppingBag size={18} className="text-gray-700" />
@@ -174,7 +174,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
 
       {/* Enrollment list */}
       {enrollments.length === 0 ? (
-        <div className="bg-white rounded-xl nice-shadow p-12 flex flex-col items-center justify-center text-center">
+        <div className="bg-card rounded-xl nice-shadow p-12 flex flex-col items-center justify-center text-center">
           <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-4 nice-shadow">
             <ShoppingBag size={24} className="text-gray-300" strokeWidth={1.5} />
           </div>
@@ -184,7 +184,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
           </p>
           <Link
             href={getUriWithOrg(orgslug, '/store')}
-            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors px-4 py-2 rounded-xl"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary transition-colors px-4 py-2 rounded-xl"
           >
             Browse store <ArrowRight size={14} />
           </Link>
@@ -201,7 +201,7 @@ function AccountPurchases({ orgId, orgslug }: AccountPurchasesProps) {
             />
           ))}
           {/* Global billing portal link for one-time purchases (invoices) */}
-          <div className="bg-white rounded-xl nice-shadow p-4 flex items-center justify-between gap-3">
+          <div className="bg-card rounded-xl nice-shadow p-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-gray-700">Invoices & receipts</p>
               <p className="text-xs text-gray-400 mt-0.5">View and download all your invoices via the billing portal</p>

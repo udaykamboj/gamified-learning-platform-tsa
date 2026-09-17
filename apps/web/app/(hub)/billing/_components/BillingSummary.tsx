@@ -47,20 +47,20 @@ export default function BillingSummary({
   const dueDate = formatDate(invoice.nextPaymentAttempt ?? invoice.periodEnd, i18n.language)
 
   return (
-    <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
-      <div className="px-6 py-5 border-b border-black/[0.05] flex items-center justify-between gap-4 flex-wrap">
+    <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+      <div className="px-6 py-5 border-b border-border flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <Receipt size={15} className="text-black/40" />
-          <h2 className="font-bold text-base tracking-tight text-black">
+          <Receipt size={15} className="text-foreground/40" />
+          <h2 className="font-bold text-base tracking-tight text-foreground">
             {t('billing.next_invoice', { defaultValue: 'Next invoice' })}
           </h2>
         </div>
         <div className="text-end">
-          <p className="text-[20px] font-black leading-none text-black">
+          <p className="text-[20px] font-black leading-none text-foreground">
             {formatMoney(invoice.amountDue, invoice.currency, i18n.language)}
           </p>
           {dueDate && (
-            <p className="text-[11px] text-black/35 font-medium mt-1">
+            <p className="text-[11px] text-foreground/35 font-medium mt-1">
               {t('billing.due_on', { defaultValue: `due ${dueDate}`, date: dueDate })}
             </p>
           )}
@@ -70,24 +70,24 @@ export default function BillingSummary({
       <div className="px-6 py-4 space-y-2">
         {invoice.lines.map((line, i) => (
           <div key={i} className="flex items-start justify-between gap-4 text-[13px]">
-            <span className="text-black/60 min-w-0">
+            <span className="text-foreground/60 min-w-0">
               {line.description ||
                 t('billing.line_subscription', { defaultValue: 'Subscription' })}
               {line.kind === 'overage' && (
-                <span className="ms-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                <span className="ms-2 text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
                   {t('billing.active_members_short', { defaultValue: 'Active members' })}
                 </span>
               )}
             </span>
-            <span className="font-semibold text-black whitespace-nowrap">
+            <span className="font-semibold text-foreground whitespace-nowrap">
               {formatMoney(line.amount, line.currency, i18n.language)}
             </span>
           </div>
         ))}
 
         {accruingUsd > 0 && (
-          <div className="flex items-start justify-between gap-4 text-[13px] pt-2 mt-2 border-t border-dashed border-black/[0.08]">
-            <span className="text-black/60 flex items-start gap-1.5 min-w-0">
+          <div className="flex items-start justify-between gap-4 text-[13px] pt-2 mt-2 border-t border-dashed border-border">
+            <span className="text-foreground/60 flex items-start gap-1.5 min-w-0">
               <TrendingUp size={13} className="text-amber-600 mt-0.5 shrink-0" />
               {t('billing.accruing_this_month', {
                 defaultValue: 'Active members this month (billed on your next renewal)',
@@ -101,8 +101,8 @@ export default function BillingSummary({
       </div>
 
       {hasActivePacks && (
-        <div className="px-6 py-3 border-t border-black/[0.04] bg-black/[0.01]">
-          <p className="text-[11px] text-black/35 font-medium">
+        <div className="px-6 py-3 border-t border-border bg-foreground/[0.01]">
+          <p className="text-[11px] text-foreground/35 font-medium">
             {t('billing.packs_billed_separately', {
               defaultValue: 'Add-ons are separate subscriptions and are invoiced on their own schedule.',
             })}

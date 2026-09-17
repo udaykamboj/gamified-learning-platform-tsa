@@ -4,11 +4,11 @@ import { CaretDown, MagnifyingGlass } from '@phosphor-icons/react'
 import { ENDPOINTS, CATEGORIES, type EndpointDoc, type HttpMethod } from '@components/Admin/Developers/catalog'
 
 const METHOD_CLS: Record<HttpMethod, string> = {
-  GET: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
-  POST: 'bg-sky-400/10 text-sky-300 border-sky-400/20',
-  PUT: 'bg-amber-400/10 text-amber-300 border-amber-400/20',
-  PATCH: 'bg-violet-400/10 text-violet-300 border-violet-400/20',
-  DELETE: 'bg-red-400/10 text-red-300 border-red-400/20',
+  GET: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  POST: 'bg-sky-100 text-sky-700 border-sky-200',
+  PUT: 'bg-amber-100 text-amber-700 border-amber-200',
+  PATCH: 'bg-violet-100 text-violet-700 border-violet-200',
+  DELETE: 'bg-red-100 text-red-700 border-red-200',
 }
 
 export default function EndpointList({
@@ -44,18 +44,18 @@ export default function EndpointList({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="relative p-3 border-b border-white/[0.06]">
+      <div className="relative p-3 border-b border-border">
         <MagnifyingGlass
           size={14}
           weight="bold"
-          className="absolute start-6 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
+          className="absolute start-6 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
         />
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search endpoints…"
-          className="w-full bg-white/[0.04] border border-white/[0.1] rounded-lg ps-8 pe-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
+          className="w-full bg-card border border-border rounded-lg ps-8 pe-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
         />
       </div>
 
@@ -65,21 +65,21 @@ export default function EndpointList({
           if (items.length === 0) return null
           const isCollapsed = collapsed[cat]
           return (
-            <section key={cat} className="border-b border-white/[0.04] last:border-b-0">
+            <section key={cat} className="border-b border-border last:border-b-0">
               <button
                 onClick={() => toggleCategory(cat)}
-                className="w-full flex items-center justify-between px-3 py-2.5 text-start hover:bg-white/[0.02] transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2.5 text-start hover:bg-accent transition-colors"
               >
-                <span className="text-xs uppercase tracking-wider text-white/50 font-semibold">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                   {cat}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/40 tabular-nums">{items.length}</span>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">{items.length}</span>
                   <CaretDown
                     size={12}
                     weight="bold"
                     className={
-                      'text-white/40 transition-transform ' + (isCollapsed ? '-rotate-90' : '')
+                      'text-muted-foreground transition-transform ' + (isCollapsed ? '-rotate-90' : '')
                     }
                   />
                 </span>
@@ -95,21 +95,21 @@ export default function EndpointList({
                           className={
                             'w-full flex items-start gap-2.5 px-3 py-2 text-start border-s-2 transition-colors ' +
                             (isActive
-                              ? 'bg-white/[0.06] border-white'
-                              : 'border-transparent hover:bg-white/[0.03]')
+                              ? 'bg-muted border-border'
+                              : 'border-transparent hover:bg-accent')
                           }
                         >
                           <span
                             className={
-                              'shrink-0 mt-0.5 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border font-mono w-12 ' +
+                              'shrink-0 mt-0.5 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border font-mono w-12 ' +
                               METHOD_CLS[e.method]
                             }
                           >
                             {e.method}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm text-white truncate">{e.title}</span>
-                            <span className="block text-[11px] text-white/40 font-mono truncate">
+                            <span className="block text-sm text-foreground truncate">{e.title}</span>
+                            <span className="block text-[11px] text-muted-foreground font-mono truncate">
                               /{e.pathTemplate}
                             </span>
                           </span>
@@ -124,7 +124,7 @@ export default function EndpointList({
         })}
 
         {Object.values(byCategory).every((v) => v.length === 0) && (
-          <div className="px-3 py-10 text-center text-xs text-white/40">
+          <div className="px-3 py-10 text-center text-xs text-muted-foreground">
             No endpoints match "{query}"
           </div>
         )}

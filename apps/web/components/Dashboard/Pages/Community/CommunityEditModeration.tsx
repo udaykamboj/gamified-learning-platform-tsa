@@ -214,7 +214,7 @@ const CommunityEditModeration: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.moderation.title')}</h1>
@@ -424,7 +424,7 @@ const CommunityEditModeration: React.FC = () => {
             <Button
               onClick={handleSave}
               disabled={isSubmitting || !hasChanges}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-action-hover"
             >
               {isSubmitting ? (
                 <>

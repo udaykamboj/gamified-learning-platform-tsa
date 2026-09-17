@@ -22,7 +22,7 @@ function planLabel(planId: string | undefined): string {
 function StatusPill({ subscription, t }: { subscription: any; t: any }) {
   if (!subscription) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/[0.05] text-black/50">
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-foreground/[0.05] text-foreground/50">
         {t('subscriptions.no_subscription', { defaultValue: 'No subscription' })}
       </span>
     )
@@ -47,7 +47,7 @@ function StatusPill({ subscription, t }: { subscription: any; t: any }) {
     active: 'bg-emerald-50 text-emerald-700',
     trialing: 'bg-blue-50 text-blue-700',
     past_due: 'bg-red-50 text-red-700',
-    canceled: 'bg-black/[0.05] text-black/50',
+    canceled: 'bg-foreground/[0.05] text-foreground/50',
     unpaid: 'bg-red-50 text-red-700',
   }
   const labels: Record<string, string> = {
@@ -57,7 +57,7 @@ function StatusPill({ subscription, t }: { subscription: any; t: any }) {
     canceled: t('subscriptions.status_canceled', { defaultValue: 'Canceled' }),
     unpaid: t('subscriptions.status_unpaid', { defaultValue: 'Unpaid' }),
   }
-  const cls = styles[status] ?? 'bg-black/[0.05] text-black/50'
+  const cls = styles[status] ?? 'bg-foreground/[0.05] text-foreground/50'
   const label = labels[status] ?? subscription.status
 
   return (
@@ -87,16 +87,16 @@ function OrgSubscriptionRow({ org, enabled }: { org: any; enabled: boolean }) {
   return (
     <Link
       href={`/billing?org=${org.slug}`}
-      className="relative flex items-center p-4 bg-white rounded-2xl nice-shadow hover:shadow-lg transition-all group"
+      className="relative flex items-center p-4 bg-card rounded-2xl nice-shadow hover:shadow-lg transition-all group"
     >
       {org.logo_image ? (
         <img
           src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
           alt={org.name}
-          className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-inset ring-black/5"
+          className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-inset ring-border"
         />
       ) : (
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg flex-shrink-0 ring-1 ring-inset ring-black/5">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg flex-shrink-0 ring-1 ring-inset ring-border">
           {initial}
         </div>
       )}
@@ -105,13 +105,13 @@ function OrgSubscriptionRow({ org, enabled }: { org: any; enabled: boolean }) {
         <div className="font-semibold text-gray-900 tracking-tight truncate">{org.name}</div>
         <div className="mt-1 flex items-center gap-2 flex-wrap">
           {subLoading ? (
-            <span className="inline-block h-4 w-24 rounded-full bg-black/[0.05] animate-pulse" />
+            <span className="inline-block h-4 w-24 rounded-full bg-foreground/[0.05] animate-pulse" />
           ) : (
             <>
-              <span className="text-xs font-medium text-black/60">{planLabel(planId)}</span>
+              <span className="text-xs font-medium text-foreground/60">{planLabel(planId)}</span>
               <StatusPill subscription={subscription} t={t} />
               {periodEnd && (
-                <span className="text-[11px] text-black/35">
+                <span className="text-[11px] text-foreground/35">
                   {t('subscriptions.renews_on', { defaultValue: 'Renews {{date}}', date: periodEnd })}
                 </span>
               )}
@@ -120,7 +120,7 @@ function OrgSubscriptionRow({ org, enabled }: { org: any; enabled: boolean }) {
         </div>
       </div>
 
-      <span className="ms-3 hidden sm:flex items-center gap-1 text-xs font-semibold text-black/40 group-hover:text-black/70 transition-colors flex-shrink-0">
+      <span className="ms-3 hidden sm:flex items-center gap-1 text-xs font-semibold text-foreground/40 group-hover:text-foreground/70 transition-colors flex-shrink-0">
         {t('subscriptions.manage_plan', { defaultValue: 'Manage plan' })}
         <ChevronRight
           size={16}
@@ -129,7 +129,7 @@ function OrgSubscriptionRow({ org, enabled }: { org: any; enabled: boolean }) {
       </span>
       <ChevronRight
         size={18}
-        className="ms-3 sm:hidden text-black/25 group-hover:text-black/60 transition-all flex-shrink-0"
+        className="ms-3 sm:hidden text-foreground/25 group-hover:text-foreground/60 transition-all flex-shrink-0"
       />
     </Link>
   )
@@ -184,7 +184,7 @@ function SubscriptionsClient() {
   const showLoader = isLoading || (isAuthenticated && orgsLoading)
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-card overflow-y-auto">
       <Toaster />
       <div className="relative min-h-screen">
         {/* Blueprint grid — fades in from bottom */}
@@ -209,7 +209,7 @@ function SubscriptionsClient() {
             <div className="flex items-center justify-between mb-8">
               <Link
                 href="/home"
-                className="flex items-center justify-center w-9 h-9 rounded-xl bg-white nice-shadow text-black/50 hover:text-black transition-colors flex-shrink-0"
+                className="flex items-center justify-center w-9 h-9 rounded-xl bg-card nice-shadow text-foreground/50 hover:text-foreground transition-colors flex-shrink-0"
                 aria-label={t('subscriptions.back_home', { defaultValue: 'Back to home' })}
               >
                 <ArrowLeft size={16} />
@@ -223,7 +223,7 @@ function SubscriptionsClient() {
                 <h1 className="font-black tracking-tight text-2xl text-gray-900">
                   {t('subscriptions.title', { defaultValue: 'Subscriptions' })}
                 </h1>
-                <p className="mt-1.5 text-sm text-black/40">
+                <p className="mt-1.5 text-sm text-foreground/40">
                   {t('subscriptions.subtitle', {
                     defaultValue: 'Plans and billing across your organizations',
                   })}
@@ -233,7 +233,7 @@ function SubscriptionsClient() {
                 type="button"
                 onClick={handleManageBilling}
                 disabled={portalLoading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-sm nice-shadow hover:bg-gray-800 transition-colors disabled:opacity-50 flex-shrink-0"
+                className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm nice-shadow hover:bg-primary transition-colors disabled:opacity-50 flex-shrink-0"
               >
                 <CreditCard size={16} />
                 {portalLoading
@@ -249,16 +249,16 @@ function SubscriptionsClient() {
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className="h-[68px] w-full rounded-2xl bg-black/[0.03] animate-pulse"
+                      className="h-[68px] w-full rounded-2xl bg-foreground/[0.03] animate-pulse"
                     />
                   ))}
                 </>
               )}
 
               {!showLoader && isAuthenticated && Array.isArray(orgs) && orgs.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 bg-white rounded-2xl nice-shadow">
-                  <TentTree className="text-black/10" size={64} />
-                  <p className="mt-4 text-sm font-semibold text-black/50 text-center">
+                <div className="flex flex-col items-center justify-center py-14 px-6 bg-card rounded-2xl nice-shadow">
+                  <TentTree className="text-foreground/10" size={64} />
+                  <p className="mt-4 text-sm font-semibold text-foreground/50 text-center">
                     {t('common.no_orgs_message', {
                       defaultValue: 'You are not part of any organization yet.',
                     })}
@@ -286,7 +286,7 @@ function SubscriptionsClient() {
 
 export default function SubscriptionsPage() {
   return (
-    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-white" />}>
+    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-card" />}>
       <SubscriptionsClient />
     </Suspense>
   )

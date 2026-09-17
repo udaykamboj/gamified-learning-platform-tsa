@@ -36,7 +36,7 @@ function HeatmapGrid({
       {/* Hour labels */}
       <div className={`flex ${compact ? 'ml-7' : 'ml-10'} mb-1`}>
         {HOUR_LABELS.map((label, i) => (
-          <div key={i} className="flex-1 text-center text-[9px] text-gray-400">
+          <div key={i} className="flex-1 text-center text-[11px] text-gray-400">
             {(compact ? i % 6 === 0 : i % 3 === 0) ? label : ''}
           </div>
         ))}
@@ -44,7 +44,7 @@ function HeatmapGrid({
       {/* Grid */}
       {grid.map((dayRow, dow) => (
         <div key={dow} className="flex items-center gap-1 mb-0.5">
-          <span className={`${compact ? 'w-6 text-[8px]' : 'w-9 text-[10px]'} text-gray-500 text-right pr-1`}>
+          <span className={`${compact ? 'w-6 text-[11px]' : 'w-9 text-[11px]'} text-gray-500 text-right pr-1`}>
             {dayLabels[dow]}
           </span>
           <div className="flex flex-1 gap-0.5">
@@ -61,7 +61,7 @@ function HeatmapGrid({
       ))}
       {/* Legend */}
       <div className={`flex items-center gap-2 mt-2 ${compact ? 'ml-7' : 'ml-10'}`}>
-        <span className="text-[9px] text-gray-400">{lessLabel}</span>
+        <span className="text-[11px] text-gray-400">{lessLabel}</span>
         {[0.1, 0.3, 0.5, 0.7, 1].map((op, i) => (
           <div
             key={i}
@@ -69,7 +69,7 @@ function HeatmapGrid({
             style={{ opacity: op }}
           />
         ))}
-        <span className="text-[9px] text-gray-400">{moreLabel}</span>
+        <span className="text-[11px] text-gray-400">{moreLabel}</span>
       </div>
     </div>
   )
@@ -168,7 +168,7 @@ export default function CoursePeakHours({
               <span className="text-lg font-bold text-violet-600">
                 {DAY_LABELS[peakDay]} {HOUR_LABELS[peakHour]}
               </span>
-              <p className="text-[10px] text-gray-400">{t('analytics.course_analytics.units.busiest_time')}</p>
+              <p className="text-[11px] text-gray-400">{t('analytics.course_analytics.units.busiest_time')}</p>
             </div>
           </div>
           <HeatmapGrid

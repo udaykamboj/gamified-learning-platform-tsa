@@ -120,7 +120,7 @@ export default function PodcastClient({
             </div>
 
             {/* Episodes List */}
-            <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+            <div className="bg-card nice-shadow rounded-lg overflow-hidden">
               {/* Header */}
               <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">

@@ -166,7 +166,7 @@ export default function BoardToolbar({
                         className={cn(
                           'flex items-center justify-center h-7 px-2.5 rounded-lg text-[11px] font-medium transition-colors',
                           drawWidth === value
-                            ? 'bg-neutral-800 text-white'
+                            ? 'bg-primary text-primary-foreground'
                             : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                         )}
                       >

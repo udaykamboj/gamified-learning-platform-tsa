@@ -50,7 +50,7 @@ function BoardMembersTab({ boardUuid }: BoardMembersTabProps) {
     return (
       <div>
         <div className="h-6"></div>
-        <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4 animate-pulse">
+        <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4 animate-pulse">
           <div className="flex flex-col bg-gray-50 px-3 sm:px-5 py-3 rounded-md mb-3 gap-2">
             <div className="h-5 w-32 bg-gray-200 rounded" />
             <div className="h-3 w-64 bg-gray-100 rounded" />
@@ -75,7 +75,7 @@ function BoardMembersTab({ boardUuid }: BoardMembersTabProps) {
   return (
     <div>
       <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
+      <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.members.title')}</h1>
@@ -96,7 +96,7 @@ function BoardMembersTab({ boardUuid }: BoardMembersTabProps) {
                 <th className="py-3 px-4">{t('boards.members.actions')}</th>
               </tr>
             </thead>
-            <tbody className="mt-5 bg-white rounded-md">
+            <tbody className="mt-5 bg-card rounded-md">
               {membersList.map((member: any) => (
                 <tr key={member.id} className="border-b border-gray-100 text-sm">
                   <td className="py-3 px-4">
@@ -179,7 +179,7 @@ function BoardMembersTab({ boardUuid }: BoardMembersTabProps) {
               dialogTitle={t('boards.members.add_member')}
               dialogDescription={t('boards.members.add_member_description')}
               dialogTrigger={
-                <button className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-md font-bold text-sm hover:bg-gray-800 transition-colors">
+                <button className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-bold text-sm hover:bg-primary transition-colors">
                   <UserPlus className="w-4 h-4" />
                   <span>{t('boards.members.add_member')}</span>
                 </button>
@@ -234,7 +234,7 @@ function AddBoardMember({ boardUuid, accessToken, setModalOpen }: {
           onChange={(e) => setIdentifier(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
           placeholder="Username or email"
-          className="w-full ps-10 pe-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all"
+          className="w-full ps-10 pe-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border focus:border-gray-400 transition-all"
           autoFocus
         />
       </div>
@@ -245,7 +245,7 @@ function AddBoardMember({ boardUuid, accessToken, setModalOpen }: {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all"
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-border focus:border-gray-400 transition-all"
           >
             <option value="editor">{t('boards.members.editor')}</option>
             <option value="viewer">{t('boards.members.viewer')}</option>
@@ -254,7 +254,7 @@ function AddBoardMember({ boardUuid, accessToken, setModalOpen }: {
         <button
           onClick={handleAdd}
           disabled={!identifier.trim() || isAdding}
-          className="inline-flex items-center gap-2 bg-black text-white font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-all"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary transition-all"
         >
           <UserPlus className="w-4 h-4" />
           {isAdding ? t('boards.members.adding') : t('boards.members.add_member')}

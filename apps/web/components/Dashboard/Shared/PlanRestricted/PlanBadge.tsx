@@ -59,13 +59,13 @@ const getDarkPlanStyles = (plan: PlanLevel): string => {
 const getSizeStyles = (size: BadgeSize): string => {
   switch (size) {
     case 'sm':
-      return 'px-1.5 py-0.5 text-[10px]'
+      return 'px-1.5 py-0.5 text-[11px]'
     case 'md':
       return 'px-2 py-1 text-xs'
     case 'lg':
       return 'px-2.5 py-1 text-sm'
     default:
-      return 'px-1.5 py-0.5 text-[10px]'
+      return 'px-1.5 py-0.5 text-[11px]'
   }
 }
 

@@ -154,7 +154,7 @@ const ButtonsExtension: React.FC = (props: any) => {
         />
       )}
       {isEditable && showColorPicker && (
-        <div ref={colorPickerRef} className="absolute mt-2 p-2 bg-white rounded-md nice-shadow">
+        <div ref={colorPickerRef} className="absolute mt-2 p-2 bg-card rounded-md nice-shadow">
           <div className="flex flex-wrap gap-2">
             {colors.map((c) => (
               <button

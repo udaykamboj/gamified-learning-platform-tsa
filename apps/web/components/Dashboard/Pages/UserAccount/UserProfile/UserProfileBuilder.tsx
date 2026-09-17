@@ -339,7 +339,7 @@ const UserProfileBuilder = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-6">
+      <div className="bg-card rounded-xl nice-shadow p-6">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -348,7 +348,7 @@ const UserProfileBuilder = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow">
+    <div className="bg-card rounded-xl nice-shadow">
       <div className="flex flex-col gap-0">
         {/* Header */}
         <div className="flex items-center justify-between bg-gray-50 px-5 py-3 mx-3 my-3 rounded-md">
@@ -395,7 +395,7 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`p-4 bg-white/80 backdrop-blur-xs rounded-lg cursor-pointer border ${
+                            className={`p-4 bg-card/80 backdrop-blur-xs rounded-lg cursor-pointer border ${
                               selectedSection === index 
                                 ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 shadow-xs' 
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
@@ -473,7 +473,7 @@ const UserProfileBuilder = () => {
               >
                 <SelectTrigger className="w-full p-0 border-0 bg-black">
                   <div className="w-full">
-                    <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                    <Button variant="default" className="w-full bg-primary hover:bg-action-hover text-primary-foreground">
                       <Plus className="h-4 w-4 me-2" />
                       {t('user.settings.profile_builder.add_section')}
                     </Button>
@@ -553,7 +553,7 @@ const ImageGalleryEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <ImageIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.image_gallery.title')}</h3>
@@ -656,7 +656,7 @@ const TextEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <TextIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.text.title')}</h3>
@@ -696,7 +696,7 @@ const LinksEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <LinkIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.links.title')}</h3>
@@ -781,7 +781,7 @@ const SkillsEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Award className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.skills.title')}</h3>
@@ -884,7 +884,7 @@ const ExperienceEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Briefcase className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.experience.title')}</h3>
@@ -1046,7 +1046,7 @@ const EducationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <GraduationCap className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.education.title')}</h3>
@@ -1222,7 +1222,7 @@ const AffiliationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <MapPin className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.affiliation.title')}</h3>
@@ -1333,7 +1333,7 @@ const CoursesEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <BookOpen className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.courses.title')}</h3>

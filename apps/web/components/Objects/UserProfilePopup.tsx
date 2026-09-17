@@ -92,7 +92,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       <HoverCardTrigger asChild>
         {children}
       </HoverCardTrigger>
-      <HoverCardContent className="w-96 bg-white/95 backdrop-blur-md p-0 nice-shadow">
+      <HoverCardContent className="w-96 bg-card/95 backdrop-blur-md p-0 nice-shadow">
         {!isAuthenticated ? (
           <div className="px-5 py-4 text-sm text-gray-600">
             Sign in to view this profile.

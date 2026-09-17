@@ -4,6 +4,7 @@
 @plugin 'tailwindcss-animate';
 
 @import 'tailwindcss';
+@import './orbital.css';
 @import './universe.css';
 @import '../components/ui/Dock.css';
 
@@ -121,7 +122,7 @@
 .canva-content-wrapper .ProseMirror hr,
 .editor-preview-wrapper .ProseMirror hr {
   border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--sl-line);
   margin: 1.25rem 0;
 }
 
@@ -140,7 +141,7 @@
 /* Selection is suppressed project-wide with !important (see above), so the
    selected divider has to say so in its own colour. */
 .activity-editor-content-wrapper .ProseMirror hr.ProseMirror-selectednode {
-  border-top-color: rgba(59, 130, 246, 0.6);
+  border-top-color: var(--sl-focus);
 }
 
 /* Embed service icons scroll animation */
@@ -155,71 +156,14 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-@theme {
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
 
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-}
-
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-}
 
 @layer utilities {
-  .nice-shadow {
-    @apply shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40;
-  }
-
+  /* Legacy elevation helpers. Both now resolve to the single Orbital card
+     treatment (1px line + card shadow) so every surface shares one surround. */
+  .nice-shadow,
   .light-shadow {
-    @apply shadow-lg shadow-gray-300/15 outline outline-1 outline-neutral-200/30;
+    box-shadow: 0 0 0 1px var(--sl-line), var(--sl-shadow-card);
   }
 
   /* Hide scrollbar while maintaining scroll functionality */
@@ -234,8 +178,8 @@
   .custom-dots-bg {
     @apply bg-fixed;
     background-image:
-      radial-gradient(#4744446b 1px, transparent 1px),
-      radial-gradient(#4744446b 1px, transparent 1px);
+      radial-gradient(color-mix(in srgb, var(--sl-fg-muted) 30%, transparent) 1px, transparent 1px),
+    radial-gradient(color-mix(in srgb, var(--sl-fg-muted) 30%, transparent) 1px, transparent 1px);
     background-position:
       0 0,
       25px 25px;
@@ -248,8 +192,7 @@
     padding: 0;
     margin: 0;
     scrollbar-gutter: stable;
-    font-family: var(--font-default, 'Wix Madefor Text'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    letter-spacing: -0.02em;
+    font-family: var(--font-sans);
   }
 
   /* Companion to the same override in @layer base. This declaration has to
@@ -301,23 +244,16 @@
     box-sizing: border-box;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      color: black;
-      background: #fbfbfb;
-    }
-  }
-
   /* Basic editor styles */
   .ProseMirror {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: var(--font-sans);
   }
   .ProseMirror > * + * {
     margin-top: 0.75em;
   }
   /* Placeholder (at the top) */
   .ProseMirror p.is-editor-empty:first-child::before {
-    color: #adb5bd;
+    color: var(--sl-fg-muted);
     content: attr(data-placeholder);
     float: inline-start;
     height: 0;
@@ -380,32 +316,6 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-
     /* Z-Index Layering System */
     --z-behind: -10;
     --z-background: -1;
@@ -432,44 +342,10 @@
     --z-critical: 400;
     --z-max: 9999;
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;}}
+}
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  html,
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-default, 'Wix Madefor Text'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    letter-spacing: -0.02em;
-  }
-
-  /* The -0.02em tracking above is tuned for Latin. Arabic is a cursive script
+  /* Headings carry -0.02em tracking tuned for Latin (see orbital.css). Arabic is a cursive script
      where letters join along a baseline, and negative tracking crushes those
      joins — in some renderers it breaks them outright. Keyed on :lang() as well
      as [dir] so Arabic content inside an English UI is covered too.
@@ -821,7 +697,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  background: white;
+  background: var(--sl-panel);
   opacity: 0;
   visibility: hidden;
   transition: opacity 150ms, visibility 150ms, padding 150ms;
@@ -849,22 +725,22 @@
   align-items: center;
   justify-content: center;
   cursor: grab;
-  color: #9ca3af;
+  color: var(--sl-fg-muted);
   transition: background 150ms, color 150ms;
   border-radius: 6px 0 0 6px;
   flex-shrink: 0;
 }
 
 .editor-drag-handle .drag-grip:hover {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--sl-hover);
+  color: var(--sl-fg-muted);
 }
 
 .editor-drag-handle .drag-grip:active,
 .editor-drag-handle.is-dragging .drag-grip {
   cursor: grabbing;
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--sl-line);
+  color: var(--sl-fg-secondary);
 }
 
 .editor-drag-handle .action-btn {
@@ -872,8 +748,8 @@
   height: 26px;
   padding: 0;
   border: none;
-  background: white;
-  color: #6b7280;
+  background: var(--sl-panel);
+  color: var(--sl-fg-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -897,49 +773,49 @@
 }
 
 .editor-drag-handle .action-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--sl-hover);
+  color: var(--sl-fg-secondary);
 }
 
 .editor-drag-handle .action-btn:active {
-  background: #e5e7eb;
+  background: var(--sl-line);
 }
 
 .editor-drag-handle .clear-btn:hover {
-  background: #fef3c7;
-  color: #f59e0b;
+  background: var(--sl-warning-surface);
+  color: var(--sl-warning);
 }
 
 .editor-drag-handle .clear-btn:active {
-  background: #fde68a;
-  color: #f59e0b;
+  background: var(--sl-warning-surface);
+  color: var(--sl-warning);
 }
 
 .editor-drag-handle .copy-btn:hover {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--sl-info-surface);
+  color: var(--sl-link);
 }
 
 .editor-drag-handle .copy-btn:active {
-  background: #bfdbfe;
-  color: #2563eb;
+  background: var(--sl-info-surface);
+  color: var(--sl-link);
 }
 
 .editor-drag-handle .delete-btn:hover {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--sl-error-surface);
+  color: var(--sl-error);
 }
 
 .editor-drag-handle .delete-btn:active {
-  background: #fecaca;
-  color: #dc2626;
+  background: var(--sl-error-surface);
+  color: var(--sl-error);
 }
 
 /* Tooltips for action buttons */
 .editor-drag-handle .tooltip-text {
   position: fixed;
-  background: rgba(255, 255, 255, 0.95);
-  color: #4b5563;
+  background: var(--sl-raised);
+  color: var(--sl-fg-secondary);
   padding: 5px 10px;
   border-radius: 6px;
   font-size: 11px;
@@ -951,8 +827,8 @@
   visibility: hidden;
   transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
               visibility 200ms;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  outline: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--sl-shadow-overlay);
+  outline: 1px solid var(--sl-line);
   z-index: var(--z-tooltip);
   transform: translateX(-50%);
 }
@@ -966,7 +842,7 @@
 .editor-drop-indicator {
   position: fixed;
   height: 2px;
-  background: #3b82f6;
+  background: var(--sl-focus);
   border-radius: 1px;
   opacity: 0;
   visibility: hidden;
@@ -981,7 +857,7 @@
   position: absolute;
   width: 6px;
   height: 6px;
-  background: #3b82f6;
+  background: var(--sl-focus);
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
@@ -1005,7 +881,7 @@
 /* Block being dragged */
 .ProseMirror .is-dragging {
   opacity: 0.4;
-  background: #f3f4f6;
+  background: var(--sl-hover);
   border-radius: 4px;
 }
 
@@ -1043,10 +919,11 @@
 /* Tippy.js base styles */
 .tippy-box {
   position: relative;
-  background-color: #333;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 14px;
+  background-color: var(--sl-raised);
+  border: 1px solid var(--sl-line);
+  color: var(--sl-fg);
+  border-radius: 6px;
+  font-size: 13px;
   line-height: 1.4;
   white-space: normal;
   outline: 0;
@@ -1074,7 +951,7 @@
 .tippy-arrow {
   width: 16px;
   height: 16px;
-  color: #333;
+  color: var(--sl-raised);
 }
 
 .tippy-arrow::before {
@@ -1129,15 +1006,15 @@
 
 /* Slash Commands Menu */
 .slash-commands-menu {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--sl-panel);
+  border: 1px solid var(--sl-line);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--sl-shadow-overlay);
   max-height: 320px;
   overflow-y: auto;
   width: 280px;
   padding: 6px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .slash-commands-menu::-webkit-scrollbar {
@@ -1149,12 +1026,12 @@
 }
 
 .slash-commands-menu::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--sl-line-control);
   border-radius: 3px;
 }
 
 .slash-commands-menu::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--sl-fg-muted);
 }
 
 .slash-commands-category {
@@ -1168,7 +1045,7 @@
 .slash-commands-category-label {
   font-size: 11px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--sl-fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 6px 10px 4px;
@@ -1189,11 +1066,11 @@
 
 .slash-commands-item:hover,
 .slash-commands-item.is-selected {
-  background: #f3f4f6;
+  background: var(--sl-hover);
 }
 
 .slash-commands-item.is-selected {
-  background: #e5e7eb;
+  background: var(--sl-line);
 }
 
 .slash-commands-item-icon {
@@ -1202,16 +1079,16 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--sl-sunken);
+  border: 1px solid var(--sl-line);
   border-radius: 6px;
   margin-inline-end: 10px;
-  color: #374151;
+  color: var(--sl-fg-secondary);
   flex-shrink: 0;
 }
 
 .slash-commands-item.is-selected .slash-commands-item-icon {
-  background: white;
+  background: var(--sl-panel);
 }
 
 .slash-commands-item-content {
@@ -1222,13 +1099,13 @@
 .slash-commands-item-title {
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
+  color: var(--sl-fg);
   line-height: 1.3;
 }
 
 .slash-commands-item-description {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--sl-fg-muted);
   line-height: 1.3;
   margin-top: 1px;
   white-space: nowrap;
@@ -1239,7 +1116,7 @@
 .slash-commands-empty {
   padding: 16px;
   text-align: center;
-  color: #6b7280;
+  color: var(--sl-fg-muted);
   font-size: 13px;
 }
 
@@ -1479,13 +1356,13 @@
 .toc-item .toc-check {
   display: flex;
   align-items: center;
-  color: #23272f;
+  color: var(--sl-fg);
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
 
 .toc-item .toc-link {
-  color: #23272f;
+  color: var(--sl-fg);
   text-decoration: none;
   display: block;
   line-height: 1.4;
@@ -1500,7 +1377,7 @@
 }
 
 .toc-item .toc-link:hover {
-  color: #007acc;
+  color: var(--sl-link);
 }
 
 .toc-item .toc-link-h1 {
@@ -1526,17 +1403,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--sl-panel);
   border-radius: 6px;
   min-width: 25px;
   height: 25px;
   padding: 5px;
   transition: all 0.2s ease-in-out;
   flex-shrink: 0;
-  color: #6b7280;
-  box-shadow: 0 4px 6px -1px rgba(209, 213, 219, 0.25),
-    0 2px 4px -2px rgba(209, 213, 219, 0.25);
-  outline: 1px solid rgba(229, 231, 235, 0.4);
+  color: var(--sl-fg-muted);
+  box-shadow: var(--sl-shadow-card);
+  outline: 1px solid var(--sl-line);
 }
 
 .editor-tool-btn svg {
@@ -1544,18 +1420,18 @@
 }
 
 .editor-tool-btn.is-active {
-  background: #f3f4f6;
-  color: #1f2937;
-  outline: 1px solid rgba(107, 114, 128, 0.3);
+  background: var(--sl-hover);
+  color: var(--sl-fg);
+  outline: 1px solid var(--sl-line-control);
 }
 
 .editor-tool-btn.is-active:hover {
-  background: #e5e7eb;
+  background: var(--sl-line);
   cursor: pointer;
 }
 
 .editor-tool-btn:hover {
-  background: #f9fafb;
+  background: var(--sl-sunken);
   cursor: pointer;
 }
 
@@ -1768,7 +1644,7 @@
 /* Editor toolbar select */
 .editor-tool-select {
   display: flex;
-  background-color: white;
+  background-color: var(--sl-panel);
   border-radius: 6px;
   width: 120px;
   border: none;
@@ -1780,7 +1656,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  color: #6b7280;
+  color: var(--sl-fg-muted);
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   /* background-position has no logical form, so the chevron is mirrored
@@ -1790,9 +1666,8 @@
   padding-inline-end: 20px;
   flex-shrink: 0;
   transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 6px -1px rgba(209, 213, 219, 0.25),
-    0 2px 4px -2px rgba(209, 213, 219, 0.25);
-  outline: 1px solid rgba(229, 231, 235, 0.4);
+  box-shadow: var(--sl-shadow-card);
+  outline: 1px solid var(--sl-line);
 }
 
 /* The dropdown chevron is a background image, and background-position has no
@@ -1801,8 +1676,8 @@
   background-position: left 5px center;
 }
 
-.editor-tool-select:hover { background-color: #f9fafb; }
-.editor-tool-select:focus { outline: 1px solid rgba(107, 114, 128, 0.3); }
+.editor-tool-select:hover { background-color: var(--sl-sunken); }
+.editor-tool-select:focus { outline: 1px solid var(--sl-line-control); }
 
 @media (max-width: 1200px) {
   .editor-tool-select {
@@ -1817,15 +1692,14 @@
   position: absolute;
   top: 100%;
   inset-inline-start: 0;
-  background: white;
+  background: var(--sl-panel);
   border-radius: 6px;
   z-index: var(--z-tooltip);
   min-width: 180px;
   margin-top: 4px;
   padding: 4px;
-  box-shadow: 0 4px 6px -1px rgba(209, 213, 219, 0.25),
-    0 2px 4px -2px rgba(209, 213, 219, 0.25);
-  outline: 1px solid rgba(229, 231, 235, 0.4);
+  box-shadow: var(--sl-shadow-card);
+  outline: 1px solid var(--sl-line);
 }
 
 /* Editor toolbar menu item */
@@ -1836,14 +1710,14 @@
   cursor: pointer;
   transition: background 0.2s;
   border-radius: 4px;
-  color: #4b5563;
+  color: var(--sl-fg-secondary);
 }
 
-.editor-menu-item:hover { background: rgba(243, 244, 246, 1); }
+.editor-menu-item:hover { background: var(--sl-hover); }
 
 .editor-menu-item.is-active {
-  background: rgba(243, 244, 246, 1);
-  color: #111827;
+  background: var(--sl-hover);
+  color: var(--sl-fg);
   font-weight: 500;
 }
 
@@ -1851,10 +1725,10 @@
   margin-inline-end: 8px;
   display: flex;
   align-items: center;
-  color: #6b7280;
+  color: var(--sl-fg-muted);
 }
 
-.editor-menu-item.is-active .icon { color: #374151; }
+.editor-menu-item.is-active .icon { color: var(--sl-fg-secondary); }
 
 .editor-menu-item .label {
   font-size: 12px;
@@ -1868,8 +1742,8 @@
   width: 100%;
   padding-top: 30px;
   position: relative;
-  background-image: radial-gradient(#4744446b 1px, transparent 1px),
-    radial-gradient(#4744446b 1px, transparent 1px);
+  background-image: radial-gradient(color-mix(in srgb, var(--sl-fg-muted) 30%, transparent) 1px, transparent 1px),
+    radial-gradient(color-mix(in srgb, var(--sl-fg-muted) 30%, transparent) 1px, transparent 1px);
   background-position: 0 0, 25px 25px;
   background-size: 50px 50px;
   background-attachment: fixed;
@@ -1892,11 +1766,11 @@
   padding: 12px;
   display: flex;
   justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: color-mix(in srgb, var(--sl-panel) 92%, transparent);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   backdrop-filter: blur(12px) saturate(180%);
-  box-shadow: 0 4px 6px -1px rgba(209, 213, 219, 0.25), 0 2px 4px -2px rgba(209, 213, 219, 0.25);
-  outline: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: var(--sl-shadow-card);
+  outline: 1px solid var(--sl-line);
   position: fixed;
   z-index: var(--z-editor-toolbar);
   /* rtl-ok: symmetric — equivalent to inset-inline: 0. */
@@ -1944,7 +1818,7 @@
   .activity-editor-users-section {
     justify-content: flex-end;
     padding-top: 8px;
-    border-top: 1px solid rgba(217, 217, 217, 0.5);
+    border-top: 1px solid var(--sl-line);
   }
 }
 
@@ -1981,7 +1855,7 @@
   align-items: center;
   display: flex;
   margin-inline-start: 10px;
-  color: #494949;
+  color: var(--sl-fg-secondary);
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -1999,7 +1873,7 @@
   margin-left: 4px;
   margin-right: 4px;
   padding: 3px;
-  color: #353535;
+  color: var(--sl-fg-secondary);
   flex-shrink: 0;
 }
 
@@ -2029,12 +1903,12 @@
 .activity-editor-content-wrapper {
   margin: 40px;
   margin-top: 97px;
-  background-color: white;
+  background-color: var(--sl-panel);
   border-radius: 10px;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 6px -1px rgba(209, 213, 219, 0.25), 0 2px 4px -2px rgba(209, 213, 219, 0.25);
-  outline: 1px solid rgba(229, 231, 235, 0.4);
+  box-shadow: var(--sl-shadow-card);
+  outline: 1px solid var(--sl-line);
 }
 
 @media (max-width: 1200px) {
@@ -2053,6 +1927,12 @@
 
 .activity-editor-content-wrapper .ProseMirror {
   padding: 20px;
+}
+
+.activity-editor-content-wrapper .ProseMirror :is(h1, h2, h3, h4, h5) {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--sl-fg);
 }
 
 .activity-editor-content-wrapper .ProseMirror h1 {
@@ -2086,14 +1966,14 @@
 }
 
 .activity-editor-content-wrapper .ProseMirror a {
-  color: #2563eb;
+  color: var(--sl-link);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .activity-editor-content-wrapper .ProseMirror a:hover {
-  color: #1d4ed8;
+  color: var(--sl-action-hover);
   text-decoration: none;
 }
 
@@ -2104,10 +1984,10 @@
 }
 
 .activity-editor-content-wrapper .ProseMirror pre {
-  background: #0d0d0d;
+  background: #0b1424;
   border-radius: 0.5rem;
   color: #fff;
-  font-family: 'JetBrainsMono', monospace;
+  font-family: var(--font-mono);
   padding: 0.75rem 1rem;
 }
 
@@ -2197,7 +2077,7 @@
 
 .activity-editor-content-wrapper table td,
 .activity-editor-content-wrapper table th {
-  border: 1px solid rgba(139, 139, 139, 0.4);
+  border: 1px solid var(--sl-line);
   box-sizing: border-box;
   min-width: 1em;
   padding: 6px 8px;
@@ -2211,13 +2091,13 @@
 }
 
 .activity-editor-content-wrapper table th {
-  background-color: rgba(217, 217, 217, 0.4);
+  background-color: var(--sl-sunken);
   font-weight: bold;
   text-align: start;
 }
 
 .activity-editor-content-wrapper table .selectedCell:after {
-  background: rgba(139, 139, 139, 0.2);
+  background: color-mix(in srgb, var(--sl-focus) 16%, transparent);
   content: "";
   /* rtl-ok: symmetric full-bleed overlay. */
   left: 0; right: 0; top: 0; bottom: 0;
@@ -2227,7 +2107,7 @@
 }
 
 .activity-editor-content-wrapper table .column-resize-handle {
-  background-color: #8d78eb;
+  background-color: var(--sl-focus);
   bottom: -2px;
   pointer-events: none;
   position: absolute;
@@ -2302,6 +2182,15 @@
   flex: 1;
   padding: 1rem;
   caret-color: transparent;
+  font-size: 1.0625rem;
+  line-height: 1.75rem;
+  color: var(--sl-fg);
+}
+
+.canva-content-wrapper .ProseMirror :is(h1, h2, h3, h4, h5) {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--sl-fg);
 }
 
 .canva-content-wrapper .ProseMirror h1 {
@@ -2335,14 +2224,14 @@
 }
 
 .canva-content-wrapper .ProseMirror a {
-  color: #2563eb;
+  color: var(--sl-link);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .canva-content-wrapper .ProseMirror a:hover {
-  color: #1d4ed8;
+  color: var(--sl-action-hover);
   text-decoration: none;
 }
 
@@ -2370,7 +2259,7 @@
 
 .canva-content-wrapper .ProseMirror table td,
 .canva-content-wrapper .ProseMirror table th {
-  border: 1px solid rgba(139, 139, 139, 0.4);
+  border: 1px solid var(--sl-line);
   box-sizing: border-box;
   min-width: 1em;
   padding: 6px 8px;
@@ -2384,13 +2273,13 @@
 }
 
 .canva-content-wrapper .ProseMirror table th {
-  background-color: rgba(217, 217, 217, 0.4);
+  background-color: var(--sl-sunken);
   font-weight: bold;
   text-align: start;
 }
 
 .canva-content-wrapper .ProseMirror table .selectedCell:after {
-  background: rgba(139, 139, 139, 0.2);
+  background: color-mix(in srgb, var(--sl-focus) 16%, transparent);
   content: "";
   /* rtl-ok: symmetric full-bleed overlay. */
   left: 0; right: 0; top: 0; bottom: 0;
@@ -2400,7 +2289,7 @@
 }
 
 .canva-content-wrapper .ProseMirror table .column-resize-handle {
-  background-color: #8d78eb;
+  background-color: var(--sl-focus);
   bottom: -2px;
   pointer-events: none;
   position: absolute;
@@ -2416,10 +2305,10 @@
 }
 
 .canva-content-wrapper .ProseMirror pre {
-  background: #0d0d0d;
+  background: #0b1424;
   border-radius: 0.5rem;
   color: #fff;
-  font-family: 'JetBrainsMono', monospace;
+  font-family: var(--font-mono);
   padding: 0.75rem 1rem;
 }
 
@@ -2492,6 +2381,12 @@
 
 /* ─── EditorPreview ProseMirror Styles ─── */
 
+.editor-preview-wrapper .ProseMirror :is(h1, h2, h3, h4, h5) {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--sl-fg);
+}
+
 .editor-preview-wrapper .ProseMirror h1 { font-size: 28px; font-weight: 600; margin-bottom: 16px; }
 .editor-preview-wrapper .ProseMirror h2 { font-size: 24px; font-weight: 600; margin-bottom: 16px; }
 .editor-preview-wrapper .ProseMirror h3 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
@@ -2499,7 +2394,7 @@
 .editor-preview-wrapper .ProseMirror h5 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
 
 .editor-preview-wrapper .ProseMirror a {
-  color: #2563eb;
+  color: var(--sl-link);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -2509,10 +2404,10 @@
 .editor-preview-wrapper .ProseMirror:focus { outline: none !important; }
 
 .editor-preview-wrapper .ProseMirror pre {
-  background: #0d0d0d;
+  background: #0b1424;
   border-radius: 0.5rem;
   color: #fff;
-  font-family: 'JetBrainsMono', monospace;
+  font-family: var(--font-mono);
   padding: 0.75rem 1rem;
   font-size: 0.8rem;
 }
@@ -2542,7 +2437,7 @@
 
 .editor-preview-wrapper .ProseMirror table td,
 .editor-preview-wrapper .ProseMirror table th {
-  border: 1px solid rgba(139, 139, 139, 0.4);
+  border: 1px solid var(--sl-line);
   box-sizing: border-box;
   min-width: 1em;
   padding: 6px 8px;
@@ -2551,7 +2446,7 @@
 }
 
 .editor-preview-wrapper .ProseMirror table th {
-  background-color: rgba(217, 217, 217, 0.4);
+  background-color: var(--sl-sunken);
   font-weight: bold;
   text-align: start;
 }
@@ -2565,43 +2460,3 @@
   min-height: 200px;
   display: block;
 }
-
-/* Keep legacy utility-heavy pages coherent when the application is rendered
-   in dark mode. A number of shared catalog and auth components still use
-   light-only utility classes instead of theme tokens. Scope these fallbacks to
-   the application shell so editors and third-party content are unaffected. */
-.dark .lh-org-font-root [class~="bg-white"],
-.dark .lh-org-font-root [class~="bg-gray-50"],
-.dark .lh-org-font-root [class~="bg-neutral-50"] {
-  background-color: #111318 !important;
-}
-
-.dark .lh-org-font-root [class~="bg-gray-100"],
-.dark .lh-org-font-root [class~="bg-neutral-100"] {
-  background-color: #191c24 !important;
-}
-
-.dark .lh-org-font-root [class~="text-black"],
-.dark .lh-org-font-root [class*="text-black/"] {
-  color: #f4f4f5 !important;
-}
-
-.dark .lh-org-font-root [class~="text-gray-900"],
-.dark .lh-org-font-root [class~="text-gray-800"],
-.dark .lh-org-font-root [class~="text-gray-700"] {
-  color: #e4e4e7 !important;
-}
-
-.dark .lh-org-font-root [class~="text-gray-600"],
-.dark .lh-org-font-root [class~="text-gray-500"],
-.dark .lh-org-font-root [class~="text-gray-400"],
-.dark .lh-org-font-root [class~="text-gray-300"] {
-  color: #a1a1aa !important;
-}
-
-.dark .lh-org-font-root [class~="border-gray-100"],
-.dark .lh-org-font-root [class~="border-gray-200"],
-.dark .lh-org-font-root [class~="border-neutral-200"] {
-  border-color: rgba(255, 255, 255, 0.12) !important;
-}
-

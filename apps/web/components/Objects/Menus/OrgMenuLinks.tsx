@@ -4,6 +4,15 @@ import { Books, FolderSimple, Headphones, Cube, MapTrifold, Star, Robot } from '
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
+import { usePathname } from 'next/navigation'
+import { CaretDown } from '@phosphor-icons/react'
+import { cn } from '@/lib/utils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@components/ui/dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
@@ -24,7 +33,11 @@ const BUILTIN: Record<string, Builtin> = {
 // is not sold per course.
 const DEFAULT_ORDER = ['ai_agent', 'journey', 'skills', 'courses', 'library', 'podcasts', 'playgrounds']
 
-function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
+// How many links stay inline before the rest collapse into "More".
+const INLINE_LIMIT = 4
+
+function MenuLinks(props: { orgslug: string; primaryColor?: string; layout?: 'bar' | 'stack' }) {
+  const pathname = usePathname() || ''
   const { t } = useTranslation()
   const org = useOrg() as any
   const colors = getMenuColorClasses(props.primaryColor || '')
@@ -73,23 +86,95 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
     })
     .filter(Boolean) as any[]
 
-  return (
-    <div className="ps-1">
-      <ul className="flex space-x-5">
-        {rendered.map((it) => {
-          const content = (
-            <li className={`flex space-x-2 items-center ${colors.text} font-semibold`}>
-              <it.Icon size={20} weight="fill" /> <span>{it.label}</span>
-            </li>
-          )
-          return it.external ? (
-            <a key={it.key} href={it.href} target="_blank" rel="noopener noreferrer">{content}</a>
-          ) : (
-            <Link key={it.key} href={it.href}>{content}</Link>
-          )
-        })}
+  const branded = !!props.primaryColor
+  const isActive = (href: string, external: boolean) => {
+    if (external) return false
+    const path = href.replace(/^https?:\/\/[^/]+/, '').split('?')[0].replace(/\/$/, '')
+    if (!path) return false
+    return pathname === path || pathname.endsWith(path) || pathname.includes(path + '/')
+  }
+
+  const linkClass = (active: boolean) =>
+    cn(
+      'relative inline-flex h-10 items-center gap-2 rounded-[10px] px-3 text-[15px] font-semibold transition-colors',
+      branded
+        ? cn(colors.text, colors.hoverBg, active && 'bg-black/10')
+        : active
+          ? 'bg-selected text-foreground'
+          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+    )
+
+  const renderLink = (it: any, extraClass = '') => {
+    const active = isActive(it.href, it.external)
+    const body = (
+      <>
+        <it.Icon size={20} weight={active ? 'fill' : 'regular'} aria-hidden />
+        <span>{it.label}</span>
+      </>
+    )
+    return it.external ? (
+      <a key={it.key} href={it.href} target="_blank" rel="noopener noreferrer" className={cn(linkClass(false), extraClass)}>
+        {body}
+      </a>
+    ) : (
+      <Link key={it.key} href={it.href} aria-current={active ? 'page' : undefined} className={cn(linkClass(active), extraClass)}>
+        {body}
+      </Link>
+    )
+  }
+
+  if (props.layout === 'stack') {
+    return (
+      <ul className="grid w-full gap-1">
+        {rendered.map((it) => (
+          <li key={it.key}>{renderLink(it, 'w-full justify-start h-11')}</li>
+        ))}
       </ul>
-    </div>
+    )
+  }
+
+  const inline = rendered.slice(0, INLINE_LIMIT)
+  const overflow = rendered.slice(INLINE_LIMIT)
+  const overflowActive = overflow.some((it) => isActive(it.href, it.external))
+
+  return (
+    <ul className="flex items-center gap-1">
+      {inline.map((it) => (
+        <li key={it.key}>{renderLink(it)}</li>
+      ))}
+      {overflow.length > 0 && (
+        <li>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className={linkClass(overflowActive)}>
+                <span>{t('common.more', { defaultValue: 'More' })}</span>
+                <CaretDown size={14} weight="bold" aria-hidden />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              {overflow.map((it) => {
+                const active = isActive(it.href, it.external)
+                return (
+                  <DropdownMenuItem key={it.key} asChild className={cn(active && 'bg-selected')}>
+                    {it.external ? (
+                      <a href={it.href} target="_blank" rel="noopener noreferrer">
+                        <it.Icon size={18} aria-hidden />
+                        {it.label}
+                      </a>
+                    ) : (
+                      <Link href={it.href} aria-current={active ? 'page' : undefined}>
+                        <it.Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
+                        {it.label}
+                      </Link>
+                    )}
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </li>
+      )}
+    </ul>
   )
 }
 

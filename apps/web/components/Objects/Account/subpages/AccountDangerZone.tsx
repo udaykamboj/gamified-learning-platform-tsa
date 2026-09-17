@@ -62,7 +62,7 @@ export default function AccountDangerZone() {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow ring-1 ring-inset ring-red-100 overflow-hidden mt-6">
+    <div className="bg-card rounded-xl nice-shadow ring-1 ring-inset ring-red-100 overflow-hidden mt-6">
       <div className="flex flex-col bg-red-50/60 -space-y-1 px-5 py-3 mx-3 mt-3 rounded-md">
         <h1 className="font-bold text-xl text-red-700 flex items-center gap-2">
           <AlertTriangle size={18} />
@@ -129,7 +129,7 @@ export default function AccountDangerZone() {
           </DialogHeader>
 
           <div className="mt-4">
-            <label className="block text-xs font-medium text-black/50 mb-1.5">
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5">
               {t('account.delete.confirm_label', {
                 defaultValue: 'Type {{username}} to confirm',
                 username,
@@ -141,7 +141,7 @@ export default function AccountDangerZone() {
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder={username}
               autoComplete="off"
-              className="w-full px-3 py-2 text-sm rounded-xl border border-black/10 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
             />
             {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
           </div>
@@ -156,7 +156,7 @@ export default function AccountDangerZone() {
                 setError(null)
               }}
               disabled={deleting}
-              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-black/[0.04] hover:bg-black/[0.07] transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-foreground/[0.04] hover:bg-foreground/[0.07] transition-colors disabled:opacity-50"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>

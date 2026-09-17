@@ -11,7 +11,7 @@ interface CommunityHeaderProps {
 export function CommunityHeader({ community }: CommunityHeaderProps) {
   const { t } = useTranslation()
   return (
-    <div className="relative inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl w-full h-[150px] md:h-[250px] overflow-hidden">
+    <div className="relative inset-0 ring-1 ring-inset ring-border rounded-lg shadow-xl w-full h-[150px] md:h-[250px] overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600">
         {/* Pattern overlay */}

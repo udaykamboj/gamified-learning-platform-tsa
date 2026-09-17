@@ -94,7 +94,7 @@ const ScenariosExtension: React.FC = (props: any) => {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setShowAIGenerator(true)}
-                className="bg-neutral-900 hover:bg-neutral-800 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition-colors outline-none flex items-center gap-1.5 nice-shadow"
+                className="bg-primary hover:bg-primary text-primary-foreground font-medium py-1.5 px-3 rounded-lg text-xs transition-colors outline-none flex items-center gap-1.5 nice-shadow"
               >
                 <Sparkle weight="duotone" size={13} />
                 Generate with AI
@@ -119,7 +119,7 @@ const ScenariosExtension: React.FC = (props: any) => {
 
         {/* Scenario content */}
         {isEditable ? (
-          <div className="bg-white rounded-lg p-4 nice-shadow">
+          <div className="bg-card rounded-lg p-4 nice-shadow">
             <input
               value={title}
               placeholder="Scenario Title"
@@ -140,7 +140,7 @@ const ScenariosExtension: React.FC = (props: any) => {
             </div>
           </div>
         ) : scenarioComplete ? (
-          <div className="bg-white rounded-lg p-6 nice-shadow text-center">
+          <div className="bg-card rounded-lg p-6 nice-shadow text-center">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle weight="duotone" size={28} className="text-emerald-600" />
             </div>
@@ -162,7 +162,7 @@ const ScenariosExtension: React.FC = (props: any) => {
               const currentScenario = getCurrentScenario()
               if (!currentScenario) {
                 return (
-                  <div className="bg-white rounded-lg p-6 nice-shadow text-center">
+                  <div className="bg-card rounded-lg p-6 nice-shadow text-center">
                     <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <GitBranch weight="duotone" size={20} className="text-neutral-400" />
                     </div>
@@ -175,7 +175,7 @@ const ScenariosExtension: React.FC = (props: any) => {
               return (
                 <>
                   {/* Scenario Text */}
-                  <div className="bg-white rounded-lg p-5 nice-shadow">
+                  <div className="bg-card rounded-lg p-5 nice-shadow">
                     {currentScenario.imageUrl && (
                       <div className="mb-4">
                         <img
@@ -199,7 +199,7 @@ const ScenariosExtension: React.FC = (props: any) => {
                       <button
                         key={option.id}
                         onClick={() => handleOptionClick(option.nextScenarioId)}
-                        className="w-full bg-white border border-neutral-200 hover:border-blue-300 hover:bg-blue-50 rounded-lg p-3 transition-all group text-start nice-shadow"
+                        className="w-full bg-card border border-neutral-200 hover:border-blue-300 hover:bg-blue-50 rounded-lg p-3 transition-all group text-start nice-shadow"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-7 h-7 bg-neutral-100 group-hover:bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0 transition-colors">

@@ -351,7 +351,7 @@ function H5PBlockComponent(props: any) {
       ref={iframeRef}
       src={h5pUrl}
       title={frameTitle}
-      className="w-full block border-0 rounded-lg bg-white"
+      className="w-full block border-0 rounded-lg bg-card"
       style={{ height: `${displayHeight}px` }}
       onLoad={handleFrameLoad}
       /*
@@ -378,7 +378,7 @@ function H5PBlockComponent(props: any) {
   if (!isEditable) {
     return (
       <NodeViewWrapper className="block-h5p w-full">
-        <div ref={containerRef} className="w-full rounded-xl overflow-hidden nice-shadow bg-white">
+        <div ref={containerRef} className="w-full rounded-xl overflow-hidden nice-shadow bg-card">
           {frame}
         </div>
       </NodeViewWrapper>
@@ -450,7 +450,7 @@ function H5PBlockComponent(props: any) {
               )}
             </div>
 
-            <div ref={containerRef} className="w-full rounded-lg overflow-hidden nice-shadow bg-white">
+            <div ref={containerRef} className="w-full rounded-lg overflow-hidden nice-shadow bg-card">
               {frame}
               {/* Drag the bottom edge for a height none of the presets give. */}
               <div
@@ -477,7 +477,7 @@ function H5PBlockComponent(props: any) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg nice-shadow p-4">
+          <form onSubmit={handleSubmit} className="bg-card rounded-lg nice-shadow p-4">
             <p className="text-sm text-neutral-600 mb-1">
               {t('editor.blocks.h5p_block.description')}
             </p>

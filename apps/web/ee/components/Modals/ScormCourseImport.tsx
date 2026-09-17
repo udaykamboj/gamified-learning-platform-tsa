@@ -234,9 +234,9 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
       {/* Step Indicator */}
       <div className="flex items-center justify-center mb-6">
         <div className="flex items-center space-x-3">
-          <div className={`flex items-center space-x-2 ${step === 'upload' ? 'text-black' : 'text-gray-400'}`}>
+          <div className={`flex items-center space-x-2 ${step === 'upload' ? 'text-foreground' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'upload' ? 'bg-black text-white' : 'bg-green-500 text-white'
+              step === 'upload' ? 'bg-primary text-primary-foreground' : 'bg-green-500 text-primary-foreground'
             }`}>
               {step === 'configure' ? <CheckCircle2 size={16} /> : '1'}
             </div>
@@ -245,9 +245,9 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
           <div className="w-12 h-[2px] bg-gray-200">
             <div className={`h-full transition-all duration-300 ${step === 'configure' ? 'w-full bg-green-500' : 'w-0'}`} />
           </div>
-          <div className={`flex items-center space-x-2 ${step === 'configure' ? 'text-black' : 'text-gray-400'}`}>
+          <div className={`flex items-center space-x-2 ${step === 'configure' ? 'text-foreground' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'configure' ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'
+              step === 'configure' ? 'bg-primary text-primary-foreground' : 'bg-gray-200 text-gray-500'
             }`}>
               2
             </div>
@@ -360,7 +360,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
               <Button
                 type="submit"
                 disabled={!scormFile || isAnalyzing}
-                className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+                className="bg-primary text-primary-foreground hover:bg-primary px-6 h-11"
               >
                 {isAnalyzing ? (
                   <span>
@@ -438,7 +438,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
                   key={assignment.scoIdentifier}
                   className={`p-3 rounded-lg border transition-all duration-200 ${
                     assignment.include
-                      ? 'border-gray-200 bg-white shadow-sm'
+                      ? 'border-gray-200 bg-card shadow-sm'
                       : 'border-gray-100 bg-gray-50 opacity-50'
                   }`}
                 >
@@ -447,7 +447,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
                       type="checkbox"
                       checked={assignment.include}
                       onChange={(e) => handleAssignmentChange(index, 'include', e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-black focus:ring-black focus:ring-offset-0"
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-foreground focus:ring-black focus:ring-offset-0"
                     />
                     <div className="flex-1 space-y-2">
                       <p className="text-sm font-medium text-gray-800">{assignment.scoTitle}</p>
@@ -511,7 +511,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
               type="button"
               onClick={handleImport}
               disabled={selectedCount === 0 || isImporting || !courseName.trim()}
-              className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+              className="bg-primary text-primary-foreground hover:bg-primary px-6 h-11"
             >
               {isImporting ? (
                 <BarLoader width={60} color="#ffffff" cssOverride={{ borderRadius: 60 }} />

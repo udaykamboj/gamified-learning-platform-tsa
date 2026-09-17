@@ -51,7 +51,7 @@ export default function DashboardHome() {
   const planStyle = PLAN_COLORS[plan] || PLAN_COLORS.free
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8]">
+    <div className="h-full w-full bg-muted">
       <div className="px-4 sm:px-10 pt-8 pb-10">
         <div className="space-y-6 max-w-[1600px] mx-auto w-full">
           {/* Welcome Header */}
@@ -74,28 +74,28 @@ export default function DashboardHome() {
             <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href="/dash/courses"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary transition-colors"
               >
                 <BookOpen size={14} weight="bold" />
                 Course monitoring
               </Link>
               <Link
                 href="/dash/analytics"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-card rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
                 <ChartBar size={14} weight="bold" />
                 {t('dashboard.home.analytics')}
               </Link>
               <Link
                 href="/dash/users/settings/users"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-card rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
                 <Users size={14} weight="bold" />
                 {t('dashboard.home.members')}
               </Link>
               <Link
                 href="/dash/org/settings/general"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-card rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
                 <GearSix size={14} weight="bold" />
                 {t('dashboard.home.settings')}

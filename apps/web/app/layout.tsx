@@ -1,15 +1,34 @@
 import '../styles/globals.css'
 import React from 'react'
 import Providers from '@components/Providers'
-import { Wix_Madefor_Text, Tajawal } from 'next/font/google'
+import { Manrope, Space_Grotesk, DM_Mono, Tajawal } from 'next/font/google'
 
-const wixMadeforText = Wix_Madefor_Text({
+// StarLab Orbital type roles: Manrope for interface and reading text, Space
+// Grotesk for display and section headings, DM Mono for short technical labels
+// and metrics. Organization fonts still override the interface role through
+// the inline style on .lh-org-font-root.
+const manrope = Manrope({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-default',
 })
 
-// Wix Madefor Text has no Arabic subset, so Arabic would otherwise fall back to
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-heading',
+})
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-telemetry',
+})
+
+// Manrope has no Arabic subset, so Arabic would otherwise fall back to
 // whatever the OS provides — Geeza Pro, Segoe UI, Noto — and look like a
 // different product on every platform.
 //
@@ -39,11 +58,15 @@ export default function RootLayout({
   // no-JS baseline for crawlers; the script overwrites it for everyone else.
   return (
     <html
-      className={`${wixMadeforText.variable} ${tajawal.variable} dark`}
+      className={`${manrope.variable} ${spaceGrotesk.variable} ${dmMono.variable} ${tajawal.variable}`}
       lang="en"
       suppressHydrationWarning
     >
       <head>
+        {/* Synchronous script — applies the Light / Dark / System appearance
+            before body paints so the wrong theme never flashes. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/theme-init.js" />
         {/* Synchronous script — sets <html lang/dir> before body paints so an
             RTL locale never flashes an LTR layout. Must run first. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}

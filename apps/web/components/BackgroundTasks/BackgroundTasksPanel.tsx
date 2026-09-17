@@ -99,7 +99,7 @@ export default function BackgroundTasksPanel() {
 
   return (
     <div className="fixed top-4 end-4 z-[9999] w-[320px] max-w-[calc(100vw-2rem)]">
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-card shadow-xl">
         {/* Header */}
         <button
           type="button"

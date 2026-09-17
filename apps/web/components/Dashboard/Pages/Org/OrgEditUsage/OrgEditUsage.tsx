@@ -112,7 +112,7 @@ export default function OrgEditUsage() {
       <PlanUpsell orgSlug={org?.slug ?? ''} currentPlan={plan} />
 
       {/* Plan & Resource Usage */}
-      <div className="bg-white rounded-xl nice-shadow">
+      <div className="bg-card rounded-xl nice-shadow">
         <div className="border-b px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">
             {t('dashboard.organization.usage.plan_resource_usage')}
@@ -217,7 +217,7 @@ export default function OrgEditUsage() {
 
       {/* AI Credits */}
       {aiCredits && aiCredits.mode !== 'disabled' && (
-        <div className="bg-white rounded-xl nice-shadow">
+        <div className="bg-card rounded-xl nice-shadow">
           <div className="border-b px-6 py-4">
             <h3 className="text-lg font-semibold text-gray-800">{t('dashboard.organization.usage.ai_credits')}</h3>
           </div>
@@ -229,7 +229,7 @@ export default function OrgEditUsage() {
 
       {/* Active Packs */}
       {packsData && packsData.active_packs.length > 0 && (
-        <div className="bg-white rounded-xl nice-shadow">
+        <div className="bg-card rounded-xl nice-shadow">
           <div className="border-b px-6 py-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">Active Packs</h3>
             <Package size={20} weight="duotone" className="text-gray-400" />
@@ -267,7 +267,7 @@ export default function OrgEditUsage() {
 
       {/* Buy More — SaaS only */}
       {isSaaS && (
-        <div className="bg-white rounded-xl nice-shadow">
+        <div className="bg-card rounded-xl nice-shadow">
           <div className="p-6 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-gray-800">
@@ -406,7 +406,7 @@ function PlanUpsell({ orgSlug, currentPlan }: { orgSlug: string; currentPlan: st
   const compareUrl = getUpgradeUrl(orgSlug)
 
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
       <div className="border-b px-6 py-4 flex items-center gap-2.5">
         <Sparkle size={18} weight="fill" className="text-amber-500 flex-none" />
         <div className="min-w-0">
@@ -429,7 +429,7 @@ function PlanUpsell({ orgSlug, currentPlan }: { orgSlug: string; currentPlan: st
               style={{ background: `linear-gradient(to bottom, ${plan.topGlow}, transparent)` }}
             >
               {plan.popular && (
-                <span className="absolute top-4 end-4 text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                <span className="absolute top-4 end-4 text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
                   {t('dashboard.organization.usage.upsell.popular', { defaultValue: 'Popular' })}
                 </span>
               )}
@@ -445,7 +445,7 @@ function PlanUpsell({ orgSlug, currentPlan }: { orgSlug: string; currentPlan: st
                     <Check size={14} weight="bold" className="text-emerald-500 mt-0.5 flex-none" />
                     <span>
                       {f.label}
-                      {f.badge && <span className="ms-1 text-[10px] font-semibold text-gray-400">{f.badge}</span>}
+                      {f.badge && <span className="ms-1 text-[11px] font-semibold text-gray-400">{f.badge}</span>}
                     </span>
                   </li>
                 ))}

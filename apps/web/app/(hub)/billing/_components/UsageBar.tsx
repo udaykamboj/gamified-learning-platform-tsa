@@ -38,18 +38,18 @@ export default function UsageBar({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className={`p-1.5 rounded-lg shrink-0 ${color}`}>{icon}</div>
-          <span className="text-[13px] font-semibold text-black truncate">{label}</span>
+          <span className="text-[13px] font-semibold text-foreground truncate">{label}</span>
         </div>
-        <span className="text-[13px] font-medium text-black/50 whitespace-nowrap">
+        <span className="text-[13px] font-medium text-foreground/50 whitespace-nowrap">
           {usage.toLocaleString()}
           {isUnlimited ? (
-            <span className="text-black/25"> / {t('billing.unlimited_lower', { defaultValue: 'unlimited' })}</span>
+            <span className="text-foreground/25"> / {t('billing.unlimited_lower', { defaultValue: 'unlimited' })}</span>
           ) : (
-            <span className="text-black/25"> / {numericLimit.toLocaleString()}</span>
+            <span className="text-foreground/25"> / {numericLimit.toLocaleString()}</span>
           )}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-black/[0.04] overflow-hidden">
+      <div className="h-2 rounded-full bg-foreground/[0.04] overflow-hidden">
         {!isUnlimited ? (
           <div
             className={`h-full rounded-full transition-all duration-500 ${
@@ -58,7 +58,7 @@ export default function UsageBar({
             style={{ width: `${Math.max(pct, 2)}%` }}
           />
         ) : (
-          <div className="h-full rounded-full bg-black/[0.06]" style={{ width: '100%' }} />
+          <div className="h-full rounded-full bg-foreground/[0.06]" style={{ width: '100%' }} />
         )}
       </div>
       {footer !== undefined ? (
@@ -66,7 +66,7 @@ export default function UsageBar({
       ) : !isUnlimited ? (
         <p
           className={`text-[11px] font-medium ${
-            isFull ? 'text-red-500' : isHigh ? 'text-amber-600' : 'text-black/30'
+            isFull ? 'text-red-500' : isHigh ? 'text-amber-600' : 'text-foreground/30'
           }`}
         >
           {isFull

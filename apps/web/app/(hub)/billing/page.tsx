@@ -248,7 +248,7 @@ function BillingClient() {
   const showLoader = isLoading || (isAuthenticated && !orgsError && (orgsLoading || !org))
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-card overflow-y-auto">
       <Toaster />
       <div className="relative min-h-screen">
         {/* Blueprint grid — fades in from bottom */}
@@ -274,7 +274,7 @@ function BillingClient() {
               <div className="flex items-center gap-3 min-w-0">
                 <Link
                   href="/organizations"
-                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-white nice-shadow text-black/50 hover:text-black transition-colors flex-shrink-0"
+                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-card nice-shadow text-foreground/50 hover:text-foreground transition-colors flex-shrink-0"
                   aria-label={t('billing.back_to_orgs', { defaultValue: 'Back to organizations' })}
                 >
                   <ArrowLeft size={16} />
@@ -285,10 +285,10 @@ function BillingClient() {
                       <img
                         src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
                         alt={org.name}
-                        className="w-8 h-8 rounded-lg object-cover flex-shrink-0 ring-1 ring-inset ring-black/5"
+                        className="w-8 h-8 rounded-lg object-cover flex-shrink-0 ring-1 ring-inset ring-border"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0 ring-1 ring-inset ring-black/5">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0 ring-1 ring-inset ring-border">
                         {(org.name || org.slug || '?').trim().charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -301,9 +301,9 @@ function BillingClient() {
 
             {showLoader ? (
               <div className="space-y-4">
-                <div className="h-10 w-64 rounded-xl bg-black/[0.03] animate-pulse" />
-                <div className="h-40 w-full rounded-2xl bg-black/[0.03] animate-pulse" />
-                <div className="h-40 w-full rounded-2xl bg-black/[0.03] animate-pulse" />
+                <div className="h-10 w-64 rounded-xl bg-foreground/[0.03] animate-pulse" />
+                <div className="h-40 w-full rounded-2xl bg-foreground/[0.03] animate-pulse" />
+                <div className="h-40 w-full rounded-2xl bg-foreground/[0.03] animate-pulse" />
               </div>
             ) : orgsError ? (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center">
@@ -331,7 +331,7 @@ function BillingClient() {
                 </p>
                 <Link
                   href="/home"
-                  className="mt-4 inline-flex items-center rounded-full bg-gray-900 px-4 py-1.5 text-sm font-bold text-white hover:bg-gray-800"
+                  className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground hover:bg-primary"
                 >
                   {t('common.home', { defaultValue: 'Home' })}
                 </Link>
@@ -380,7 +380,7 @@ function BillingClient() {
 
 export default function BillingPage() {
   return (
-    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-white" />}>
+    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-card" />}>
       <BillingClient />
     </Suspense>
   )

@@ -59,7 +59,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
       )}
 
       <Link prefetch href={getUriWithOrg(org?.slug, '/')} className="relative z-10">
-        <div className="w-10 h-10 rounded-lg ring-1 ring-inset ring-white/10 bg-white flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-10 h-10 rounded-lg ring-1 ring-inset ring-white/10 bg-card flex items-center justify-center overflow-hidden shrink-0">
           {org?.logo_image ? (
             <img
               src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
@@ -85,7 +85,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
 
       {/* Unsplash attribution (required by Unsplash API guidelines) */}
       {background_type === 'unsplash' && background_image && unsplash_photographer_name && (
-        <span className="relative z-10 ms-auto text-[10px] leading-tight text-white/70 truncate max-w-[45%] text-end">
+        <span className="relative z-10 ms-auto text-[11px] leading-tight text-white/70 truncate max-w-[45%] text-end">
           Photo by{' '}
           <a
             href={withUtm(unsplash_photographer_url) || withUtm(unsplash_photo_url)}

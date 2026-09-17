@@ -69,7 +69,7 @@ const ConfirmationModal = (params: ModalParams) => {
             {isWarning ? <AlertTriangle size={35} /> : <Info size={35} />}
           </div>
           <div className="pt-1 w-auto grow">
-            <div className="text-xl font-bold text-black">{params.dialogTitle}</div>
+            <div className="text-xl font-bold text-foreground">{params.dialogTitle}</div>
             <div className="text-md text-gray-500 leading-tight mt-1">
               {params.confirmationMessage}
             </div>

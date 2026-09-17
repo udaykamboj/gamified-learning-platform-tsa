@@ -966,7 +966,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
       badge:
         results && testCases.length > 0 ? (
           <span
-            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+            className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
               allPassed
                 ? 'bg-emerald-100 text-emerald-600'
                 : 'bg-red-100 text-red-600'
@@ -1105,7 +1105,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 onChange={handleSqliteUpload}
                 className="hidden"
               />
-              <p className="text-[10px] text-neutral-400 mt-1">
+              <p className="text-[11px] text-neutral-400 mt-1">
                 Students' SQL queries will run against this database.
               </p>
             </div>
@@ -1143,7 +1143,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                     <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Time Limit</label>
                     <div className="relative">
                       <input type="number" min={1000} step={1000} value={timeLimitMs} onChange={(e) => updateAttributes({ timeLimitMs: parseInt(e.target.value) || 10000 })} className="w-full text-[12px] text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 pr-10 outline-none focus:border-neutral-300 transition-colors nice-shadow" />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">ms</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400">ms</span>
                     </div>
                   </div>
                 </div>
@@ -1164,13 +1164,13 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Timed Challenge</label>
-                    <p className="text-[10px] text-neutral-400">Add a countdown timer to the challenge.</p>
+                    <p className="text-[11px] text-neutral-400">Add a countdown timer to the challenge.</p>
                   </div>
                   <button
                     onClick={() => updateAttributes({ timedMode: !timedMode })}
                     className={`w-10 h-5 rounded-full transition-colors ${timedMode ? 'bg-blue-500' : 'bg-neutral-200'}`}
                   >
-                    <span className={`block w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${timedMode ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0.5 rtl:-translate-x-0.5'}`} />
+                    <span className={`block w-4 h-4 rounded-full bg-card transition-transform shadow-sm ${timedMode ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0.5 rtl:-translate-x-0.5'}`} />
                   </button>
                 </div>
                 {timedMode && (
@@ -1193,14 +1193,14 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                       <Plus weight="duotone" size={11} /> Add File
                     </button>
                   </div>
-                  <p className="text-[10px] text-neutral-400 mb-2">Files available to the student's code (e.g., data.txt, utils.py).</p>
+                  <p className="text-[11px] text-neutral-400 mb-2">Files available to the student's code (e.g., data.txt, utils.py).</p>
                   {additionalFiles.map((file, i) => (
                     <div key={i} className="mb-2 rounded-lg border border-neutral-200 p-2.5 bg-neutral-50/50">
                       <div className="flex items-center gap-2 mb-1.5">
                         <input
                           value={file.name}
                           onChange={(e) => updateAdditionalFile(i, 'name', e.target.value)}
-                          className="flex-1 text-[11px] font-mono text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1 outline-none focus:border-neutral-300"
+                          className="flex-1 text-[11px] font-mono text-neutral-700 bg-card border border-neutral-200 rounded px-2 py-1 outline-none focus:border-neutral-300"
                           placeholder="filename.ext"
                         />
                         <button onClick={() => removeAdditionalFile(i)} className="p-1 hover:bg-red-50 rounded transition-colors">
@@ -1210,7 +1210,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                       <textarea
                         value={file.content}
                         onChange={(e) => updateAdditionalFile(i, 'content', e.target.value)}
-                        className="w-full text-[11px] font-mono text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-neutral-300 resize-none"
+                        className="w-full text-[11px] font-mono text-neutral-700 bg-card border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-neutral-300 resize-none"
                         rows={4}
                         placeholder="File contents..."
                       />
@@ -1259,7 +1259,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
 
           {additionalFiles.length > 0 && (
             <div className="space-y-1">
-              <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">Available Files</span>
+              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Available Files</span>
               {additionalFiles.map((f, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg text-neutral-500 bg-neutral-50 border border-neutral-100 nice-shadow w-fit">
                   <FileText weight="duotone" size={10} className="text-neutral-400" />
@@ -1290,13 +1290,13 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setSolutionView('diff')}
-                      className={`text-[10px] font-semibold px-2 py-1 rounded transition-colors ${solutionView === 'diff' ? 'bg-neutral-200 text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'}`}
+                      className={`text-[11px] font-semibold px-2 py-1 rounded transition-colors ${solutionView === 'diff' ? 'bg-neutral-200 text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'}`}
                     >
                       Diff
                     </button>
                     <button
                       onClick={() => setSolutionView('solution')}
-                      className={`text-[10px] font-semibold px-2 py-1 rounded transition-colors ${solutionView === 'solution' ? 'bg-neutral-200 text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'}`}
+                      className={`text-[11px] font-semibold px-2 py-1 rounded transition-colors ${solutionView === 'solution' ? 'bg-neutral-200 text-neutral-700' : 'text-neutral-400 hover:text-neutral-600'}`}
                     >
                       Solution
                     </button>
@@ -1361,7 +1361,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
               <div
                 key={tc.id}
                 className={`rounded-lg border overflow-hidden transition-colors nice-shadow ${
-                  r ? (r.passed ? 'border-emerald-200 bg-emerald-50/30' : 'border-red-200 bg-red-50/30') : 'border-neutral-200 bg-white'
+                  r ? (r.passed ? 'border-emerald-200 bg-emerald-50/30' : 'border-red-200 bg-red-50/30') : 'border-neutral-200 bg-card'
                 }`}
               >
                 <div className="flex items-center gap-3 px-3.5 py-2.5">
@@ -1378,7 +1378,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {r?.time && <span className="text-[10px] text-neutral-400 font-mono">{r.time}s</span>}
+                    {r?.time && <span className="text-[11px] text-neutral-400 font-mono">{r.time}s</span>}
                     {isEditable && (
                       <button onClick={() => removeTestCase(tc.id)} className="p-1 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash weight="duotone" size={12} className="text-red-400" />
@@ -1388,7 +1388,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 <div className="px-3.5 pb-3 space-y-2 border-t border-neutral-100">
                   <div className="pt-2.5">
-                    <label className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Input</label>
+                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Input</label>
                     {isEditable ? (
                       <textarea value={tc.stdin} onChange={(e) => updateTestCase(tc.id, 'stdin', e.target.value)} className="w-full text-[12px] font-mono text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 outline-none focus:border-neutral-300 resize-none transition-colors" rows={2} placeholder="stdin..." />
                     ) : (
@@ -1396,7 +1396,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                     )}
                   </div>
                   <div>
-                    <label className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Expected Output</label>
+                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Expected Output</label>
                     {isEditable ? (
                       <textarea value={tc.expectedStdout} onChange={(e) => updateTestCase(tc.id, 'expectedStdout', e.target.value)} className="w-full text-[12px] font-mono text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 outline-none focus:border-neutral-300 resize-none transition-colors" rows={2} placeholder="expected stdout..." />
                     ) : (
@@ -1405,7 +1405,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                   </div>
                   {r && !r.passed && r.actual_stdout != null && (
                     <div>
-                      <label className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1 block">Your Output</label>
+                      <label className="text-[11px] font-semibold text-red-400 uppercase tracking-wider mb-1 block">Your Output</label>
                       <pre className="text-[12px] font-mono text-red-600 bg-red-50 border border-red-100 rounded-lg p-2.5 whitespace-pre-wrap">{r.actual_stdout || '(no output)'}</pre>
                     </div>
                   )}
@@ -1437,7 +1437,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 <input
                   value={tc.label}
                   onChange={(e) => updateStudentTestCase(tc.id, 'label', e.target.value)}
-                  className="flex-1 text-[12px] font-medium text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1 outline-none focus:border-blue-300"
+                  className="flex-1 text-[12px] font-medium text-neutral-700 bg-card border border-neutral-200 rounded px-2 py-1 outline-none focus:border-blue-300"
                 />
                 <button onClick={() => removeStudentTestCase(tc.id)} className="p-1 hover:bg-red-50 rounded transition-colors">
                   <Trash weight="duotone" size={11} className="text-red-400" />
@@ -1445,21 +1445,21 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
               </div>
               <div className="space-y-1.5">
                 <div>
-                  <label className="text-[9px] font-semibold text-neutral-400 uppercase">Input (stdin)</label>
+                  <label className="text-[11px] font-semibold text-neutral-400 uppercase">Input (stdin)</label>
                   <textarea
                     value={tc.stdin}
                     onChange={(e) => updateStudentTestCase(tc.id, 'stdin', e.target.value)}
-                    className="w-full text-[11px] font-mono text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-blue-300 resize-none"
+                    className="w-full text-[11px] font-mono text-neutral-700 bg-card border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-blue-300 resize-none"
                     rows={2}
                     placeholder="Input..."
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-semibold text-neutral-400 uppercase">Expected Output</label>
+                  <label className="text-[11px] font-semibold text-neutral-400 uppercase">Expected Output</label>
                   <textarea
                     value={tc.expectedStdout}
                     onChange={(e) => updateStudentTestCase(tc.id, 'expectedStdout', e.target.value)}
-                    className="w-full text-[11px] font-mono text-neutral-700 bg-white border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-blue-300 resize-none"
+                    className="w-full text-[11px] font-mono text-neutral-700 bg-card border border-neutral-200 rounded px-2 py-1.5 outline-none focus:border-blue-300 resize-none"
                     rows={2}
                     placeholder="Expected output..."
                   />
@@ -1515,7 +1515,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
             <span className="w-2 h-2 rounded-full bg-[#febc2e]" />
             <span className="w-2 h-2 rounded-full bg-[#28c840]" />
           </div>
-          <span className="text-[10px] font-mono text-neutral-500 ml-1">{label}</span>
+          <span className="text-[11px] font-mono text-neutral-500 ml-1">{label}</span>
           <div className="ml-auto">{copyText && <CopyButton text={copyText} />}</div>
         </div>
         <div className="p-3.5">
@@ -1530,7 +1530,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
           {time && (
             <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-white/5">
               <Clock weight="duotone" size={10} className="text-neutral-500" />
-              <span className="text-[10px] font-mono text-neutral-500">{(parseFloat(time) * 1000).toFixed(0)}ms</span>
+              <span className="text-[11px] font-mono text-neutral-500">{(parseFloat(time) * 1000).toFixed(0)}ms</span>
             </div>
           )}
         </div>
@@ -1573,18 +1573,18 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 <div className="flex items-center gap-2 px-3.5 py-2">
                   {r.passed ? <CheckCircle weight="duotone" size={13} className="text-emerald-500" /> : <XCircle weight="duotone" size={13} className="text-red-500" />}
                   <span className="text-[12px] font-semibold text-neutral-700">{r.label}</span>
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${r.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                  <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${r.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
                     {r.status?.description || (r.passed ? 'Accepted' : 'Failed')}
                   </span>
                   <div className="ml-auto flex items-center gap-2">
-                    {r.time && <span className="text-[10px] text-neutral-400 font-mono">{r.time}s</span>}
-                    {r.memory && <span className="text-[10px] text-neutral-400 font-mono">{Math.round(r.memory)}KB</span>}
+                    {r.time && <span className="text-[11px] text-neutral-400 font-mono">{r.time}s</span>}
+                    {r.memory && <span className="text-[11px] text-neutral-400 font-mono">{Math.round(r.memory)}KB</span>}
                   </div>
                 </div>
                 {r.actual_stdout != null && (
                   <div className="px-3.5 pb-2.5">
                     <div className="flex items-center justify-between mb-0.5">
-                      <label className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider">Output</label>
+                      <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Output</label>
                       <CopyButton text={r.actual_stdout || ''} />
                     </div>
                     {isSqlLanguage && r.actual_stdout && r.actual_stdout.includes('|') ? (
@@ -1593,7 +1593,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                           <thead>
                             <tr className="bg-neutral-50">
                               {r.actual_stdout.trim().split('\n')[0].split('|').map((h, i) => (
-                                <th key={i} className="px-2.5 py-1.5 text-left text-[10px] font-bold text-neutral-500 uppercase tracking-wider border-b border-neutral-200">
+                                <th key={i} className="px-2.5 py-1.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider border-b border-neutral-200">
                                   {h}
                                 </th>
                               ))}
@@ -1601,7 +1601,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                           </thead>
                           <tbody>
                             {r.actual_stdout.trim().split('\n').slice(1).filter(Boolean).map((line, ri) => (
-                              <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-neutral-50/50'}>
+                              <tr key={ri} className={ri % 2 === 0 ? 'bg-card' : 'bg-neutral-50/50'}>
                                 {line.split('|').map((cell, ci) => (
                                   <td key={ci} className="px-2.5 py-1 text-neutral-700 border-b border-neutral-100">
                                     {cell}
@@ -1613,13 +1613,13 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                         </table>
                       </div>
                     ) : (
-                      <pre className="text-[11px] font-mono text-neutral-700 bg-white border border-neutral-100 rounded-lg p-2 whitespace-pre-wrap nice-shadow">{r.actual_stdout || '(no output)'}</pre>
+                      <pre className="text-[11px] font-mono text-neutral-700 bg-card border border-neutral-100 rounded-lg p-2 whitespace-pre-wrap nice-shadow">{r.actual_stdout || '(no output)'}</pre>
                     )}
                   </div>
                 )}
                 {!r.passed && r.expected_stdout && (
                   <div className="px-3.5 pb-2.5">
-                    <label className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider mb-0.5 block">Expected</label>
+                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-0.5 block">Expected</label>
                     <pre className="text-[11px] font-mono text-emerald-700 bg-emerald-50/50 border border-emerald-100 rounded-lg p-2 whitespace-pre-wrap nice-shadow">{r.expected_stdout}</pre>
                   </div>
                 )}
@@ -1702,7 +1702,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 <span className="text-[12px] font-semibold text-neutral-300 tracking-tight">
                   Code Playground
                 </span>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${diff.darkBg} ${diff.darkText}`}>
+                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md ${diff.darkBg} ${diff.darkText}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${diff.dot}`} />
                   {diff.label}
                 </span>
@@ -1847,7 +1847,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                   )}
                   {isEditable ? 'Test Run' : 'Run Code'}
                 </button>
-                <span className="text-[10px] text-neutral-500 hidden sm:inline">
+                <span className="text-[11px] text-neutral-500 hidden sm:inline">
                   {typeof navigator !== 'undefined' && navigator.platform?.includes('Mac') ? '\u2318' : 'Ctrl'}+Enter
                 </span>
                 {isRunning && (
@@ -1872,10 +1872,10 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
 
           {/* ── Right: Tabbed Panel ──────────────────────────── */}
           <div
-            className="flex-1 min-w-[240px] border-l border-neutral-200/60 bg-white flex flex-col"
+            className="flex-1 min-w-[240px] border-l border-neutral-200/60 bg-card flex flex-col"
           >
             {/* Tab bar */}
-            <div className="flex items-center border-b border-neutral-200/60 bg-white px-1 shrink-0">
+            <div className="flex items-center border-b border-neutral-200/60 bg-card px-1 shrink-0">
               {visibleTabs.map((tab) => (
                 <button
                   key={tab.id}

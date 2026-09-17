@@ -82,7 +82,7 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
         </p>
       </div>
 
-      <div className="bg-white border rounded-xl p-6 space-y-4 max-w-xs w-full nice-shadow">
+      <div className="bg-card border rounded-xl p-6 space-y-4 max-w-xs w-full nice-shadow">
         <div className="text-center">
           <p className="text-3xl font-bold text-gray-900">{formattedPrice}</p>
           <p className="text-sm text-gray-500">{offer.offer_name}</p>

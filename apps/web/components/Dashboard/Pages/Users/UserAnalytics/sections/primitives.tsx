@@ -7,7 +7,7 @@ export const P = 'dashboard.users.analytics'
 
 export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-xl nice-shadow p-5 ${className}`}>{children}</div>
+    <div className={`bg-card rounded-xl nice-shadow p-5 ${className}`}>{children}</div>
   )
 }
 

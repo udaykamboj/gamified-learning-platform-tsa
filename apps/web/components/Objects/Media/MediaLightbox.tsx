@@ -76,7 +76,7 @@ export default function MediaLightbox({ resource, mediaUuid, isOpen, onOpenChang
             {downloadUrl && (
               <a
                 href={downloadUrl}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3 py-2 text-xs font-semibold text-white nice-shadow hover:bg-neutral-800 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground nice-shadow hover:bg-primary transition-colors"
               >
                 <DownloadSimple size={14} /> {t('media.download')}
               </a>

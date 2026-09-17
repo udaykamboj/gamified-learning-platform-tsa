@@ -23,12 +23,14 @@ export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
 
   if (error || !data) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/40">
-        <ChartBar size={48} weight="fill" />
-        <p className="mt-4 text-lg">
+      <div className="sl-card flex flex-col items-center justify-center px-6 py-16 text-center text-muted-foreground">
+        <span className="grid size-12 place-items-center rounded-full bg-muted">
+          <ChartBar size={24} aria-hidden />
+        </span>
+        <p className="mt-4 text-card-title font-semibold text-foreground">
           {error ? 'Failed to load analytics' : 'No analytics data available'}
         </p>
-        <p className="text-sm text-white/25 mt-1">
+        <p className="mt-1 text-ui text-muted-foreground">
           Ensure Tinybird analytics is configured
         </p>
       </div>
@@ -45,31 +47,31 @@ export default function GlobalAnalytics({ days = 30 }: { days?: number }) {
         const firstRow = rows[0] || {}
         const values = Object.entries(firstRow)
 
+        const format = (val: unknown) => (typeof val === 'number' ? val.toLocaleString() : String(val))
+        const title = queryName.replace(/_/g, ' ')
+
         return (
-          <div
-            key={queryName}
-            className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-5"
-          >
-            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">
-              {queryName.replace(/_/g, ' ')}
-            </h3>
-            {values.length > 0 ? (
-              <div className="space-y-2">
+          <div key={queryName} className="sl-card p-5 md:p-6">
+            <h3 className="text-sm font-semibold capitalize text-muted-foreground">{title}</h3>
+            {values.length === 1 ? (
+              // Single metric: label, prominent value, unit.
+              <p className="mt-3 flex items-baseline gap-2">
+                <span className="font-display text-page font-semibold tabular-nums text-foreground">
+                  {format(values[0][1])}
+                </span>
+                <span className="text-ui text-muted-foreground">{values[0][0].replace(/_/g, ' ')}</span>
+              </p>
+            ) : values.length > 0 ? (
+              <dl className="mt-3 divide-y divide-border">
                 {values.map(([key, val]) => (
-                  <div key={key} className="flex justify-between items-center">
-                    <span className="text-sm text-white/50">
-                      {key.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-sm font-medium text-white">
-                      {typeof val === 'number'
-                        ? val.toLocaleString()
-                        : String(val)}
-                    </span>
+                  <div key={key} className="flex items-center justify-between gap-4 py-2">
+                    <dt className="text-ui capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</dt>
+                    <dd className="text-ui font-semibold tabular-nums text-foreground">{format(val)}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             ) : (
-              <p className="text-sm text-white/25">No data</p>
+              <p className="mt-3 text-ui text-muted-foreground">No data for this period</p>
             )}
           </div>
         )

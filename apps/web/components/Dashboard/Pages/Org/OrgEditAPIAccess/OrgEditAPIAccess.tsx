@@ -204,7 +204,7 @@ const OrgEditAPIAccess: React.FC = () => {
   return (
     <FeatureGate feature="api_access">
     <>
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow pt-3">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow pt-3">
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">
@@ -249,7 +249,7 @@ const OrgEditAPIAccess: React.FC = () => {
               </p>
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-action-hover"
               >
                 <Plus size={16} className="me-2" />
                 {t('dashboard.organization.api_access.create_token')}

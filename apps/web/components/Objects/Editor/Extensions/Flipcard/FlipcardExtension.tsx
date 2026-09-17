@@ -410,7 +410,7 @@ const FlipcardExtension: React.FC = (props: any) => {
 
         {/* Color Picker */}
         {isEditable && showColorPicker && (
-          <div ref={colorPickerRef} className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 p-3 bg-white rounded-lg nice-shadow z-10 border border-neutral-200">
+          <div ref={colorPickerRef} className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 p-3 bg-card rounded-lg nice-shadow z-10 border border-neutral-200">
             <div className="flex flex-wrap gap-2 max-w-xs">
               {colors.map((c) => (
                 <button

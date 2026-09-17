@@ -121,7 +121,7 @@ export function CreatePodcastModal({
                   name="name"
                   id="name"
                   placeholder={t('podcasts.modals.create.form.name_placeholder')}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all"
                 />
                 <ErrorMessage
                   name="name"
@@ -144,7 +144,7 @@ export function CreatePodcastModal({
                   id="description"
                   rows={3}
                   placeholder={t('podcasts.modals.create.form.description_placeholder')}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all resize-none"
                 />
                 <ErrorMessage
                   name="description"
@@ -159,7 +159,7 @@ export function CreatePodcastModal({
                   type="checkbox"
                   name="public"
                   id="public"
-                  className="w-4 h-4 text-black rounded border-gray-300 focus:ring-black/20"
+                  className="w-4 h-4 text-foreground rounded border-gray-300 focus:ring-border"
                 />
                 <label
                   htmlFor="public"
@@ -181,7 +181,7 @@ export function CreatePodcastModal({
                 <button
                   type="submit"
                   disabled={isSubmitting || !isValid || !dirty}
-                  className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   {t('podcasts.modals.create.submit')}

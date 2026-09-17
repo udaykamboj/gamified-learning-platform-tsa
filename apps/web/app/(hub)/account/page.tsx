@@ -42,7 +42,7 @@ function AccountClient() {
   const showLoader = isLoading || !isAuthenticated
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-card overflow-y-auto">
       <Toaster />
       <div className="relative min-h-screen">
         {/* Blueprint grid — fades in from bottom */}
@@ -68,7 +68,7 @@ function AccountClient() {
               <div className="flex items-center gap-3 min-w-0">
                 <Link
                   href="/home"
-                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-white nice-shadow text-black/50 hover:text-black transition-colors flex-shrink-0"
+                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-card nice-shadow text-foreground/50 hover:text-foreground transition-colors flex-shrink-0"
                   aria-label={t('account.back_home', { defaultValue: 'Back to organizations' })}
                 >
                   <ArrowLeft size={16} />
@@ -77,7 +77,7 @@ function AccountClient() {
                   <h1 className="text-lg font-black tracking-tight text-gray-900 truncate">
                     {t('account.title', { defaultValue: 'Account settings' })}
                   </h1>
-                  <p className="text-xs text-black/40 truncate">
+                  <p className="text-xs text-foreground/40 truncate">
                     {t('account.subtitle', {
                       defaultValue: 'Manage your profile, security and account',
                     })}
@@ -91,16 +91,16 @@ function AccountClient() {
 
             {showLoader ? (
               <div className="space-y-4">
-                <div className="h-40 w-full rounded-2xl bg-black/[0.03] animate-pulse" />
-                <div className="h-40 w-full rounded-2xl bg-black/[0.03] animate-pulse" />
-                <div className="h-28 w-full rounded-2xl bg-black/[0.03] animate-pulse" />
+                <div className="h-40 w-full rounded-2xl bg-foreground/[0.03] animate-pulse" />
+                <div className="h-40 w-full rounded-2xl bg-foreground/[0.03] animate-pulse" />
+                <div className="h-28 w-full rounded-2xl bg-foreground/[0.03] animate-pulse" />
               </div>
             ) : (
               <div className="space-y-6">
                 {/* A. Profile — identity (first/last name, username, bio, avatar) */}
                 <section className="space-y-2.5">
                   <div className="flex items-center gap-2 px-1">
-                    <UserCog size={15} className="text-black/40" />
+                    <UserCog size={15} className="text-foreground/40" />
                     <h2 className="text-sm font-semibold text-gray-700">
                       {t('account.section.profile', { defaultValue: 'Profile' })}
                     </h2>
@@ -111,7 +111,7 @@ function AccountClient() {
                 {/* B. Security — change password */}
                 <section className="space-y-2.5">
                   <div className="flex items-center gap-2 px-1">
-                    <KeyRound size={15} className="text-black/40" />
+                    <KeyRound size={15} className="text-foreground/40" />
                     <h2 className="text-sm font-semibold text-gray-700">
                       {t('account.section.security', { defaultValue: 'Security' })}
                     </h2>
@@ -176,7 +176,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
   }
 
   return (
-    <div className="rounded-2xl bg-white nice-shadow ring-1 ring-inset ring-red-100 overflow-hidden">
+    <div className="rounded-2xl bg-card nice-shadow ring-1 ring-inset ring-red-100 overflow-hidden">
       <div className="p-5 sm:flex sm:items-center sm:justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-red-50 text-red-600 flex-shrink-0">
@@ -186,7 +186,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
             <h3 className="font-semibold text-gray-900">
               {t('account.delete.title', { defaultValue: 'Delete account' })}
             </h3>
-            <p className="text-sm text-black/50 mt-0.5">
+            <p className="text-sm text-foreground/50 mt-0.5">
               {t('account.delete.description', {
                 defaultValue:
                   'Permanently delete your account and remove your access. This cannot be undone.',
@@ -241,7 +241,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
           </DialogHeader>
 
           <div className="mt-4">
-            <label className="block text-xs font-medium text-black/50 mb-1.5">
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5">
               {t('account.delete.confirm_label', {
                 defaultValue: 'Type {{username}} to confirm',
                 username,
@@ -253,7 +253,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder={username}
               autoComplete="off"
-              className="w-full px-3 py-2 text-sm rounded-xl border border-black/10 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
             />
             {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
           </div>
@@ -268,7 +268,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
                 setError(null)
               }}
               disabled={deleting}
-              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-black/[0.04] hover:bg-black/[0.07] transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-foreground/[0.04] hover:bg-foreground/[0.07] transition-colors disabled:opacity-50"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
@@ -291,7 +291,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-white" />}>
+    <Suspense fallback={<div className="fixed inset-0 z-[100] bg-card" />}>
       <AccountClient />
     </Suspense>
   )

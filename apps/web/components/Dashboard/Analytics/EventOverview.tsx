@@ -194,7 +194,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
 
   return (
     <>
-    <div className="bg-white nice-shadow rounded-xl overflow-hidden">
+    <div className="bg-card nice-shadow rounded-xl overflow-hidden">
       <div className="grid grid-cols-5 divide-x divide-gray-100">
         <div
           className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors group relative"

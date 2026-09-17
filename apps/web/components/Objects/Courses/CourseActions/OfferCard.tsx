@@ -34,7 +34,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
   const formattedPrice = formatCurrency(offer.amount, offer.currency ?? 'USD', i18n.language)
 
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
       {/* Type stripe */}
       <div className={`px-4 py-2 flex items-center gap-2 ${isSubscription ? 'bg-indigo-50' : 'bg-gray-50'}`}>
         {isSubscription
@@ -102,8 +102,8 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
         >
           <div className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm transition-colors cursor-pointer ${
             isSubscription
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              : 'bg-gray-900 hover:bg-gray-800 text-white'
+              ? 'bg-indigo-600 hover:bg-indigo-700 text-primary-foreground'
+              : 'bg-primary hover:bg-primary text-primary-foreground'
           }`}>
             {isSubscription ? 'Subscribe now' : 'Get access'}
             <ArrowRight size={13} />

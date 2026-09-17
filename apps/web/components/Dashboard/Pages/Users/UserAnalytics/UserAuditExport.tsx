@@ -253,14 +253,14 @@ export default function UserAuditExport({ userIds, days = 365, defaultDossier, l
       <button
         onClick={() => setOpen((o) => !o)}
         disabled={busy || ids.length === 0}
-        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary transition-colors disabled:opacity-50"
       >
         <Download size={15} />
         {busy ? t('dashboard.users.analytics.exporting') : label || t('dashboard.users.analytics.export')}
         {!busy && <ChevronDown size={12} />}
       </button>
       {open && (
-        <div className="absolute end-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 min-w-[190px] overflow-hidden">
+        <div className="absolute end-0 mt-1 bg-card border border-gray-200 rounded-lg shadow-lg z-30 min-w-[190px] overflow-hidden">
           {(['pdf', 'csv', 'json'] as Fmt[]).map((f) => (
             <button
               key={f}

@@ -38,7 +38,7 @@ const AccessCard = React.forwardRef<
         transition-all duration-150
         ${
           selected
-            ? 'bg-white border border-indigo-200 ring-1 ring-indigo-100 shadow-xs'
+            ? 'bg-card border border-indigo-200 ring-1 ring-indigo-100 shadow-xs'
             : 'bg-gray-50/80 border border-gray-100 hover:bg-gray-50 hover:border-gray-200'
         }
         ${className || ''}
@@ -55,7 +55,7 @@ const AccessCard = React.forwardRef<
       )}
       <div
         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-150 ${
-          selected ? 'bg-indigo-50 text-indigo-600' : 'bg-white border border-gray-100 text-gray-400'
+          selected ? 'bg-indigo-50 text-indigo-600' : 'bg-card border border-gray-100 text-gray-400'
         }`}
       >
         <Icon size={24} strokeWidth={1.75} />
@@ -132,7 +132,7 @@ function ManageAccessPopover({ resource_uuid, resourceType }: Props) {
   const isReady = isClientPublic !== undefined
 
   return (
-    <div className="bg-white rounded-xl">
+    <div className="bg-card rounded-xl">
       {/* Access type cards */}
       <div className="pb-5 border-b border-gray-100">
         <div className={`flex flex-col sm:flex-row gap-3 transition-opacity duration-200 ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}>

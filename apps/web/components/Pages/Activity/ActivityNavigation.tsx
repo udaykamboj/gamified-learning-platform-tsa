@@ -147,7 +147,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
                 onClick={() => navigateToActivity(prevActivity)}
                 className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
                   prevActivity 
-                    ? 'bg-white nice-shadow text-gray-700' 
+                    ? 'bg-card nice-shadow text-gray-700' 
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
                 disabled={!prevActivity}
@@ -172,7 +172,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
                 onClick={() => navigateToActivity(nextActivity)}
                 className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
                   nextActivity 
-                    ? 'bg-white nice-shadow text-gray-700' 
+                    ? 'bg-card nice-shadow text-gray-700' 
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
                 disabled={!nextActivity}
@@ -204,7 +204,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       {!isBottomNavVisible && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-sticky-header w-[85%] sm:w-auto sm:min-w-[350px] max-w-lg transition-all duration-300 ease-in-out">
           <div 
-            className="bg-white/90 backdrop-blur-xl rounded-full py-1.5 px-2.5 shadow-xs animate-in fade-in slide-in-from-bottom duration-300"
+            className="bg-card/90 backdrop-blur-xl rounded-full py-1.5 px-2.5 shadow-xs animate-in fade-in slide-in-from-bottom duration-300"
           >
             <NavigationButtons isFloating={true} />
           </div>

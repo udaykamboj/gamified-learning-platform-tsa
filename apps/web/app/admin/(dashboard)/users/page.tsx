@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 export default function AdminUsersPage() {
   return (
-    <div className="p-8">
+    <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Users</h1>
-        <p className="text-white/40 mt-1">
+        <h1 className="sl-page-title">Users</h1>
+        <p className="mt-2 text-reading text-muted-foreground">
           Manage all users across the platform
         </p>
       </div>

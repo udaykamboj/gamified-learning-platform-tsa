@@ -281,7 +281,7 @@ const OrgEditLanding = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
       <div className="p-6 space-y-6">
         {/* Enable/Disable Landing Page */}
         <div className="flex items-center justify-between border-b pb-4">
@@ -297,7 +297,7 @@ const OrgEditLanding = () => {
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-card after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
             <Button 
               variant="default" 
@@ -337,7 +337,7 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`p-4 bg-white/80 backdrop-blur-xs rounded-lg cursor-pointer border  ${
+                                className={`p-4 bg-card/80 backdrop-blur-xs rounded-lg cursor-pointer border  ${
                                   selectedSection === index 
                                     ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 shadow-xs' 
                                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
@@ -415,7 +415,7 @@ const OrgEditLanding = () => {
                   >
                     <SelectTrigger className="w-full p-0 border-0 bg-black ">
                       <div className="w-full">
-                        <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                        <Button variant="default" className="w-full bg-primary hover:bg-action-hover text-primary-foreground">
                           <Plus className="h-4 w-4 me-2" />
                           {t('dashboard.organization.landing.add_section')}
                         </Button>
@@ -506,7 +506,7 @@ const HeroSectionEditor: React.FC<{
   }
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <LayoutTemplate className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.hero_editor.title')}</h3>
@@ -1198,7 +1198,7 @@ const TextAndImageSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <ImageIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.text_image_editor.title')}</h3>
@@ -1299,7 +1299,7 @@ const LogosSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Award className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.logos_editor.title')}</h3>
@@ -1401,7 +1401,7 @@ const PeopleSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Users className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.people_editor.title')}</h3>
@@ -1554,7 +1554,7 @@ const FeaturedCoursesEditor: React.FC<{
   })
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <BookOpen className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.courses_editor.title')}</h3>

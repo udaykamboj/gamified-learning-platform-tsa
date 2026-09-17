@@ -52,7 +52,7 @@ export default function LibrarySearchResults({ results, isLoading, orgslug, org_
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 animate-pulse">
-        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-white rounded-xl nice-shadow h-16" />)}
+        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-card rounded-xl nice-shadow h-16" />)}
       </div>
     )
   }

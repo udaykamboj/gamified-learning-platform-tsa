@@ -29,14 +29,14 @@ export default function RecentMembers() {
   const totalMembers = membersData?.total ?? 0
 
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-semibold text-gray-700">
             {t('dashboard.home.recent_members')}
           </h3>
           {totalMembers > 0 && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
               {totalMembers} {t('dashboard.home.total')}
             </span>
           )}
@@ -108,18 +108,18 @@ export default function RecentMembers() {
                       {displayName}
                     </p>
                     {!user.email_verified && (
-                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-600">
+                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-600">
                         {t('dashboard.home.unverified')}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="flex items-center gap-1 text-[10px] text-gray-400 truncate">
+                    <span className="flex items-center gap-1 text-[11px] text-gray-400 truncate">
                       <EnvelopeSimple size={10} />
                       {user.email}
                     </span>
                     {joinedAt && (
-                      <span className="flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
+                      <span className="flex items-center gap-1 text-[11px] text-gray-400 shrink-0">
                         <Clock size={10} />
                         {joinedAt}
                       </span>
@@ -129,7 +129,7 @@ export default function RecentMembers() {
 
                 {/* Role badge */}
                 {role && (
-                  <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 shrink-0">
+                  <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 shrink-0">
                     <ShieldCheck size={10} />
                     {role.name}
                   </span>

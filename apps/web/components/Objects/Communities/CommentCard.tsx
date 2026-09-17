@@ -184,7 +184,7 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
                   <button
                     onClick={handleEdit}
                     disabled={!editContent.trim() || isSubmitting}
-                    className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
+                    className="px-3 py-1 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
                   >
                     {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : t('communities.comments.save')}
                   </button>

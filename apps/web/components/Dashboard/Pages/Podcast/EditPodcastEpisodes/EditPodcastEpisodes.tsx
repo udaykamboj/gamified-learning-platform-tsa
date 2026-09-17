@@ -120,7 +120,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
       <div className="h-full">
         <div className="h-6" />
         <div className="px-10 pb-10">
-          <div className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+          <div className="bg-card rounded-xl shadow-sm p-6 animate-pulse">
             <div className="flex items-center justify-between mb-6">
               <div className="space-y-2">
                 <div className="h-5 w-24 bg-gray-200 rounded" />
@@ -153,7 +153,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
     <div className="h-full">
       <div className="h-6" />
       <div className="px-10 pb-10">
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-card rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
@@ -165,7 +165,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors"
             >
               <Plus size={16} className="me-2" />
               {t('podcasts.dashboard.episodes.new_episode')}
@@ -183,7 +183,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
               </p>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors"
               >
                 <Plus size={16} className="me-2" />
                 {t('podcasts.dashboard.episodes.create_first')}
@@ -297,11 +297,11 @@ function EpisodeRow({
             <span className="text-xs font-medium text-gray-400">#{index + 1}</span>
             <h3 className="text-sm font-medium text-gray-900 truncate">{episode.title}</h3>
             {episode.published ? (
-              <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded">
+              <span className="px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded">
                 {t('podcasts.published')}
               </span>
             ) : (
-              <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded">
+              <span className="px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded">
                 {t('podcasts.unpublished')}
               </span>
             )}
@@ -322,7 +322,7 @@ function EpisodeRow({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-white transition-colors">
+          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-card transition-colors">
             <MoreVertical size={18} />
           </button>
         </DropdownMenuTrigger>
@@ -451,7 +451,7 @@ function CreateEpisodeModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('podcasts.dashboard.episodes.title_placeholder')}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all"
               required
             />
           </div>
@@ -465,7 +465,7 @@ function CreateEpisodeModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('podcasts.dashboard.episodes.description_placeholder')}
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all resize-none"
             />
           </div>
 
@@ -509,7 +509,7 @@ function CreateEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.create')}
@@ -597,7 +597,7 @@ function EditEpisodeModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('podcasts.dashboard.episodes.title_placeholder')}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all"
               required
             />
           </div>
@@ -611,7 +611,7 @@ function EditEpisodeModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('podcasts.dashboard.episodes.description_placeholder')}
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-border focus:border-transparent outline-none transition-all resize-none"
             />
           </div>
 
@@ -665,7 +665,7 @@ function EditEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-action-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.save')}

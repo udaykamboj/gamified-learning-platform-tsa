@@ -49,7 +49,7 @@ function uniqueKey(base: string, taken: Set<string>): string {
 // `w-36` on the type select in the cascade, which let the select eat the whole
 // row and collapsed the label input beside it to a few pixels.
 const INPUT_BASE =
-  'bg-gray-50 text-gray-900 rounded-lg px-3 py-2 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all'
+  'bg-gray-50 text-gray-900 rounded-lg px-3 py-2 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-border focus:border-gray-400 transition-all'
 
 const INPUT = `${INPUT_BASE} w-full`
 
@@ -233,7 +233,7 @@ export default function OrgSignupFields() {
   }
 
   return (
-    <div className="mx-4 sm:mx-10 bg-white rounded-xl nice-shadow mt-6">
+    <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow mt-6">
       <div className="px-4 sm:px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="font-bold text-xl text-gray-800">
@@ -249,7 +249,7 @@ export default function OrgSignupFields() {
         <button
           onClick={save}
           disabled={!dirty || saving || !canEdit}
-          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-black/85 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-action-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving
             ? t('common.saving', { defaultValue: 'Saving…' })

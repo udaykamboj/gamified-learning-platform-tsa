@@ -368,7 +368,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
                   minWidth: 180,
                 }}
               >
-                <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-2 px-1">{t('boards.timer.set_timer_title')}</p>
+                <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 px-1">{t('boards.timer.set_timer_title')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {TIMER_PRESETS.map((preset) => (
                     <button
@@ -423,7 +423,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 transition-colors shrink-0"
+                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground hover:bg-action-hover transition-colors shrink-0"
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>
@@ -472,7 +472,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
           >
             {/* Pomodoro phase label */}
             {pomColors && (
-              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: pomColors.on }}>
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: pomColors.on }}>
                 {pomColors.label}
               </span>
             )}

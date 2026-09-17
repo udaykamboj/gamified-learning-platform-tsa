@@ -92,18 +92,18 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
   const courseLink = customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)
 
   return (
-    <div onMouseEnter={handleMouseEnter} className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+    <div onMouseEnter={handleMouseEnter} className={`group relative flex flex-col sl-card sl-card-interactive overflow-hidden w-full ${isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}>
       {/* Selection checkbox - visible on hover or when selected (dashboard only) */}
       {isDashboard && onToggleSelect && (
         <button
           onClick={handleSelectClick}
           aria-label={isSelected ? 'Deselect course' : 'Select course'}
-          className={`absolute top-2 start-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
+          className={`absolute top-2 start-2 z-20 p-1.5 bg-card/90 backdrop-blur-sm rounded-full hover:bg-card transition-all shadow-md ${
             isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}
         >
           {isSelected ? (
-            <CheckSquare className="w-4 h-4 text-black" />
+            <CheckSquare className="w-4 h-4 text-foreground" />
           ) : (
             <Square className="w-4 h-4 text-gray-500" />
           )}
@@ -126,15 +126,15 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-foreground/5 transition-colors duration-300" />
         {isDashboard && (
           <div className="absolute bottom-2 start-2">
             {course.published ? (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
                 {t('courses.published')}
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
+              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
                 {t('courses.unpublished')}
               </span>
             )}
@@ -148,7 +148,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
+            className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
            dir="auto">
             {course.name}
           </Link>
@@ -183,7 +183,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
                 ))}
                 {hasMoreAuthors && (
                   <div className="relative z-0">
-                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[8px] font-bold text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[11px] font-bold text-gray-600 bg-gray-100 border-2 border-white rounded-full">
                       +{remainingAuthorsCount}
                     </div>
                   </div>
@@ -192,7 +192,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             )}
             
             {course.update_date && (
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
                 {formatDate(course.update_date, i18n.language, { dateStyle: undefined, month: 'short', day: 'numeric' })}
               </span>
             )}
@@ -202,7 +202,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {t('courses.start_learning')}
           </Link>

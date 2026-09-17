@@ -66,7 +66,7 @@ function StripeConnectCallbackInner() {
   }, [session, router, searchParams])
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+    <div className="h-screen w-full bg-muted flex items-center justify-center">
       <div className="flex flex-col items-center">
         <div className="mb-10">
           <Image
@@ -82,7 +82,7 @@ function StripeConnectCallbackInner() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white p-8 rounded-xl nice-shadow max-w-md w-full mx-4"
+          className="bg-card p-8 rounded-xl nice-shadow max-w-md w-full mx-4"
         >
           <div className="flex flex-col items-center text-center space-y-4">
             {status === 'processing' && (
@@ -130,7 +130,7 @@ function StripeConnectCallbackInner() {
 export default function StripeConnectCallback() {
   return (
     <Suspense fallback={
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="h-screen w-full bg-muted flex items-center justify-center">
         <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
       </div>
     }>

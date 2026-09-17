@@ -190,7 +190,7 @@ export default function PodcastPlayer() {
 
       {/* Player UI */}
       <div
-        className={`fixed bottom-0 start-0 end-0 bg-white border-t border-gray-200 shadow-lg transition-all duration-300 z-50 ${
+        className={`fixed bottom-0 start-0 end-0 bg-card border-t border-gray-200 shadow-lg transition-all duration-300 z-50 ${
           isMinimized ? 'h-16' : 'h-24'
         }`}
       >

@@ -182,7 +182,7 @@ export default function RadialOrbitalTimeline({
               </div>
 
               {!isExpanded && (
-                <p className="absolute left-1/2 top-full mt-2 w-max -translate-x-1/2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <p className="absolute left-1/2 top-full mt-2 w-max -translate-x-1/2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   {item.title}
                 </p>
               )}
@@ -193,7 +193,7 @@ export default function RadialOrbitalTimeline({
                     <div className="flex items-center justify-between gap-2">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] uppercase ${getStatusStyles(item.status)}`}
+                        className={`text-[11px] uppercase ${getStatusStyles(item.status)}`}
                       >
                         {item.status === "completed"
                           ? "Complete"
@@ -201,7 +201,7 @@ export default function RadialOrbitalTimeline({
                             ? "In progress"
                             : "Pending"}
                       </Badge>
-                      <span className="font-mono text-[10px] text-muted-foreground">
+                      <span className="font-mono text-[11px] text-muted-foreground">
                         {item.date}
                       </span>
                     </div>
@@ -213,7 +213,7 @@ export default function RadialOrbitalTimeline({
                     </p>
 
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] uppercase text-muted-foreground">
+                      <div className="flex items-center justify-between text-[11px] uppercase text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Zap className="size-3" /> Energy level
                         </span>
@@ -224,7 +224,7 @@ export default function RadialOrbitalTimeline({
 
                     {item.relatedIds.length > 0 && (
                       <div className="space-y-2 border-t border-border pt-3">
-                        <p className="flex items-center gap-1.5 text-[10px] uppercase text-muted-foreground">
+                        <p className="flex items-center gap-1.5 text-[11px] uppercase text-muted-foreground">
                           <LinkIcon className="size-3" /> Connected nodes
                         </p>
                         <div className="flex flex-wrap gap-1.5">

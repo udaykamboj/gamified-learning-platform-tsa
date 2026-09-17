@@ -71,7 +71,7 @@ const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, de
       <div className="absolute top-2 end-2 z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-md">
+            <button className="p-1 bg-card rounded-full hover:bg-gray-100 transition-colors shadow-md">
               <MoreVertical size={20} className="text-gray-700" />
             </button>
           </DropdownMenuTrigger>
@@ -139,7 +139,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
     : '/empty_thumbnail.png'
 
   return (
-    <div className="relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden min-w-[280px] w-full max-w-sm shrink-0 m-2">
+    <div className="relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden min-w-[280px] w-full max-w-sm shrink-0 m-2">
       <AdminEditOptions
         course={course}
         orgslug={orgslug}
@@ -147,7 +147,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
       />
       <Link prefetch={false} href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
         <div
-          className="inset-0 ring-1 ring-inset ring-black/10 rounded-t-xl w-full aspect-video bg-cover bg-center"
+          className="inset-0 ring-1 ring-inset ring-border rounded-t-xl w-full aspect-video bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
       </Link>
@@ -160,7 +160,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center px-2 rounded-md bg-gray-100/80 border border-gray-200">
-              <span className="text-[10px] font-medium text-gray-600 truncate">
+              <span className="text-[11px] font-medium text-gray-600 truncate">
                 {t('common.updated')} {formatDate(course.update_date, i18n.language, { dateStyle: undefined, month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
@@ -202,7 +202,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
         <Link 
           prefetch 
           href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-          className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-primary text-primary-foreground text-xs font-medium rounded-lg hover:bg-primary transition-colors"
         >
           {t('courses.start_learning')}
         </Link>

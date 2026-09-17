@@ -49,15 +49,15 @@ export default function CourseDailyCompletions({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-emerald-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
                 <p className="text-2xl font-bold text-emerald-600">{totalCompletions}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.peak_day')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.peak_day')}</p>
                 <p className="text-2xl font-bold text-gray-700">{peakDay}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.daily_avg')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.daily_avg')}</p>
                 <p className="text-2xl font-bold text-gray-700">{avgDaily}</p>
               </div>
             </div>

@@ -461,7 +461,7 @@ export default function OrgEditBranding() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mb-2 rounded-md">
         <h1 className="font-bold text-xl text-gray-800">
           {t('dashboard.organization.branding.title')}
@@ -525,7 +525,7 @@ export default function OrgEditBranding() {
                     <div className="relative group">
                       <div
                         className={cn(
-                          "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
+                          "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-card",
                           "border-2 border-gray-100 hover:border-blue-200 transition-all duration-300",
                           isLogoUploading && "opacity-50"
                         )}
@@ -575,7 +575,7 @@ export default function OrgEditBranding() {
                     <div className="flex flex-col items-center space-y-2">
                       <div
                         className={cn(
-                          "w-8 h-8 bg-contain bg-no-repeat bg-center rounded bg-white",
+                          "w-8 h-8 bg-contain bg-no-repeat bg-center rounded bg-card",
                           "border-2 border-gray-100 hover:border-blue-200 transition-all duration-300",
                           isFaviconUploading && "opacity-50"
                         )}
@@ -630,7 +630,7 @@ export default function OrgEditBranding() {
                     <div className="relative group">
                       <div
                         className={cn(
-                          "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
+                          "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-card",
                           "border-2 border-gray-100 hover:border-purple-200 transition-all duration-300",
                           isThumbnailUploading && "opacity-50"
                         )}
@@ -731,7 +731,7 @@ export default function OrgEditBranding() {
                                     {preview.type === 'image' ? (
                                       <div
                                         className={cn(
-                                          `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-white`,
+                                          `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-card`,
                                           "border border-gray-200 hover:border-gray-300",
                                           "transition-colors duration-200",
                                           snapshot.isDragging ? "shadow-lg" : "shadow-xs hover:shadow-md"
@@ -937,7 +937,7 @@ export default function OrgEditBranding() {
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
                   placeholder="No color"
-                  className="w-28 h-10 font-mono text-sm uppercase bg-white"
+                  className="w-28 h-10 font-mono text-sm uppercase bg-card"
                   maxLength={7}
                 />
                 {primaryColor && (
@@ -994,8 +994,8 @@ export default function OrgEditBranding() {
                 </div>
                 {/* Content Preview */}
                 <div className="p-3 flex gap-2">
-                  <div className="w-16 h-10 rounded bg-white shadow-sm" />
-                  <div className="w-16 h-10 rounded bg-white shadow-sm" />
+                  <div className="w-16 h-10 rounded bg-card shadow-sm" />
+                  <div className="w-16 h-10 rounded bg-card shadow-sm" />
                 </div>
               </div>
             </div>
@@ -1006,7 +1006,7 @@ export default function OrgEditBranding() {
             <Button
               onClick={handleThemeSave}
               disabled={isThemeSaving}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-action-hover"
             >
               {isThemeSaving ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
             </Button>
@@ -1044,7 +1044,7 @@ export default function OrgEditBranding() {
                                 value={values.socials.twitter || ''}
                                 onChange={handleChange}
                                 placeholder={t('dashboard.organization.socials.placeholders.twitter')}
-                                className="h-9 bg-white"
+                                className="h-9 bg-card"
                               />
                             </div>
 
@@ -1058,7 +1058,7 @@ export default function OrgEditBranding() {
                                 value={values.socials.facebook || ''}
                                 onChange={handleChange}
                                 placeholder={t('dashboard.organization.socials.placeholders.facebook')}
-                                className="h-9 bg-white"
+                                className="h-9 bg-card"
                               />
                             </div>
 
@@ -1072,7 +1072,7 @@ export default function OrgEditBranding() {
                                 value={values.socials.instagram || ''}
                                 onChange={handleChange}
                                 placeholder={t('dashboard.organization.socials.placeholders.instagram')}
-                                className="h-9 bg-white"
+                                className="h-9 bg-card"
                               />
                             </div>
 
@@ -1086,7 +1086,7 @@ export default function OrgEditBranding() {
                                 value={values.socials.youtube || ''}
                                 onChange={handleChange}
                                 placeholder={t('dashboard.organization.socials.placeholders.youtube')}
-                                className="h-9 bg-white"
+                                className="h-9 bg-card"
                               />
                             </div>
                           </div>
@@ -1107,7 +1107,7 @@ export default function OrgEditBranding() {
                                 <Input
                                   placeholder={t('dashboard.organization.socials.placeholders.label')}
                                   value={linkKey}
-                                  className="h-9 w-1/3 bg-white"
+                                  className="h-9 w-1/3 bg-card"
                                   onChange={(e) => {
                                     const newLinks = { ...values.links };
                                     delete newLinks[linkKey];
@@ -1118,7 +1118,7 @@ export default function OrgEditBranding() {
                                 <Input
                                   placeholder={t('dashboard.organization.socials.placeholders.url')}
                                   value={linkValue}
-                                  className="h-9 flex-1 bg-white"
+                                  className="h-9 flex-1 bg-card"
                                   onChange={(e) => {
                                     const newLinks = { ...values.links };
                                     newLinks[linkKey] = e.target.value;
@@ -1170,7 +1170,7 @@ export default function OrgEditBranding() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-black text-white hover:bg-black/90"
+                      className="bg-primary text-primary-foreground hover:bg-action-hover"
                     >
                       {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
                     </Button>

@@ -104,10 +104,10 @@ export default function DemoEntryCard({ className = '' }: { className?: string }
       type="button"
       onClick={handleEnter}
       disabled={disabled}
-      className={`w-full text-start rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      className={`w-full text-start rounded-2xl border border-dashed border-gray-300 bg-card p-5 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           {entering ? (
             <CircleNotch size={18} weight="bold" className="animate-spin" />
           ) : (

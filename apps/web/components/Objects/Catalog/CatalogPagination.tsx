@@ -14,14 +14,14 @@ import {
 
 const paginationWrapperClassName = 'flex items-center justify-center gap-2'
 const paginationNavButtonClassName =
-  'flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+  'flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-card nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
 const paginationPagesClassName = 'flex items-center gap-1'
 const paginationEllipsisClassName = 'px-2 py-1 text-gray-400'
 const paginationPageButtonBaseClassName =
   'px-3 py-2 text-sm font-medium rounded-lg transition-colors'
-const paginationActivePageButtonClassName = 'bg-black text-white'
+const paginationActivePageButtonClassName = 'bg-primary text-primary-foreground'
 const paginationInactivePageButtonClassName =
-  'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
+  'bg-card text-gray-600 nice-shadow hover:bg-gray-50'
 
 type CatalogPaginationProps = {
   currentPage: number

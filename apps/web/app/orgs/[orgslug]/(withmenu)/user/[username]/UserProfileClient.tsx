@@ -105,7 +105,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
       </div>
       
       {/* Profile Content */}
-      <div className="bg-white rounded-b-xl nice-shadow p-8 relative">
+      <div className="bg-card rounded-b-xl nice-shadow p-8 relative">
         {/* Avatar Positioned on the banner */}
         <div className="absolute -top-24 start-8">
           <div className="rounded-xl overflow-hidden shadow-lg border-4 border-white">
@@ -125,7 +125,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
           {profile.sections?.map((section: any) => (
             section.type === 'affiliation' && section.affiliations?.map((affiliation: any, index: number) => (
               affiliation.logoUrl && (
-                <div key={index} className="bg-white rounded-lg p-2 shadow-lg border-2 border-white">
+                <div key={index} className="bg-card rounded-lg p-2 shadow-lg border-2 border-white">
                   <img 
                     src={affiliation.logoUrl} 
                     alt={affiliation.name}

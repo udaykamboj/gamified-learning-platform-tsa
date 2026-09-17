@@ -60,7 +60,7 @@ export default function OrgEditSocials() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
       <Formik
         enableReinitialize
         initialValues={initialValues}
@@ -99,7 +99,7 @@ export default function OrgEditSocials() {
                             value={values.socials.twitter || ''}
                             onChange={handleChange}
                             placeholder={t('dashboard.organization.socials.placeholders.twitter')}
-                            className="h-9 bg-white"
+                            className="h-9 bg-card"
                           />
                         </div>
 
@@ -113,7 +113,7 @@ export default function OrgEditSocials() {
                             value={values.socials.facebook || ''}
                             onChange={handleChange}
                             placeholder={t('dashboard.organization.socials.placeholders.facebook')}
-                            className="h-9 bg-white"
+                            className="h-9 bg-card"
                           />
                         </div>
 
@@ -127,7 +127,7 @@ export default function OrgEditSocials() {
                             value={values.socials.instagram || ''}
                             onChange={handleChange}
                             placeholder={t('dashboard.organization.socials.placeholders.instagram')}
-                            className="h-9 bg-white"
+                            className="h-9 bg-card"
                           />
                         </div>
 
@@ -141,7 +141,7 @@ export default function OrgEditSocials() {
                             value={values.socials.youtube || ''}
                             onChange={handleChange}
                             placeholder={t('dashboard.organization.socials.placeholders.youtube')}
-                            className="h-9 bg-white"
+                            className="h-9 bg-card"
                           />
                         </div>
                       </div>
@@ -162,7 +162,7 @@ export default function OrgEditSocials() {
                             <Input
                               placeholder={t('dashboard.organization.socials.placeholders.label')}
                               value={linkKey}
-                              className="h-9 w-1/3 bg-white"
+                              className="h-9 w-1/3 bg-card"
                               onChange={(e) => {
                                 const newLinks = { ...values.links };
                                 delete newLinks[linkKey];
@@ -173,7 +173,7 @@ export default function OrgEditSocials() {
                             <Input
                               placeholder={t('dashboard.organization.socials.placeholders.url')}
                               value={linkValue}
-                              className="h-9 flex-1 bg-white"
+                              className="h-9 flex-1 bg-card"
                               onChange={(e) => {
                                 const newLinks = { ...values.links };
                                 newLinks[linkKey] = e.target.value;
@@ -225,7 +225,7 @@ export default function OrgEditSocials() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-action-hover"
                 >
                   {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
                 </Button>

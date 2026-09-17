@@ -81,7 +81,7 @@ export default function EpisodeCard({ episode, podcast, showThumbnail = true }: 
           <div className={`absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 transition-opacity ${
             isCurrentEpisode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
-            <div className="bg-white rounded-full p-2">
+            <div className="bg-card rounded-full p-2">
               {isPlaying ? (
                 <Pause size={16} className="text-gray-900" fill="currentColor" />
               ) : (
@@ -108,7 +108,7 @@ export default function EpisodeCard({ episode, podcast, showThumbnail = true }: 
             {formatDuration(episode.duration_seconds || 0)}
           </span>
           {!episode.published && (
-            <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[10px] font-medium">
+            <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[11px] font-medium">
               Unpublished
             </span>
           )}
@@ -124,7 +124,7 @@ export default function EpisodeCard({ episode, podcast, showThumbnail = true }: 
           }}
           className={`flex-shrink-0 p-3 rounded-full transition-colors ${
             isCurrentEpisode
-              ? 'bg-gray-900 text-white'
+              ? 'bg-primary text-primary-foreground'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >

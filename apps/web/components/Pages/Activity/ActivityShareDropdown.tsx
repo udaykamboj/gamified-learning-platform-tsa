@@ -134,14 +134,14 @@ function ActivityShareDropdown({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white nice-shadow text-neutral-600 hover:text-neutral-800 transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card nice-shadow text-neutral-600 hover:text-neutral-800 transition-colors text-sm font-medium"
       >
         <Share2 size={14} />
         <span>{t('activities.share')}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute end-0 top-10 z-50 bg-white rounded-lg nice-shadow py-1 min-w-[180px]">
+        <div className="absolute end-0 top-10 z-50 bg-card rounded-lg nice-shadow py-1 min-w-[180px]">
           {shareLinks.map((link) => {
             const Icon = link.icon
             return (

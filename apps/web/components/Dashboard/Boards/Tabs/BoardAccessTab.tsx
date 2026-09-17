@@ -52,7 +52,7 @@ function BoardAccessTab({ board, boardUuid, boardKey: _boardKey }: BoardAccessTa
   return (
     <div>
       <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
+      <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
           <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.access.title')}</h1>
           <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.access.description')}</h2>

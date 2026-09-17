@@ -92,7 +92,7 @@ function ActivityContentSkeleton({ activityType }: { activityType?: string }) {
 
   if (isDocument) {
     return (
-      <div className="bg-white nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-3" style={{ minHeight: '520px' }}>
+      <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-3" style={{ minHeight: '520px' }}>
         <div className="h-4 bg-gray-100 rounded w-full" />
         <div className="h-4 bg-gray-100 rounded w-[94%]" />
         <div className="h-4 bg-gray-100 rounded w-[88%]" />
@@ -105,7 +105,7 @@ function ActivityContentSkeleton({ activityType }: { activityType?: string }) {
   }
 
   return (
-    <div className="bg-white nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
+    <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
       <div className="h-7 bg-gray-100 rounded w-2/5 mb-2" />
       <div className="h-4 bg-gray-100 rounded w-full" />
       <div className="h-4 bg-gray-100 rounded w-[92%]" />
@@ -248,7 +248,7 @@ function ActivityClient(props: ActivityClientProps) {
   const session = useLHSession() as any;
   const pathname = usePathname()
   const access_token = session?.data?.tokens?.access_token;
-  const [bgColor, setBgColor] = React.useState('bg-white nice-shadow')
+  const [bgColor, setBgColor] = React.useState('bg-card nice-shadow')
   const [assignment, setAssignment] = React.useState(null) as any;
   const [_markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
   const [isFocusMode, setIsFocusMode] = React.useState(false);
@@ -431,11 +431,11 @@ function ActivityClient(props: ActivityClientProps) {
   useEffect(() => {
     if (!activity) return;
     if (activity.activity_type == 'TYPE_DYNAMIC' || activity.activity_type == 'TYPE_SCORM') {
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-card' : 'bg-card nice-shadow');
     }
     else if (activity.activity_type == 'TYPE_ASSIGNMENT') {
       setMarkStatusButtonActive(false);
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-card' : 'bg-card nice-shadow');
       getAssignmentUI();
     }
     else {
@@ -476,7 +476,7 @@ function ActivityClient(props: ActivityClientProps) {
             </div>
           </div>
           {/* Content box placeholder */}
-          <div className="bg-white nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
+          <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
             <div className="h-7 bg-gray-100 rounded w-2/5 mb-2" />
             <div className="h-4 bg-gray-100 rounded w-full" />
             <div className="h-4 bg-gray-100 rounded w-[92%]" />
@@ -500,7 +500,7 @@ function ActivityClient(props: ActivityClientProps) {
     const isAuthenticated = session?.status === 'authenticated'
     return (
       <GeneralWrapperStyled>
-        <div className="max-w-2xl mx-auto my-16 bg-white rounded-2xl border border-gray-200/80 shadow-sm p-8 text-center">
+        <div className="max-w-2xl mx-auto my-16 bg-card rounded-2xl border border-gray-200/80 shadow-sm p-8 text-center">
           <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mb-4">
             <Lock className="text-rose-500" size={24} />
           </div>
@@ -516,7 +516,7 @@ function ActivityClient(props: ActivityClientProps) {
             {!isAuthenticated && (
               <Link
                 href={getUriWithOrg(orgslug, '/login')}
-                className="inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
+                className="inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary transition-colors"
               >
                 {t('auth.sign_in', 'Sign in')}
               </Link>
@@ -524,7 +524,7 @@ function ActivityClient(props: ActivityClientProps) {
             {isAuthenticated && (
               <Link
                 href={getUriWithOrg(orgslug, '/skills')}
-                className="inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
+                className="inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary transition-colors"
               >
                 Browse Skills
               </Link>
@@ -559,7 +559,7 @@ function ActivityClient(props: ActivityClientProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed inset-0 bg-white"
+                  className="fixed inset-0 bg-card"
                   style={{ zIndex: 'var(--z-overlay)' }}
                 >
                   {/* Focus Mode Top Bar */}
@@ -568,7 +568,7 @@ function ActivityClient(props: ActivityClientProps) {
                     animate={{ y: 0 }}
                     exit={{ y: -100 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed top-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-b border-gray-100"
+                    className="fixed top-0 start-0 end-0 bg-card/90 backdrop-blur-xl border-b border-gray-100"
                     style={{ zIndex: 'var(--z-modal-content)' }}
                   >
                     <div className="container mx-auto px-4 py-2">
@@ -675,7 +675,7 @@ function ActivityClient(props: ActivityClientProps) {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setIsFocusMode(false)}
-                            className="bg-white nice-shadow p-2 rounded-full cursor-pointer hover:bg-gray-50"
+                            className="bg-card nice-shadow p-2 rounded-full cursor-pointer hover:bg-gray-50"
                             title={t('activities.exit_focus_mode')}
                           >
                             <Minimize2 size={16} className="text-gray-700" />
@@ -717,7 +717,7 @@ function ActivityClient(props: ActivityClientProps) {
                       animate={{ y: 0 }}
                       exit={{ y: 100 }}
                       transition={{ duration: 0.3 }}
-                      className="fixed bottom-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-t border-gray-100"
+                      className="fixed bottom-0 start-0 end-0 bg-card/90 backdrop-blur-xl border-t border-gray-100"
                       style={{ zIndex: 'var(--z-modal-content)' }}
                     >
                       <div className="container mx-auto px-4">
@@ -983,7 +983,7 @@ function ActivityClient(props: ActivityClientProps) {
                               <div className={`flex-1 min-w-0 ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : 'p-3 sm:p-7 rounded-lg'} ${bgColor} relative isolate`} style={{ zIndex: 'var(--z-base)' }}>
                                 <button
                                   onClick={() => setIsFocusMode(true)}
-                                  className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 end-2' : 'top-4 end-4'} hidden sm:flex bg-white/80 hover:bg-white nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
+                                  className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 end-2' : 'top-4 end-4'} hidden sm:flex bg-card/80 hover:bg-card nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
                                   style={{ zIndex: 'var(--z-interactive)' }}
                                   title={t('activities.focus_mode')}
                                 >
@@ -1265,7 +1265,7 @@ export function MarkStatus(props: {
               dialogTitle={t('activities.unmark_activity_title')}
               dialogTrigger={
                 <div className="bg-teal-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
-                  <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+                  <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
                   <div className="flex items-center space-x-2">
                     <svg 
                       width="17" 
@@ -1303,10 +1303,10 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div
-              className={`${isLoading ? 'opacity-90' : ''} bg-gray-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
+              className={`${isLoading ? 'opacity-90' : ''} bg-primary rounded-md px-4 nice-shadow flex flex-col p-2.5 text-primary-foreground hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-action-hover'}`}
               onClick={!isLoading ? markActivityAsCompleteFront : undefined}
             >
-              <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+              <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
               <div className="flex items-center space-x-2">
                 {isLoading ? (
                   <div className="animate-spin">
@@ -1410,7 +1410,7 @@ function NextActivityButton({ course, currentActivityId, orgslug }: { course: an
       onClick={navigateToActivity}
       className="bg-gray-200 rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:bg-gray-200"
     >
-      <span className="text-[10px] font-bold text-gray-500 mb-1 uppercase">{t('common.next')}</span>
+      <span className="text-[11px] font-bold text-gray-500 mb-1 uppercase">{t('common.next')}</span>
       <div className="flex items-center space-x-1">
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">
           {isLastActivity ? t('course.finish_course', 'Finish course') : nextActivity.name}
@@ -1463,9 +1463,9 @@ function PreviousActivityButton({ course, currentActivityId, orgslug }: { course
   return (
     <div
       onClick={navigateToActivity}
-      className="bg-white rounded-md px-3 sm:px-4 nice-shadow flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
+      className="bg-card rounded-md px-3 sm:px-4 nice-shadow flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
     >
-      <span className="text-[10px] font-bold text-gray-500 mb-1 uppercase">{t('common.previous')}</span>
+      <span className="text-[11px] font-bold text-gray-500 mb-1 uppercase">{t('common.previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} className="shrink-0" />
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{previousActivity.name}</span>
@@ -1636,7 +1636,7 @@ function AssignmentTools(props: {
     if (isAssignmentPastDue(props.assignment?.due_date)) {
       return (
         <div className="bg-rose-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-          <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+          <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <BookOpenCheck size={17} />
             <span className="text-xs font-bold">
@@ -1653,7 +1653,7 @@ function AssignmentTools(props: {
     if (isSubmitting) {
       return (
         <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-          <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+          <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <Loader2 size={17} className="animate-spin" />
             <span className="text-xs font-bold">
@@ -1683,7 +1683,7 @@ function AssignmentTools(props: {
         }
         dialogTrigger={
           <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
-            <span className="text-[10px] font-bold mb-1 uppercase">
+            <span className="text-[11px] font-bold mb-1 uppercase">
               {isRetryAttempt
                 ? t('assignments.attempt_count', { current: attemptNumber })
                 : t('common.status')}
@@ -1719,7 +1719,7 @@ function AssignmentTools(props: {
       return (
         <div className="flex items-center gap-2">
           <div className="bg-teal-700 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-            <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+            <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
             <div className="flex items-center space-x-2">
               <CheckCircle size={17} />
               <span className="text-xs font-bold">
@@ -1741,7 +1741,7 @@ function AssignmentTools(props: {
                 <button
                   type="button"
                   disabled={isRetrying}
-                  className="h-full inline-flex items-center gap-1.5 px-3 py-2.5 rounded-md bg-white/90 hover:bg-white disabled:opacity-50 text-teal-800 text-xs font-bold nice-shadow transition-colors"
+                  className="h-full inline-flex items-center gap-1.5 px-3 py-2.5 rounded-md bg-card/90 hover:bg-card disabled:opacity-50 text-teal-800 text-xs font-bold nice-shadow transition-colors"
                 >
                   <RotateCcw size={14} />
                   {t('assignments.retry_assignment')}
@@ -1757,7 +1757,7 @@ function AssignmentTools(props: {
 
     return (
       <div className="bg-amber-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-        <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
+        <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
         <div className="flex items-center space-x-2">
           <UserRoundPen size={17} />
           <span className="text-xs font-bold">{t('assignments.grading_in_progress')}</span>
@@ -1777,7 +1777,7 @@ function AssignmentTools(props: {
     const tasks = gradeData?.tasks as any[] | undefined;
     const isPassing = passed !== false;
     const pillBg = isPassing ? 'bg-teal-600' : 'bg-rose-600';
-    const pillChip = isPassing ? 'bg-white text-teal-800' : 'bg-white text-rose-700';
+    const pillChip = isPassing ? 'bg-card text-teal-800' : 'bg-card text-rose-700';
 
     // Retry availability mirrors the backend's eligibility check: teacher
     // opted in (allow_retries) and attempt counter hasn't reached the cap
@@ -1805,10 +1805,10 @@ function AssignmentTools(props: {
           onClick={() => setIsGradeModalOpen(true)}
           className={`${pillBg} rounded-md px-3 sm:px-4 nice-shadow flex flex-col items-start text-start p-2 sm:p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out`}
         >
-          <span className="text-[10px] font-bold mb-1 uppercase text-white/90 flex items-center gap-1.5">
+          <span className="text-[11px] font-bold mb-1 uppercase text-white/90 flex items-center gap-1.5">
             <span>{t('common.status')}</span>
             {allowRetries && currentAttempt > 1 && (
-              <span className="bg-white/20 text-white px-1.5 py-px rounded-full text-[9px] font-bold tracking-normal normal-case">
+              <span className="bg-white/20 text-white px-1.5 py-px rounded-full text-[11px] font-bold tracking-normal normal-case">
                 {maxRetries
                   ? t('assignments.attempt_count_bounded', {
                       current: currentAttempt,
@@ -1870,7 +1870,7 @@ function AssignmentTools(props: {
                 }`} />
 
                 <div className="relative flex flex-col items-center text-center space-y-3">
-                  <div className={`relative w-[72px] h-[72px] rounded-full flex items-center justify-center nice-shadow bg-white`}>
+                  <div className={`relative w-[72px] h-[72px] rounded-full flex items-center justify-center nice-shadow bg-card`}>
                     {isPassing ? (
                       <Trophy size={34} className="text-emerald-600" strokeWidth={2.2} />
                     ) : (
@@ -1885,7 +1885,7 @@ function AssignmentTools(props: {
                   </div>
 
                   <div className="space-y-1.5">
-                    <p className={`text-[10px] font-bold uppercase tracking-[0.18em] ${
+                    <p className={`text-[11px] font-bold uppercase tracking-[0.18em] ${
                       isPassing ? 'text-emerald-700' : 'text-rose-700'
                     }`}>
                       {isPassing
@@ -1908,7 +1908,7 @@ function AssignmentTools(props: {
               <div className="px-6 pt-5 pb-6 space-y-5">
                 {tasks && tasks.length > 0 && (
                   <div className="space-y-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                       {t('assignments.task_breakdown')}
                     </p>
                     <div className="space-y-1.5">
@@ -1960,7 +1960,7 @@ function AssignmentTools(props: {
 
                 {feedback && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400">
                       <MessageSquare size={11} />
                       <span>{t('dashboard.assignments.submissions.feedback.label')}</span>
                     </div>
@@ -1983,7 +1983,7 @@ function AssignmentTools(props: {
                     {canRetry ? (
                       <div className="rounded-xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 via-pink-50 to-rose-50 p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-card nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
                             <RotateCcw size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -2022,7 +2022,7 @@ function AssignmentTools(props: {
                             <button
                               type="button"
                               disabled={isRetrying}
-                              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+                              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-primary hover:bg-primary disabled:opacity-50 text-primary-foreground text-sm font-semibold transition-colors"
                             >
                               <RotateCcw size={14} />
                               {t('assignments.retry_assignment')}

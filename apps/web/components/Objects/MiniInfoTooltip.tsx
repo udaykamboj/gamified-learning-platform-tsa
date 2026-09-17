@@ -23,7 +23,7 @@ export default function MiniInfoTooltip({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className={`absolute -top-20 left-1/2 transform -translate-x-1/2 bg-white rounded-lg nice-shadow p-3 ${width}`}
+      className={`absolute -top-20 left-1/2 transform -translate-x-1/2 bg-card rounded-lg nice-shadow p-3 ${width}`}
     >
       <div className="flex items-center space-x-3">
         {icon && (
@@ -33,7 +33,7 @@ export default function MiniInfoTooltip({
         )}
         <p className="text-sm text-gray-700">{message}</p>
       </div>
-      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-card rotate-45"></div>
       <button
         onClick={onClose}
         className="absolute top-1 end-1 text-gray-400 hover:text-gray-600"

@@ -54,7 +54,7 @@ function ResourceActivity({ activity, orgslug, style }: ResourceActivityProps) {
       </div>
 
       <div
-        className="w-full rounded-xl overflow-hidden nice-shadow bg-white"
+        className="w-full rounded-xl overflow-hidden nice-shadow bg-card"
         style={{ height: '75vh', minHeight: 480 }}
       >
         <iframe

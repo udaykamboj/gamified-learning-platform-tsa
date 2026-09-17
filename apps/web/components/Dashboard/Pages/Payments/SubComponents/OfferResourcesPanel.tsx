@@ -143,7 +143,7 @@ function OfferResourcesPanel({ offerId, offerName }: OfferResourcesPanelProps) {
                   <button
                     disabled={isLinking}
                     onClick={() => handleLinkCourse(course)}
-                    className="w-full text-start px-2 py-1.5 rounded text-xs hover:bg-white flex items-center gap-2 disabled:opacity-50"
+                    className="w-full text-start px-2 py-1.5 rounded text-xs hover:bg-card flex items-center gap-2 disabled:opacity-50"
                   >
                     <BookOpen size={12} className="text-indigo-500 shrink-0" />
                     <span className="truncate">{course.name}</span>

@@ -150,8 +150,8 @@ export default function UserList() {
   }
 
   const avatarFallback = (
-    <div className="h-8 w-8 rounded-full bg-white/[0.08] flex items-center justify-center shrink-0">
-      <User size={14} weight="fill" className="text-white/30" />
+    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+      <User size={14} weight="fill" className="text-muted-foreground" />
     </div>
   )
 
@@ -163,32 +163,32 @@ export default function UserList() {
           <div className="relative">
             <MagnifyingGlass
               size={14}
-              className="absolute start-2.5 top-1/2 -translate-y-1/2 text-white/30"
+              className="absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search users..."
-              className="bg-white/[0.05] border border-white/[0.08] rounded-lg ps-8 pe-3 py-1.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-white/20 w-64"
+              className="sl-input ps-9 w-72 max-w-full"
             />
           </div>
-          <span className="text-xs text-white/30">
+          <span className="text-xs text-muted-foreground">
             {totalCount} user{totalCount !== 1 ? 's' : ''}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40 me-1">Role:</span>
+              <span className="text-xs text-muted-foreground me-1">Role:</span>
               {SUPERADMIN_FILTERS.map((f) => (
                 <button
                   key={f}
                   onClick={() => handleSuperadminFilter(f)}
                   className={`text-xs px-2.5 py-1 rounded-md transition-colors capitalize ${
                     superadminFilter === f
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-muted-foreground hover:bg-accent'
                   }`}
                 >
                   {f === 'all'
@@ -202,7 +202,7 @@ export default function UserList() {
 
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-white/40 me-1">Sort:</span>
+            <span className="text-xs text-muted-foreground me-1">Sort:</span>
             {(
               [
                 ['id', 'Default'],
@@ -218,8 +218,8 @@ export default function UserList() {
                 onClick={() => handleSortChange(key)}
                 className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
                   sortBy === key
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-muted-foreground hover:bg-accent'
                 }`}
               >
                 {label}
@@ -230,18 +230,18 @@ export default function UserList() {
       </div>
 
       {/* Table */}
-      <div className="relative">
+      <div className="sl-card relative overflow-hidden">
         {isValidating && !isLoading && (
-          <div className="absolute inset-0 bg-[#0f0f10]/50 z-10 flex items-center justify-center pointer-events-none">
-            <div className="h-5 w-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center pointer-events-none">
+            <div className="h-5 w-5 border-2 border-border border-t-primary rounded-full animate-spin" />
           </div>
         )}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="h-6 w-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+            <div className="h-6 w-6 border-2 border-border border-t-primary rounded-full animate-spin" />
           </div>
         ) : !users || users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/40">
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <User size={48} weight="fill" />
             <p className="mt-4 text-lg">No users found</p>
           </div>
@@ -249,21 +249,21 @@ export default function UserList() {
           <>
             <table className="w-full text-start">
               <thead>
-                <tr className="border-b border-white/[0.08]">
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-start text-meta font-semibold text-muted-foreground">
                     User
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-start text-meta font-semibold text-muted-foreground">
                     Email
                   </th>
 
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-start text-meta font-semibold text-muted-foreground">
                     Role
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-start text-meta font-semibold text-muted-foreground">
                     Created
                   </th>
-                  <th className="px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-start text-meta font-semibold text-muted-foreground">
                     Updated
                   </th>
                 </tr>
@@ -277,7 +277,7 @@ export default function UserList() {
                   return (
                     <tr
                       key={u.id}
-                      className="border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors"
+                      className="border-b border-border hover:bg-accent transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export default function UserList() {
                             <img
                               src={safeImageSrc(getAvatarUrl(u.user_uuid, u.avatar_image))}
                               alt={u.username}
-                              className="h-8 w-8 rounded-full object-cover bg-white/[0.05]"
+                              className="h-8 w-8 rounded-full object-cover bg-card"
                               onError={(e) => {
                                 ;(e.target as HTMLImageElement).style.display =
                                   'none'
@@ -295,11 +295,11 @@ export default function UserList() {
                             avatarFallback
                           )}
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-foreground">
                               {u.username}
                             </p>
                             {fullName && (
-                              <p className="text-xs text-white/30 truncate max-w-[200px]">
+                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                 {fullName}
                               </p>
                             )}
@@ -311,9 +311,9 @@ export default function UserList() {
                           <EnvelopeSimple
                             size={12}
                             weight="bold"
-                            className="text-white/20 shrink-0"
+                            className="text-muted-foreground/70 shrink-0"
                           />
-                          <span className="text-sm text-white/60 truncate max-w-[220px]">
+                          <span className="text-sm text-muted-foreground truncate max-w-[220px]">
                             {u.email}
                           </span>
                         </div>
@@ -321,25 +321,25 @@ export default function UserList() {
 
                       <td className="px-4 py-3">
                         {u.is_superadmin ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400/10 text-amber-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-700">
                             <ShieldStar size={12} weight="fill" />
                             Superadmin
                           </span>
                         ) : (
-                          <span className="text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-white/[0.06] text-white/40">
+                          <span className="text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground">
                             User
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-muted-foreground">
                           {u.creation_date
                             ? new Date(u.creation_date).toLocaleDateString()
                             : '—'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-muted-foreground">
                           {u.update_date
                             ? new Date(u.update_date).toLocaleDateString()
                             : '—'}
@@ -354,14 +354,14 @@ export default function UserList() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 px-4">
-                <span className="text-xs text-white/30">
+                <span className="text-xs text-muted-foreground">
                   Page {page} of {totalPages}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handlePageChange(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                   >
                     <CaretLeft size={14} weight="bold" data-dir-flip />
                   </button>
@@ -375,7 +375,7 @@ export default function UserList() {
                     .map((p, idx, arr) => (
                       <React.Fragment key={p}>
                         {idx > 0 && arr[idx - 1] !== p - 1 && (
-                          <span className="text-white/20 text-xs px-1">
+                          <span className="text-muted-foreground/70 text-xs px-1">
                             ...
                           </span>
                         )}
@@ -383,8 +383,8 @@ export default function UserList() {
                           onClick={() => handlePageChange(p)}
                           className={`text-xs min-w-[28px] h-7 rounded transition-colors ${
                             p === page
-                              ? 'bg-white/10 text-white'
-                              : 'text-white/40 hover:text-white hover:bg-white/[0.05]'
+                              ? 'bg-muted text-foreground'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                           }`}
                         >
                           {p}
@@ -396,7 +396,7 @@ export default function UserList() {
                       handlePageChange(Math.min(totalPages, page + 1))
                     }
                     disabled={page === totalPages}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                   >
                     <CaretRight size={14} weight="bold" data-dir-flip />
                   </button>

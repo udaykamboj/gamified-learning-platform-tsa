@@ -192,7 +192,7 @@ export function EditDiscussionModal({
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
                     selectedLabel === label.id
                       ? 'border-gray-900 bg-gray-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      : 'border-gray-200 hover:border-gray-300 bg-card'
                   } ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span style={{ color: label.color }}>
@@ -286,7 +286,7 @@ export function EditDiscussionModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !isValid}
-                className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                 {t('communities.edit_discussion.save')}

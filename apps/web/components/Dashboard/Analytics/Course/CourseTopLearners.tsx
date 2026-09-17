@@ -44,7 +44,7 @@ function LearnerRow({
       {index < 3 ? (
         <Medal size={compact ? 16 : 20} weight="fill" className={RANK_COLORS[index]} />
       ) : (
-        <span className={`${compact ? 'text-[10px] w-4' : 'text-xs w-5'} text-gray-400 text-right font-medium`}>
+        <span className={`${compact ? 'text-[11px] w-4' : 'text-xs w-5'} text-gray-400 text-right font-medium`}>
           {index + 1}
         </span>
       )}
@@ -148,7 +148,7 @@ export default function CourseTopLearners({
             ))}
           </div>
           {rows.length > 3 && (
-            <p className="text-[10px] text-gray-300 text-center mt-1">
+            <p className="text-[11px] text-gray-300 text-center mt-1">
               {t('analytics.course_analytics.common.more_expand', { count: rows.length - 3 })}
             </p>
           )}

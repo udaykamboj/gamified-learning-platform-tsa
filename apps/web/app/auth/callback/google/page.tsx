@@ -303,7 +303,7 @@ export default function GoogleCallbackPage() {
           <div className="space-y-3">
             <Link
               href="/login"
-              className="block w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+              className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary transition-colors"
             >
               Go to Login
             </Link>
@@ -335,7 +335,7 @@ export default function GoogleCallbackPage() {
           <div className="space-y-3">
             <Link
               href="/login"
-              className="block w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+              className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary transition-colors"
             >
               Try Again
             </Link>

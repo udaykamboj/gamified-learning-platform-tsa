@@ -21,7 +21,7 @@ export function CommunityActionsMobile({
 
   return (
     <nav aria-label="Community mobile actions" className="fixed bottom-0 start-0 end-0 z-50 md:hidden">
-      <div className="mx-3 mb-4 bg-white/95 backdrop-blur-sm rounded-xl nice-shadow p-3">
+      <div className="mx-3 mb-4 bg-card/95 backdrop-blur-sm rounded-xl nice-shadow p-3">
         <div className="flex items-center gap-3">
           {/* Community Icon */}
           <div className="flex-shrink-0 w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -50,7 +50,7 @@ export function CommunityActionsMobile({
             {canCreateDiscussion && onCreateDiscussion && (
               <button
                 onClick={onCreateDiscussion}
-                className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-colors text-sm font-medium"
               >
                 <Plus size={14} />
                 New

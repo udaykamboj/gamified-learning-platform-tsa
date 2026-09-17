@@ -18,7 +18,7 @@ export default function UserDossierModal({ userId, days = 365, onOpenChange }: P
 
   return (
     <Dialog open={userId != null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-[#f8f8f8] p-6 sm:p-8">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-muted p-6 sm:p-8">
         {isLoading && (
           <div className="py-20 flex justify-center"><StarLabSpinner /></div>
         )}

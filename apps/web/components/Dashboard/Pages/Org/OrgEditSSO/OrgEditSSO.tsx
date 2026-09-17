@@ -225,7 +225,7 @@ const OrgEditSSO: React.FC = () => {
 
   if (isLoading && ssoEnabled) {
     return (
-      <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow p-8">
+      <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow p-8">
         <div className="flex items-center justify-center">
           <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
         </div>
@@ -235,7 +235,7 @@ const OrgEditSSO: React.FC = () => {
 
   return (
     <FeatureGate feature="sso">
-      <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow pt-3">
+      <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow pt-3">
         <div className="flex flex-col gap-0">
           {/* Header */}
           <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
@@ -485,7 +485,7 @@ const OrgEditSSO: React.FC = () => {
             <Button
               onClick={handleSave}
               disabled={isSaving || !selectedProviderInfo?.available}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-action-hover"
             >
               {isSaving
                 ? t('dashboard.organization.sso.saving')

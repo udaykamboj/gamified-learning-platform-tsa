@@ -166,7 +166,7 @@ const DetailCard = React.memo(({
   }, [detail.label]);
 
   return (
-    <div className="space-y-2 p-4 border rounded-lg bg-white shadow-sm">
+    <div className="space-y-2 p-4 border rounded-lg bg-card shadow-sm">
       <div className="flex justify-between items-center mb-3">
         <Input
           value={localLabel}
@@ -507,7 +507,7 @@ const UserEditForm = ({
                     <AIImageButton
                       onSelect={profilePicture.handleAISelect}
                       onSelectFile={profilePicture.handleAIImageFile}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border border-gray-200 rounded-md bg-white hover:bg-gray-50 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border border-gray-200 rounded-md bg-card hover:bg-gray-50 transition-colors"
                     />
                   </>
                 )}
@@ -526,7 +526,7 @@ const UserEditForm = ({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {isSubmitting ? t('user.settings.general.saving') : t('user.settings.general.save_changes')}
           </Button>
@@ -655,7 +655,7 @@ function AccountGeneral() {
 
   if (!userData) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-8">
+      <div className="bg-card rounded-xl nice-shadow p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -664,7 +664,7 @@ function AccountGeneral() {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow">
+    <div className="bg-card rounded-xl nice-shadow">
       <Formik<FormValues>
         enableReinitialize
         initialValues={{

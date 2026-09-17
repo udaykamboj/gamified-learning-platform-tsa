@@ -81,7 +81,7 @@ export default function PodcastsClient({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={t('podcasts.search_placeholder')}
                 placeholder={t('podcasts.search_placeholder')}
-                className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
               />
               {searchQuery && (
                 <button
@@ -120,7 +120,7 @@ export default function PodcastsClient({
             )}
             {allPodcasts.length === 0 && !searchQuery && (
               <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-white rounded-full nice-shadow mb-4">
+                <div className="p-4 bg-card rounded-full nice-shadow mb-4">
                   <Headphones className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                 </div>
                 <h1 className="text-xl font-bold text-gray-600 mb-2">

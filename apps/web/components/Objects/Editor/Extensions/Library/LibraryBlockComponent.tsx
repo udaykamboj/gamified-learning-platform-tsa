@@ -163,7 +163,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
     if (!isEditable) {
       return (
         <NodeViewWrapper className="my-4">
-          <div className="flex items-center justify-center gap-3 py-8 bg-white rounded-lg nice-shadow">
+          <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
             <Library className="text-slate-300" size={32} />
             <p className="text-slate-500">{t('library.no_resource_selected')}</p>
           </div>
@@ -173,7 +173,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
     return (
       <NodeViewWrapper className="my-4">
         <div
-          className="flex flex-col items-center justify-center gap-4 py-8 bg-white rounded-lg text-slate-700 px-4 border-2 border-dashed border-slate-200 text-sm"
+          className="flex flex-col items-center justify-center gap-4 py-8 bg-card rounded-lg text-slate-700 px-4 border-2 border-dashed border-slate-200 text-sm"
           contentEditable={false}
         >
           {uploading ? (
@@ -229,7 +229,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
           type="button"
           onClick={() => setLightboxOpen(true)}
           title={t('library.preview')}
-          className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white nice-shadow text-slate-600"
+          className="p-1.5 rounded-md bg-card/90 backdrop-blur-sm hover:bg-card nice-shadow text-slate-600"
         >
           <Expand size={14} />
         </button>
@@ -238,7 +238,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
         <a
           href={downloadUrl}
           title={t('media.download')}
-          className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white nice-shadow text-slate-600"
+          className="p-1.5 rounded-md bg-card/90 backdrop-blur-sm hover:bg-card nice-shadow text-slate-600"
         >
           <Download size={14} />
         </a>
@@ -249,7 +249,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
             type="button"
             onClick={() => setPickerOpen(true)}
             title={t('library.replace_resource')}
-            className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white nice-shadow text-slate-600"
+            className="p-1.5 rounded-md bg-card/90 backdrop-blur-sm hover:bg-card nice-shadow text-slate-600"
           >
             <ArrowLeftRight size={14} />
           </button>
@@ -257,7 +257,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
             type="button"
             onClick={clearSelection}
             title={t('library.remove_resource')}
-            className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white nice-shadow text-rose-600"
+            className="p-1.5 rounded-md bg-card/90 backdrop-blur-sm hover:bg-card nice-shadow text-rose-600"
           >
             <Trash2 size={14} />
           </button>
@@ -299,7 +299,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
         <div className="absolute top-2 end-2 z-10">{toolbar}</div>
 
         {display === 'embed' && baseUrl ? (
-          <div className="w-full rounded-xl overflow-hidden nice-shadow bg-white" style={{ height: '70vh', minHeight: 420 }}>
+          <div className="w-full rounded-xl overflow-hidden nice-shadow bg-card" style={{ height: '70vh', minHeight: 420 }}>
             <iframe
               src={buildEmbedUrl(kind, baseUrl)}
               title={name}
@@ -309,11 +309,11 @@ function LibraryBlockComponent(props: NodeViewProps) {
             />
           </div>
         ) : (
-          <div className="flex items-center gap-3 bg-white rounded-xl nice-shadow px-4 py-3">
+          <div className="flex items-center gap-3 bg-card rounded-xl nice-shadow px-4 py-3">
             <Icon size={22} className="text-slate-400 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                 {t(`library.tabs.${kind}s`)}
               </p>
             </div>

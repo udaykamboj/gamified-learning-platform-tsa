@@ -116,7 +116,7 @@ function Trail(params: any) {
           </div>
         ) : trail.runs.length === 0 ? (
           <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-            <div className="p-4 bg-white rounded-full nice-shadow mb-4">
+            <div className="p-4 bg-card rounded-full nice-shadow mb-4">
               <BookOpen className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
             </div>
             <h1 className="text-xl font-bold text-gray-600 mb-2">

@@ -62,7 +62,7 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
           <div className="h-7 bg-gray-200 rounded w-28 mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl nice-shadow p-3 h-16" />
+              <div key={i} className="bg-card rounded-xl nice-shadow p-3 h-16" />
             ))}
           </div>
         </GeneralWrapperStyled>
@@ -97,11 +97,11 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
               )}
 
               {folders.length === 0 && rootItems.length === 0 && (
-                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 dark:border-white/10 rounded-2xl bg-gray-50/30 dark:bg-white/[0.03]">
-                  <div className="p-4 bg-white dark:bg-white/10 rounded-full nice-shadow mb-4">
-                    <FolderSimple className="w-8 h-8 text-gray-300 dark:text-gray-500" weight="duotone" />
+                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 ">
+                  <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+                    <FolderSimple className="w-8 h-8 text-gray-300 " weight="duotone" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-600 dark:text-gray-200 mb-1">
+                  <h3 className="text-lg font-bold text-gray-600 mb-1">
                     {isError ? t('library.error_loading') : t('library.empty_folder')}
                   </h3>
                 </div>

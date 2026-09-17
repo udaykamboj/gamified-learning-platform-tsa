@@ -314,7 +314,7 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
               />
             </div>
 
@@ -333,7 +333,7 @@ function TaskNumberAnswerObject({
                       correct_value: Number.parseFloat(e.target.value) || 0,
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
                 />
               </div>
               <div className="flex flex-col space-y-1">
@@ -351,7 +351,7 @@ function TaskNumberAnswerObject({
                       tolerance: Math.max(0, Number.parseFloat(e.target.value) || 0),
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
                 />
               </div>
             </div>
@@ -368,9 +368,9 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.unit_placeholder'
                 )}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
               />
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[11px] text-slate-400">
                 {t('dashboard.assignments.editor.task_editor.number_answer.unit_hint')}
               </p>
             </div>
@@ -388,7 +388,7 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
               />
             </div>
 
@@ -420,7 +420,7 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.your_answer_placeholder'
                 )}
-                className="w-full max-w-[200px] px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none font-mono"
+                className="w-full max-w-[200px] px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none font-mono"
               />
               {contents.unit && (
                 <span className="text-sm font-medium text-slate-500">{contents.unit}</span>

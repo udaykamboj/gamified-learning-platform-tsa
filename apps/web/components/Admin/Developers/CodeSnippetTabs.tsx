@@ -35,8 +35,8 @@ export default function CodeSnippetTabs({
   }
 
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-black/30 overflow-hidden">
-      <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/[0.06] bg-white/[0.02]">
+    <div className="rounded-lg border border-border bg-muted overflow-hidden">
+      <div className="flex items-center justify-between px-2 py-1.5 border-b border-border bg-card">
         <div className="flex items-center gap-0.5">
           {(['curl', 'js', 'python'] as Lang[]).map((lang) => {
             const isActive = active === lang
@@ -47,8 +47,8 @@ export default function CodeSnippetTabs({
                 className={
                   'px-2.5 py-1 rounded text-xs transition-colors ' +
                   (isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/40 hover:text-white/70')
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-muted-foreground')
                 }
               >
                 {LANG_LABELS[lang]}
@@ -58,11 +58,11 @@ export default function CodeSnippetTabs({
         </div>
         <button
           onClick={handleCopy}
-          className="text-xs text-white/60 hover:text-white inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-white/[0.04] transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-accent transition-colors"
         >
           {copied ? (
             <>
-              <Check size={12} weight="bold" className="text-emerald-300" />
+              <Check size={12} weight="bold" className="text-emerald-700" />
               Copied
             </>
           ) : (
@@ -73,7 +73,7 @@ export default function CodeSnippetTabs({
           )}
         </button>
       </div>
-      <pre className="px-3 py-2.5 text-xs font-mono text-white/80 whitespace-pre overflow-x-auto leading-relaxed">
+      <pre className="px-3 py-2.5 text-xs font-mono text-foreground whitespace-pre overflow-x-auto leading-relaxed">
         {code}
       </pre>
     </div>

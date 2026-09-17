@@ -101,7 +101,7 @@ function InlineAudioPlayer({ src, title }: { src: string; title?: string }) {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-card border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Title bar */}

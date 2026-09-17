@@ -334,7 +334,7 @@ export default function PlaygroundEditor({
             <CircleNotch size={12} weight="bold" className="animate-spin text-gray-400 flex-shrink-0" />
           )}
           {titleSaveStatus === 'saved' && !isSavingTitle && (
-            <span className="flex items-center gap-0.5 text-[10px] font-semibold text-green-500 flex-shrink-0">
+            <span className="flex items-center gap-0.5 text-[11px] font-semibold text-green-500 flex-shrink-0">
               <Check size={10} weight="bold" />
               Saved
             </span>

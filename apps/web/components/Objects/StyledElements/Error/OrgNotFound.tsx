@@ -27,7 +27,7 @@ function OrgNotFound() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="max-w-md w-full mx-4 p-8 bg-white rounded-2xl shadow-lg">
+      <div className="max-w-md w-full mx-4 p-8 bg-card rounded-2xl shadow-lg">
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
             <Building2 className="h-8 w-8 text-gray-600" />
@@ -57,7 +57,7 @@ function OrgNotFound() {
             <button
               type="submit"
               disabled={!orgSlug.trim() || isNavigating}
-              className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 px-4 rounded-xl font-medium hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isNavigating ? (
                 'Redirecting...'

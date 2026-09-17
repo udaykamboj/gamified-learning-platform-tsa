@@ -64,9 +64,9 @@ export default function EELicenseError({ error }: { error: unknown }) {
   if (!error) return null
   if (isEERequiredError(error)) {
     return (
-      <div className="rounded-2xl border border-sky-400/20 bg-sky-400/[0.06] p-5 my-4">
+      <div className="rounded-2xl border border-sky-200 bg-sky-400/[0.06] p-5 my-4">
         <div className="flex items-start gap-3">
-          <Warning size={20} weight="fill" className="text-sky-300 mt-0.5 shrink-0" />
+          <Warning size={20} weight="fill" className="text-sky-700 mt-0.5 shrink-0" />
           <div className="min-w-0">
             <div className="text-sm font-semibold text-sky-200">
               Enterprise Edition license required
@@ -82,9 +82,9 @@ export default function EELicenseError({ error }: { error: unknown }) {
   }
   if (isEELicenseInactiveError(error)) {
     return (
-      <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.06] p-5 my-4">
+      <div className="rounded-2xl border border-amber-200 bg-amber-400/[0.06] p-5 my-4">
         <div className="flex items-start gap-3">
-          <Warning size={20} weight="fill" className="text-amber-300 mt-0.5 shrink-0" />
+          <Warning size={20} weight="fill" className="text-amber-700 mt-0.5 shrink-0" />
           <div className="min-w-0">
             <div className="text-sm font-semibold text-amber-200">
               Enterprise features are currently unavailable
@@ -132,9 +132,9 @@ export default function EELicenseError({ error }: { error: unknown }) {
   // Generic error fallback
   const msg = error instanceof Error ? error.message : String(error)
   return (
-    <div className="rounded-2xl border border-red-400/20 bg-red-400/[0.06] p-5 my-4">
+    <div className="rounded-2xl border border-red-200 bg-red-400/[0.06] p-5 my-4">
       <div className="flex items-start gap-3">
-        <Warning size={20} weight="fill" className="text-red-300 mt-0.5 shrink-0" />
+        <Warning size={20} weight="fill" className="text-red-700 mt-0.5 shrink-0" />
         <div className="min-w-0">
           <div className="text-sm font-semibold text-red-200">Failed to load</div>
           <p className="text-xs text-red-200/80 mt-1 leading-relaxed break-words">{msg}</p>

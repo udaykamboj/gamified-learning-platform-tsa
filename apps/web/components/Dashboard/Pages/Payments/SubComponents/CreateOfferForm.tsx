@@ -228,7 +228,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                         (c: any) => `course_${c.course_uuid?.replace('course_', '')}` === uuid
                       );
                       return (
-                        <li key={uuid} className="flex items-center justify-between bg-white rounded px-2 py-1 text-xs border">
+                        <li key={uuid} className="flex items-center justify-between bg-card rounded px-2 py-1 text-xs border">
                           <div className="flex items-center gap-1.5">
                             <BookOpen size={11} className="text-indigo-500" />
                             <span>{course?.name ?? uuid}</span>

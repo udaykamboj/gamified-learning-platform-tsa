@@ -66,7 +66,7 @@ function MediaThumbnail({ media, orgslug, org_id, isDashboard = false, onChanged
   }
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
       {isDashboard && (
         <AuthenticatedClientElement
           action="update"
@@ -77,7 +77,7 @@ function MediaThumbnail({ media, orgslug, org_id, isDashboard = false, onChanged
           <div className={`absolute top-2 end-2 z-20 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
             <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <button aria-label="Media actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+                <button aria-label="Media actions" className="p-1.5 bg-card/90 backdrop-blur-sm rounded-full hover:bg-card transition-all shadow-md">
                   <MoreVertical size={18} className="text-gray-700" />
                 </button>
               </DropdownMenuTrigger>
@@ -122,7 +122,7 @@ function MediaThumbnail({ media, orgslug, org_id, isDashboard = false, onChanged
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-bold text-gray-900 leading-tight truncate">{media.name}</h3>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{typeLabel}</span>
+            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{typeLabel}</span>
           </div>
           {media.media_type === 'EMBED' ? (
             <ExternalLink className="w-4 h-4 text-gray-300 flex-shrink-0" />

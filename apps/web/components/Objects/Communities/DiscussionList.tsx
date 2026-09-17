@@ -248,7 +248,7 @@ export function DiscussionList({
             {canCreateDiscussion && onCreateClick && !isSelectMode && (
               <button
                 onClick={() => handleCreateClick('header')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 h-8 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
+                className="hidden md:flex items-center gap-2 px-3 py-2 h-8 bg-primary hover:bg-primary text-primary-foreground rounded-md transition-colors text-xs font-medium"
               >
                 <Plus size={14} />
                 {t('communities.discussion_list.new_discussion')}
@@ -326,7 +326,7 @@ export function DiscussionList({
                 {canCreateDiscussion && onCreateClick && (
                   <button
                     onClick={() => handleCreateClick('empty_state')}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-colors text-sm font-medium"
                   >
                     <Plus size={16} />
                     {t('communities.discussion_list.start_discussion')}

@@ -118,7 +118,7 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
   return (
     <div>
       <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
+      <div className="mx-4 sm:mx-10 bg-card rounded-xl shadow-xs px-4 py-4">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
           <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.thumbnail.title')}</h1>
           <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.thumbnail.description')}</h2>
@@ -150,7 +150,7 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
               />
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 onClick={() => imageInputRef.current?.click()}
               >
                 <UploadCloud size={16} />
@@ -158,7 +158,7 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
               </button>
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 onClick={() => setShowUnsplashPicker(true)}
               >
                 <ImageIcon size={16} />
@@ -167,7 +167,7 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
               <AIImageButton
                 onSelect={handleUnsplashSelect}
                 onSelectFile={handleAIImageFile}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               />
             </div>
           )}

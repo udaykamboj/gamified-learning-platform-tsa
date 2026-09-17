@@ -159,7 +159,7 @@ const OrgEditOther: React.FC = () => {
   return (
     <div className="sm:mx-10 mx-0 space-y-4">
       {/* Watermark Toggle */}
-      <div className="bg-white rounded-xl nice-shadow p-4">
+      <div className="bg-card rounded-xl nice-shadow p-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label className="text-base font-medium">{t('dashboard.organization.settings.watermark_label')}</Label>
@@ -180,7 +180,7 @@ const OrgEditOther: React.FC = () => {
       </div>
 
       {/* Scripts Section */}
-      <div className="bg-white rounded-xl nice-shadow">
+      <div className="bg-card rounded-xl nice-shadow">
       <div className="pt-0.5">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <div className="flex items-center justify-between">
@@ -212,7 +212,7 @@ const OrgEditOther: React.FC = () => {
                   setCurrentScript(null)
                   setSelectedView('edit')
                 }}
-                className="bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-action-hover"
               >
                 <Plus className="h-4 w-4 me-2" />
                 {t('dashboard.organization.scripts.add_script')}
@@ -242,7 +242,7 @@ const OrgEditOther: React.FC = () => {
                       <div className="flex items-baseline space-x-2">
                         <h4 className="text-sm font-medium text-gray-800 truncate">{script.name}</h4>
                       </div>
-                      <pre className="text-sm text-gray-600 font-mono bg-white/80 p-2 rounded border border-gray-200 overflow-x-auto">
+                      <pre className="text-sm text-gray-600 font-mono bg-card/80 p-2 rounded border border-gray-200 overflow-x-auto">
                         {script.content.length > 100 
                           ? script.content.substring(0, 100) + '...' 
                           : script.content}
@@ -330,7 +330,7 @@ const OrgEditOther: React.FC = () => {
                     <Button 
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-black text-white hover:bg-black/90"
+                      className="bg-primary text-primary-foreground hover:bg-action-hover"
                     >
                       {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.scripts.save_script')}
                     </Button>

@@ -33,7 +33,7 @@ function CommunityCard(props: PropsType) {
 
   return (
     <div
-      className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
+      className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
     >
       <Link
         href={communityLink}
@@ -59,7 +59,7 @@ function CommunityCard(props: PropsType) {
       <div className="p-3 flex flex-col space-y-1.5">
         <Link
           href={communityLink}
-          className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
+          className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
         >
           {props.community.name}
         </Link>
@@ -73,14 +73,14 @@ function CommunityCard(props: PropsType) {
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
           <div className="flex items-center gap-1.5 text-gray-500">
             <MessageCircle size={12} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">
+            <span className="text-[11px] font-bold uppercase tracking-wider">
               {props.community.course_id ? 'Course Q&A' : 'Everyone'}
             </span>
           </div>
 
           <Link
             href={communityLink}
-            className="flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="flex items-center gap-1 text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {variant === 'dashboard' && <Shield size={10} />}
             {variant === 'dashboard' ? 'Moderate' : t('dashboard.courses.communities.card.view_community')}

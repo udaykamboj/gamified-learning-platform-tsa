@@ -27,7 +27,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-8">
+      <div className="bg-card rounded-xl nice-shadow p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -37,7 +37,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-8">
+      <div className="bg-card rounded-xl nice-shadow p-8">
         <div className="text-center text-red-500">
           {t('common.something_went_wrong')}
         </div>
@@ -46,7 +46,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow">
+    <div className="bg-card rounded-xl nice-shadow">
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">{t('account.my_courses')}</h1>

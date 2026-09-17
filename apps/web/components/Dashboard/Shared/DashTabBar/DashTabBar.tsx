@@ -88,7 +88,7 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
         <button
           onClick={() => scroll('left')}
           aria-label="Scroll tabs left"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-card nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
         >
           <ChevronLeft size={13} strokeWidth={2.5} />
         </button>
@@ -163,7 +163,7 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
         <button
           onClick={() => scroll('right')}
           aria-label="Scroll tabs right"
-          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-white nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
+          className="pointer-events-auto flex items-center justify-center w-6 h-6 rounded-full bg-card nice-shadow text-gray-500 hover:text-gray-900 transition-colors duration-150"
         >
           <ChevronRight size={13} strokeWidth={2.5} />
         </button>

@@ -222,7 +222,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   // Show join organization prompt for authenticated users who are not part of the org
   if (session.data?.user && !isUserPartOfTheOrg) {
     return (
-      <div className="bg-white/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
+      <div className="bg-card/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
         <div className="flex flex-col space-y-3">
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-center gap-2">
@@ -235,7 +235,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
           </div>
           <a
             href={getUriWithOrg(orgslug, '/signup')}
-            className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary transition-colors flex items-center justify-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
             {t('courses.join_organization')}
@@ -259,7 +259,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     });
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
+    <div className="bg-card/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
       <div className="flex flex-col space-y-4">
         <MultipleAuthors authors={sortedAuthors} />
         
@@ -316,7 +316,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                         amount: offer.amount,
                         currency: offer.currency,
                       })}
-                      className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+                      className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary transition-colors flex items-center justify-center gap-2"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       {formattedPrice ? `Get Access — ${formattedPrice}` : 'Purchase Course'}
@@ -332,8 +332,8 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             disabled={isActionLoading}
             className={`w-full py-2 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${
               isStarted
-                ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                ? 'bg-red-500 text-primary-foreground hover:bg-red-600 disabled:bg-red-400'
+                : 'bg-primary text-primary-foreground hover:bg-primary disabled:bg-neutral-700'
             }`}
           >
             {isActionLoading ? (

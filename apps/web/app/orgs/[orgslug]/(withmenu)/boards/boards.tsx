@@ -83,7 +83,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
         <button
           type="submit"
           disabled={!name.trim()}
-          className="rounded-lg bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-gray-800 transition-colors"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 hover:bg-primary transition-colors"
         >
           {t('boards.create_board')}
         </button>
@@ -223,7 +223,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
 
   return (
     <>
-      <div className="h-full w-full bg-[#f8f8f8] ps-4 pe-4 sm:ps-10 sm:pe-10">
+      <div className="h-full w-full bg-muted ps-4 pe-4 sm:ps-10 sm:pe-10">
         <div className="mb-6 pt-6">
           <Breadcrumbs items={[
             { label: t('boards.boards'), href: '/boards', icon: <ChalkboardSimple size={14} /> }
@@ -245,7 +245,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 />
               }
               dialogTrigger={
-                <button className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105">
+                <button className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:scale-105">
                   <div>{t('boards.new_board')}</div>
                   <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
                 </button>
@@ -264,7 +264,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boards.search_placeholder')}
-                className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
               />
               {searchQuery && (
                 <button
@@ -284,13 +284,13 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 </span>
                 <button
                   onClick={selectAllBoards}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-card nice-shadow rounded-lg transition-colors"
                 >
                   <span>{t('boards.select_all')}</span>
                 </button>
                 <button
                   onClick={clearSelection}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-card nice-shadow rounded-lg transition-colors"
                 >
                   <X className="w-4 h-4" />
                   <span>{t('boards.clear_selection')}</span>
@@ -300,7 +300,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                   confirmationMessage={t('boards.delete_selected_confirm', { count: selectedBoards.size })}
                   dialogTitle={t('boards.delete_boards_title')}
                   dialogTrigger={
-                    <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white nice-shadow rounded-lg transition-colors">
+                    <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-card nice-shadow rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                       <span>{t('boards.delete_selected')}</span>
                     </button>
@@ -326,7 +326,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-xl bg-white nice-shadow overflow-hidden">
+              <div key={i} className="animate-pulse rounded-xl bg-card nice-shadow overflow-hidden">
                 <div className="aspect-video bg-gray-200" />
                 <div className="p-3 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -426,17 +426,17 @@ function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelec
   }
 
   return (
-    <div className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+    <div className={`group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
       {/* Selection checkbox */}
       <button
         onClick={handleSelectClick}
         aria-label={isSelected ? 'Deselect board' : 'Select board'}
-        className={`absolute top-2 start-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
+        className={`absolute top-2 start-2 z-20 p-1.5 bg-card/90 backdrop-blur-sm rounded-full hover:bg-card transition-all shadow-md ${
           isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
       >
         {isSelected ? (
-          <CheckSquare className="w-4 h-4 text-black" />
+          <CheckSquare className="w-4 h-4 text-foreground" />
         ) : (
           <Square className="w-4 h-4 text-gray-500" />
         )}
@@ -459,15 +459,15 @@ function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelec
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-foreground/5 transition-colors duration-300" />
         <div className="absolute bottom-2 start-2">
           {board.public ? (
-            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
               <Globe size={10} />
               {t('boards.public')}
             </span>
           ) : (
-            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-full">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-full">
               <Lock size={10} />
               {t('boards.private')}
             </span>
@@ -477,7 +477,7 @@ function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelec
 
       <div className="p-3 flex flex-col space-y-1.5">
         <div className="flex items-start justify-between">
-          <Link href={settingsLink} className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1">
+          <Link href={settingsLink} className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1">
             {board.name}
           </Link>
         </div>
@@ -489,7 +489,7 @@ function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelec
         )}
 
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+          <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
             <Users size={12} />
             <span>{board.member_count !== 1
               ? t('boards.member_count_plural', { count: board.member_count })
@@ -497,7 +497,7 @@ function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelec
           </div>
           <Link
             href={settingsLink}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {isOwner ? t('boards.settings') : t('boards.open_board')}
           </Link>
@@ -524,7 +524,7 @@ function BoardCardOptions({ board, orgslug, isOwner, onDuplicate, onDelete }: {
       }`}>
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
-            <button aria-label="Board actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+            <button aria-label="Board actions" className="p-1.5 bg-card/90 backdrop-blur-sm rounded-full hover:bg-card transition-all shadow-md">
               <MoreVertical size={18} className="text-gray-700" />
             </button>
           </DropdownMenuTrigger>

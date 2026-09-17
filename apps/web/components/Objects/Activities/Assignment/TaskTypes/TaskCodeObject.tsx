@@ -730,7 +730,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                     }))
                     setCode(lang?.defaultCode || code)
                   }}
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
                 >
                   {PLAYGROUND_LANGUAGES.map((lang) => (
                     <option key={lang.id} value={lang.id}>
@@ -746,7 +746,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                   onChange={(e) =>
                     setContents((prev) => ({ ...prev, grading_mode: e.target.value as any }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
                 >
                   <option value="equal_weight">Equal Weight</option>
                   <option value="binary">Binary (All or Nothing)</option>
@@ -814,7 +814,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               {contents.test_cases.map((tc, index) => (
                 <div
                   key={tc.id}
-                  className="flex flex-col space-y-2 p-3 border border-gray-200 rounded-md bg-white"
+                  className="flex flex-col space-y-2 p-3 border border-gray-200 rounded-md bg-card"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 flex-1">
@@ -856,7 +856,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase">Stdin</label>
+                      <label className="text-[11px] font-semibold text-slate-400 uppercase">Stdin</label>
                       <textarea
                         value={tc.stdin}
                         onChange={(e) => updateTestCase(index, 'stdin', e.target.value)}
@@ -866,7 +866,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                       />
                     </div>
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase">Expected Stdout</label>
+                      <label className="text-[11px] font-semibold text-slate-400 uppercase">Expected Stdout</label>
                       <textarea
                         value={tc.expectedStdout}
                         onChange={(e) => updateTestCase(index, 'expectedStdout', e.target.value)}
@@ -984,7 +984,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               )}
             </div>
             {!canStudentSave && (
-              <div className="flex items-center space-x-1.5 text-[10px] text-slate-500 bg-slate-100 rounded-md px-2 py-1 w-fit">
+              <div className="flex items-center space-x-1.5 text-[11px] text-slate-500 bg-slate-100 rounded-md px-2 py-1 w-fit">
                 <Lock size={11} />
                 <span>
                   {submissionIsGraded
@@ -998,7 +998,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
               </div>
             )}
             {antiPasteEnabled && (
-              <div className="flex items-center space-x-1.5 text-[10px] text-amber-600 bg-amber-50 rounded-md px-2 py-1 w-fit">
+              <div className="flex items-center space-x-1.5 text-[11px] text-amber-600 bg-amber-50 rounded-md px-2 py-1 w-fit">
                 <span>🔒</span>
                 <span>{t('dashboard.assignments.editor.task_editor.general.paste_blocked_hint')}</span>
               </div>
@@ -1191,7 +1191,7 @@ function TestResultsPanel({
                 )}
                 <span className="font-medium text-slate-700">{result.label}</span>
                 {result.time && (
-                  <span className="text-[10px] text-slate-400 ms-auto">{result.time}s</span>
+                  <span className="text-[11px] text-slate-400 ms-auto">{result.time}s</span>
                 )}
               </div>
               {!result.passed && !isHidden && !detailsSuppressed && (
@@ -1199,25 +1199,25 @@ function TestResultsPanel({
                   {result.expected_stdout !== null && (
                     <div>
                       <span className="text-slate-400">Expected: </span>
-                      <code className="text-slate-600 bg-white px-1 rounded">{result.expected_stdout}</code>
+                      <code className="text-slate-600 bg-card px-1 rounded">{result.expected_stdout}</code>
                     </div>
                   )}
                   {result.actual_stdout !== null && (
                     <div>
                       <span className="text-slate-400">Got: </span>
-                      <code className="text-red-600 bg-white px-1 rounded">{result.actual_stdout}</code>
+                      <code className="text-red-600 bg-card px-1 rounded">{result.actual_stdout}</code>
                     </div>
                   )}
                   {result.stderr && (
                     <div>
                       <span className="text-slate-400">Error: </span>
-                      <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.stderr}</code>
+                      <code className="text-red-600 bg-card px-1 rounded text-[11px] break-all">{result.stderr}</code>
                     </div>
                   )}
                   {result.compile_output && (
                     <div>
                       <span className="text-slate-400">Compile: </span>
-                      <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.compile_output}</code>
+                      <code className="text-red-600 bg-card px-1 rounded text-[11px] break-all">{result.compile_output}</code>
                     </div>
                   )}
                 </div>
@@ -1266,12 +1266,12 @@ function CodeOptionToggle({
   onChange: (_next: boolean) => void
 }) {
   return (
-    <div className="flex items-start justify-between gap-2 p-2 rounded-md bg-white border border-slate-200">
+    <div className="flex items-start justify-between gap-2 p-2 rounded-md bg-card border border-slate-200">
       <div className="flex items-start gap-2 flex-1 min-w-0">
         <div className="mt-0.5 flex-none text-slate-500">{icon}</div>
         <div className="flex flex-col min-w-0">
           <p className="text-[11px] font-bold text-slate-700">{label}</p>
-          <p className="text-[10px] text-slate-500 leading-snug mt-0.5">{description}</p>
+          <p className="text-[11px] text-slate-500 leading-snug mt-0.5">{description}</p>
         </div>
       </div>
       <button
@@ -1283,7 +1283,7 @@ function CodeOptionToggle({
         }`}
       >
         <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+          className={`inline-block h-3 w-3 transform rounded-full bg-card shadow transition-transform ${
             checked ? 'translate-x-3.5 rtl:-translate-x-3.5' : 'translate-x-0.5 rtl:-translate-x-0.5'
           }`}
         />

@@ -351,7 +351,7 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
               />
             </div>
 
@@ -367,7 +367,7 @@ function TaskShortAnswerObject({
                     match_mode: e.target.value as MatchMode,
                   }))
                 }
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
               >
                 <option value="case_insensitive">
                   {t('dashboard.assignments.editor.task_editor.short_answer.match_modes.case_insensitive')}
@@ -406,7 +406,7 @@ function TaskShortAnswerObject({
                     placeholder={t(
                       'dashboard.assignments.editor.task_editor.short_answer.answer_placeholder'
                     )}
-                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-card"
                   />
                   {contents.correct_answers.length > 1 && (
                     <button
@@ -434,7 +434,7 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-card resize-y"
               />
             </div>
           </>
@@ -456,7 +456,7 @@ function TaskShortAnswerObject({
               placeholder={t(
                 'dashboard.assignments.editor.task_editor.short_answer.your_answer_placeholder'
               )}
-              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
             />
             {/* No answer-key panel at all when the key was withheld — the
                 learner still sees their own answer and their score. A panel
@@ -471,7 +471,7 @@ function TaskShortAnswerObject({
                   {contents.correct_answers.map((answer, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-xs font-medium bg-white text-emerald-700 rounded-md"
+                      className="px-2 py-0.5 text-xs font-medium bg-card text-emerald-700 rounded-md"
                     >
                       {answer}
                     </span>

@@ -71,7 +71,7 @@ export default function PricingGrid({
     return (
       <div
         key={plan.id}
-        className="relative flex flex-col rounded-2xl p-7 bg-white nice-shadow overflow-hidden"
+        className="relative flex flex-col rounded-2xl p-7 bg-card nice-shadow overflow-hidden"
       >
         <div
           className="absolute top-0 start-0 w-[200px] h-[200px] pointer-events-none"
@@ -89,7 +89,7 @@ export default function PricingGrid({
 
         {plan.popular && (
           <span
-            className={`absolute top-4 end-4 text-[10px] font-bold px-2 py-0.5 rounded-md text-white ${
+            className={`absolute top-4 end-4 text-[11px] font-bold px-2 py-0.5 rounded-md text-white ${
               isPersonal ? 'bg-amber-500' : plan.id === 'pro' ? 'bg-purple-600' : 'bg-blue-600'
             }`}
           >
@@ -106,28 +106,28 @@ export default function PricingGrid({
         <div className="mt-4 relative z-10">
           <div className="flex items-baseline gap-1">
             {pricesLoading && !isFree ? (
-              <span className="inline-block h-[42px] w-[100px] rounded-lg bg-black/[0.06] animate-pulse" />
+              <span className="inline-block h-[42px] w-[100px] rounded-lg bg-foreground/[0.06] animate-pulse" />
             ) : (
               <>
-                <span className="text-[42px] font-black leading-none text-black">
+                <span className="text-[42px] font-black leading-none text-foreground">
                   {getCurrencySymbol(plan.id)}
                   {price}
                 </span>
-                {!isFree && <span className="text-sm font-medium text-black/35">/mo</span>}
+                {!isFree && <span className="text-sm font-medium text-foreground/35">/mo</span>}
               </>
             )}
           </div>
         </div>
 
-        <p className="mt-2 text-sm font-medium leading-snug text-black/45 relative z-10">{plan.tagline}</p>
+        <p className="mt-2 text-sm font-medium leading-snug text-foreground/45 relative z-10">{plan.tagline}</p>
 
-        <div className="my-6 h-px bg-black/[0.06] relative z-10" />
+        <div className="my-6 h-px bg-foreground/[0.06] relative z-10" />
 
         <div className="flex-1 relative z-10">
           {plan.inheritsFrom && (
-            <p className="text-xs font-semibold mb-3 text-black/25 flex items-center gap-1.5">
+            <p className="text-xs font-semibold mb-3 text-foreground/25 flex items-center gap-1.5">
               Everything in{' '}
-              <span className={`inline-flex px-1 py-px text-[9px] font-semibold rounded border ${plan.inheritsBadge}`}>
+              <span className={`inline-flex px-1 py-px text-[11px] font-semibold rounded border ${plan.inheritsBadge}`}>
                 {plan.inheritsFrom}
               </span>{' '}
               plus:
@@ -137,10 +137,10 @@ export default function PricingGrid({
             {plan.features.map((f) => (
               <li key={f.label} className="flex items-start gap-2.5">
                 <Check size={15} className={`mt-0.5 flex-shrink-0 ${plan.accentColor} opacity-60`} />
-                <span className="text-[13.5px] font-medium leading-snug text-black/60">
+                <span className="text-[13.5px] font-medium leading-snug text-foreground/60">
                   {f.label}
                   {f.badge && (
-                    <span className="ms-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-black/35 border border-black/[0.06] rounded-md">
+                    <span className="ms-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-medium text-foreground/35 border border-border rounded-md">
                       {f.badge}
                     </span>
                   )}
@@ -172,7 +172,7 @@ export default function PricingGrid({
           <button
             onClick={() => onPlanTypeChange('general')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
-              planType === 'general' ? 'bg-white text-black shadow-sm' : 'text-black/40 hover:text-black/60'
+              planType === 'general' ? 'bg-card text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/60'
             }`}
           >
             <Presentation size={16} />
@@ -181,7 +181,7 @@ export default function PricingGrid({
           <button
             onClick={() => onPlanTypeChange('personal')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
-              planType === 'personal' ? 'bg-white text-black shadow-sm' : 'text-black/40 hover:text-black/60'
+              planType === 'personal' ? 'bg-card text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/60'
             }`}
           >
             <GraduationCap size={16} />
@@ -192,7 +192,7 @@ export default function PricingGrid({
           <button
             onClick={() => onAnnualChange(false)}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
-              !annual ? 'bg-white text-black shadow-sm' : 'text-black/40 hover:text-black/60'
+              !annual ? 'bg-card text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/60'
             }`}
           >
             Monthly
@@ -200,12 +200,12 @@ export default function PricingGrid({
           <button
             onClick={() => onAnnualChange(true)}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
-              annual ? 'bg-white text-black shadow-sm' : 'text-black/40 hover:text-black/60'
+              annual ? 'bg-card text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/60'
             }`}
           >
             Annual
             {annualSavePct > 0 && (
-              <span className="ms-1.5 text-[10px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full">
+              <span className="ms-1.5 text-[11px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full">
                 Save {annualSavePct}%
               </span>
             )}
@@ -257,7 +257,7 @@ export default function PricingGrid({
                         href="https://starlab.app/contact?subject=business"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block mt-6 px-5 py-2.5 text-[14px] font-bold bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
+                        className="inline-block mt-6 px-5 py-2.5 text-[14px] font-bold bg-card text-foreground rounded-lg hover:bg-card/90 transition-colors"
                       >
                         Talk to us
                       </a>

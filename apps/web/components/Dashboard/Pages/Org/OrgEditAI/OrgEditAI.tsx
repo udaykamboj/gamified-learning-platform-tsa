@@ -190,7 +190,7 @@ function SettingRow({ icon, title, description, checked, onToggle, disabled, alw
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-white nice-shadow">
+    <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-card nice-shadow">
       <div className="flex gap-3 min-w-0">
         <div className="flex-shrink-0 mt-0.5 text-gray-400">{icon}</div>
         <div className="space-y-0.5 min-w-0">

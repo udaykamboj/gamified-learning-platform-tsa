@@ -960,13 +960,13 @@ export default function BoardCanvas({ board, accessToken, orgslug, username, org
   if (authFailed) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-neutral-50">
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-lg">
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-8 shadow-lg">
           <div className="text-2xl">🔒</div>
           <p className="text-sm font-medium text-neutral-700">Unable to connect to this board</p>
           <p className="text-xs text-neutral-400">You may not have access, or the session has expired.</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 rounded-lg bg-neutral-900 px-4 py-2 text-xs font-medium text-white hover:bg-neutral-800 transition-colors"
+            className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary transition-colors"
           >
             Retry
           </button>

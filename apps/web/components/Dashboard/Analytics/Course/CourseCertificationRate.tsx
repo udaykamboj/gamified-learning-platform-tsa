@@ -63,7 +63,7 @@ export default function CourseCertificationRate({
           <div>
             <p className="text-4xl font-black text-gray-900">{rate}%</p>
             <p className="text-sm text-gray-500">{t('analytics.course_analytics.units.claim_rate')}</p>
-            <div className="flex gap-3 mt-2 text-[10px]">
+            <div className="flex gap-3 mt-2 text-[11px]">
               <span className="bg-emerald-50 text-emerald-500 px-2 py-0.5 rounded-full font-medium">{claims} {t('analytics.course_analytics.units.claimed')}</span>
               <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full font-medium">{completions} {t('analytics.course_analytics.units.completed')}</span>
             </div>

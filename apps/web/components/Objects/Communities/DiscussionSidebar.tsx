@@ -51,7 +51,7 @@ export function DiscussionSidebar({
   return (
     <div className="space-y-4">
       {/* Author Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
             {t('communities.sidebar.posted_by')}
@@ -127,7 +127,7 @@ export function DiscussionSidebar({
       </div>
 
       {/* Reactions Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
         <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
           {t('communities.sidebar.reactions')}
         </div>
@@ -135,7 +135,7 @@ export function DiscussionSidebar({
       </div>
 
       {/* Community Link */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
         <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
           {t('communities.sidebar.community')}
         </div>

@@ -63,7 +63,7 @@ function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: stri
 
   const url = getResourceUrl(orgslug, resource)
   const card = (
-    <div className={`bg-white rounded-xl nice-shadow overflow-hidden flex flex-col ${url ? 'cursor-pointer hover:scale-[1.01] transition-transform duration-150' : ''}`}>
+    <div className={`bg-card rounded-xl nice-shadow overflow-hidden flex flex-col ${url ? 'cursor-pointer hover:scale-[1.01] transition-transform duration-150' : ''}`}>
       {/* Thumbnail */}
       <div
         className="w-full aspect-video overflow-hidden bg-gray-100"
@@ -215,7 +215,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
 
             {/* Benefits */}
             {benefits.length > 0 && (
-              <div className="bg-white rounded-xl nice-shadow p-5">
+              <div className="bg-card rounded-xl nice-shadow p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Benefits</h2>
                 <ul className="space-y-2.5">
                   {benefits.map((b, i) => (
@@ -231,7 +231,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
 
           {/* Right col — sticky pricing card */}
           <div className="lg:col-span-1">
-            <div className="rounded-2xl nice-shadow bg-white p-6 sticky top-24">
+            <div className="rounded-2xl nice-shadow bg-card p-6 sticky top-24">
               {/* Price */}
               <div className="mb-5">
                 <p className="text-xs text-gray-400 font-medium mb-1">
@@ -251,8 +251,8 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 disabled={loading}
                 className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                   isSubscription
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    : 'bg-gray-900 hover:bg-gray-800 text-white'
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-primary-foreground'
+                    : 'bg-primary hover:bg-primary text-primary-foreground'
                 }`}
               >
                 {loading ? (

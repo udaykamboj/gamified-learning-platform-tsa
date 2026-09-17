@@ -350,7 +350,7 @@ const OrgEditAutomations: React.FC = () => {
       <>
         {/* ── Zapier hero card (hidden until the StarLab Zapier app is live) ────────────────────── */}
         {showZapierHeroCard && (
-        <div className="sm:mx-10 mx-0 mb-6 bg-white rounded-xl nice-shadow overflow-hidden">
+        <div className="sm:mx-10 mx-0 mb-6 bg-card rounded-xl nice-shadow overflow-hidden">
           <div className="px-5 py-4 flex items-center gap-4">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden nice-shadow">
               <ZapierLogo size={40} className="w-full h-full object-cover" />
@@ -358,11 +358,11 @@ const OrgEditAutomations: React.FC = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="font-semibold text-gray-800 text-[15px]">Zapier</h2>
-                <Badge className="bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-semibold uppercase tracking-wider hover:bg-violet-50">
+                <Badge className="bg-violet-50 text-violet-700 border border-violet-200 text-[11px] font-semibold uppercase tracking-wider hover:bg-violet-50">
                   Beta
                 </Badge>
                 {zapierWebhooks.length > 0 && (
-                  <Badge className="bg-[#FFF5F0] text-[#FF4A00] border border-[#FFE5D6] text-[10px] font-semibold uppercase tracking-wider hover:bg-[#FFF5F0]">
+                  <Badge className="bg-[#FFF5F0] text-[#FF4A00] border border-[#FFE5D6] text-[11px] font-semibold uppercase tracking-wider hover:bg-[#FFF5F0]">
                     {zapierWebhooks.length} active {zapierWebhooks.length === 1 ? 'Zap' : 'Zaps'}
                   </Badge>
                 )}
@@ -419,7 +419,7 @@ const OrgEditAutomations: React.FC = () => {
         )}
 
         {/* ── Manual webhooks ──────────────────────────────────────── */}
-        <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow pt-3">
+        <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow pt-3">
           <div className="flex flex-col gap-0">
             <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
               <h1 className="font-bold text-xl text-gray-800">{t('dashboard.organization.automations.webhooks_title')}</h1>
@@ -439,7 +439,7 @@ const OrgEditAutomations: React.FC = () => {
                     setNewSecret(null)
                     setIsCreateDialogOpen(true)
                   }}
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-action-hover"
                 >
                   <Plus size={16} className="me-2" />
                   Add Endpoint
@@ -1011,7 +1011,7 @@ const EventSelector: React.FC<{
                       onClick={() => setPreviewEvent(previewEvent === event.id ? null : event.id)}
                       title="View example payload"
                     >
-                      <code className="text-[10px]">{event.id}</code>
+                      <code className="text-[11px]">{event.id}</code>
                       {previewEvent === event.id ? <ChevronUp size={10} className="inline ms-1" /> : <ChevronDown size={10} className="inline ms-1" />}
                     </button>
                   </div>
@@ -1042,13 +1042,13 @@ const ZapierRow: React.FC<{
 }> = ({ zap, onToggleActive, onDelete, onViewLogs }) => {
   const title = zap.zap_name || zap.description || 'Zapier integration'
   return (
-    <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white border border-gray-100 hover:border-gray-200 transition-colors">
+    <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-card border border-gray-100 hover:border-gray-200 transition-colors">
       <Switch checked={zap.is_active} onCheckedChange={onToggleActive} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm text-gray-800 truncate">{title}</p>
           {zap.events[0] && (
-            <code className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-mono flex-shrink-0">
+            <code className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-mono flex-shrink-0">
               {zap.events[0]}
             </code>
           )}

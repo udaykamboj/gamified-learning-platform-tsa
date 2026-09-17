@@ -618,7 +618,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
         return (
             <AssignmentBoxUI submitFC={submitFC} saveFC={saveFC} gradeFC={gradeFC} gradeCustomFC={gradeCustomFC} view={view} currentPoints={userSubmissionObject?.grade} currentFeedback={userSubmissionObject?.task_submission_grade_feedback} maxPoints={assignmentTaskOutsideProvider?.max_grade_value} dirtyValue={serializeSelectedOptions(userSubmissions.submissions)} savedValue={serializeSelectedOptions(initialUserSubmissions.submissions)} taskUUID={assignmentTaskUUID} type="quiz" autoGradable={true}>
                 {view === 'teacher' && (
-                    <div className="flex flex-wrap gap-2 items-center mb-4 py-2 px-3 bg-white rounded-md nice-shadow">
+                    <div className="flex flex-wrap gap-2 items-center mb-4 py-2 px-3 bg-card rounded-md nice-shadow">
                         <p className="text-xs font-bold text-slate-500">{t('assignments.quiz.grading_mode_label')}</p>
                         <div className="flex gap-1" role="group" aria-label={t('assignments.quiz.grading_mode_label')}>
                             {([QUIZ_GRADING_ALL_OR_NOTHING, QUIZ_GRADING_PARTIAL_CREDIT] as QuizGradingMode[]).map((mode) => (
@@ -628,7 +628,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                     aria-pressed={gradingMode === mode}
                                     onClick={() => setGradingMode(mode)}
                                     className={`text-xs font-bold px-2 py-0.5 rounded-md transition-all ease-linear ${gradingMode === mode
-                                        ? 'bg-slate-800 text-white'
+                                        ? 'bg-primary text-primary-foreground'
                                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                         }`}
                                 >
@@ -684,7 +684,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                             aria-pressed={responseType === mode}
                                             onClick={() => setQuestionResponseType(qIndex, mode)}
                                             className={`flex items-center space-x-1 text-[11px] font-bold px-2 py-0.5 rounded-md transition-all ease-linear ${responseType === mode
-                                                ? 'bg-slate-800 text-white'
+                                                ? 'bg-primary text-primary-foreground'
                                                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                                 }`}
                                         >
@@ -736,7 +736,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                                     chooseOption(qIndex, oIndex);
                                                 }
                                             }}
-                                            className={"answer outline outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white text-sm duration-150 ease-linear nice-shadow " + (view == 'student' && !submissionIsGraded ? 'cursor-pointer active:scale-110 focus-visible:outline-slate-400' : '')}
+                                            className={"answer outline outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card text-sm duration-150 ease-linear nice-shadow " + (view == 'student' && !submissionIsGraded ? 'cursor-pointer active:scale-110 focus-visible:outline-slate-400' : '')}
                                         >
                                             <div className="font-bold text-base flex items-center h-full w-[40px] rounded-s-md text-slate-800 bg-slate-100/80">
                                                 <p className="mx-auto font-bold text-sm">{String.fromCharCode(65 + oIndex)}</p>
@@ -805,7 +805,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                                 if (!selected && !correct) return null;
                                                 if (selected && correct) {
                                                     return (
-                                                        <div className="w-fit flex-none flex text-[10px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-emerald-50 text-emerald-700">
+                                                        <div className="w-fit flex-none flex text-[11px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-emerald-50 text-emerald-700">
                                                             <Check size={10} />
                                                             <p className='font-bold'>{t('assignments.quiz.correct_answer')}</p>
                                                         </div>
@@ -813,7 +813,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                                 }
                                                 if (selected && !correct) {
                                                     return (
-                                                        <div className="w-fit flex-none flex text-[10px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-rose-50 text-rose-600">
+                                                        <div className="w-fit flex-none flex text-[11px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-rose-50 text-rose-600">
                                                             <X size={10} />
                                                             <p className='font-bold'>{t('assignments.quiz.incorrect_answer')}</p>
                                                         </div>
@@ -821,7 +821,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                                 }
                                                 // Correct but not chosen — show what the answer was.
                                                 return (
-                                                    <div className="w-fit flex-none flex text-[10px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-emerald-50/70 text-emerald-700 border border-emerald-200">
+                                                    <div className="w-fit flex-none flex text-[11px] px-2 py-0.5 space-x-1 items-center h-fit rounded-lg bg-emerald-50/70 text-emerald-700 border border-emerald-200">
                                                         <Check size={10} />
                                                         <p className='font-bold'>{t('assignments.quiz.correct_answer')}</p>
                                                     </div>
@@ -875,7 +875,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                                         {view === 'teacher' && oIndex === question.options.length - 1 && questions[qIndex].options.length <= 4 && (
                                             <div className="flex justify-center mx-auto px-2">
                                                 <div
-                                                    className="outline text-xs outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white duration-150 cursor-pointer ease-linear nice-shadow"
+                                                    className="outline text-xs outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-card duration-150 cursor-pointer ease-linear nice-shadow"
                                                     onClick={() => addOption(qIndex)}
                                                 >
                                                     <Plus size={14} className="inline-block" />
@@ -893,7 +893,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskQui
                 {view === 'teacher' && questions.length <= 5 && (
                     <div className="flex justify-center mx-auto px-2">
                         <div
-                            className="flex w-full my-2 py-2 px-4 bg-white text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
+                            className="flex w-full my-2 py-2 px-4 bg-card text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />

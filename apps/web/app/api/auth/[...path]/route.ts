@@ -23,7 +23,9 @@ const BACKEND_URL = (getConfig('NEXT_PUBLIC_STARLAB_BACKEND_URL') || 'http://loc
 const TOKEN_RESPONSE_PATHS = ['login', 'refresh', 'oauth', 'signup', 'verify-email', 'magic-link']
 
 function shouldExtractTokens(path: string): boolean {
-  return TOKEN_RESPONSE_PATHS.some(p => path.startsWith(p))
+  // Admin portal endpoints (admin/login, admin/refresh) return tokens too.
+  const normalized = path.startsWith('admin/') ? path.slice('admin/'.length) : path
+  return TOKEN_RESPONSE_PATHS.some(p => normalized.startsWith(p))
 }
 
 // Decode a JWT payload without verifying the signature. Used purely to read
@@ -257,11 +259,13 @@ async function proxyRequest(
   }
 
   const cookieParts: string[] = []
+  // Forward under the same names the backend reads for this route family:
+  // admin endpoints look for LH_admin_access / LH_admin_refresh.
   if (accessToken?.value) {
-    cookieParts.push(`${ACCESS_TOKEN_COOKIE}=${accessToken.value}`)
+    cookieParts.push(`${reqAccessTokenCookie}=${accessToken.value}`)
   }
   if (refreshToken?.value) {
-    cookieParts.push(`${REFRESH_TOKEN_COOKIE}=${refreshToken.value}`)
+    cookieParts.push(`${reqRefreshTokenCookie}=${refreshToken.value}`)
   }
   if (cookieParts.length > 0) {
     headers['Cookie'] = cookieParts.join('; ')

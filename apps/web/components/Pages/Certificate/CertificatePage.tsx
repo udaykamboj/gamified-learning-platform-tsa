@@ -276,7 +276,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         </div>
 
         {/* Certificate Display */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-card rounded-2xl shadow-lg p-8">
           <div className="max-w-2xl mx-auto">
             {certificatePreviewProps && <CertificatePreview {...certificatePreviewProps} />}
           </div>

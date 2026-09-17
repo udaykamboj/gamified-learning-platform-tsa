@@ -38,34 +38,34 @@ export default function TokenCreatedDialog({
     <div
       // Intentionally NO click-outside-to-close: the secret cannot be retrieved
       // later; closing must be a deliberate action.
-      className="fixed inset-0 z-[1001] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[1001] flex items-center justify-center bg-scrim backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-lg bg-[#141415] border border-white/[0.08] rounded-2xl shadow-2xl">
-        <div className="px-6 py-4 border-b border-white/[0.06]">
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl">
+        <div className="px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <Warning size={18} weight="fill" className="text-amber-300" />
-            <h2 className="text-base font-semibold text-white">Save this token now</h2>
+            <Warning size={18} weight="fill" className="text-amber-700" />
+            <h2 className="text-base font-semibold text-foreground">Save this token now</h2>
           </div>
         </div>
 
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-white/70">
+          <p className="text-sm text-muted-foreground">
             This is the only time the full token <strong>{token.name}</strong> will be shown.
             Store it somewhere secure — you cannot retrieve it later. If you lose it, revoke this token and create a new one.
           </p>
 
-          <div className="rounded-lg bg-black/40 border border-white/[0.1] overflow-hidden">
+          <div className="rounded-lg bg-muted border border-border overflow-hidden">
             <div className="flex items-stretch">
-              <code className="flex-1 px-3 py-2.5 font-mono text-xs text-white break-all overflow-x-auto">
+              <code className="flex-1 px-3 py-2.5 font-mono text-xs text-foreground break-all overflow-x-auto">
                 {token.token}
               </code>
               <button
                 onClick={handleCopy}
-                className="px-3 border-s border-white/[0.08] hover:bg-white/[0.04] transition-colors flex items-center gap-1.5 text-xs text-white/70 hover:text-white"
+                className="px-3 border-s border-border hover:bg-accent transition-colors flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
               >
                 {copied ? (
                   <>
-                    <Check size={14} weight="bold" className="text-emerald-300" />
+                    <Check size={14} weight="bold" className="text-emerald-700" />
                     Copied
                   </>
                 ) : (
@@ -78,16 +78,16 @@ export default function TokenCreatedDialog({
             </div>
           </div>
 
-          <div className="rounded-lg bg-white/[0.03] border border-white/[0.08] px-3 py-2.5 text-xs text-white/60 font-mono">
+          <div className="rounded-lg bg-card border border-border px-3 py-2.5 text-xs text-muted-foreground font-mono">
             curl -H "Authorization: Bearer &lt;token&gt;" \<br />
             &nbsp;&nbsp;{getApiBase()}/ee/superadmin/organizations
           </div>
         </div>
 
-        <div className="flex items-center justify-end px-6 py-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-end px-6 py-4 border-t border-border">
           <button
             onClick={onClose}
-            className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors"
+            className="px-3.5 py-2 bg-muted hover:bg-accent text-foreground text-sm rounded-lg transition-colors"
           >
             I've saved the token
           </button>

@@ -23,7 +23,7 @@ export function CommunityActions({
 
   const renderStatsSection = () => {
     return (
-      <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+      <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -77,7 +77,7 @@ export function CommunityActions({
   }
 
   return (
-    <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
       <div className="space-y-4">
         {/* Stats Section */}
         {renderStatsSection()}
@@ -111,7 +111,7 @@ export function CommunityActions({
         {canCreateDiscussion && onCreateDiscussion && (
           <button
             onClick={onCreateDiscussion}
-            className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-neutral-900 text-white hover:bg-neutral-800"
+            className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary"
           >
             <Plus className="w-5 h-5" />
             <span>New Discussion</span>
@@ -122,7 +122,7 @@ export function CommunityActions({
         {canManageCommunity && onEdit && (
           <button
             onClick={onEdit}
-            className="w-full bg-white text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-card text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <Settings className="w-5 h-5" />
             Manage Community

@@ -168,7 +168,7 @@ export default function AuthBrandingTab() {
             value={welcomeMessage}
             onChange={(e) => setWelcomeMessage(e.target.value)}
             placeholder={t('dashboard.organization.auth_branding.welcome_placeholder')}
-            className="w-full min-h-[80px] bg-white"
+            className="w-full min-h-[80px] bg-card"
             maxLength={200}
           />
           <p className="text-xs text-gray-400 mt-2">
@@ -200,7 +200,7 @@ export default function AuthBrandingTab() {
                   "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                   backgroundType === option.type
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300 bg-white"
+                    : "border-gray-200 hover:border-gray-300 bg-card"
                 )}
               >
                 <option.icon size={24} className={cn(
@@ -225,7 +225,7 @@ export default function AuthBrandingTab() {
           <div className="mt-3">
             <AIImageButton
               onSelect={handleUnsplashSelect}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 bg-white text-sm font-medium text-gray-600 transition-all"
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 bg-card text-sm font-medium text-gray-600 transition-all"
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function AuthBrandingTab() {
                 "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all",
                 textColor === 'light'
                   ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300 bg-white"
+                  : "border-gray-200 hover:border-gray-300 bg-card"
               )}
             >
               <Sun size={18} className={textColor === 'light' ? "text-blue-500" : "text-gray-400"} />
@@ -259,7 +259,7 @@ export default function AuthBrandingTab() {
                 "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all",
                 textColor === 'dark'
                   ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300 bg-white"
+                  : "border-gray-200 hover:border-gray-300 bg-card"
               )}
             >
               <Moon size={18} className={textColor === 'dark' ? "text-blue-500" : "text-gray-400"} />
@@ -281,7 +281,7 @@ export default function AuthBrandingTab() {
           <Button
             onClick={handleSave}
             disabled={isSaving || isUploading}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {isSaving ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
           </Button>
@@ -296,7 +296,7 @@ export default function AuthBrandingTab() {
         <div className="rounded-xl overflow-hidden border border-gray-200 aspect-[4/3]">
           <div className="h-full flex">
             {/* Form Side Preview (left) */}
-            <div className="w-1/2 bg-white flex items-center justify-center p-4">
+            <div className="w-1/2 bg-card flex items-center justify-center p-4">
               <div className="w-full max-w-[100px] space-y-2">
                 <div className="h-2 w-12 bg-gray-200 rounded" />
                 <div className="h-6 bg-gray-100 rounded border border-gray-200" />
@@ -350,7 +350,7 @@ export default function AuthBrandingTab() {
                   {/* Welcome message */}
                   {welcomeMessage && (
                     <p className={cn(
-                      "text-[9px] max-w-[100px] leading-relaxed",
+                      "text-[11px] max-w-[100px] leading-relaxed",
                       textColor === 'light' ? "text-white/70" : "text-gray-600"
                     )}>
                       {welcomeMessage}

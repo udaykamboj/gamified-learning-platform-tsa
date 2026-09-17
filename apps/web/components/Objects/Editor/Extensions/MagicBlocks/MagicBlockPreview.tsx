@@ -101,7 +101,7 @@ ${html}
       <iframe
         ref={iframeRef}
         srcDoc={previewHtml || undefined}
-        className="w-full h-full bg-white block"
+        className="w-full h-full bg-card block"
         style={{ border: 'none', minHeight: '100%' }}
         sandbox="allow-scripts"
         title="MagicBlock Preview"

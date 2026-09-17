@@ -101,7 +101,7 @@ function ExportToastContent({ status, progress, courseName, courseCount, type, e
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden min-w-[320px] max-w-[400px]">
+    <div className="bg-card rounded-xl shadow-lg border border-gray-100 overflow-hidden min-w-[320px] max-w-[400px]">
       {/* Progress bar at top */}
       <div className="h-1 bg-gray-100 relative overflow-hidden">
         <div

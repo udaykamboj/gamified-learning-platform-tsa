@@ -107,6 +107,11 @@ interface SessionCache {
 // in the UI. 2 min balances freshness against redundant /users/session fetches
 // (the authenticated refetch interval is ~1 min).
 const SESSION_CACHE_TTL = 2 * 60 * 1000 // 2 minutes
+
+// Admin portal pages authenticate with the separate LH_admin_* cookies.
+function isAdminPortalPath(): boolean {
+  return typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/'))
+}
 const TOKEN_REFRESH_THRESHOLD = 60 * 1000 // 1 minute before expiry
 const AUTH_BROADCAST_CHANNEL = 'starlab_auth_sync'
 const OAUTH_STATE_COOKIE = 'LH_oauth_state'
@@ -338,9 +343,13 @@ export function SessionProvider({
   // Check if a session might exist (marker cookie is set alongside httpOnly auth cookies).
   // Match the cookie name EXACTLY — `includes('LH_session')` also matched unrelated
   // names like `LH_session_backup`, falsely reporting a session.
+  //
+  // The admin portal has its own cookie set (LH_admin_*), so on /admin routes
+  // the admin marker is the one that proves a session exists.
   const hasSessionMarker = useCallback((): boolean => {
     if (typeof document === 'undefined') return false
-    return document.cookie.split('; ').some((c) => c.startsWith('LH_session='))
+    const marker = isAdminPortalPath() ? 'LH_admin_session=' : 'LH_session='
+    return document.cookie.split('; ').some((c) => c.startsWith(marker))
   }, [])
 
   // Refresh access token using refresh token cookie.
@@ -361,7 +370,7 @@ export function SessionProvider({
     refreshPromiseRef.current = (async () => {
       try {
         // Use Next.js API route to ensure cookies are set correctly
-        const response = await fetch('/api/auth/refresh', {
+        const response = await fetch(isAdminPortalPath() ? '/api/auth/admin/refresh' : '/api/auth/refresh', {
           method: 'GET',
           credentials: 'include',
         })

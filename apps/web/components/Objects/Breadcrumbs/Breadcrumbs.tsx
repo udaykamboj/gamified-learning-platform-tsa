@@ -30,7 +30,7 @@ const ChevronDivider = () => (
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
     <nav className="flex items-center">
-      <ol className="flex items-center text-[13px] font-medium rounded-lg bg-white overflow-hidden nice-shadow">
+      <ol className="flex items-center text-[13px] font-medium rounded-lg bg-card overflow-hidden nice-shadow">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const isFirst = index === 0

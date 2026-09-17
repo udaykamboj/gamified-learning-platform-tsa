@@ -392,7 +392,7 @@ function EmbedObjectsComponent(props: any) {
       <div
         ref={resizeRef}
         className={cn(
-          "relative bg-white rounded-xl overflow-hidden nice-shadow",
+          "relative bg-card rounded-xl overflow-hidden nice-shadow",
           alignment === 'center' && "mx-auto"
         )}
         style={(embedUrl || sanitizedEmbedCode) ? getResponsiveStyles() : { width: '100%' }}
@@ -403,7 +403,7 @@ function EmbedObjectsComponent(props: any) {
 
               {/* Toolbar for existing embeds */}
               {isEditable && (
-                <div className="absolute top-2 end-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 opacity-70 hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 end-2 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-lg p-1 opacity-70 hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setActiveInput(embedType)}
                     className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600"
@@ -488,7 +488,7 @@ function EmbedObjectsComponent(props: any) {
             <div className="absolute inset-0 bg-neutral-50/95 backdrop-blur-sm flex items-center justify-center p-4 z-10">
               <form
                 onSubmit={handleInputSubmit}
-                className="w-full max-w-lg bg-white rounded-xl nice-shadow p-4"
+                className="w-full max-w-lg bg-card rounded-xl nice-shadow p-4"
                 onKeyDown={handleKeyDown}
               >
                 <div className="flex justify-between items-center mb-3">
@@ -589,13 +589,13 @@ function EmbedObjectsComponent(props: any) {
           {isEditable && (embedUrl || sanitizedEmbedCode) && (
             <>
               <div
-                className="absolute end-0 top-0 bottom-0 w-4 cursor-ew-resize flex items-center justify-center bg-white/70 hover:bg-white/90 transition-opacity"
+                className="absolute end-0 top-0 bottom-0 w-4 cursor-ew-resize flex items-center justify-center bg-card/70 hover:bg-card/90 transition-opacity"
                 onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
               >
                 <DotsSixVertical weight="duotone" size={16} className="text-neutral-500" />
               </div>
               <div
-                className="absolute start-0 end-0 bottom-0 h-4 cursor-ns-resize flex items-center justify-center bg-white/70 hover:bg-white/90 transition-opacity"
+                className="absolute start-0 end-0 bottom-0 h-4 cursor-ns-resize flex items-center justify-center bg-card/70 hover:bg-card/90 transition-opacity"
                 onMouseDown={(e) => handleResizeStart(e, 'vertical')}
               >
                 <DotsSix weight="duotone" size={16} className="text-neutral-500" />

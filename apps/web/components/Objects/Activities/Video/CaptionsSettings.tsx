@@ -59,7 +59,7 @@ export default function CaptionsSettings({
             type="checkbox"
             checked={value.enabled}
             onChange={(e) => onChange({ ...value, enabled: e.target.checked })}
-            className="rounded border-gray-300 text-black focus:ring-black"
+            className="rounded border-gray-300 text-foreground focus:ring-black"
           />
           <span className="text-sm text-gray-600">Generate with AI</span>
         </label>
@@ -148,7 +148,7 @@ export default function CaptionsSettings({
                     {l.label}
                     {l.status && (
                       <span
-                        className={`text-[10px] font-medium ${
+                        className={`text-[11px] font-medium ${
                           l.status === 'ready'
                             ? 'text-green-600'
                             : l.status === 'failed'

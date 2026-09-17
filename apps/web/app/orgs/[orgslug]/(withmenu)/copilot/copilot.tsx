@@ -386,9 +386,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           onClick={() => setSidebarOpen(false)}
         />
         <div className="fixed inset-y-0 start-0 z-50 w-[280px] p-3 md:relative md:inset-auto md:z-auto md:flex-shrink-0 md:my-5 md:me-3 md:p-0">
-          <div className="flex flex-col h-full w-full bg-white dark:bg-neutral-900 rounded-2xl nice-shadow overflow-hidden md:mt-0 mt-[72px]">
+          <div className="flex flex-col h-full w-full bg-card rounded-2xl nice-shadow overflow-hidden md:mt-0 mt-[72px]">
             {/* Sidebar header */}
-            <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 dark:border-neutral-800/60">
+            <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 ">
               <button
                 onClick={handleNewChat}
                 className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
@@ -398,7 +398,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </button>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all"
               >
                 <X size={15} />
               </button>
@@ -408,13 +408,13 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="flex-1 overflow-y-auto px-2 py-2">
               {sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-center px-4">
-                  <ChatCircleDots size={24} className="text-neutral-300 dark:text-neutral-600 mb-2" />
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">No conversations yet</p>
+                  <ChatCircleDots size={24} className="text-neutral-300 mb-2" />
+                  <p className="text-xs text-neutral-400 ">No conversations yet</p>
                 </div>
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
                   <div key={group.label} className="mb-3">
-                    <p className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-2 py-1.5">
+                    <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider px-2 py-1.5">
                       {group.label}
                     </p>
                     {group.sessions.map((s) => (
@@ -439,14 +439,14 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="hidden md:flex flex-shrink-0 self-start mt-5 me-2 p-2 rounded-xl bg-white dark:bg-neutral-900 nice-shadow text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
+          className="hidden md:flex flex-shrink-0 self-start mt-5 me-2 p-2 rounded-xl bg-card nice-shadow text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 transition-all"
         >
           <List size={16} />
         </button>
       )}
 
       {/* Main chat area */}
-      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 bg-white dark:bg-neutral-900 rounded-2xl nice-shadow overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 bg-card rounded-2xl nice-shadow overflow-hidden">
         {/* Top bar */}
         {(aichatUuid && currentSessionTitle) ? (
           <ChatTopBar
@@ -458,10 +458,10 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             showMenuButton
           />
         ) : (
-          <div className="flex items-center h-12 px-4 border-b border-neutral-100 dark:border-neutral-800/60 md:hidden">
+          <div className="flex items-center h-12 px-4 border-b border-neutral-100 md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all"
             >
               <List size={18} />
             </button>
@@ -474,14 +474,14 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full">
               <SpinnerGap size={20} className="animate-spin text-violet-400 mb-2" />
-              <span className="text-sm text-neutral-400 dark:text-neutral-500">Loading conversation...</span>
+              <span className="text-sm text-neutral-400 ">Loading conversation...</span>
             </div>
           )}
 
           {/* Empty state */}
           {messages.length === 0 && !isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6 pb-10">
-              <div className="flex items-center justify-center p-3 rounded-xl border border-violet-300 dark:border-violet-500/40">
+              <div className="flex items-center justify-center p-3 rounded-xl border border-violet-300 ">
               <svg width="40" height="22" viewBox="0 37 304 152" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="lrn-icon-grad" x1="152" y1="30" x2="152" y2="200" gradientUnits="userSpaceOnUse">
@@ -494,20 +494,20 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </svg>
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Course Copilot</h2>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed">
+                <h2 className="text-xl font-bold text-neutral-900 ">Course Copilot</h2>
+                <p className="text-sm text-neutral-500 max-w-md leading-relaxed">
                   Ask questions about your courses and get answers grounded in course content, with references to the source material.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {/* Mode toggle */}
-                <div className="flex items-center rounded-xl bg-neutral-50 dark:bg-neutral-800 nice-shadow p-0.5">
+                <div className="flex items-center rounded-xl bg-neutral-50 nice-shadow p-0.5">
                   <button
                     onClick={() => setChatMode('course_only')}
                     className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                       chatMode === 'course_only'
-                        ? 'bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white shadow-sm'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
+                        ? 'bg-card text-neutral-800 shadow-sm'
+                        : 'text-neutral-500 hover:text-neutral-700 '
                     }`}
                   >
                     <BookOpen size={15} weight="duotone" />
@@ -517,8 +517,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     onClick={() => setChatMode('general')}
                     className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                       chatMode === 'general'
-                        ? 'bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white shadow-sm'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
+                        ? 'bg-card text-neutral-800 shadow-sm'
+                        : 'text-neutral-500 hover:text-neutral-700 '
                     }`}
                   >
                     <GlobeSimple size={15} weight="duotone" />
@@ -529,7 +529,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-50 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 nice-shadow transition-all"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-50 text-neutral-700 hover:bg-neutral-100 nice-shadow transition-all"
                   >
                     {selectedCourse ? <Books size={17} weight="duotone" className="text-violet-500" /> : <Sparkle size={17} weight="duotone" className="text-violet-500" />}
                     <span>{selectedCourseName}</span>
@@ -578,7 +578,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     <button
                       key={i}
                       onClick={() => sendMessage(s)}
-                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
+                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 bg-neutral-50 hover:bg-violet-50 hover:text-violet-700 nice-shadow transition-all"
                     >
                       <ArrowRight size={13} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 transition-colors" data-dir-flip />
                       <span className="truncate">{s}</span>
@@ -588,9 +588,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 animate-pulse">
-                      <div className="w-3 h-3 rounded-full bg-neutral-200 dark:bg-neutral-700" />
-                      <div className={`h-3 rounded-md bg-neutral-200 dark:bg-neutral-700 ${i === 1 ? 'w-48' : i === 2 ? 'w-56' : 'w-40'}`} />
+                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-50 animate-pulse">
+                      <div className="w-3 h-3 rounded-full bg-neutral-200 " />
+                      <div className={`h-3 rounded-md bg-neutral-200 ${i === 1 ? 'w-48' : i === 2 ? 'w-56' : 'w-40'}`} />
                     </div>
                   ))}
                 </div>
@@ -599,7 +599,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           )}
 
           {error && (
-            <div className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm nice-shadow">
+            <div className="px-4 py-3 rounded-xl bg-red-50 text-red-600 text-sm nice-shadow">
               {error}
             </div>
           )}
@@ -608,14 +608,14 @@ export function CopilotChat({ orgslug }: CopilotProps) {
         </div>
 
         {/* Input */}
-        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-3 border-t border-neutral-100 dark:border-neutral-800/60">
+        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-3 border-t border-neutral-100 ">
           {/* Mode toggle */}
           <button
             onClick={() => setChatMode(chatMode === 'course_only' ? 'general' : 'course_only')}
             className={`flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg transition-all ${
               chatMode === 'general'
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400'
-                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                ? 'bg-violet-50 text-violet-600 '
+                : 'text-neutral-500 hover:bg-neutral-50 '
             }`}
             title={chatMode === 'general' ? 'General Knowledge mode' : 'Course Only mode'}
           >
@@ -626,7 +626,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg text-neutral-500 hover:bg-neutral-50 transition-all"
               >
                 {selectedCourse ? <Books size={13} weight="duotone" className="text-violet-500" /> : <Sparkle size={13} weight="duotone" className="text-violet-500" />}
                 <CaretDown size={10} className={`text-neutral-400 transition-transform ${courseDropdownOpen ? 'rotate-180' : ''}`} />
@@ -642,12 +642,12 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             aria-label="Ask about your courses"
             placeholder={isLoadingSession ? 'Loading conversation...' : isWaiting ? 'Thinking...' : chatMode === 'general' ? 'Ask anything...' : 'Ask about your courses...'}
             disabled={isInputDisabled}
-            className="flex-1 bg-transparent outline-none text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:opacity-40"
+            className="flex-1 bg-transparent outline-none text-sm text-neutral-900 placeholder:text-neutral-400 disabled:opacity-40"
           />
           <button
             onClick={() => sendMessage(input)}
             disabled={isInputDisabled || !input.trim()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:cursor-not-allowed text-white transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white transition-colors"
           >
             <PaperPlaneRight size={14} weight="fill" />
           </button>
@@ -687,11 +687,11 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
   }
 
   return (
-    <div className="flex items-center gap-3 h-12 px-4 md:px-5 border-b border-neutral-100 dark:border-neutral-800/60">
+    <div className="flex items-center gap-3 h-12 px-4 md:px-5 border-b border-neutral-100 ">
       {showMenuButton && onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
-          className="md:hidden flex-shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+          className="md:hidden flex-shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all"
         >
           <List size={18} />
         </button>
@@ -707,24 +707,24 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
               if (e.key === 'Escape') { setEditValue(title); setIsEditing(false) }
             }}
             onBlur={handleSubmit}
-            className="flex-1 min-w-0 bg-neutral-50 dark:bg-neutral-800 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 dark:text-white outline-none ring-1 ring-violet-300 dark:ring-violet-500/40"
+            className="flex-1 min-w-0 bg-neutral-50 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 outline-none ring-1 ring-violet-300 "
             maxLength={80}
           />
           <button
             onClick={handleSubmit}
-            className="p-1 rounded-md text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-all"
+            className="p-1 rounded-md text-violet-600 hover:bg-violet-50 transition-all"
           >
             <Check size={15} weight="bold" />
           </button>
         </div>
       ) : (
         <div className="flex items-center gap-2 flex-1 min-w-0 group">
-          <h3 className="text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate">
+          <h3 className="text-sm font-medium text-neutral-800 truncate">
             {title}
           </h3>
           <button
             onClick={() => setIsEditing(true)}
-            className="flex-shrink-0 p-1 rounded-md text-neutral-300 dark:text-neutral-600 opacity-0 group-hover:opacity-100 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+            className="flex-shrink-0 p-1 rounded-md text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-neutral-500 hover:bg-neutral-100 transition-all"
           >
             <PencilSimple size={13} />
           </button>
@@ -735,8 +735,8 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
         onClick={onToggleFavorite}
         className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${
           isFavorite
-            ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
-            : 'text-neutral-300 dark:text-neutral-600 hover:text-amber-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+            ? 'text-amber-500 hover:bg-amber-50 '
+            : 'text-neutral-300 hover:text-amber-400 hover:bg-neutral-100 '
         }`}
         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       >
@@ -761,20 +761,20 @@ export function SessionItem({ session, isActive, onSelect, onDelete }: {
       onMouseLeave={() => setHovered(false)}
       className={`group w-full text-start px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
         isActive
-          ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium'
-          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
+          ? 'bg-violet-50 text-violet-700 font-medium'
+          : 'text-neutral-600 hover:bg-neutral-50 '
       }`}
     >
       {session.favorite ? (
         <Star size={13} weight="fill" className="flex-shrink-0 text-amber-500" />
       ) : (
-        <ChatCircleDots size={14} weight={isActive ? 'fill' : 'regular'} className="flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
+        <ChatCircleDots size={14} weight={isActive ? 'fill' : 'regular'} className="flex-shrink-0 text-neutral-400 " />
       )}
       <span className="truncate flex-1">{session.title}</span>
       {hovered && (
         <span
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          className="flex-shrink-0 p-1 rounded-md text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+          className="flex-shrink-0 p-1 rounded-md text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-all"
         >
           <Trash size={13} />
         </span>
@@ -806,14 +806,14 @@ export const AssistantMessage = React.memo(function AssistantMessage({ content, 
     <div className="space-y-1.5">
       {/* Source course intro line */}
       {courseNames.length > 0 && !isWaiting && (
-        <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 font-medium">
+        <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 font-medium">
           <BookOpen size={11} weight="bold" className="text-violet-400" />
           <span>Answering from {courseNames.join(', ')}</span>
         </div>
       )}
 
       {/* Message bubble — full width, relative for badge positioning */}
-      <div className="relative rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-800/60 nice-shadow">
+      <div className="relative rounded-2xl px-4 py-3 bg-neutral-50 nice-shadow">
         {isWaiting ? (
           <ThinkingIndicator />
         ) : (
@@ -846,7 +846,7 @@ function CitationBadge({ num, sources, orgslug }: { num: number; sources: Stream
   const source = sources[num - 1]
   if (!source) {
     return (
-      <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-neutral-100 dark:bg-neutral-700 text-[10px] font-bold text-neutral-400 dark:text-neutral-500 align-middle mx-0.5">
+      <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-neutral-100 text-[11px] font-bold text-neutral-400 align-middle mx-0.5">
         {num}
       </span>
     )
@@ -860,7 +860,7 @@ function CitationBadge({ num, sources, orgslug }: { num: number; sources: Stream
 
   const badge = (
     <span
-      className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-violet-100 dark:bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-400 align-middle mx-0.5 hover:bg-violet-200 dark:hover:bg-violet-500/25 cursor-pointer transition-colors"
+      className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-violet-100 text-[11px] font-bold text-violet-600 align-middle mx-0.5 hover:bg-violet-200 cursor-pointer transition-colors"
       title={[source.course_name, source.chapter_name, source.activity_name].filter(Boolean).join(' > ')}
     >
       {num}
@@ -1032,7 +1032,7 @@ export function CopilotMarkdown({ content, sources = [], orgslug, isStreaming = 
       strong: ({ children, ...props }: any) => <strong {...props}>{processChildren(children)}</strong>,
       em: ({ children, ...props }: any) => <em {...props}>{processChildren(children)}</em>,
       blockquote: ({ children, ...props }: any) => (
-        <div className="not-prose my-2 px-3.5 py-2.5 rounded-lg bg-neutral-200/60 dark:bg-neutral-700/70 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed" {...props}>
+        <div className="not-prose my-2 px-3.5 py-2.5 rounded-lg bg-neutral-200/60 text-sm text-neutral-700 leading-relaxed" {...props}>
           {children}
         </div>
       ),
@@ -1040,7 +1040,7 @@ export function CopilotMarkdown({ content, sources = [], orgslug, isStreaming = 
   }, [sources, orgslug])
 
   return (
-    <div className="relative z-10 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-headings:text-neutral-900 dark:prose-headings:text-white prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-strong:text-neutral-900 dark:prose-strong:text-white prose-code:text-violet-700 dark:prose-code:text-violet-300 prose-code:bg-violet-50 dark:prose-code:bg-violet-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1">
+    <div className="relative z-10 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-neutral-700 prose-headings:text-neutral-900 prose-a:text-violet-600 prose-strong:text-neutral-900 prose-code:text-violet-700 prose-code:bg-violet-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1">
       <ReactMarkdown
         remarkPlugins={mathPlugins ? mathPlugins.remark : BASE_REMARK_PLUGINS}
         rehypePlugins={mathPlugins ? mathPlugins.rehype : NO_REHYPE_PLUGINS}
@@ -1062,25 +1062,25 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
 }) {
   const positionClass = position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
   return (
-    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-neutral-900 nice-shadow z-50 py-1`}>
+    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white nice-shadow z-50 py-1`}>
       <button
         onClick={() => onSelect(null)}
-        className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
-          !selectedCourse ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10' : 'text-neutral-700 dark:text-neutral-300'
+        className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 transition-colors flex items-center gap-2.5 ${
+          !selectedCourse ? 'text-violet-600 font-medium bg-violet-50/60 ' : 'text-neutral-700 '
         }`}
       >
         <Sparkle size={15} weight="duotone" className="text-violet-500 flex-shrink-0" />
         <span>All courses</span>
       </button>
-      <div className="h-px bg-neutral-100 dark:bg-neutral-800 mx-2 my-1" />
+      <div className="h-px bg-neutral-100 mx-2 my-1" />
       {Array.isArray(courses) && courses.map((course: any) => (
         <button
           key={course.course_uuid}
           onClick={() => onSelect(course.course_uuid)}
-          className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
+          className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 transition-colors flex items-center gap-2.5 ${
             selectedCourse === course.course_uuid
-              ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10'
-              : 'text-neutral-700 dark:text-neutral-300'
+              ? 'text-violet-600 font-medium bg-violet-50/60 '
+              : 'text-neutral-700 '
           }`}
         >
           <Books size={15} weight="duotone" className="text-neutral-400 flex-shrink-0" />
@@ -1102,11 +1102,11 @@ export function SourcesCompact({ sources, orgslug }: { sources: StreamSourceData
           : null
 
         const inner = (
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors group">
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-violet-100 dark:bg-violet-500/15 text-[9px] font-bold text-violet-600 dark:text-violet-400 flex-shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-violet-600 transition-colors group">
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-violet-100 text-[11px] font-bold text-violet-600 flex-shrink-0">
               {i + 1}
             </span>
-            <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-violet-600 dark:group-hover:text-violet-400">
+            <span className="truncate max-w-xs font-medium text-neutral-500 group-hover:text-violet-600 ">
               {source.activity_name || 'Unknown'}
             </span>
           </span>

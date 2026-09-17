@@ -123,7 +123,7 @@ export default function UsageOverview() {
   return (
     <div className="space-y-6">
       {/* Usage card */}
-      <div className="bg-white rounded-xl nice-shadow p-5">
+      <div className="bg-card rounded-xl nice-shadow p-5">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-sm font-semibold text-gray-700">{t('dashboard.home.plan_and_usage')}</h3>
           <span
@@ -179,12 +179,12 @@ export default function UsageOverview() {
                     />
                   </div>
                   {!isUnlimited && meter.limit_reached && (
-                    <p className="text-[10px] text-red-500 mt-1">
+                    <p className="text-[11px] text-red-500 mt-1">
                       {t('dashboard.home.limit_reached')}
                     </p>
                   )}
                   {!isUnlimited && !meter.limit_reached && (
-                    <p className="text-[10px] text-gray-300 mt-1">
+                    <p className="text-[11px] text-gray-300 mt-1">
                       {meter.remaining} {t('dashboard.home.remaining')}
                     </p>
                   )}
@@ -210,7 +210,7 @@ export default function UsageOverview() {
       </div>
 
       {/* Features card */}
-      <div className="bg-white rounded-xl nice-shadow p-5">
+      <div className="bg-card rounded-xl nice-shadow p-5">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">
           {t('dashboard.home.features')}
         </h3>
@@ -251,7 +251,7 @@ export default function UsageOverview() {
                   />
                 </Link>
               ) : (
-                <span className="text-[10px] text-gray-300">{t('dashboard.home.off')}</span>
+                <span className="text-[11px] text-gray-300">{t('dashboard.home.off')}</span>
               )}
             </div>
           ))}
@@ -308,14 +308,14 @@ function AICreditsSection({ credits }: { credits: AICreditsSummary }) {
         />
       </div>
       {isUnlimited ? (
-        <p className="text-[10px] text-gray-300 mt-1">{used} {t('dashboard.home.used')}</p>
+        <p className="text-[11px] text-gray-300 mt-1">{used} {t('dashboard.home.used')}</p>
       ) : remaining !== null && remaining > 0 ? (
-        <p className="text-[10px] text-gray-300 mt-1">{remaining} {t('dashboard.home.remaining')}</p>
+        <p className="text-[11px] text-gray-300 mt-1">{remaining} {t('dashboard.home.remaining')}</p>
       ) : remaining !== null && remaining <= 0 ? (
-        <p className="text-[10px] text-red-500 mt-1">{t('dashboard.home.no_credits_remaining')}</p>
+        <p className="text-[11px] text-red-500 mt-1">{t('dashboard.home.no_credits_remaining')}</p>
       ) : null}
       {credits.purchased_credits > 0 && (
-        <p className="text-[10px] text-gray-300 mt-0.5">
+        <p className="text-[11px] text-gray-300 mt-0.5">
           {t('dashboard.home.includes_purchased', { count: credits.purchased_credits })}
         </p>
       )}

@@ -79,7 +79,7 @@ export default function CourseCompletionVelocity({
             <Lightning size={24} weight="fill" className="text-gray-200" />
           </div>
           <p className="text-sm">{t('analytics.course_analytics.completion_velocity.not_enough_data_short')}</p>
-          <p className="text-[10px] text-gray-300">{t('analytics.course_analytics.completion_velocity.need_transitions_short')}</p>
+          <p className="text-[11px] text-gray-300">{t('analytics.course_analytics.completion_velocity.need_transitions_short')}</p>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-48 gap-3">
@@ -90,7 +90,7 @@ export default function CourseCompletionVelocity({
             <p className="text-4xl font-black text-gray-900">{velocity.value}</p>
             <p className="text-sm text-gray-500 mt-0.5">{t('analytics.course_analytics.common.avg_prefix', { value: velocity.unit })}</p>
           </div>
-          <span className="text-[10px] text-gray-300 bg-gray-50 px-2 py-0.5 rounded-full">
+          <span className="text-[11px] text-gray-300 bg-gray-50 px-2 py-0.5 rounded-full">
             {row.transitions} {t('analytics.course_analytics.units.transitions')}
           </span>
         </div>

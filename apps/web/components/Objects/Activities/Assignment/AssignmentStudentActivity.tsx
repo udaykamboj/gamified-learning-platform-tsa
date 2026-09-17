@@ -288,7 +288,7 @@ function AssignmentStudentActivity() {
                 )}
                 target='_blank'
                 download={true}
-                className='px-3 py-1.5 w-fit flex items-center nice-shadow bg-white text-teal-800 rounded-full space-x-2 cursor-pointer'>
+                className='px-3 py-1.5 w-fit flex items-center nice-shadow bg-card text-teal-800 rounded-full space-x-2 cursor-pointer'>
                 <Download size={13} />
                 <p className='text-xs font-semibold'>
                   {t('assignments.solution_download', { defaultValue: 'Download the model answer' })}
@@ -357,13 +357,13 @@ function AssignmentStudentActivity() {
                 <div className='relative p-4 flex flex-col gap-3'>
                   <div className='flex items-center justify-between gap-3'>
                     <div className='flex items-center gap-2.5'>
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-white nice-shadow ${
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-card nice-shadow ${
                         taskPassed ? 'text-emerald-600' : 'text-rose-600'
                       }`}>
                         {taskPassed ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
                       </div>
                       <div className='flex flex-col leading-tight'>
-                        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] ${
+                        <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${
                           taskPassed ? 'text-emerald-700' : 'text-rose-700'
                         }`}>
                           {taskPassed ? t('assignments.task_passed') : t('assignments.task_not_passed')}
@@ -373,20 +373,20 @@ function AssignmentStudentActivity() {
                         </span>
                       </div>
                     </div>
-                    <div className='flex items-baseline gap-1 px-3 py-1.5 rounded-lg bg-white nice-shadow'>
+                    <div className='flex items-baseline gap-1 px-3 py-1.5 rounded-lg bg-card nice-shadow'>
                       <span className='text-xl font-black text-slate-900 leading-none tabular-nums'>{taskGrade}</span>
                       <span className='text-xs font-semibold text-slate-400 leading-none'>/ {taskMax}</span>
                     </div>
                   </div>
                   {/* Progress fill */}
-                  <div className='h-1.5 w-full rounded-full bg-white/70 overflow-hidden'>
+                  <div className='h-1.5 w-full rounded-full bg-card/70 overflow-hidden'>
                     <div
                       className={`h-full rounded-full ${taskPassed ? 'bg-emerald-500' : 'bg-rose-500'}`}
                       style={{ width: `${Math.max(0, Math.min(100, taskPercentage))}%` }}
                     />
                   </div>
                   {taskFeedback && (
-                    <div className='flex items-start gap-2 p-3 rounded-lg bg-white/70 border border-white'>
+                    <div className='flex items-start gap-2 p-3 rounded-lg bg-card/70 border border-white'>
                       <MessageSquare size={13} className='shrink-0 mt-0.5 text-slate-400' />
                       <p className='text-xs text-slate-700 leading-relaxed whitespace-pre-wrap'>{taskFeedback}</p>
                     </div>

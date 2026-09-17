@@ -66,7 +66,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
   }
 
   return (
-    <div className="group relative bg-white nice-shadow rounded-xl p-3 hover:bg-gray-50/50 transition-colors">
+    <div className="group relative bg-card nice-shadow rounded-xl p-3 hover:bg-gray-50/50 transition-colors">
       {isDashboard && (
         <AuthenticatedClientElement action="update" ressourceType={'folders' as any} checkMethod="roles" orgId={org_id ?? org?.id}>
           <div className={`absolute top-2 end-2 z-20 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -123,7 +123,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
       <Link prefetch={false} href={folderLink} className="flex items-center gap-3 pe-6">
         {thumb ? (
           <div
-            className="w-10 h-10 rounded-lg bg-cover bg-center flex-shrink-0 ring-1 ring-inset ring-black/5"
+            className="w-10 h-10 rounded-lg bg-cover bg-center flex-shrink-0 ring-1 ring-inset ring-border"
             style={{ backgroundImage: `url(${thumb})` }}
           />
         ) : (

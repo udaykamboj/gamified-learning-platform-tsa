@@ -316,7 +316,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                         <Link
                             href={getTaskFileSubmissionDir(org?.org_uuid, assignment.course_object.course_uuid, assignment.activity_object.activity_uuid, assignment.assignment_object.assignment_uuid, assignmentTaskUUID, userSubmissions.fileUUID)}
                             target='_blank'
-                            className='flex flex-col rounded-lg bg-white text-gray-500 shadow-xs hover:shadow-md transition-shadow border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mx-auto'>
+                            className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs hover:shadow-md transition-shadow border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mx-auto'>
                             <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
                                 <Cloud size={14} />
                             </div>
@@ -333,7 +333,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
             )}
             {view === 'student' && (
                 <>
-                    <div className="w-full bg-white rounded-lg border border-gray-100 min-h-[200px] shadow-xs px-4 sm:px-6 py-5 sm:py-6">
+                    <div className="w-full bg-card rounded-lg border border-gray-100 min-h-[200px] shadow-xs px-4 sm:px-6 py-5 sm:py-6">
                         <div className="flex flex-col justify-center items-center h-full w-full">
                             <div className="flex flex-col justify-center items-center w-full max-w-full">
                                 <div className="flex flex-col justify-center items-center w-full">
@@ -344,7 +344,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                     )}
                                 </div>
                                 {localUploadFile && !isLoading && (
-                                    <div className='flex flex-col rounded-lg bg-white text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
+                                    <div className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
                                         <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
                                             <Cloud size={14} />
                                         </div>
@@ -360,7 +360,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                     </div>
                                 )}
                                 {userSubmissions.fileUUID && !isLoading && !localUploadFile && (
-                                    <div className='flex flex-col rounded-lg bg-white text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
+                                    <div className='flex flex-col rounded-lg bg-card text-gray-500 shadow-xs border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mt-3'>
                                         <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
                                             <Cloud size={14} />
                                         </div>

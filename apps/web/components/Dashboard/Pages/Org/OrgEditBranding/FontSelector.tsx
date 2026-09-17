@@ -104,7 +104,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="w-72 justify-between h-10 bg-white font-normal"
+                className="w-72 justify-between h-10 bg-card font-normal"
               >
                 <span
                   className="truncate"
@@ -155,7 +155,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                         {font}
                       </span>
                       {font === DEFAULT_FONT && (
-                        <span className="ms-auto text-[10px] text-gray-400">default</span>
+                        <span className="ms-auto text-[11px] text-gray-400">default</span>
                       )}
                     </button>
                   ))
@@ -183,7 +183,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
       </div>
 
       {/* Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-card rounded-lg border border-gray-200 p-4">
         <p className="text-xs text-gray-400 mb-2">Preview</p>
         <div
           style={{ fontFamily: `'${previewFont || DEFAULT_FONT}', sans-serif` }}

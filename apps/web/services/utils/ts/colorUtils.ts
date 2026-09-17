@@ -37,19 +37,21 @@ export function isLightColor(hex: string): boolean {
  * - Light primaryColor → dark foreground with subtle overlays
  */
 export function getMenuColorClasses(primaryColor: string) {
+  // No organization brand color: the header is an Orbital theme surface, so
+  // every role resolves through semantic tokens and follows Light / Dark.
   if (!primaryColor) {
     return {
-      text: 'text-white',
-      textMuted: 'text-white/70',
-      hoverBg: 'hover:bg-white/10',
-      iconBtn: 'hover:bg-white/10 text-white',
-      searchBg: 'bg-white/20 text-white placeholder:text-white/60 focus:ring-white/20 focus:border-white/30',
-      searchIcon: 'text-white/60 group-focus-within:text-white',
-      signUpBtn: 'bg-white text-black hover:bg-gray-200',
-      profileHover: 'hover:bg-white/10',
-      profileName: 'text-white',
-      profileMuted: 'text-white/70',
-      logoFilter: 'invert(1) brightness(2)',
+      text: 'text-foreground',
+      textMuted: 'text-muted-foreground',
+      hoverBg: 'hover:bg-accent',
+      iconBtn: 'hover:bg-accent text-foreground',
+      searchBg: 'bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:ring-ring/30 focus:border-ring',
+      searchIcon: 'text-muted-foreground group-focus-within:text-foreground',
+      signUpBtn: 'bg-primary text-primary-foreground hover:bg-action-hover',
+      profileHover: 'hover:bg-accent',
+      profileName: 'text-foreground',
+      profileMuted: 'text-muted-foreground',
+      logoFilter: 'var(--sl-logo-filter, none)',
     }
   }
 

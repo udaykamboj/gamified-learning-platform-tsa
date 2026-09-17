@@ -82,7 +82,7 @@ const PaymentsConfigurationPage: React.FC = () => {
   }, [org?.id, queryClient]);
 
   if (isLoading) return (
-    <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4 animate-pulse">
+    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4 animate-pulse">
       <div className="h-14 bg-gray-100 rounded-md mb-4" />
       <div className="space-y-3">
         {[1, 2].map((i) => (
@@ -105,7 +105,7 @@ const PaymentsConfigurationPage: React.FC = () => {
   const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
 
   return (
-    <div className="ms-10 me-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
+    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
         <h1 className="font-bold text-xl text-gray-800">Payments Configuration</h1>
         <h2 className="text-gray-500 text-sm">
@@ -191,7 +191,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
       {/* Main row */}
-      <div className="flex items-center justify-between px-5 py-4 bg-white">
+      <div className="flex items-center justify-between px-5 py-4 bg-card">
         <div className="flex items-center space-x-4">
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
             <provider.Icon size={22} className="text-gray-700" />
@@ -273,7 +273,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
               onClick={handleConnect}
               disabled={isConnecting}
               size="sm"
-              className="text-xs bg-gray-900 text-white hover:bg-gray-800"
+              className="text-xs bg-primary text-primary-foreground hover:bg-primary"
             >
               {isConnecting ? (
                 <Loader2 size={12} className="animate-spin me-1" />

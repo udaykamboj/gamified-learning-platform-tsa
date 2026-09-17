@@ -84,7 +84,7 @@ export default function PlatformOverview() {
       {cards.map((card) => {
         const Icon = card.icon
         const body = (
-          <div className="bg-white rounded-xl nice-shadow p-4 h-full hover:bg-gray-50/60 transition-colors">
+          <div className="bg-card rounded-xl nice-shadow p-4 h-full hover:bg-gray-50/60 transition-colors">
             <div className="flex items-center gap-2.5 mb-3">
               <div className={`p-1.5 rounded-lg ${card.color}`}>
                 <Icon size={16} weight="duotone" />

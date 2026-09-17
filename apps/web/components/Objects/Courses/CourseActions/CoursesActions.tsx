@@ -189,7 +189,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (!isStarted) {
       return (
-        <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+        <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
@@ -231,7 +231,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     }
 
     return (
-        <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+        <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
           <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -305,7 +305,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   // Show join organization prompt for authenticated users who are not part of the org
   if (session.data?.user && !isUserPartOfTheOrg) {
     return (
-      <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+      <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
         <div className="space-y-4">
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
             <div className="flex items-center gap-3">
@@ -318,7 +318,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           </div>
           <a
             href={getUriWithOrg(orgslug, '/signup')}
-            className="w-full bg-neutral-900 text-white py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-primary text-primary-foreground py-3 rounded-lg nice-shadow font-semibold hover:bg-primary transition-colors flex items-center justify-center gap-2"
           >
             <UserPlus className="w-5 h-5" />
             {t('courses.join_organization')}
@@ -332,7 +332,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     // User already enrolled / started — show "you own this" notice + leave button
     if (isStarted) {
       return (
-        <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
+        <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
           <div className="space-y-4">
             <div className="p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">
@@ -375,7 +375,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   }
 
   return (
-    <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
       <div className="space-y-4">
         {/* Progress Section */}
         {renderProgressSection()}
@@ -387,8 +387,8 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           aria-label={isStarted ? t('courses.leave_course') : t('courses.start_course')}
           className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
             isStarted
-              ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-              : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+              ? 'bg-red-500 text-primary-foreground hover:bg-red-600 disabled:bg-red-400'
+              : 'bg-primary text-primary-foreground hover:bg-primary disabled:bg-neutral-700'
           }`}
         >
           {isActionLoading ? (

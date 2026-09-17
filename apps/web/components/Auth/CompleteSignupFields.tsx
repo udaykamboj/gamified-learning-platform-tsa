@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTitle } from '@components/ui/dialog'
 import type { SignupFieldItem } from '@services/settings/org'
 
 const INPUT =
-  'w-full bg-neutral-50 text-black rounded-lg px-3 py-2.5 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all'
+  'w-full bg-neutral-50 text-foreground rounded-lg px-3 py-2.5 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-border focus:border-neutral-400 transition-all'
 
 /**
  * Asks a signed-in member for required custom signup fields they haven't
@@ -109,12 +109,12 @@ export default function CompleteSignupFields() {
         <div className="px-6 py-6 space-y-4">
           <DialogTitle asChild>
             <div>
-              <p className="text-[17px] font-bold text-black">
+              <p className="text-[17px] font-bold text-foreground">
                 {t('auth.complete_profile.title', {
                   defaultValue: 'Complete your profile',
                 })}
               </p>
-              <p className="text-[13px] text-black/45 mt-1 font-normal">
+              <p className="text-[13px] text-foreground/45 mt-1 font-normal">
                 {t('auth.complete_profile.subtitle', {
                   defaultValue: `${org?.name ?? 'This organization'} needs a little more information before you continue.`,
                   org: org?.name ?? '',
@@ -130,7 +130,7 @@ export default function CompleteSignupFields() {
               return (
                 <div key={field.key}>
                   {field.type !== 'checkbox' && (
-                    <label className="block text-[13px] font-semibold text-black/70 mb-1.5">
+                    <label className="block text-[13px] font-semibold text-foreground/70 mb-1.5">
                       {label}
                     </label>
                   )}
@@ -170,7 +170,7 @@ export default function CompleteSignupFields() {
                         onChange={(e) => setValue(field.key, e.target.checked)}
                         className="mt-0.5 h-4 w-4 rounded border-neutral-300 accent-black"
                       />
-                      <span className="text-[13px] text-black/70 leading-snug">{label}</span>
+                      <span className="text-[13px] text-foreground/70 leading-snug">{label}</span>
                     </label>
                   )}
 
@@ -188,7 +188,7 @@ export default function CompleteSignupFields() {
                   )}
 
                   {field.help_text && (
-                    <p className="mt-1 text-[11px] text-black/35">{field.help_text}</p>
+                    <p className="mt-1 text-[11px] text-foreground/35">{field.help_text}</p>
                   )}
                   {error && <p className="mt-1 text-[11px] text-red-500">{error}</p>}
                 </div>
@@ -197,11 +197,11 @@ export default function CompleteSignupFields() {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-black/[0.05] bg-black/[0.01] flex justify-end">
+        <div className="px-6 py-4 border-t border-border bg-foreground/[0.01] flex justify-end">
           <button
             onClick={submit}
             disabled={saving}
-            className="px-5 py-2 bg-black text-white rounded-xl text-[13px] font-semibold hover:bg-black/85 transition-colors disabled:opacity-50"
+            className="px-5 py-2 bg-primary text-primary-foreground rounded-xl text-[13px] font-semibold hover:bg-action-hover transition-colors disabled:opacity-50"
           >
             {saving
               ? t('common.saving', { defaultValue: 'Saving…' })

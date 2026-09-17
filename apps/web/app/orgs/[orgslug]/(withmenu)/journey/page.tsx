@@ -122,7 +122,7 @@ export default function JourneyPage() {
               </Button>
               <div>
                 <h1 className="font-display text-lg font-semibold leading-none">Learning Journey</h1>
-                <p className="mt-1 font-mono text-[10px] uppercase text-white/60">
+                <p className="mt-1 font-mono text-[11px] uppercase text-white/60">
                   Your path through the curriculum
                 </p>
               </div>

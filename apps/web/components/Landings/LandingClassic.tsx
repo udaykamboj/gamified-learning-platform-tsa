@@ -54,7 +54,7 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
             ))}
             {courses.length === 0 && (
               <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-white rounded-full nice-shadow mb-4">
+                <div className="p-4 bg-card rounded-full nice-shadow mb-4">
                   {isAuthenticated ? (
                     <BookCopy className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                   ) : (
@@ -81,7 +81,7 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
                 {!isAuthenticated && (
                   <Link
                     href={getUriWithOrg(orgslug, '/login')}
-                    className="inline-flex items-center gap-2 justify-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
+                    className="inline-flex items-center gap-2 justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary transition-colors"
                   >
                     <LogIn size={16} />
                     {t('auth.sign_in', 'Sign in')}

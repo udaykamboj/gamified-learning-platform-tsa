@@ -72,7 +72,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
   }, [isAuthenticated, orgs, redirectEmptyOrgs, router])
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-card overflow-y-auto">
       <div className="relative min-h-screen">
         {/* Blueprint grid — fades in from bottom */}
         <div
@@ -105,7 +105,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
               <h1 className="mt-6 font-black tracking-tight text-2xl text-gray-900 text-center">
                 {t('common.your_organizations')}
               </h1>
-              <p className="mt-1.5 text-sm text-black/40 text-center">
+              <p className="mt-1.5 text-sm text-foreground/40 text-center">
                 {t('common.choose_an_organization_to_continue', {
                   defaultValue: 'Choose an organization to continue',
                 })}
@@ -114,14 +114,14 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
 
             {/* User strip */}
             {isAuthenticated && (
-              <div className="w-full mb-6 flex items-center justify-between bg-white rounded-2xl nice-shadow px-4 py-3">
+              <div className="w-full mb-6 flex items-center justify-between bg-card rounded-2xl nice-shadow px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <UserAvatar border="border-2" rounded="rounded-full" width={36} />
                   <div className="flex flex-col min-w-0">
                     <span className="text-sm font-semibold text-gray-900 truncate capitalize">
                       {session?.data?.user?.first_name} {session?.data?.user?.last_name}
                     </span>
-                    <span className="text-xs text-black/40 truncate">
+                    <span className="text-xs text-foreground/40 truncate">
                       {session?.data?.user?.email}
                     </span>
                   </div>
@@ -130,7 +130,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
                   <DropdownMenuTrigger asChild>
                     <button
                       aria-label={t('common.settings')}
-                      className="p-2 rounded-lg text-black/40 hover:text-black hover:bg-black/[0.04] transition-colors"
+                      className="p-2 rounded-lg text-foreground/40 hover:text-foreground hover:bg-foreground/[0.04] transition-colors"
                     >
                       <Settings size={16} />
                     </button>
@@ -187,7 +187,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className="h-[68px] w-full rounded-2xl bg-black/[0.03] animate-pulse"
+                      className="h-[68px] w-full rounded-2xl bg-foreground/[0.03] animate-pulse"
                     />
                   ))}
                 </>
@@ -196,7 +196,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
               {!isLoading && !isAuthenticated && (
                 <Link
                   href="/login"
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm nice-shadow hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-primary-foreground rounded-2xl font-semibold text-sm nice-shadow hover:bg-primary transition-colors"
                 >
                   <LogIn size={16} />
                   {t('auth.sign_in', { defaultValue: 'Sign in' })}
@@ -204,9 +204,9 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
               )}
 
               {isAuthenticated && orgs && orgs.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 bg-white rounded-2xl nice-shadow">
-                  <TentTree className="text-black/10" size={64} />
-                  <p className="mt-4 text-sm font-semibold text-black/50 text-center">
+                <div className="flex flex-col items-center justify-center py-14 px-6 bg-card rounded-2xl nice-shadow">
+                  <TentTree className="text-foreground/10" size={64} />
+                  <p className="mt-4 text-sm font-semibold text-foreground/50 text-center">
                     {t('common.no_orgs_message')}
                   </p>
                 </div>
@@ -222,7 +222,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
               {isAuthenticated && orgs && (
                 <Link
                   href="/new"
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm nice-shadow hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-primary-foreground rounded-2xl font-semibold text-sm nice-shadow hover:bg-primary transition-colors"
                 >
                   <Plus size={16} />
                   {t('common.create_organization', { defaultValue: 'Create organization' })}
@@ -239,15 +239,15 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
                 href={platformUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30 hover:text-black/60 transition-colors"
+                className="mt-10 flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors"
               >
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">StarLab</span>
+                <span className="font-semibold tracking-tight text-foreground/50 group-hover:text-foreground/70">StarLab</span>
               </a>
             ) : (
-              <div className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30">
+              <div className="mt-10 flex items-center gap-1.5 text-[11px] text-foreground/30">
                 <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50">StarLab</span>
+                <span className="font-semibold tracking-tight text-foreground/50">StarLab</span>
               </div>
             )}
             <CopyrightFooter year={new Date().getFullYear()} className="mt-4 pt-0" />
@@ -318,7 +318,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
   }
 
   return (
-    <div className="relative flex items-center p-4 bg-white rounded-2xl nice-shadow hover:shadow-lg transition-all group">
+    <div className="relative flex items-center p-4 bg-card rounded-2xl nice-shadow hover:shadow-lg transition-all group">
       <Link
         href="/dashboard"
         onClick={(event) => {
@@ -333,10 +333,10 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
           <img
             src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
             alt={org.name}
-            className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-inset ring-black/5"
+            className="w-11 h-11 rounded-xl object-cover flex-shrink-0 ring-1 ring-inset ring-border"
           />
         ) : (
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg flex-shrink-0 ring-1 ring-inset ring-black/5">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg flex-shrink-0 ring-1 ring-inset ring-border">
             {initial}
           </div>
         )}
@@ -349,21 +349,21 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
             {org.is_demo && (
               // Marks the shared sandbox in a list of the user's real
               // organizations, so nobody mistakes it for one of theirs.
-              <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+              <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">
                 {t('demo.badge', { defaultValue: 'Demo' })}
               </span>
             )}
           </div>
           {org.description ? (
-            <p className="text-xs text-black/40 truncate mt-0.5">{org.description}</p>
+            <p className="text-xs text-foreground/40 truncate mt-0.5">{org.description}</p>
           ) : (
-            <p className="text-xs text-black/30 truncate mt-0.5">{org.slug}</p>
+            <p className="text-xs text-foreground/30 truncate mt-0.5">{org.slug}</p>
           )}
         </div>
 
         <ChevronRight
           size={18}
-          className="ms-3 text-black/25 group-hover:text-black/60 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-all flex-shrink-0"
+          className="ms-3 text-foreground/25 group-hover:text-foreground/60 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-all flex-shrink-0"
         />
       </Link>
 
@@ -372,7 +372,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
         <DropdownMenuTrigger asChild>
           <button
             aria-label={t('common.org_actions', { defaultValue: 'Organization actions' })}
-            className="ms-1.5 p-2 rounded-lg text-black/30 hover:text-black hover:bg-black/[0.04] transition-colors flex-shrink-0"
+            className="ms-1.5 p-2 rounded-lg text-foreground/30 hover:text-foreground hover:bg-foreground/[0.04] transition-colors flex-shrink-0"
           >
             <MoreVertical size={16} />
           </button>
@@ -459,7 +459,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
           </DialogHeader>
 
           <div className="mt-4">
-            <label className="block text-xs font-medium text-black/50 mb-1.5">
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5">
               {t('common.delete_organization_confirm_label', {
                 defaultValue: 'Type {{slug}} to confirm',
                 slug: org.slug,
@@ -471,7 +471,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder={org.slug}
               autoComplete="off"
-              className="w-full px-3 py-2 text-sm rounded-xl border border-black/10 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-colors"
             />
             {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
           </div>
@@ -486,7 +486,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
                 setError(null)
               }}
               disabled={deleting}
-              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-black/[0.04] hover:bg-black/[0.07] transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold rounded-xl text-gray-700 bg-foreground/[0.04] hover:bg-foreground/[0.07] transition-colors disabled:opacity-50"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
@@ -524,7 +524,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
               </DialogTitle>
             </div>
           </DialogHeader>
-          <p className="text-sm text-black/60 mt-1">
+          <p className="text-sm text-foreground/60 mt-1">
             {t('common.leave_organization_desc', {
               defaultValue: 'You will lose access to {{org}} and be removed from its members. You can re-join later if invited.',
               org: org.name || org.slug,
@@ -535,7 +535,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
             <button
               onClick={() => setLeaveOpen(false)}
               disabled={leaving}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-black/60 hover:bg-black/[0.04] transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground/60 hover:bg-foreground/[0.04] transition-colors disabled:opacity-50"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>

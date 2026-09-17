@@ -577,7 +577,7 @@ export function ActivityPreviewHoverCard({
         align="start"
         side="right"
         sideOffset={8}
-        className="w-[420px] max-w-[90vw] p-0 border border-gray-200 bg-white shadow-xl rounded-xl overflow-hidden"
+        className="w-[420px] max-w-[90vw] p-0 border border-gray-200 bg-card shadow-xl rounded-xl overflow-hidden"
       >
         {hasOpened ? (
           <ActivityPreview activity={activity} className="max-h-72 overflow-y-auto px-4 py-3" />

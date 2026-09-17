@@ -113,7 +113,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             key={`text-image-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
-            <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-white rounded-xl p-6 md:p-8 lg:p-12 nice-shadow ${
+            <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-card rounded-xl p-6 md:p-8 lg:p-12 nice-shadow ${
               section.flow === 'right' ? 'md:flex-row-reverse' : ''
             }`}>
               <div className="flex-1 w-full max-w-2xl">

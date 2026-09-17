@@ -12,9 +12,9 @@ function formatMoney(minorUnits: number, currency: string, lng: string): string 
 const STATUS_STYLES: Record<string, string> = {
   paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   open: 'bg-amber-50 text-amber-700 border-amber-200',
-  draft: 'bg-black/[0.04] text-black/50 border-black/[0.08]',
+  draft: 'bg-foreground/[0.04] text-foreground/50 border-border',
   uncollectible: 'bg-red-50 text-red-600 border-red-200',
-  void: 'bg-black/[0.04] text-black/40 border-black/[0.08]',
+  void: 'bg-foreground/[0.04] text-foreground/40 border-border',
 }
 
 export default function InvoiceHistory({ invoices }: { invoices: PastInvoice[] }) {
@@ -24,26 +24,26 @@ export default function InvoiceHistory({ invoices }: { invoices: PastInvoice[] }
   if (!invoices || invoices.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full px-6 py-5 flex items-center justify-between gap-4 hover:bg-black/[0.01] transition-colors"
+        className="w-full px-6 py-5 flex items-center justify-between gap-4 hover:bg-foreground/[0.01] transition-colors"
       >
         <div className="flex items-center gap-2">
-          <FileText size={15} className="text-black/40" />
-          <h2 className="font-bold text-base tracking-tight text-black">
+          <FileText size={15} className="text-foreground/40" />
+          <h2 className="font-bold text-base tracking-tight text-foreground">
             {t('billing.invoice_history', { defaultValue: 'Invoice history' })}
           </h2>
         </div>
         <ChevronDown
           size={16}
-          className={`text-black/40 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`text-foreground/40 transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
-        <div className="border-t border-black/[0.05] divide-y divide-black/[0.04]">
+        <div className="border-t border-border divide-y divide-border">
           {invoices.map((inv) => {
             const date = formatDate(inv.created * 1000, i18n.language, {
               dateStyle: undefined,
@@ -58,22 +58,22 @@ export default function InvoiceHistory({ invoices }: { invoices: PastInvoice[] }
                 className="px-6 py-3.5 flex items-center justify-between gap-4 flex-wrap"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-[13px] font-semibold text-black whitespace-nowrap">
+                  <span className="text-[13px] font-semibold text-foreground whitespace-nowrap">
                     {date}
                   </span>
                   {inv.number && (
-                    <span className="text-[11px] text-black/30 font-medium truncate">
+                    <span className="text-[11px] text-foreground/30 font-medium truncate">
                       {inv.number}
                     </span>
                   )}
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${badge}`}
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${badge}`}
                   >
                     {inv.status}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-[13px] font-semibold text-black whitespace-nowrap">
+                  <span className="text-[13px] font-semibold text-foreground whitespace-nowrap">
                     {formatMoney(
                       inv.status === 'paid' ? inv.amountPaid : inv.amountDue,
                       inv.currency,
@@ -85,7 +85,7 @@ export default function InvoiceHistory({ invoices }: { invoices: PastInvoice[] }
                       href={inv.hostedInvoiceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1 text-[12px] font-semibold text-black/50 hover:text-black transition-colors"
+                      className="flex items-center gap-1 text-[12px] font-semibold text-foreground/50 hover:text-foreground transition-colors"
                     >
                       <ExternalLink size={12} />
                       {t('billing.view', { defaultValue: 'View' })}

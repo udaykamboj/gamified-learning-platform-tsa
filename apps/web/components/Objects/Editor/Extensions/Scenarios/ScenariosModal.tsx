@@ -211,14 +211,14 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={resetPreview}
-                className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg transition-all text-sm font-medium shadow-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-card hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg transition-all text-sm font-medium shadow-sm"
               >
                 <RotateCcw size={14} />
                 Reset
               </button>
               <button
                 onClick={() => setShowPreview(false)}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all text-sm font-medium shadow-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-all text-sm font-medium shadow-sm"
               >
                 <Settings size={14} />
                 Back to Edit
@@ -240,7 +240,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
               </p>
               <button
                 onClick={resetPreview}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md mx-auto"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md mx-auto"
               >
                 <RotateCcw size={16} />
                 Start Over
@@ -249,7 +249,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
           ) : previewScenario ? (
             <div className="w-full max-w-xl mx-auto space-y-4 p-4">
               {/* Scenario Text */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div className="bg-card border border-slate-200 rounded-xl p-6 shadow-sm">
                 {previewScenario.imageUrl && (
                   <div className="mb-4">
                     <img 
@@ -273,7 +273,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                   <button
                     key={option.id}
                     onClick={() => handleOptionClick(option.nextScenarioId)}
-                    className="w-full bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-lg p-3 transition-all group text-start shadow-sm hover:shadow-md"
+                    className="w-full bg-card border border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-lg p-3 transition-all group text-start shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-6 h-6 bg-slate-100 group-hover:bg-blue-100 rounded flex items-center justify-center flex-shrink-0 transition-colors">
@@ -307,7 +307,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
   const renderEditContent = () => (
     <div className="flex flex-col h-[calc(75vh-220px)] p-2">
       {/* Header Section */}
-      <div className="bg-white border-b border-slate-200 p-4 -mx-2 -mt-2 mb-4 flex-shrink-0">
+      <div className="bg-card border-b border-slate-200 p-4 -mx-2 -mt-2 mb-4 flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div className="flex-1 min-w-0">
             <label className="block text-sm font-semibold text-slate-900 mb-2">
@@ -317,7 +317,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-white text-slate-900 placeholder-slate-400 transition-all"
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-card text-slate-900 placeholder-slate-400 transition-all"
               placeholder="Enter your scenario title..."
             />
           </div>
@@ -338,7 +338,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
             <button
               onClick={addNewScenario}
               disabled={scenarios.length >= 40}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-900"
+              className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
             >
               <Plus size={14} />
               Add
@@ -352,7 +352,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
         <div className="h-full overflow-y-auto pe-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
           <div className="space-y-4 pb-4">
             {scenarios.map((scenario, scenarioIndex) => (
-              <div key={scenario.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div key={scenario.id} className="bg-card border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 {/* Scenario Header */}
                 <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3 border-b border-slate-200">
                   <div className="flex items-center justify-between">
@@ -409,7 +409,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                             ? 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 shadow-sm' 
                             : scenario.imageUrl && scenario.imageUrl.trim() !== ''
                             ? 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100'
-                            : 'text-slate-600 bg-white border-slate-200 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200'
+                            : 'text-slate-600 bg-card border-slate-200 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200'
                         }`}
                         title={scenario.imageUrl && scenario.imageUrl.trim() !== '' ? "Edit image" : "Add image"}
                       >
@@ -427,7 +427,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                     <textarea
                       value={scenario.text}
                       onChange={(e) => updateScenario(scenario.id, { text: e.target.value })}
-                      className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-white text-slate-900 placeholder-slate-400 transition-all"
+                      className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-card text-slate-900 placeholder-slate-400 transition-all"
                       rows={2}
                       placeholder="Describe what happens in this scenario..."
                     />
@@ -443,7 +443,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                         type="url"
                         value={scenario.imageUrl || ''}
                         onChange={(e) => updateScenario(scenario.id, { imageUrl: e.target.value })}
-                        className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-white text-slate-900 placeholder-slate-400 transition-all"
+                        className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-card text-slate-900 placeholder-slate-400 transition-all"
                         placeholder="https://example.com/image.jpg"
                       />
                       {scenario.imageUrl && (
@@ -482,7 +482,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                       {scenario.options.map((option, index) => (
                         <div key={option.id} className="group bg-slate-50 border border-slate-200 rounded-lg p-3 hover:bg-slate-100 transition-all">
                           <div className="flex items-start gap-2">
-                            <div className="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <div className="w-6 h-6 bg-card border border-slate-300 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
                               <span className="text-xs font-bold text-slate-600">
                                 {String.fromCharCode('A'.charCodeAt(0) + index)}
                               </span>
@@ -492,7 +492,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                 type="text"
                                 value={option.text}
                                 onChange={(e) => updateOption(scenario.id, option.id, { text: e.target.value })}
-                                className="w-full px-2 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-white placeholder-slate-400 transition-all"
+                                className="w-full px-2 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-card placeholder-slate-400 transition-all"
                                 placeholder="Enter response option..."
                               />
                               <div className="flex items-center gap-2">
@@ -502,7 +502,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                                   onChange={(e) => updateOption(scenario.id, option.id, { 
                                     nextScenarioId: e.target.value || null 
                                   })}
-                                  className="flex-1 px-2 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-white transition-all"
+                                  className="flex-1 px-2 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 bg-card transition-all"
                                 >
                                   <option value="">End scenario</option>
                                   {scenarios.map((s) => (
@@ -539,7 +539,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
                 <p className="text-slate-500 text-sm mb-4">Create your first scenario to get started.</p>
                 <button
                   onClick={addNewScenario}
-                  className="flex items-center gap-2 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md mx-auto"
+                  className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-primary-foreground rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md mx-auto"
                 >
                   <Plus size={14} />
                   Create First Scenario

@@ -114,7 +114,7 @@ function PDFBlockComponent(props: any) {
     return (
       <NodeViewWrapper className="block-pdf">
         <div className="bg-neutral-50 rounded-xl px-5 py-4 nice-shadow">
-          <div className="flex items-center justify-center gap-3 py-8 bg-white rounded-lg nice-shadow">
+          <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
             <FileText weight="duotone" className="text-neutral-300" size={32} />
             <p className="text-neutral-500">{t('editor.blocks.pdf_block.no_pdf')}</p>
           </div>
@@ -130,7 +130,7 @@ function PDFBlockComponent(props: any) {
         <NodeViewWrapper className="block-pdf">
           <div className="relative group">
             <iframe
-              className="w-full h-96 rounded-lg nice-shadow bg-white"
+              className="w-full h-96 rounded-lg nice-shadow bg-card"
               src={pdfUrl}
               title={t('editor.blocks.pdf_block.document_title')}
             />
@@ -194,7 +194,7 @@ function PDFBlockComponent(props: any) {
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
                   error
                     ? 'border-red-300 bg-red-50/30 hover:border-red-400 hover:bg-red-50/50'
-                    : 'border-neutral-200 bg-white hover:border-blue-400 hover:bg-blue-50/50'
+                    : 'border-neutral-200 bg-card hover:border-blue-400 hover:bg-blue-50/50'
                 }`}
               >
                 <input
@@ -260,7 +260,7 @@ function PDFBlockComponent(props: any) {
           {blockObject && pdfUrl && (
             <div className="relative">
               <iframe
-                className="w-full h-96 rounded-lg nice-shadow bg-white"
+                className="w-full h-96 rounded-lg nice-shadow bg-card"
                 src={pdfUrl}
                 title={t('editor.blocks.pdf_block.document_title')}
               />

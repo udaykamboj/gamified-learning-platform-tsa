@@ -45,7 +45,7 @@ function CourseItem({ item, orgslug, onRemove }: { item: any; orgslug: string; o
           confirmationMessage={t('library.remove_from_folder_confirm')}
           dialogTitle={t('library.remove_from_folder')}
           dialogTrigger={
-            <button title={t('library.remove_from_folder')} className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-rose-50 hover:text-rose-600 text-gray-600 transition-all shadow-md">
+            <button title={t('library.remove_from_folder')} className="p-1.5 bg-card/90 backdrop-blur-sm rounded-full hover:bg-rose-50 hover:text-rose-600 text-gray-600 transition-all shadow-md">
               <FolderMinus className="w-4 h-4" />
             </button>
           }
@@ -195,7 +195,7 @@ export default function LibraryGrid({
                           >
                             <div
                               {...dragProvided.dragHandleProps}
-                              className="absolute top-2 end-2 z-30 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md"
+                              className="absolute top-2 end-2 z-30 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors bg-card/90 backdrop-blur-sm rounded-full p-1 shadow-md"
                               title={t('library.sort.drag_to_reorder', { defaultValue: 'Drag to reorder' })}
                             >
                               <GripVertical size={16} />

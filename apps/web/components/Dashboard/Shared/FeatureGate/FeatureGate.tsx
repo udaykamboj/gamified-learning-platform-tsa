@@ -153,13 +153,13 @@ function UpgradeCard({
                 upsell_plan: meta.upsellPlan,
               })
             }
-            className="bg-white text-gray-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors nice-shadow flex items-center gap-2"
+            className="bg-card text-gray-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors nice-shadow flex items-center gap-2"
           >
             <span>{t('common.plans.upgrade_to')}</span>
             {badge}
           </a>
         ) : (
-          <div className="bg-white text-gray-700 px-6 py-2.5 rounded-lg font-semibold nice-shadow flex items-center gap-2">
+          <div className="bg-card text-gray-700 px-6 py-2.5 rounded-lg font-semibold nice-shadow flex items-center gap-2">
             <span>{t('common.plans.upgrade_to')}</span>
             {badge}
           </div>
@@ -230,7 +230,7 @@ function GateShell({
     <div
       data-feature-gate={variant}
       data-feature={feature}
-      className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-[#f8f8f8]"
+      className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-muted"
     >
       <div className="w-full max-w-lg">{children}</div>
     </div>
@@ -245,7 +245,7 @@ function GateCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
       <div className={`flex flex-col items-center justify-center py-14 px-6 text-center bg-gradient-to-b ${gradient} via-white to-white`}>
         {children}
       </div>
@@ -255,7 +255,7 @@ function GateCard({
 
 function IconBubble({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white p-4 rounded-xl nice-shadow mb-6 inline-flex">
+    <div className="bg-card p-4 rounded-xl nice-shadow mb-6 inline-flex">
       {children}
     </div>
   )

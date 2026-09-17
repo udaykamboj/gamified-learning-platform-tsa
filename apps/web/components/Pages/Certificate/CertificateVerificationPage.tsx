@@ -94,7 +94,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6">
+        <div className="bg-card rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
@@ -110,7 +110,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   if (error || verificationStatus === 'invalid') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
+        <div className="bg-card rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="bg-red-100 p-4 rounded-full">
               <XCircle className="w-16 h-16 text-red-600" />
@@ -139,7 +139,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="pt-4">
               <Link
                 href="/"
-                className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+                className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-6 py-3 rounded-full hover:bg-action-hover transition duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Go Home</span>
@@ -162,7 +162,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="bg-white rounded-2xl p-6 mb-8 nice-shadow">
+        <div className="bg-card rounded-2xl p-6 mb-8 nice-shadow">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="bg-green-100 p-3 rounded-full">
@@ -186,7 +186,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           {/* Certificate Preview and Course Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Certificate Preview */}
-            <div className="bg-white rounded-2xl p-6 nice-shadow">
+            <div className="bg-card rounded-2xl p-6 nice-shadow">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Certificate Preview</h2>
               <div className="max-w-2xl mx-auto" id="certificate-preview">
                 <CertificatePreview
@@ -207,11 +207,11 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             </div>
 
             {/* Course Information */}
-            <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+            <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
               <div className="flex items-start space-x-4">
                 {/* Course Thumbnail */}
                 <div className="flex-shrink-0">
-                  <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden ring-1 ring-inset ring-black/10">
+                  <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden ring-1 ring-inset ring-border">
                     {certificateData.course.thumbnail_image ? (
                       <img
                         src={getCourseThumbnailMediaDirectory(
@@ -284,7 +284,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
           {/* Certificate Details */}
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 nice-shadow">
+            <div className="bg-card rounded-2xl p-6 nice-shadow">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Certificate Information</h2>
               
               <div className="space-y-4">
@@ -358,7 +358,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+            className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-6 py-3 rounded-full hover:bg-action-hover transition duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Go Home</span>

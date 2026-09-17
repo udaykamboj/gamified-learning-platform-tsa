@@ -56,7 +56,7 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
               <span className="text-xs font-mono text-gray-400 w-5">{language.code.toUpperCase()}</span>
               <span>{language.nativeName}</span>
             </span>
-            {i18n.language.split('-')[0] === language.code && <Check size={14} className="text-black" />}
+            {i18n.language.split('-')[0] === language.code && <Check size={14} className="text-foreground" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

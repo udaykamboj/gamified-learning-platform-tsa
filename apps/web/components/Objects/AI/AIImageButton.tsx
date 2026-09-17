@@ -29,7 +29,7 @@ const AIImageButton: React.FC<AIImageButtonProps> = ({
   const base =
     variant === 'chip'
       ? 'px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1.5 text-sm'
-      : 'px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 nice-shadow transition-colors flex items-center gap-1.5 text-sm'
+      : 'px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary nice-shadow transition-colors flex items-center gap-1.5 text-sm'
 
   return (
     <>

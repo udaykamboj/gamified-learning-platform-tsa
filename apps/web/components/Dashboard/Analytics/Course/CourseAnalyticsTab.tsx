@@ -105,7 +105,7 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
   if (analyticsStatus && !isConfigured) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-center p-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 max-w-md nice-shadow">
+        <div className="bg-card rounded-2xl border border-gray-100 p-10 max-w-md nice-shadow">
           <h2 className="text-lg font-bold text-gray-900 mb-2">{t('analytics.course_analytics.not_configured_title')}</h2>
           <p className="text-sm text-gray-500 leading-relaxed">
             {t('analytics.course_analytics.not_configured_desc')}
@@ -128,7 +128,7 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
               onClick={() => setDays(r.value)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 days === r.value
-                  ? 'bg-white text-gray-900 shadow-sm'
+                  ? 'bg-card text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >

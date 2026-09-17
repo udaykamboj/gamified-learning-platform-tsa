@@ -34,7 +34,7 @@ export default function DevelopersTabs() {
 
   return (
     <div>
-      <div className="flex items-center gap-1 mb-2 border-b border-white/[0.08]">
+      <div className="flex items-center gap-1 mb-2 border-b border-border">
         {TABS.map((t) => {
           const isActive = active === t.key
           return (
@@ -44,8 +44,8 @@ export default function DevelopersTabs() {
               className={
                 'inline-flex items-center gap-1.5 px-3.5 py-2.5 text-sm border-b-2 -mb-px transition-colors ' +
                 (isActive
-                  ? 'border-white text-white'
-                  : 'border-transparent text-white/40 hover:text-white/70')
+                  ? 'border-border text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-muted-foreground')
               }
             >
               {t.icon}
@@ -54,7 +54,7 @@ export default function DevelopersTabs() {
           )
         })}
       </div>
-      <p className="text-xs text-white/40 mb-6">{current.description}</p>
+      <p className="text-xs text-muted-foreground mb-6">{current.description}</p>
 
       {active === 'tokens' && <TokensTab />}
       {active === 'docs' && (

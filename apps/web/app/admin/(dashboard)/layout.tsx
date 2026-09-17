@@ -10,7 +10,7 @@ export default function AdminDashboardLayout({
 }) {
   return (
     <SuperadminAuthorization>
-      <div className="min-h-screen bg-[#0f0f10]">
+      <div className="min-h-screen bg-background text-foreground">
         <AdminTopMenu />
         <div>{children}</div>
       </div>

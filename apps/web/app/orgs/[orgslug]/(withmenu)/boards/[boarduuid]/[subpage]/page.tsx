@@ -77,7 +77,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
 
   if (isLoading || !board) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
+      <div className="h-screen w-full bg-muted grid grid-rows-[auto_1fr]">
         <div className="ps-10 pe-10 bg-[#fcfbfc] nice-shadow animate-pulse">
           <div className="pt-6 pb-4">
             <div className="h-4 w-40 bg-gray-200 rounded" />
@@ -96,7 +96,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
           </div>
         </div>
         <div className="p-10">
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 animate-pulse">
+          <div className="bg-card rounded-xl shadow-sm p-6 space-y-4 animate-pulse">
             <div className="h-4 w-32 bg-gray-200 rounded" />
             <div className="h-10 bg-gray-100 rounded" />
             <div className="h-10 bg-gray-100 rounded" />
@@ -111,7 +111,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     : '/empty_thumbnail.png'
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr] grid-cols-1">
+    <div className="h-screen w-full bg-muted grid grid-rows-[auto_1fr] grid-cols-1">
       <div className="ps-4 pe-4 sm:ps-10 sm:pe-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow relative min-w-0 overflow-hidden">
         <div className="pt-6 pb-4">
           <Breadcrumbs items={[
@@ -131,7 +131,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
             </Link>
             <div className="flex flex-col justify-center ps-3 sm:ps-5 min-w-0">
               <div className="text-gray-400 font-semibold text-xs sm:text-sm">Board Settings</div>
-              <div className="text-black font-bold text-base sm:text-xl -mt-1 first-letter:uppercase truncate">
+              <div className="text-foreground font-bold text-base sm:text-xl -mt-1 first-letter:uppercase truncate">
                 {board.name}
               </div>
             </div>

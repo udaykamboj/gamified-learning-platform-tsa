@@ -94,15 +94,15 @@ export default function CourseViewToEnrollment({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.views')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.views')}</p>
                 <p className="text-2xl font-bold text-indigo-600">{totalViews}</p>
               </div>
               <div className="bg-emerald-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.enrollments')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.enrollments')}</p>
                 <p className="text-2xl font-bold text-emerald-600">{totalEnrollments}</p>
               </div>
               <div className="bg-amber-50 rounded-xl px-5 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.course_analytics.common.conversion')}</p>
+                <p className="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.course_analytics.common.conversion')}</p>
                 <p className="text-2xl font-bold text-amber-600">{overallRate}%</p>
               </div>
             </div>

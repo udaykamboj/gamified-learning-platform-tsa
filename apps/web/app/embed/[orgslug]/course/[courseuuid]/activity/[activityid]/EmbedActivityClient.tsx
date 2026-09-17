@@ -165,7 +165,7 @@ function EmbedActivityClient({ activityId, courseuuid, orgslug, bgcolor }: Embed
   if (!isEmbeddable) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-        <div className="bg-white rounded-2xl nice-shadow p-8 max-w-md w-full text-center">
+        <div className="bg-card rounded-2xl nice-shadow p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <Image
               src="/starlab_bigicon.png"
@@ -185,7 +185,7 @@ function EmbedActivityClient({ activityId, courseuuid, orgslug, bgcolor }: Embed
             href={getActivityUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary transition-colors"
           >
             {t('embed.visit_activity')}
           </a>
@@ -274,7 +274,7 @@ function PoweredByBadge({ activityUrl }: { activityUrl: string }) {
     <div className="fixed bottom-4 end-4 z-50">
       <button
         onClick={handleClick}
-        className="bg-white/80 backdrop-blur-lg rounded-2xl p-2 light-shadow block cursor-pointer"
+        className="bg-card/80 backdrop-blur-lg rounded-2xl p-2 light-shadow block cursor-pointer"
       >
         <Image
           src="/starlab-black.svg"

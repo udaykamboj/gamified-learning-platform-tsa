@@ -40,7 +40,7 @@ const OrgEditDangerZone: React.FC = () => {
   if (!canManageOrg) {
     return (
       <div className="sm:mx-10 mx-0">
-        <div className="bg-white rounded-xl nice-shadow p-6 text-gray-500">
+        <div className="bg-card rounded-xl nice-shadow p-6 text-gray-500">
           You don&apos;t have permission to manage this organization&apos;s danger zone.
         </div>
       </div>
@@ -96,7 +96,7 @@ const OrgEditDangerZone: React.FC = () => {
 
   return (
     <div className="sm:mx-10 mx-0 space-y-4">
-      <div className="rounded-xl nice-shadow bg-white border border-red-100 overflow-hidden">
+      <div className="rounded-xl nice-shadow bg-card border border-red-100 overflow-hidden">
         <div className="flex items-center space-x-2 bg-red-50 px-5 py-3 border-b border-red-100">
           <AlertTriangle className="h-5 w-5 text-red-600" />
           <div>

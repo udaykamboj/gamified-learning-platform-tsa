@@ -41,7 +41,7 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
   const rows = Array.from(merged.values())
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
+    <div className="bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
       <h3 className="text-sm font-semibold text-gray-700 mb-4">Activity Engagement</h3>
       {isLoading ? (
         <div className="h-48 flex items-center justify-center text-gray-300">Loading...</div>

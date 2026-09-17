@@ -198,7 +198,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
 
   return (
     <div
-      className={`fixed top-[60px] start-0 end-0 bg-white/90 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-top ${
+      className={`fixed top-[60px] start-0 end-0 bg-card/90 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-top ${
         isScrolled ? 'nice-shadow' : ''
       }`}
       style={{ zIndex: 'var(--z-drag-overlay)' }}

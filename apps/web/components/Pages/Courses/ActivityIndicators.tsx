@@ -95,7 +95,7 @@ const ActivityTooltipContent = memo(({
 }) => {
   const { t } = useTranslation();
   return (
-  <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+  <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
     <div className="flex items-center gap-2">
       <ActivityTypeIcon activityType={activity.activity_type} activitySubType={activity.activity_sub_type} />
       <span className="text-sm text-gray-700">{activity.name}</span>
@@ -133,7 +133,7 @@ const ChapterTooltipContent = memo(({
 }) => {
   const { t } = useTranslation();
   return (
-  <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+  <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium text-gray-900">{t('courses.chapter')} {chapterNumber}</span>
       <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
@@ -165,7 +165,7 @@ const CertificationBadge = memo(({
     sideOffset={8}
     unstyled
     content={
-      <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+      <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
         <div className="flex items-center gap-2">
           <Trophy size={16} className="text-yellow-500" />
           <span className="text-sm font-medium text-gray-900">
@@ -241,7 +241,7 @@ const MobileChapterSelector = memo(({
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center gap-0.5 text-[10px] text-gray-500 font-medium hover:text-gray-700 transition-colors"
+        className="flex items-center gap-0.5 text-[11px] text-gray-500 font-medium hover:text-gray-700 transition-colors"
       >
         <span>{t('courses.chapter')} {currentChapterIndex + 1}/{chapters.length}</span>
         <ChevronDown size={10} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -249,7 +249,7 @@ const MobileChapterSelector = memo(({
 
       {isOpen && (
         <div
-          className="absolute top-full start-0 mt-2 bg-white rounded-lg nice-shadow py-1.5 min-w-[220px] max-h-[60vh] overflow-y-auto"
+          className="absolute top-full start-0 mt-2 bg-card rounded-lg nice-shadow py-1.5 min-w-[220px] max-h-[60vh] overflow-y-auto"
           style={{ zIndex: 'var(--z-dropdown)' }}
         >
           {chapters.map((chapter: any, chapterIdx: number) => {
@@ -258,7 +258,7 @@ const MobileChapterSelector = memo(({
 
             return (
               <div key={chapter.id}>
-                <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-teal-600' : 'text-gray-400'}`}>
+                <div className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-teal-600' : 'text-gray-400'}`}>
                   {t('courses.chapter')} {chapterIdx + 1} — {completedInChapter}/{chapter.activities.length}
                 </div>
                 {chapter.activities.map((activity: any) => {
@@ -448,7 +448,7 @@ function ActivityIndicators(props: Props) {
         )}
 
         <div className="flex-1 flex flex-col gap-1.5 min-w-0 relative">
-          <div className="flex items-center justify-between text-[10px] text-gray-500 font-medium px-0.5">
+          <div className="flex items-center justify-between text-[11px] text-gray-500 font-medium px-0.5">
             <MobileChapterSelector
               chapters={course.chapters}
               currentChapterIndex={currentChapterIndex}
@@ -529,7 +529,7 @@ function ActivityIndicators(props: Props) {
                 >
                   {chapterLinkHref ? (
                     <Link href={chapterLinkHref} prefetch={false} className="relative z-10 shrink-0 flex items-center cursor-pointer focus:outline-none">
-                      <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
+                      <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[11px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
                           ? 'bg-teal-500 text-white'
                           : 'bg-gray-200 text-gray-500'
@@ -539,7 +539,7 @@ function ActivityIndicators(props: Props) {
                     </Link>
                   ) : (
                     <div className="relative z-10 shrink-0 flex items-center cursor-not-allowed">
-                      <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
+                      <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[11px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
                           ? 'bg-teal-500 text-white'
                           : 'bg-gray-200 text-gray-500'

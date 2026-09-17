@@ -37,7 +37,7 @@ export function AdvancedGate({
               href={upgradeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 text-xs font-semibold text-gray-600 bg-white px-4 py-2 rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
+              className="mt-3 text-xs font-semibold text-gray-600 bg-card px-4 py-2 rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
             >
               {t('common.plans.upgrade_to')} Enterprise
             </a>

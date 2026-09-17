@@ -41,7 +41,7 @@ function DropoffRow({
         </span>
       </div>
       {!compact && (
-        <span className="text-[10px] text-gray-300 whitespace-nowrap">
+        <span className="text-[11px] text-gray-300 whitespace-nowrap">
           {t('analytics.course_analytics.common.avg_prefix', { value: Math.round(row.avg_completed_before_stop || 0) })} {t('analytics.course_analytics.units.done_before')}
         </span>
       )}
@@ -69,11 +69,11 @@ function DropoffModalContent({
     <div>
       <div className="flex gap-6 mb-4">
         <div className="bg-rose-50 rounded-xl px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.total_dropoffs')}</p>
+          <p className="text-[11px] uppercase tracking-wider text-rose-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.total_dropoffs')}</p>
           <p className="text-2xl font-bold text-rose-600">{totalDropoffs}</p>
         </div>
         <div className="bg-gray-50 rounded-xl px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.dropoff_points')}</p>
+          <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.dropoff_points')}</p>
           <p className="text-2xl font-bold text-gray-700">{rows.length}</p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function CourseActivityDropoff({
             ))}
           </div>
           {rows.length > 3 && (
-            <p className="text-[10px] text-gray-300 text-center mt-1">
+            <p className="text-[11px] text-gray-300 text-center mt-1">
               {t('analytics.course_analytics.common.more_expand', { count: rows.length - 3 })}
             </p>
           )}

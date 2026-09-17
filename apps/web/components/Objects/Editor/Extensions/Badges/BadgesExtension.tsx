@@ -121,14 +121,14 @@ const BadgesExtension: React.FC = (props: any) => {
     switch (color) {
       case 'sky': return 'bg-sky-400 text-sky-50';
       case 'green': return 'bg-green-400 text-green-50';
-      case 'yellow': return 'bg-yellow-400 text-black';
+      case 'yellow': return 'bg-yellow-400 text-foreground';
       case 'red': return 'bg-red-500 text-red-50';
       case 'purple': return 'bg-purple-400 text-purple-50';
       case 'pink': return 'bg-pink-400 text-pink-50';
       case 'teal': return 'bg-teal-400 text-teal-900';
       case 'amber': return 'bg-amber-600 text-amber-100';
       case 'indigo': return 'bg-indigo-400 text-indigo-50';
-      case 'neutral': return 'bg-neutral-800 text-white';
+      case 'neutral': return 'bg-primary text-primary-foreground';
       default: return 'bg-sky-400 text-white';
     }
   }
@@ -159,7 +159,7 @@ const BadgesExtension: React.FC = (props: any) => {
                 <Palette weight="duotone" size={14} />
               </button>
               {showColorPicker && (
-                <div ref={colorPickerRef} className="absolute start-full ms-2 p-2 bg-white rounded-full nice-shadow">
+                <div ref={colorPickerRef} className="absolute start-full ms-2 p-2 bg-card rounded-full nice-shadow">
                   <div className="flex space-x-2">
                     {colors.map((c) => (
                       <button
@@ -185,7 +185,7 @@ const BadgesExtension: React.FC = (props: any) => {
         )}
 
         {isEditable && showPredefinedCallouts && (
-          <div className='flex flex-wrap gap-2 absolute top-full mt-2 start-0 bg-white/90 backdrop-blur-md p-2 rounded-lg nice-shadow z-10'>
+          <div className='flex flex-wrap gap-2 absolute top-full mt-2 start-0 bg-card/90 backdrop-blur-md p-2 rounded-lg nice-shadow z-10'>
             {predefinedBadges.map((badge, index) => (
               <button
                 key={index}

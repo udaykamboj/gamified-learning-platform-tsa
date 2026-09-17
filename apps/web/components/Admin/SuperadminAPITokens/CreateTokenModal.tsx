@@ -77,21 +77,21 @@ export default function CreateTokenModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-scrim backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-[#141415] border border-white/[0.08] rounded-2xl shadow-2xl"
+        className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <Key size={18} weight="fill" className="text-white/70" />
-            <h2 className="text-base font-semibold text-white">New API token</h2>
+            <Key size={18} weight="fill" className="text-muted-foreground" />
+            <h2 className="text-base font-semibold text-foreground">New API token</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white/80 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close"
           >
             <X size={18} weight="bold" />
@@ -106,7 +106,7 @@ export default function CreateTokenModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="acme-automation"
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
+              className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
             />
           </Field>
 
@@ -116,12 +116,12 @@ export default function CreateTokenModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What this token is for"
               rows={2}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 resize-none"
+              className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring resize-none"
             />
           </Field>
 
           <Field label="Expiration">
-            <label className="flex items-center gap-2 text-sm text-white/80 mb-2">
+            <label className="flex items-center gap-2 text-sm text-foreground mb-2">
               <input
                 type="checkbox"
                 checked={neverExpires}
@@ -135,31 +135,31 @@ export default function CreateTokenModal({
                 type="datetime-local"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30"
+                className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
               />
             )}
           </Field>
 
-          <div className="rounded-lg bg-amber-400/[0.06] border border-amber-400/20 px-3 py-2.5 text-xs text-amber-200/90">
+          <div className="rounded-lg bg-amber-400/[0.06] border border-amber-200 px-3 py-2.5 text-xs text-amber-200/90">
             A superadmin token can call <em>every</em> <code className="font-mono">/ee/superadmin/*</code> endpoint
             — create orgs, toggle features, update plans across the platform. Treat it like a master key.
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-700">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
           <button
             onClick={onClose}
             disabled={submitting}
-            className="px-3.5 py-2 text-sm text-white/60 hover:text-white/90 transition-colors disabled:opacity-40"
+            className="px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3.5 py-2 bg-muted hover:bg-accent text-foreground text-sm rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {submitting ? 'Creating…' : 'Create token'}
           </button>
@@ -182,11 +182,11 @@ function Field({
 }) {
   return (
     <div>
-      <label className="text-xs text-white/50 uppercase tracking-wider block mb-1.5">
+      <label className="text-xs text-muted-foreground uppercase tracking-wider block mb-1.5">
         {label} {required && <span className="text-red-400/70">*</span>}
       </label>
       {children}
-      {hint && <p className="text-[11px] text-white/30 mt-1">{hint}</p>}
+      {hint && <p className="text-[11px] text-muted-foreground mt-1">{hint}</p>}
     </div>
   )
 }

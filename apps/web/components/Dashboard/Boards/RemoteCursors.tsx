@@ -241,7 +241,7 @@ function buildCursorHtml(c: CursorData, now: number): string {
     <svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M1.5 1L6.5 20L9.5 12.5L17 10.5L1.5 1Z" fill="${c.color}" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
     </svg>
-    <div class="ml-4 -mt-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-white whitespace-nowrap" style="background-color:${c.color}">${escapeHtml(c.name)}</div>
+    <div class="ml-4 -mt-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white whitespace-nowrap" style="background-color:${c.color}">${escapeHtml(c.name)}</div>
   `
 
   if (hasBubble) {

@@ -91,13 +91,13 @@ function TrailCourseElement(props: TrailCourseElementProps) {
 
   return (
     <div
-      className="trailcoursebox flex p-3 bg-white rounded-xl"
+      className="trailcoursebox flex p-3 bg-card rounded-xl"
       style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}
       onMouseEnter={handleMouseEnter}
     >
       <Link href={getUriWithOrg(props.orgslug, '/course/' + courseid)}>
         <div
-          className="course_tumbnail inset-0 ring-1 ring-inset ring-black/10 rounded-lg relative h-[50px] w-[72px] bg-cover bg-center"
+          className="course_tumbnail inset-0 ring-1 ring-inset ring-border rounded-lg relative h-[50px] w-[72px] bg-cover bg-center"
           style={{
             backgroundImage: `url(${getCourseThumbnailMediaDirectory(
               org.org_uuid,

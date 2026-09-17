@@ -153,20 +153,20 @@ export default function SubmissionHistory({
               </span>
 
               {sub.execution_time_ms !== null && (
-                <span className="flex items-center gap-0.5 text-[10px] text-neutral-400 ml-auto">
+                <span className="flex items-center gap-0.5 text-[11px] text-neutral-400 ml-auto">
                   <Clock weight="duotone" size={10} />
                   {sub.execution_time_ms}ms
                 </span>
               )}
 
-              <span className="text-[10px] text-neutral-400 ml-2 shrink-0">
+              <span className="text-[11px] text-neutral-400 ml-2 shrink-0">
                 {dateStr} {timeStr}
               </span>
             </button>
 
             {/* Expanded content */}
             {isExpanded && (
-              <div className="border-t border-neutral-200 bg-white">
+              <div className="border-t border-neutral-200 bg-card">
                 <pre className="text-xs font-mono p-3 overflow-x-auto max-h-[200px] overflow-y-auto bg-neutral-900 text-neutral-200 rounded-none">
                   {sub.source_code}
                 </pre>

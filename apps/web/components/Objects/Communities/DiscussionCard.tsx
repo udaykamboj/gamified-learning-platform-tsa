@@ -186,7 +186,7 @@ export function DiscussionCard({
             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
               isSelected
                 ? 'bg-indigo-600 border-indigo-600'
-                : 'border-gray-300 bg-white'
+                : 'border-gray-300 bg-card'
             }`}
           >
             {isSelected && <Check size={12} className="text-white" />}
@@ -255,7 +255,7 @@ export function DiscussionCard({
             <div className="mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500">
               {/* Label badge */}
               <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium"
                 style={{
                   backgroundColor: `${labelInfo.color}15`,
                   color: labelInfo.color,

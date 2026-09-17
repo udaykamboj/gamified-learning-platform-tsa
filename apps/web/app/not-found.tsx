@@ -18,10 +18,10 @@ export default function NotFound() {
         />
         </div>
       <div className="space-y-6 text-center">
-        <h1 className="text-8xl leading-7 font-bold text-black drop-shadow-md">
+        <h1 className="text-8xl leading-7 font-bold text-foreground drop-shadow-md">
           404!
         </h1>
-        <p className='text-lg pt-8 text-black tracking-tight font-medium leading-normal'>
+        <p className='text-lg pt-8 text-foreground tracking-tight font-medium leading-normal'>
           We are very sorry for the inconvenience. It looks like you're trying to
           <span className="block">access a page that has been deleted or never existed before</span>
         </p>
@@ -29,7 +29,7 @@ export default function NotFound() {
       <div className='pt-8 flex flex-col items-center'>
       <Link
         href="/dashboard"
-        className="flex w-fit h-[50px] text-xl space-x-2 bg-black px-6 py-2 text-md rounded-lg font-bold text-white items-center shadow-md gap-2"
+        className="flex w-fit h-[50px] text-xl space-x-2 bg-primary px-6 py-2 text-md rounded-lg font-bold text-primary-foreground items-center shadow-md gap-2"
       >
         Go back to homepage
         <ArrowRight className="tracking-tight transition-transform duration-150 ease-in-out ms-1" />

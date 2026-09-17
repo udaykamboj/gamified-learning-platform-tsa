@@ -242,7 +242,7 @@ function BlockingInterstitial({
       // menu's sign-out inside it — must stay reachable above this overlay.
       style={{ zIndex: 'var(--z-interactive)' }}
     >
-      <div className="w-full max-w-lg bg-white rounded-2xl nice-shadow outline outline-1 outline-neutral-200/40 p-8 flex flex-col items-center text-center space-y-5">
+      <div className="w-full max-w-lg bg-card rounded-2xl nice-shadow outline outline-1 outline-neutral-200/40 p-8 flex flex-col items-center text-center space-y-5">
         <div className="bg-amber-100 p-3 rounded-2xl">
           <ShieldAlert className="text-amber-700" size={34} />
         </div>
@@ -274,7 +274,7 @@ function BlockingInterstitial({
 
         <a
           href={getUriWithOrg(orgslug, '/account/security')}
-          className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm rounded-xl px-5 py-3 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary text-primary-foreground font-semibold text-sm rounded-xl px-5 py-3 transition-colors"
         >
           <ShieldCheck size={18} />
           {t('mfa.policy.set_up_2fa', {

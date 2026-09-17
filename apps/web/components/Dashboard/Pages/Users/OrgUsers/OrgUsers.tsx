@@ -276,7 +276,7 @@ function OrgUsers() {
     <div>
       <Toast></Toast>
       <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl nice-shadow">
+      <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow">
             {/* Header */}
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-4 sm:px-6 py-5 border-b border-gray-100">
               <div className="flex-1 min-w-0">
@@ -331,7 +331,7 @@ function OrgUsers() {
                   <button
                     onClick={handleExportCSV}
                     disabled={isExporting || total === 0}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-card hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     <Download className="w-4 h-4" />
                     <span className="hidden sm:inline">Export</span>
@@ -347,7 +347,7 @@ function OrgUsers() {
 
               {/* Role filter */}
               <Select value={filterRole || 'all'} onValueChange={handleFilterChange(setFilterRole)}>
-                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-white">
+                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-card">
                   <SelectValue placeholder="All roles" />
                 </SelectTrigger>
                 <SelectContent>
@@ -362,7 +362,7 @@ function OrgUsers() {
 
               {/* Status filter */}
               <Select value={filterStatus || 'all'} onValueChange={handleFilterChange(setFilterStatus)}>
-                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-white">
+                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-card">
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
@@ -374,7 +374,7 @@ function OrgUsers() {
 
               {/* Group filter */}
               <Select value={filterGroupId || 'all'} onValueChange={handleFilterChange(setFilterGroupId)}>
-                <SelectTrigger className="h-8 w-[160px] text-xs border-gray-200 bg-white">
+                <SelectTrigger className="h-8 w-[160px] text-xs border-gray-200 bg-card">
                   <SelectValue placeholder="All groups" />
                 </SelectTrigger>
                 <SelectContent>
@@ -413,7 +413,7 @@ function OrgUsers() {
                   </button>
                   <button
                     onClick={() => setComparing(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-md text-xs font-medium transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-card text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-md text-xs font-medium transition-all"
                   >
                     <GitCompare className="w-3.5 h-3.5" />
                     <span>{t('dashboard.users.analytics.compare')}</span>
@@ -503,7 +503,7 @@ function OrgUsers() {
               ) : (
                 <div className="relative">
                 {isPageTransitioning && (
-                  <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-lg">
+                  <div className="absolute inset-0 bg-card/60 z-10 flex items-center justify-center rounded-lg">
                     <StarLabSpinner size={28} />
                   </div>
                 )}
@@ -743,7 +743,7 @@ function OrgUsers() {
                           <div className="inline-flex items-center gap-1.5">
                             <button
                               onClick={() => setAnalyticsUserId(user.user.id)}
-                              className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md text-xs font-medium nice-shadow transition-all"
+                              className="inline-flex items-center gap-1.5 h-8 px-3 bg-card text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md text-xs font-medium nice-shadow transition-all"
                               title={t('dashboard.users.analytics.view_analytics')}
                             >
                               <BarChart3 className="w-3.5 h-3.5" />
@@ -752,7 +752,7 @@ function OrgUsers() {
                             <ToolTip content={t('dashboard.users.analytics.open_full_page')} side="top">
                               <Link
                                 href={getUriWithOrg(params.orgslug, '') + `/dash/users/analytics/${user.user.id}`}
-                                className="inline-flex items-center justify-center h-8 w-8 bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-md nice-shadow transition-all"
+                                className="inline-flex items-center justify-center h-8 w-8 bg-card text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-md nice-shadow transition-all"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </Link>
@@ -764,7 +764,7 @@ function OrgUsers() {
                               dialogTitle={t('dashboard.users.active_users.modals.remove_user.title', { username: user.user.username })}
                               dialogTrigger={
                                 <button
-                                  className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-rose-50 hover:text-rose-600 rounded-md text-xs font-medium nice-shadow transition-all"
+                                  className="inline-flex items-center gap-1.5 h-8 px-3 bg-card text-gray-600 hover:bg-rose-50 hover:text-rose-600 rounded-md text-xs font-medium nice-shadow transition-all"
                                   title={t('dashboard.users.active_users.actions.remove_from_org')}
                                 >
                                   <LogOut className="w-3.5 h-3.5" />
@@ -802,19 +802,19 @@ function OrgUsers() {
                     <button
                       onClick={() => handlePageChange(page - 1)}
                       disabled={page === 1}
-                      className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="p-2 rounded-lg border border-gray-200 bg-card hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronLeft className="w-4 h-4 text-gray-600" />
                     </button>
                   </ToolTip>
-                  <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
+                  <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-card px-3 py-2 rounded-lg border border-gray-200">
                     {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) }) || `Page ${page} of ${Math.ceil(total / ITEMS_PER_PAGE)}`}
                   </span>
                   <ToolTip content={t('dashboard.users.active_users.pagination.next', { defaultValue: 'Next page' })} side="top">
                     <button
                       onClick={() => handlePageChange(page + 1)}
                       disabled={page * ITEMS_PER_PAGE >= total}
-                      className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="p-2 rounded-lg border border-gray-200 bg-card hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       <ChevronRight className="w-4 h-4 text-gray-600" />
                     </button>
@@ -827,7 +827,7 @@ function OrgUsers() {
       {/* Per-student analytics (integrated into the Users tab) */}
       <UserDossierModal userId={analyticsUserId} onOpenChange={(o) => !o && setAnalyticsUserId(null)} />
       <Dialog open={comparing} onOpenChange={setComparing}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-[#f8f8f8] p-6 sm:p-8">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-muted p-6 sm:p-8">
           <h2 className="font-bold text-xl tracking-tight mb-4">{t('dashboard.users.analytics.compare_students')}</h2>
           <UsersComparisonTable
             userIds={Array.from(selectedUserIds)}

@@ -94,7 +94,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
             transition={{ duration: 0.35, ease }}
             className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="bg-white rounded-2xl nice-shadow relative overflow-hidden">
+            <div className="bg-card rounded-2xl nice-shadow relative overflow-hidden">
               {/* Close button */}
               <button
                 onClick={onClose}
@@ -155,7 +155,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => track(AnalyticsEvent.UpgradePlanSelected, { selected_plan: 'standard' })}
-                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-black hover:bg-gray-800 text-white"
+                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Standard' })}
                         <ArrowRight size={14} weight="bold" data-dir-flip />
@@ -202,7 +202,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => track(AnalyticsEvent.UpgradePlanSelected, { selected_plan: 'pro' })}
-                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-black hover:bg-gray-800 text-white"
+                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Pro' })}
                         <ArrowRight size={14} weight="bold" data-dir-flip />

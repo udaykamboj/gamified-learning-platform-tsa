@@ -72,7 +72,7 @@ export function CommunitySidebar({
   return (
     <div className="space-y-4">
       {/* Community Info Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden">
         {/* Header with community name */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -170,7 +170,7 @@ export function CommunitySidebar({
           {canCreateDiscussion && onCreateDiscussion && (
             <button
               onClick={onCreateDiscussion}
-              className="w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer bg-neutral-900 text-white hover:bg-neutral-800 text-sm"
+              className="w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary text-sm"
             >
               <Plus className="w-4 h-4" />
               <span>{t('communities.new_discussion')}</span>
@@ -180,7 +180,7 @@ export function CommunitySidebar({
           {canManageCommunity && (
             <Link
               href={getUriWithOrg(orgslug, '/dash/communities')}
-              className="w-full bg-white text-neutral-600 border border-neutral-200 py-2.5 rounded-lg font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-sm"
+              className="w-full bg-card text-neutral-600 border border-neutral-200 py-2.5 rounded-lg font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Settings className="w-4 h-4" />
               {t('communities.manage')}
@@ -190,7 +190,7 @@ export function CommunitySidebar({
       </div>
 
       {/* Quick Tips Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
+      <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
         <h3 className="font-medium text-gray-900 mb-2 text-sm">{t('communities.community_guidelines')}</h3>
         <p className="text-xs text-gray-500 leading-relaxed">
           {t('communities.community_guidelines_text')}

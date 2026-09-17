@@ -23,8 +23,8 @@ export const FormLabelAndMessage = (props: {
   <div className="flex items-center space-x-3">
     <FormLabel className="grow text-sm">{props.label}</FormLabel>
     {(props.message && (
-      <div className="text-red-700 text-sm items-center  rounded-md flex  space-x-1">
-        <Info size={10} />
+      <div className="text-error text-meta items-center flex gap-1">
+        <Info size={12} />
         <div>{props.message}</div>
       </div>
     )) || <></>}
@@ -47,14 +47,14 @@ FormField.displayName = 'FormField'
 
 export const FormLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<typeof Form.Label>>(
   ({ className, ...props }, ref) => (
-    <Form.Label ref={ref} className={`font-medium leading-[35px] text-black ${className || ''}`} {...props} />
+    <Form.Label ref={ref} className={`text-sm font-semibold leading-8 text-foreground ${className || ''}`} {...props} />
   )
 )
 FormLabel.displayName = 'FormLabel'
 
 export const FormMessage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWithoutRef<typeof Form.Message>>(
   ({ className, ...props }, ref) => (
-    <Form.Message ref={ref} className={`text-[13px] text-white opacity-80 ${className || ''}`} {...props} />
+    <Form.Message ref={ref} className={`text-meta text-error ${className || ''}`} {...props} />
   )
 )
 FormMessage.displayName = 'FormMessage'
@@ -70,7 +70,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
   ({ className, ...props }, ref) => (
     <input
       ref={ref}
-      className={`box-border w-full inline-flex items-center justify-center rounded h-[35px] leading-none px-2.5 text-[15px] text-[#7c7c7c] bg-[#fbfdff] shadow-[0_0_0_1px_#edeeef] hover:shadow-[0_0_0_1px_#edeeef] focus:shadow-[0_0_0_2px_#edeeef] selection:bg-black selection:text-white border-none outline-none ${className || ''}`}
+      className={`sl-input items-center ${className || ''}`}
       {...props}
     />
   )
@@ -81,7 +81,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
   ({ className, ...props }, ref) => (
     <textarea
       ref={ref}
-      className={`box-border w-full inline-flex items-center justify-center rounded resize-none p-2.5 text-[15px] text-[#7c7c7c] bg-[#fbfdff] shadow-[0_0_0_1px_#edeeef] hover:shadow-[0_0_0_1px_#edeeef] focus:shadow-[0_0_0_2px_#edeeef] selection:bg-black selection:text-white border-none outline-none ${className || ''}`}
+      className={`sl-input resize-none ${className || ''}`}
       {...props}
     />
   )
@@ -92,8 +92,9 @@ export const ButtonBlack = React.forwardRef<HTMLButtonElement, React.ButtonHTMLA
   ({ className, state, ...props }, ref) => (
     <button
       ref={ref}
-      className={`inline-flex items-center justify-center rounded-lg px-[15px] text-[15px] leading-none font-medium h-[35px] bg-black text-white hover:bg-[#181818] hover:cursor-pointer focus:shadow-[0_0_0_2px_black] outline-none border-none ${
-        state === 'loading' ? 'pointer-events-none bg-[#808080]' : ''
+      aria-busy={state === 'loading' || undefined}
+      className={`sl-btn sl-btn-primary ${
+        state === 'loading' ? 'pointer-events-none opacity-80' : ''
       } ${className || ''}`}
       {...props}
     />

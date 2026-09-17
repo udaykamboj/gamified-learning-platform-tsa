@@ -70,7 +70,7 @@ export default function PlaygroundOptionsModal({
         <div className="flex h-full min-h-[680px]">
           {/* Sidebar */}
           <div className="w-44 flex-shrink-0 border-e border-gray-100 bg-gray-50/60 flex flex-col py-4 px-3 gap-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">
               Playground
             </p>
             {tabs.map((tab) => (
@@ -79,8 +79,8 @@ export default function PlaygroundOptionsModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all text-start ${
                   activeTab === tab.id
-                    ? 'bg-white nice-shadow text-gray-900'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-white/60'
+                    ? 'bg-card nice-shadow text-gray-900'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-card/60'
                 }`}
               >
                 {tab.icon}
@@ -359,7 +359,7 @@ function AccessTab({
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-start ${
                 active
                   ? 'border-sky-500 bg-sky-50/50'
-                  : 'border-gray-100 bg-gray-50/60 hover:border-gray-200 hover:bg-white'
+                  : 'border-gray-100 bg-gray-50/60 hover:border-gray-200 hover:bg-card'
               }`}
             >
               <div className="flex-shrink-0">{opt.icon}</div>
@@ -371,7 +371,7 @@ function AccessTab({
               </div>
               {active && (
                 <div className="flex-shrink-0 w-4 h-4 rounded-full bg-sky-500 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-card" />
                 </div>
               )}
             </button>
@@ -407,7 +407,7 @@ function AccessTab({
             <button
               onClick={handleShare}
               disabled={!identifier.trim() || isSharing}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-900 text-white text-xs font-black nice-shadow transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary hover:bg-primary text-primary-foreground text-xs font-black nice-shadow transition-all disabled:opacity-50"
             >
               <Plus size={12} weight="bold" />
               Share
@@ -592,21 +592,21 @@ function ThumbnailTab({
         <div className="flex gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-card hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
           >
             <UploadSimple size={14} weight="bold" />
             Upload image
           </button>
           <button
             onClick={() => setShowUnsplash(true)}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-card hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
           >
             <Image size={14} weight="bold" />
             Unsplash
           </button>
           <AIImageButton
             onSelect={handleUnsplashSelect}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-card hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
           />
         </div>
       )}

@@ -111,7 +111,7 @@ export default function CourseEngagementByType({
             ))}
           </div>
           {rows.length > 3 && (
-            <p className="text-[10px] text-gray-300 text-center mt-2">
+            <p className="text-[11px] text-gray-300 text-center mt-2">
               {t('analytics.course_analytics.common.more_expand', { count: rows.length - 3 })}
             </p>
           )}

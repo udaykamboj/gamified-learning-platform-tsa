@@ -145,7 +145,7 @@ export function FeedbackModal({
           'sm:max-w-md',
           isDark
             ? 'bg-[#0f0f10] border-white/10 text-white'
-            : 'bg-white border-gray-200'
+            : 'bg-card border-gray-200'
         )}
       >
         <DialogHeader className="p-6 pb-2">
@@ -333,8 +333,8 @@ export function FeedbackModal({
               className={cn(
                 'flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                 isDark
-                  ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-black text-white hover:bg-gray-800'
+                  ? 'bg-card text-foreground hover:bg-card/90'
+                  : 'bg-primary text-primary-foreground hover:bg-primary'
               )}
             >
               {feedbackSubmitting ? (

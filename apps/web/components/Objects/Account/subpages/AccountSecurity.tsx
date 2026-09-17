@@ -594,7 +594,7 @@ function TwoFactorAuthSection() {
             type="button"
             onClick={finishCodes}
             disabled={!codesAcknowledged || busy}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
             {t('user.settings.security.mfa.done', { defaultValue: 'Done' })}
@@ -649,7 +649,7 @@ function TwoFactorAuthSection() {
             type="button"
             onClick={() => runSetup(password)}
             disabled={busy || !password}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
             {t('user.settings.security.mfa.continue', { defaultValue: 'Continue' })}
@@ -677,7 +677,7 @@ function TwoFactorAuthSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-          <div className="flex items-center justify-center bg-white border border-gray-200 rounded-lg p-3 w-[224px] h-[224px] shrink-0">
+          <div className="flex items-center justify-center bg-card border border-gray-200 rounded-lg p-3 w-[224px] h-[224px] shrink-0">
             {qrDataUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
@@ -744,7 +744,7 @@ function TwoFactorAuthSection() {
               setStep('verify')
             }}
             disabled={busy || !secret}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
             {t('user.settings.security.mfa.continue', { defaultValue: 'Continue' })}
@@ -783,7 +783,7 @@ function TwoFactorAuthSection() {
             type="button"
             onClick={confirmEnrollment}
             disabled={busy || code.length !== 6 || retryAfter > 0}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-primary text-primary-foreground hover:bg-action-hover"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
             {retryAfter > 0
@@ -918,7 +918,7 @@ function TwoFactorAuthSection() {
                 type="button"
                 onClick={regenerateCodes}
                 disabled={busy || code.length !== 6 || retryAfter > 0}
-                className="bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-action-hover"
               >
                 {busy && <Loader2 size={14} className="animate-spin" />}
                 {retryAfter > 0
@@ -1030,7 +1030,7 @@ function TwoFactorAuthSection() {
           type="button"
           onClick={startEnrollment}
           disabled={busy}
-          className="bg-black text-white hover:bg-black/90 shrink-0"
+          className="bg-primary text-primary-foreground hover:bg-action-hover shrink-0"
         >
           {busy && <Loader2 size={14} className="animate-spin" />}
           {t('user.settings.security.mfa.enable', { defaultValue: 'Enable' })}
@@ -1109,7 +1109,7 @@ function AccountSecurity() {
 
   return (
     <>
-    <div className="bg-white rounded-xl nice-shadow">
+    <div className="bg-card rounded-xl nice-shadow">
       <div className="flex flex-col gap-0">
         {/* Current session / device */}
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-3 rounded-md">
@@ -1209,7 +1209,7 @@ function AccountSecurity() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-black text-white hover:bg-black/90"
+                    className="bg-primary text-primary-foreground hover:bg-action-hover"
                   >
                     {isSubmitting ? t('user.settings.password.updating') : t('user.settings.password.update_password')}
                   </Button>

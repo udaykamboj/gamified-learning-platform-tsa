@@ -14,38 +14,29 @@ export default async function SkillsPage({ params }: { params: PageParams }) {
   const { orgslug } = await params;
 
   return (
-    <div style={{ background: "#050810", minHeight: "100svh", color: "#f0f4ff", fontFamily: "Manrope, sans-serif" }}>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "4rem 1.25rem" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3rem" }}>
-          <Link href={getUriWithOrg(orgslug, "/dashboard")} style={{
-            display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.5)",
-            textDecoration: "none", fontSize: 12, fontFamily: "monospace",
-            letterSpacing: "0.1em", textTransform: "uppercase"
-          }}>
-            <ArrowLeft size={14} /> Command deck
-          </Link>
-          <span style={{
-            border: "1px solid rgba(78,214,198,0.4)", color: "#4ed6c6", padding: "4px 12px",
-            borderRadius: 4, fontSize: 10, fontFamily: "monospace", letterSpacing: "0.15em", textTransform: "uppercase"
-          }}>
-            Skill Tree
-          </span>
+    <div className="bg-background text-foreground">
+      <div className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
+        <Link
+          href={getUriWithOrg(orgslug, "/dashboard")}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft size={16} aria-hidden /> Learning universe
+        </Link>
+
+        <header className="mt-6 max-w-2xl">
+          <p className="sl-telemetry flex items-center gap-1.5 text-link">
+            <Hexagon size={14} aria-hidden /> Enrollment
+          </p>
+          <h1 className="mt-2 sl-page-title">Skills &amp; disciplines</h1>
+          <p className="mt-3 text-reading text-muted-foreground">
+            Choose the courses that join your learning universe. Enroll in as many as you like, learn at your own pace,
+            and leave a course whenever you want.
+          </p>
+        </header>
+
+        <div className="mt-8">
+          <SkillsEnrollment orgslug={orgslug} />
         </div>
-
-        {/* Heading */}
-        <p style={{ color: "#4ed6c6", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-          <Hexagon size={12} /> Enrollment
-        </p>
-        <h1 style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 600, margin: "0 0 16px", color: "#fff" }}>
-          Skills &amp; Disciplines
-        </h1>
-        <p style={{ color: "rgba(240,244,255,0.5)", fontSize: 14, lineHeight: 1.8, maxWidth: 520, marginBottom: "3rem" }}>
-          Choose the courses that join your learning universe. Enroll in as many as you like,
-          learn at your own pace, and leave a course whenever you want.
-        </p>
-
-        <SkillsEnrollment orgslug={orgslug} />
       </div>
     </div>
   );

@@ -197,7 +197,7 @@ function PlaylistPlayer({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-card border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <audio ref={audioRef} preload="metadata" />
 
       {/* Header */}
@@ -646,7 +646,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                   podcastUUID={blockObject.podcast.podcast_uuid}
                 />
               ) : (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-6 text-center">
+                <div className="bg-card border border-gray-200 rounded-xl shadow-sm px-4 py-6 text-center">
                   <CircleNotch weight="duotone" className="w-5 h-5 animate-spin mx-auto text-gray-400" />
                   <p className="text-sm text-gray-400 mt-2">Loading playlist...</p>
                 </div>
@@ -692,7 +692,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors flex-1 justify-center outline-none',
                     activeTab === tab.key
-                      ? 'bg-white text-neutral-800 shadow-sm'
+                      ? 'bg-card text-neutral-800 shadow-sm'
                       : 'text-neutral-500 hover:text-neutral-700'
                   )}
                 >
@@ -715,7 +715,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                   onDrop={handleDrop}
                   className={cn(
                     'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all',
-                    isDragging ? 'border-blue-400 bg-blue-50' : 'border-neutral-200 bg-white hover:border-blue-400 hover:bg-blue-50/50'
+                    isDragging ? 'border-blue-400 bg-blue-50' : 'border-neutral-200 bg-card hover:border-blue-400 hover:bg-blue-50/50'
                   )}
                 >
                   {isLoading ? (
@@ -754,7 +754,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                       onClick={() => setGenMode(m.key)}
                       className={cn(
                         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-colors flex-1 justify-center outline-none',
-                        genMode === m.key ? 'bg-white text-neutral-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                        genMode === m.key ? 'bg-card text-neutral-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
                       )}
                     >
                       <m.icon size={13} />
@@ -785,7 +785,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                     <select
                       value={genVoice}
                       onChange={(e) => setGenVoice(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-white"
+                      className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-card"
                     >
                       {TTS_VOICES.map((v) => (
                         <option key={v.name} value={v.name}>{v.name} — {v.desc}</option>
@@ -813,7 +813,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                             next[i] = { ...next[i], voice: e.target.value }
                             setGenSpeakers(next)
                           }}
-                          className="rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-white"
+                          className="rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-card"
                         >
                           {TTS_VOICES.map((v) => (
                             <option key={v.name} value={v.name}>{v.name}</option>
@@ -835,7 +835,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                       <select
                         value={genMinutes}
                         onChange={(e) => setGenMinutes(Number(e.target.value))}
-                        className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-white"
+                        className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-card"
                       >
                         {LENGTH_OPTIONS.map((m) => (
                           <option key={m} value={m}>{m} min</option>
@@ -848,7 +848,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                     <select
                       value={genLanguage}
                       onChange={(e) => setGenLanguage(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-white"
+                      className="mt-1 w-full rounded-lg border border-neutral-200 p-2 text-sm outline-none focus:border-blue-400 bg-card"
                     >
                       {TTS_LANGUAGES.map((l) => (
                         <option key={l} value={l}>{l}</option>
@@ -894,7 +894,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                     'w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-colors',
                     isGenerating || isGeneratingScript || !genText.trim()
                       ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-                      : 'bg-black text-white hover:bg-neutral-800'
+                      : 'bg-primary text-primary-foreground hover:bg-primary'
                   )}
                 >
                   {isGenerating ? (
@@ -1057,7 +1057,7 @@ function AudioBlockComponent(props: ExtendedNodeViewProps) {
                       podcastUUID={blockObject.podcast.podcast_uuid}
                     />
                   ) : (
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-4">
+                    <div className="bg-card border border-gray-200 rounded-xl shadow-sm px-4 py-4">
                       <div className="flex items-center gap-2">
                         <Radio size={14} className="text-gray-400" />
                         <span className="text-sm font-medium text-gray-700">{blockObject.podcast.name}</span>

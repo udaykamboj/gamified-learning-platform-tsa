@@ -175,7 +175,7 @@ const OrgAuditLogs = () => {
   return (
     <FeatureGate feature="audit_logs">
       <>
-        <div className="mx-4 sm:mx-10 bg-white rounded-xl nice-shadow px-4 py-4">
+        <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow px-4 py-4">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3">
           <div className="flex flex-wrap gap-3 justify-between items-start">
             <div>
@@ -205,12 +205,12 @@ const OrgAuditLogs = () => {
                 <span className="hidden md:inline font-medium">{t('dashboard.organization.audit_logs.export')}</span>
                </button>
 
-               <div className="flex items-center gap-0 border border-gray-200 rounded-md overflow-hidden bg-white">
+               <div className="flex items-center gap-0 border border-gray-200 rounded-md overflow-hidden bg-card">
                 <Select
                   value={searchField}
                   onValueChange={(val) => setSearchField(val)}
                 >
-                  <SelectTrigger className="w-[110px] h-9 text-[10px] border-none bg-gray-50 rounded-none focus:ring-0">
+                  <SelectTrigger className="w-[110px] h-9 text-[11px] border-none bg-gray-50 rounded-none focus:ring-0">
                     <SelectValue placeholder={t('dashboard.organization.audit_logs.search_by')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -327,7 +327,7 @@ const OrgAuditLogs = () => {
         <div className="overflow-x-auto">
         <table className="table-auto w-full text-start whitespace-nowrap rounded-md overflow-hidden">
           <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-            <tr className="font-bolder text-[10px] tracking-wider">
+            <tr className="font-bolder text-[11px] tracking-wider">
               <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.timestamp')}</th>
               <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.user')}</th>
               <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.resource')}</th>
@@ -337,7 +337,7 @@ const OrgAuditLogs = () => {
               <th className="py-3 px-4 text-end">{t('dashboard.organization.audit_logs.table.payload')}</th>
             </tr>
           </thead>
-          <tbody className="bg-white relative">
+          <tbody className="bg-card relative">
             {isLoading && !data ? (
               <>
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -369,7 +369,7 @@ const OrgAuditLogs = () => {
                   <td className="py-3 px-4">
                     <div className="flex flex-col text-sm">
                       <span className="font-semibold text-gray-700">{dayjs(log.created_at).format('MMM DD, YYYY')}</span>
-                      <span className="text-[10px] text-gray-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
+                      <span className="text-[11px] text-gray-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
                     </div>
                   </td>
                   <td className="py-3 px-4">
@@ -385,7 +385,7 @@ const OrgAuditLogs = () => {
                                 @{log.username || 'System'}
                             </span>
                             {log.user_id && (
-                                <span className="text-[10px] text-gray-400 font-mono tracking-tighter">ID: {log.user_id}</span>
+                                <span className="text-[11px] text-gray-400 font-mono tracking-tighter">ID: {log.user_id}</span>
                             )}
                         </div>
                     </div>
@@ -395,7 +395,7 @@ const OrgAuditLogs = () => {
                       <Activity className="w-3.5 h-3.5 text-gray-400" />
                       <span className="text-sm capitalize">{log.resource}</span>
                       {log.resource_id && (
-                        <span className="text-[10px] bg-gray-50 border border-gray-200 px-1 rounded text-gray-400 font-mono">
+                        <span className="text-[11px] bg-gray-50 border border-gray-200 px-1 rounded text-gray-400 font-mono">
                           {log.resource_id}
                         </span>
                       )}
@@ -407,7 +407,7 @@ const OrgAuditLogs = () => {
                         <Terminal className="w-3 h-3" />
                         {log.path}
                       </div>
-                      <span className={`w-fit text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                      <span className={`w-fit text-[11px] font-bold px-1.5 py-0.5 rounded ${
                         log.method === 'GET' ? 'text-blue-600 bg-blue-50' :
                         log.method === 'POST' ? 'text-green-600 bg-green-50' :
                         log.method === 'PUT' ? 'text-amber-600 bg-amber-50' :

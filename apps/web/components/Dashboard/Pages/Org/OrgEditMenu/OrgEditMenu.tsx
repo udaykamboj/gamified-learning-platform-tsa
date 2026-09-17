@@ -112,7 +112,7 @@ function IconPicker({
         onClick={toggle}
         aria-label="Change icon"
         title="Change icon"
-        className={`relative p-2 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors disabled:opacity-50 ${open ? 'ring-2 ring-black/10' : ''}`}
+        className={`relative p-2 bg-card rounded-lg nice-shadow hover:bg-gray-50 transition-colors disabled:opacity-50 ${open ? 'ring-2 ring-border' : ''}`}
       >
         {/* eslint-disable-next-line react-hooks/static-components */}
         <Current size={18} weight="fill" className="text-gray-600" />
@@ -125,7 +125,7 @@ function IconPicker({
           <div
             ref={popRef}
             style={{ position: 'fixed', left: coords.left, top: coords.top, width: ICON_POPOVER_W }}
-            className="z-[100] p-2 bg-white rounded-xl shadow-2xl ring-1 ring-black/5 border border-gray-100 grid grid-cols-6 gap-1"
+            className="z-[100] p-2 bg-card rounded-xl shadow-2xl ring-1 ring-border border border-gray-100 grid grid-cols-6 gap-1"
           >
             {MENU_ICON_NAMES.map((name) => {
               const IconOpt = MENU_ICONS[name]
@@ -139,7 +139,7 @@ function IconPicker({
                     setOpen(false)
                   }}
                   title={name}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${selected ? 'bg-black text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${selected ? 'bg-primary text-primary-foreground' : 'text-gray-500 hover:bg-gray-100'}`}
                 >
                   <IconOpt size={16} weight="fill" />
                 </button>
@@ -257,7 +257,7 @@ const OrgEditMenu: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
       <div className="pt-0.5">
         <div className="flex items-center justify-between bg-gray-50 px-5 py-3 mx-3 my-3 rounded-md">
           <div className="flex flex-col -space-y-1">
@@ -267,7 +267,7 @@ const OrgEditMenu: React.FC = () => {
           <button
             onClick={save}
             disabled={!canEdit || saving || !dirty}
-            className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white nice-shadow hover:bg-neutral-800 transition-colors disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground nice-shadow hover:bg-primary transition-colors disabled:opacity-40"
           >
             <FloppyDisk size={16} weight="bold" />
             <span>{t('dashboard.organization.menu.save')}</span>
@@ -286,16 +286,16 @@ const OrgEditMenu: React.FC = () => {
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               placeholder={t('dashboard.organization.menu.label_placeholder')}
-              className="flex-1 px-3 py-2 text-sm bg-white nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="flex-1 px-3 py-2 text-sm bg-card nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-border"
             />
             <input
               type="text"
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://example.com"
-              className="flex-1 px-3 py-2 text-sm bg-white nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="flex-1 px-3 py-2 text-sm bg-card nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-border"
             />
-            <button onClick={addCustom} disabled={!canEdit} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-700 nice-shadow hover:bg-gray-50 transition-colors disabled:opacity-40">
+            <button onClick={addCustom} disabled={!canEdit} className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-2 text-sm font-medium text-gray-700 nice-shadow hover:bg-gray-50 transition-colors disabled:opacity-40">
               <Plus size={16} /> {t('dashboard.organization.menu.add')}
             </button>
           </div>
@@ -319,7 +319,7 @@ const OrgEditMenu: React.FC = () => {
                         <div
                           ref={prov.innerRef}
                           {...prov.draggableProps}
-                          className={`flex items-center gap-3 bg-gray-50/60 rounded-lg p-3 nice-shadow ${snap.isDragging ? 'bg-white shadow-lg' : ''} ${grayed ? 'opacity-60 grayscale' : ''}`}
+                          className={`flex items-center gap-3 bg-gray-50/60 rounded-lg p-3 nice-shadow ${snap.isDragging ? 'bg-card shadow-lg' : ''} ${grayed ? 'opacity-60 grayscale' : ''}`}
                         >
                           <button {...prov.dragHandleProps} className="text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing" aria-label="Reorder">
                             <DotsSixVertical size={18} weight="bold" />
@@ -331,7 +331,7 @@ const OrgEditMenu: React.FC = () => {
                               disabled={!canEdit}
                             />
                           ) : (
-                            <div className="p-2 bg-white rounded-lg nice-shadow flex-shrink-0">
+                            <div className="p-2 bg-card rounded-lg nice-shadow flex-shrink-0">
                               <Icon size={18} weight="fill" className="text-gray-600" />
                             </div>
                           )}

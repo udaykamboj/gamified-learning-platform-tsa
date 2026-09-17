@@ -289,7 +289,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                 background:
                   'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
               }}
-              className={`bg-black z-[10000] shadow-lg ring-1 ring-inset ring-white/10 text-white p-4 backdrop-blur-md transition-all duration-300 flex flex-col rounded-2xl max-w-(--breakpoint-2xl) w-10/12 mx-auto fixed bottom-4 left-1/2 transform -translate-x-1/2 ${
+              className={`bg-primary z-[10000] shadow-lg ring-1 ring-inset ring-white/10 text-primary-foreground p-4 backdrop-blur-md transition-all duration-300 flex flex-col rounded-2xl max-w-(--breakpoint-2xl) w-10/12 mx-auto fixed bottom-4 left-1/2 transform -translate-x-1/2 ${
                 aiChatBotState.isFullscreen
                   ? 'h-[80vh]'
                   : 'h-[350px]'

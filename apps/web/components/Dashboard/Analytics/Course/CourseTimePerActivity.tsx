@@ -49,7 +49,7 @@ function TimeBar({
         </span>
       </div>
       {!compact && (
-        <span className="text-[10px] text-gray-300 whitespace-nowrap">
+        <span className="text-[11px] text-gray-300 whitespace-nowrap">
           {row.samples} {row.samples !== 1 ? t('analytics.course_analytics.units.samples') : t('analytics.course_analytics.units.sample')}
         </span>
       )}
@@ -79,15 +79,15 @@ function TimeModalContent({
     <div>
       <div className="flex gap-6 mb-4">
         <div className="bg-amber-50 rounded-xl px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.overview.activities')}</p>
+          <p className="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.overview.activities')}</p>
           <p className="text-2xl font-bold text-amber-600">{rows.length}</p>
         </div>
         <div className="bg-gray-50 rounded-xl px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.avg_time')}</p>
+          <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.avg_time')}</p>
           <p className="text-2xl font-bold text-gray-700">{formatDuration(overallAvg)}</p>
         </div>
         <div className="bg-gray-50 rounded-xl px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.total_samples')}</p>
+          <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.total_samples')}</p>
           <p className="text-2xl font-bold text-gray-700">{totalSamples}</p>
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function CourseTimePerActivity({
             ))}
           </div>
           {rows.length > 3 && (
-            <p className="text-[10px] text-gray-300 text-center mt-1">
+            <p className="text-[11px] text-gray-300 text-center mt-1">
               {t('analytics.course_analytics.common.more_expand', { count: rows.length - 3 })}
             </p>
           )}

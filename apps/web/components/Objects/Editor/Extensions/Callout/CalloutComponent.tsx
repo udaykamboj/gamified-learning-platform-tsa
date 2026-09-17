@@ -126,7 +126,7 @@ function CalloutComponent(props: any) {
   return (
     <NodeViewWrapper>
       <div
-        className={`w-full flex relative my-4 items-start rounded-xl shadow-inner gap-3 py-3 px-4 ${config.bg} ${config.text} ${isEditable ? 'ring-1 ring-inset ring-black/[0.06]' : ''}`}
+        className={`w-full flex relative my-4 items-start rounded-xl shadow-inner gap-3 py-3 px-4 ${config.bg} ${config.text} ${isEditable ? 'ring-1 ring-inset ring-border' : ''}`}
         contentEditable={isEditable || undefined}
         suppressContentEditableWarning={true}
       >
@@ -158,7 +158,7 @@ function CalloutComponent(props: any) {
             <div
               ref={pickerRef}
               contentEditable={false}
-              className="absolute top-8 start-0 z-50 bg-white rounded-xl shadow-lg ring-1 ring-black/10 py-1.5 min-w-[140px] overflow-hidden"
+              className="absolute top-8 start-0 z-50 bg-card rounded-xl shadow-lg ring-1 ring-border py-1.5 min-w-[140px] overflow-hidden"
             >
               {(Object.entries(CALLOUT_TYPES) as [CalloutType, typeof CALLOUT_TYPES[CalloutType]][]).map(
                 ([type, cfg]) => {
@@ -199,7 +199,7 @@ function CalloutComponent(props: any) {
           <button
             contentEditable={false}
             onClick={() => setDismissed(true)}
-            className="shrink-0 mt-0.5 cursor-pointer p-0.5 rounded-full hover:bg-black/10 transition-colors"
+            className="shrink-0 mt-0.5 cursor-pointer p-0.5 rounded-full hover:bg-foreground/10 transition-colors"
           >
             <X size={14} />
           </button>

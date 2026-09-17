@@ -133,7 +133,7 @@ const CourseClient = (props: any) => {
           {/* Chapter list */}
           <div className="w-full my-5 mb-10">
             <div className="h-7 bg-gray-200 rounded w-40 mb-5" />
-            <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
+            <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
               {Array.from({ length: 3 }).map((_, chIdx) => (
                 <div key={chIdx}>
                   {/* Chapter header */}
@@ -362,7 +362,7 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl w-full h-[200px] md:h-[400px]">
+                      <div className="relative inset-0 ring-1 ring-inset ring-border rounded-lg shadow-xl w-full h-[200px] md:h-[400px]">
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 end-3 z-10">
                             <div className="bg-black/20 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
@@ -370,7 +370,7 @@ const CourseClient = (props: any) => {
                                 onClick={() => setActiveThumbnailType('image')}
                                 className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                                   activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    ? 'bg-card/90 text-gray-900 shadow-sm'
                                     : 'text-white/80 hover:text-white hover:bg-white/10'
                                 }`}
                               >
@@ -381,7 +381,7 @@ const CourseClient = (props: any) => {
                                 onClick={() => setActiveThumbnailType('video')}
                                 className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                                   activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    ? 'bg-card/90 text-gray-900 shadow-sm'
                                     : 'text-white/80 hover:text-white hover:bg-white/10'
                                 }`}
                               >
@@ -410,7 +410,7 @@ const CourseClient = (props: any) => {
                     );
                   } else if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl w-full h-[200px] md:h-[400px] bg-cover bg-center"
+                      <div className="relative inset-0 ring-1 ring-inset ring-border rounded-lg shadow-xl w-full h-[200px] md:h-[400px] bg-cover bg-center"
                         style={{
                           backgroundImage: `url(${getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -435,7 +435,7 @@ const CourseClient = (props: any) => {
                                 onClick={() => setActiveThumbnailType('image')}
                                 className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                                   activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    ? 'bg-card/90 text-gray-900 shadow-sm'
                                     : 'text-white/80 hover:text-white hover:bg-white/10'
                                 }`}
                               >
@@ -446,7 +446,7 @@ const CourseClient = (props: any) => {
                                 onClick={() => setActiveThumbnailType('video')}
                                 className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                                   activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    ? 'bg-card/90 text-gray-900 shadow-sm'
                                     : 'text-white/80 hover:text-white hover:bg-white/10'
                                 }`}
                               >
@@ -461,7 +461,7 @@ const CourseClient = (props: any) => {
                   } else {
                     return (
                       <div
-                        className="inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl relative w-full h-[400px] bg-cover bg-center"
+                        className="inset-0 ring-1 ring-inset ring-border rounded-lg shadow-xl relative w-full h-[400px] bg-cover bg-center"
                         style={{
                           backgroundImage: `url('/empty_thumbnail.png')`,
                           backgroundSize: 'auto',
@@ -501,7 +501,7 @@ const CourseClient = (props: any) => {
                 <CoursesActions courseuuid={courseuuid} orgslug={orgslug} course={course} trailData={trailData} />
                 
                 {/* Authors & Updates Box */}
-                <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+                <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
                   <CourseProvider courseuuid={course.course_uuid}>
                     <CourseAuthors authors={course.authors} />
                   </CourseProvider>
@@ -518,7 +518,7 @@ const CourseClient = (props: any) => {
               return (
                 <div className="w-full">
                   <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.what_you_will_learn')}</h2>
-                  <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
+                  <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
                     {displayLearnings.map((learning: any) => {
                       const learningText = typeof learning === 'string' ? learning : learning.text
                       const learningEmoji = typeof learning === 'string' ? null : learning.emoji
@@ -557,7 +557,7 @@ const CourseClient = (props: any) => {
 
             <div className="w-full my-5 mb-10">
               <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.course_lessons')}</h2>
-              <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
+              <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
                 {(course.chapters ?? []).map((chapter: any, idx: number) => {
                   const isExpanded = expandedChapters[chapter.chapter_uuid] ?? (idx === 0); // Default to expanded for first chapter
                   return (
@@ -589,7 +589,7 @@ const CourseClient = (props: any) => {
                             </span>
                             <h3 className="text-lg font-bold leading-tight truncate min-w-0 sm:text-base md:text-lg" style={{lineHeight: '1.2'}}>{chapter.name}</h3>
                             {chapter.is_locked && (
-                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
+                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-semibold">
                                 <Lock size={10} />
                                 {t('course.locked', 'Locked')}
                               </span>
@@ -627,7 +627,7 @@ const CourseClient = (props: any) => {
                                   <div className="flex items-center space-x-2 w-full">
                                     <p className={`font-semibold transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
                                     {locked && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-semibold">
                                         <Lock size={10} />
                                         {t('course.locked', 'Locked')}
                                       </span>

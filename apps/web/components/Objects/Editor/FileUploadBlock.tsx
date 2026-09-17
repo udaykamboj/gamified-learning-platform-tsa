@@ -67,7 +67,7 @@ function FileUploadBlock({
 
   if (!isEditable && isEmpty)
     return (
-      <div className="flex items-center justify-center gap-3 py-8 bg-white rounded-lg nice-shadow">
+      <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
         {<Icon className="text-slate-300" size={32} />}
         <p className="text-slate-500">No file available for preview.</p>
       </div>
@@ -88,7 +88,7 @@ function FileUploadBlockWrapper({
 }: UploadBlockComponentProps) {
   return (
     isEmpty && (
-      <div className="flex items-center justify-center gap-4 py-8 bg-white rounded-lg text-slate-700 px-4 border-2 border-dashed border-slate-200 text-sm" contentEditable={false}>
+      <div className="flex items-center justify-center gap-4 py-8 bg-card rounded-lg text-slate-700 px-4 border-2 border-dashed border-slate-200 text-sm" contentEditable={false}>
         <FileUploadBlock isEmpty {...props}>{children}</FileUploadBlock>
       </div>
     )

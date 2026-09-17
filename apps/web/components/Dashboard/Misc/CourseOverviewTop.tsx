@@ -105,7 +105,7 @@ export function CourseOverviewTop({
           </Link>
           <div className="flex flex-col course_metadata justify-center ps-3 sm:ps-5 min-w-0">
             <div className="text-gray-400 font-semibold text-xs sm:text-sm">{t('dashboard.courses.overview_top.course_label')}</div>
-            <div className="text-black font-bold text-base sm:text-xl -mt-0.5 first-letter:uppercase truncate">
+            <div className="text-foreground font-bold text-base sm:text-xl -mt-0.5 first-letter:uppercase truncate">
               {courseStructure.name}
             </div>
           </div>

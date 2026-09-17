@@ -18,9 +18,9 @@ export const folderTone = (color?: string) =>
   FOLDER_COLORS[color || DEFAULT_FOLDER_COLOR]?.tile || FOLDER_COLORS[DEFAULT_FOLDER_COLOR].tile
 
 export const PRIMARY_BTN =
-  'inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white nice-shadow hover:bg-neutral-800 transition-colors'
+  'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground nice-shadow hover:bg-primary transition-colors'
 export const SECONDARY_BTN =
-  'inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 nice-shadow hover:bg-gray-50 transition-colors'
+  'inline-flex items-center gap-2 rounded-lg bg-card px-4 py-2 text-sm font-medium text-gray-700 nice-shadow hover:bg-gray-50 transition-colors'
 
 export function StatPill({
   icon,
@@ -32,9 +32,9 @@ export function StatPill({
   value: number
 }) {
   return (
-    <div className="flex items-center gap-2 bg-white nice-shadow rounded-xl px-3.5 py-2">
+    <div className="flex items-center gap-2 bg-card nice-shadow rounded-xl px-3.5 py-2">
       {icon}
-      <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">{label}</span>
+      <span className="text-[11px] uppercase tracking-wider font-semibold text-gray-400">{label}</span>
       <span className="text-sm font-bold text-gray-900">{value}</span>
     </div>
   )
@@ -57,7 +57,7 @@ export function FilterPill({
     <button
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-colors whitespace-nowrap ${
-        active ? activeClass : 'bg-white nice-shadow text-gray-600 hover:bg-gray-50'
+        active ? activeClass : 'bg-card nice-shadow text-gray-600 hover:bg-gray-50'
       }`}
     >
       {icon}

@@ -448,7 +448,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   // a separate template variant, not a flip of this one.
   return (
     <div dir="ltr" className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 w-full h-full">
-      <div className="bg-white rounded-lg shadow-sm p-6 relative overflow-hidden w-full h-full flex flex-col">
+      <div className="sl-theme-light bg-white text-foreground rounded-lg shadow-sm p-6 relative overflow-hidden w-full h-full flex flex-col">
         {/* Dynamic Certificate Pattern */}
         {renderCertificatePattern(certificatePattern)}
 
@@ -507,7 +507,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </h4>
             {learnerName && (
               <div className="flex flex-col items-center mb-2">
-                <span className={`text-[10px] sm:text-xs ${theme.secondary} uppercase tracking-wider`}>Presented to</span>
+                <span className={`text-[11px] sm:text-xs ${theme.secondary} uppercase tracking-wider`}>Presented to</span>
                 <span dir="auto" className={`font-semibold text-sm sm:text-base ${theme.primary} text-center`}>
                   {learnerName}
                 </span>

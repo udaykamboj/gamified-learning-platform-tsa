@@ -206,7 +206,7 @@ export default function EphemeralChat({ ydoc, provider }: EphemeralChatProps) {
               {r.emoji}
             </span>
             <span
-              className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white whitespace-nowrap"
+              className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white whitespace-nowrap"
               style={{ backgroundColor: r.color }}
             >
               {r.username}
@@ -244,7 +244,7 @@ export default function EphemeralChat({ ydoc, provider }: EphemeralChatProps) {
                   style={{ ...frostedStyle, opacity, transition: 'opacity 0.4s ease' }}
                 >
                   <div
-                    className="h-[25px] w-[25px] rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                    className="h-[25px] w-[25px] rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0"
                     style={{ backgroundColor: msg.color }}
                   >
                     {msg.username.charAt(0).toUpperCase()}

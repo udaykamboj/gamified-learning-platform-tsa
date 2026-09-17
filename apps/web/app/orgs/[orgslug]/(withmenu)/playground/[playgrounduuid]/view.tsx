@@ -120,7 +120,7 @@ export default function PlaygroundViewClient({
 
             {/* Thumbnail */}
             {thumbnailUrl && (
-              <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+              <div className="bg-card nice-shadow rounded-lg overflow-hidden">
                 <img
                   src={thumbnailUrl}
                   alt={playground.name}
@@ -130,9 +130,9 @@ export default function PlaygroundViewClient({
             )}
 
             {/* Info card */}
-            <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+            <div className="bg-card nice-shadow rounded-lg overflow-hidden">
               <div className="p-3 border-b border-gray-100">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('playgrounds.view.about')}</p>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('playgrounds.view.about')}</p>
                 <h1 className="text-sm font-bold text-gray-900 leading-snug">
                   {playground.name}
                 </h1>
@@ -161,7 +161,7 @@ export default function PlaygroundViewClient({
                 )}
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-gray-500">{t('playgrounds.view.access')}</span>
-                  <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold ${accessBadge.className}`}>
+                  <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-semibold ${accessBadge.className}`}>
                     <AccessIcon size={9} />
                     {accessBadge.label}
                   </span>
@@ -175,7 +175,7 @@ export default function PlaygroundViewClient({
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-gray-500">{t('playgrounds.view.status')}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                  <span className={`px-1.5 py-0.5 rounded text-[11px] font-semibold ${
                     playground.published ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
                   }`}>
                     {playground.published ? t('playgrounds.view.published') : t('playgrounds.view.draft')}
@@ -204,8 +204,8 @@ export default function PlaygroundViewClient({
             </div>
 
             {/* Reactions card */}
-            <div className="bg-white nice-shadow rounded-lg p-3">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+            <div className="bg-card nice-shadow rounded-lg p-3">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
                 {t('playgrounds.view.reactions')}
               </p>
               <PlaygroundReactionButton playgroundUuid={playground.playground_uuid} />
@@ -217,21 +217,21 @@ export default function PlaygroundViewClient({
         <div className="flex-1 min-w-0">
           <div
             ref={iframeContainerRef}
-            className="relative bg-white nice-shadow rounded-lg overflow-hidden"
+            className="relative bg-card nice-shadow rounded-lg overflow-hidden"
             style={{ height: 'calc(100vh - 200px)', minHeight: 480 }}
           >
             {/* Toolbar — top right of preview */}
             <div className="absolute top-3 end-3 z-10 flex items-center gap-2">
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-card/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
               >
                 <DownloadSimple size={13} weight="bold" />
                 {t('playgrounds.view.download')}
               </button>
               <button
                 onClick={toggleFullscreen}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-card/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
               >
                 {isFullscreen
                   ? <><ArrowsInSimple size={13} weight="bold" />{t('playgrounds.view.exit_fullscreen')}</>
@@ -251,7 +251,7 @@ export default function PlaygroundViewClient({
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-center px-6">
-                <div className="w-14 h-14 rounded-2xl bg-white nice-shadow flex items-center justify-center mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-card nice-shadow flex items-center justify-center mb-4">
                   <Sparkle size={24} weight="fill" className="text-gray-300" />
                 </div>
                 <p className="text-base font-semibold text-gray-500">{t('common.no_content_yet')}</p>
@@ -261,7 +261,7 @@ export default function PlaygroundViewClient({
                 {canEdit && (
                   <Link
                     href={`/editor/playground/${playground.playground_uuid}/edit`}
-                    className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                    className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary transition-colors"
                   >
                     <PencilSimple size={14} weight="bold" />
                     {t('playgrounds.view.open_editor')}

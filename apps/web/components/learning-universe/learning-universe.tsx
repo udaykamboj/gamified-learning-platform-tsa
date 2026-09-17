@@ -1,476 +1,595 @@
 "use client";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, Sparkles } from "@react-three/drei";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getUriWithOrg } from "@services/config/config";
 import {
-  Bell,
+  ArrowRight,
   BookOpen,
-  Bot,
-  ChevronDown,
-  Flame,
-  Gamepad2,
-  Hexagon,
+  Info,
+  LayoutGrid,
   Lock,
-  Medal,
-  Mic,
-  Milestone,
   Orbit,
+  Pause,
   Play,
-  Settings,
-  ShieldCheck,
-  Sparkles as SparklesIcon,
   Target,
-  UserRound,
-  Users,
-  Zap,
 } from "lucide-react";
-import { Suspense, useMemo, useRef, useState, useEffect } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import Dock from "@/components/ui/Dock";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
+import { useLHSession } from "@components/Contexts/LHSessionContext";
 import { cn } from "@/lib/utils";
 
+/**
+ * Learning Universe — learner home (template B, "Navigate" intensity).
+ *
+ * The destinations below are the conceptual subject identities from the
+ * existing universe. They are NOT live learner records, so every place that
+ * shows them is labelled as a preview and no XP, level or launch action is
+ * implied. Real course navigation goes to the existing /courses catalog.
+ */
 
-type Course = {
+type Destination = {
   id: string;
   name: string;
-  shortName: string;
   discipline: string;
-  progress: number;
-  xp: number;
-  level: number;
-  next: string;
+  summary: string;
+  sampleProgress: number;
   color: string;
   position: [number, number, number];
   size: number;
   locked?: boolean;
+  lockedReason?: string;
 };
 
-const COURSES: [Course, ...Course[]] = [
+const DESTINATIONS: [Destination, ...Destination[]] = [
   {
     id: "foundations",
     name: "AI Foundations",
-    shortName: "Foundation Prime",
-    discipline: "Main Quest · 3 Core Modules",
-    progress: 68,
-    xp: 1240,
-    level: 7,
-    next: "Complete: Ethics in the Wild",
-    color: "#edb45c",
+    discipline: "Core path",
+    summary: "The shared starting point: how modern AI works, where it fails, and how to use it responsibly.",
+    sampleProgress: 68,
+    color: "#f4bd64",
     position: [0, 0.25, 0],
-    size: 1.35,
+    size: 1.3,
   },
   {
     id: "healthcare",
     name: "AI for Healthcare",
-    shortName: "Helix",
-    discipline: "Applied Intelligence",
-    progress: 24,
-    xp: 320,
-    level: 2,
-    next: "Decode a diagnostic model",
-    color: "#4ed6c6",
+    discipline: "Applied intelligence",
+    summary: "Clinical data, diagnostic models and the questions to ask before trusting a prediction.",
+    sampleProgress: 24,
+    color: "#4dd4bc",
     position: [-4.6, 1.8, -1.2],
     size: 0.66,
   },
   {
     id: "business",
     name: "AI for Business",
-    shortName: "Venture",
-    discipline: "Applied Intelligence",
-    progress: 11,
-    xp: 145,
-    level: 1,
-    next: "Map an automation workflow",
-    color: "#89a6ff",
+    discipline: "Applied intelligence",
+    summary: "Map real workflows, spot automation opportunities and measure their impact.",
+    sampleProgress: 11,
+    color: "#7599ec",
     position: [4.8, 1.55, -0.9],
     size: 0.75,
   },
   {
     id: "model",
     name: "Train Your Own Model",
-    shortName: "Forge",
-    discipline: "Builder Path",
-    progress: 0,
-    xp: 0,
-    level: 0,
-    next: "Unlock after Foundation Prime",
-    color: "#e97687",
+    discipline: "Builder path",
+    summary: "Collect data, train a small model and evaluate it honestly.",
+    sampleProgress: 0,
+    color: "#d95c79",
     position: [-3.8, -2.25, -0.3],
     size: 0.57,
     locked: true,
+    lockedReason: "Opens after AI Foundations is complete.",
   },
   {
     id: "arena",
-    name: "PvP Prompt Arena",
-    shortName: "Arena",
-    discipline: "Challenge Sector",
-    progress: 0,
-    xp: 0,
-    level: 0,
-    next: "Unlock at Level 10",
-    color: "#b88cff",
+    name: "Prompt Arena",
+    discipline: "Challenge sector",
+    summary: "Put your prompting skills against timed challenges.",
+    sampleProgress: 0,
+    color: "#b8a0ff",
     position: [4.1, -2.15, -0.6],
     size: 0.61,
     locked: true,
+    lockedReason: "Opens after an applied course is complete.",
   },
 ];
 
-function Planet({ course, selected, onSelect }: { course: Course; selected: boolean; onSelect: () => void }) {
+/* ─── Motion + capability hooks ──────────────────────────────────────────── */
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const sync = () => setMatches(m.matches);
+    sync();
+    m.addEventListener("change", sync);
+    return () => m.removeEventListener("change", sync);
+  }, [query]);
+  return matches;
+}
+
+function useWebGLAvailable() {
+  const [available, setAvailable] = useState<boolean | null>(null);
+  useEffect(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      setAvailable(!!(canvas.getContext("webgl2") || canvas.getContext("webgl")));
+    } catch {
+      setAvailable(false);
+    }
+  }, []);
+  return available;
+}
+
+/* ─── 3D scene ───────────────────────────────────────────────────────────── */
+
+function Planet({
+  destination,
+  selected,
+  animate,
+  onSelect,
+}: {
+  destination: Destination;
+  selected: boolean;
+  animate: boolean;
+  onSelect: () => void;
+}) {
   const group = useRef<THREE.Group>(null);
   const planet = useRef<THREE.Mesh>(null);
-  const { gl } = useThree();
+  const [hovered, setHovered] = useState(false);
 
   useFrame(({ clock }, rawDelta) => {
+    if (!animate) return;
     const dt = Math.min(rawDelta, 0.05);
-    if (planet.current) planet.current.rotation.y += dt * (course.id === "foundations" ? 0.12 : 0.2);
-    if (group.current) group.current.position.y = course.position[1] + Math.sin(clock.elapsedTime * 0.55 + course.position[0]) * 0.08;
+    // Roughly one turn every ~60–90 seconds.
+    if (planet.current) planet.current.rotation.y += dt * 0.08;
+    if (group.current) {
+      group.current.position.y =
+        destination.position[1] + Math.sin(clock.elapsedTime * 0.35 + destination.position[0]) * 0.04;
+    }
   });
 
+  const base = destination.locked ? "#34496a" : destination.color;
+  const scale = selected ? 1.08 : hovered ? 1.04 : 1;
+
   return (
-    <group ref={group} position={course.position}>
+    <group ref={group} position={destination.position}>
       <mesh
         ref={planet}
         onClick={(event) => {
           event.stopPropagation();
-          if (!course.locked) onSelect();
+          onSelect();
         }}
-        onPointerEnter={() => {
-          if (!course.locked) gl.domElement.style.cursor = "pointer";
+        onPointerEnter={(event) => {
+          event.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = "pointer";
         }}
         onPointerLeave={() => {
-          gl.domElement.style.cursor = "default";
+          setHovered(false);
+          document.body.style.cursor = "";
         }}
-        scale={selected ? 1.08 : 1}
+        scale={scale}
       >
-        <sphereGeometry args={[course.size, 64, 64]} />
+        <sphereGeometry args={[destination.size, 64, 64]} />
         <meshStandardMaterial
-          color={course.locked ? "#353b4f" : course.color}
-          emissive={course.locked ? "#10131c" : course.color}
-          emissiveIntensity={selected ? 0.33 : 0.12}
-          metalness={0.28}
-          roughness={0.66}
+          color={base}
+          emissive={base}
+          emissiveIntensity={selected ? 0.26 : 0.08}
+          metalness={0.15}
+          roughness={0.72}
         />
       </mesh>
       <mesh rotation-x={Math.PI / 2.5}>
-        <torusGeometry args={[course.size * 1.42, course.size * 0.035, 16, 100]} />
-        <meshBasicMaterial color={course.locked ? "#50586f" : course.color} transparent opacity={selected ? 0.85 : 0.42} />
+        <torusGeometry args={[destination.size * 1.42, destination.size * 0.03, 16, 100]} />
+        <meshBasicMaterial color={destination.locked ? "#657d9e" : destination.color} transparent opacity={selected ? 0.8 : 0.35} />
       </mesh>
       {selected && (
         <mesh rotation-x={Math.PI / 2}>
-          <torusGeometry args={[course.size * 1.82, 0.015, 8, 120]} />
-          <meshBasicMaterial color={course.color} transparent opacity={0.75} />
+          <torusGeometry args={[destination.size * 1.85, 0.014, 8, 120]} />
+          <meshBasicMaterial color="#72e3ce" transparent opacity={0.8} />
         </mesh>
       )}
     </group>
   );
 }
 
-function OrbitalScene({ selectedId, onSelect }: { selectedId: string; onSelect: (id: string) => void }) {
+function OrbitalScene({
+  selectedId,
+  animate,
+  onSelect,
+}: {
+  selectedId: string;
+  animate: boolean;
+  onSelect: (id: string) => void;
+}) {
   const constellation = useRef<THREE.Group>(null);
-  const reducedMotion = useRef(false);
-
-  useEffect(() => {
-    reducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
 
   useFrame((_, rawDelta) => {
-    if (!constellation.current || reducedMotion.current) return;
-    constellation.current.rotation.y += Math.min(rawDelta, 0.05) * 0.018;
+    if (!constellation.current || !animate) return;
+    constellation.current.rotation.y += Math.min(rawDelta, 0.05) * 0.012;
   });
 
   return (
     <>
-      <color attach="background" args={["#050810"]} />
-      <fogExp2 attach="fog" args={["#050810", 0.035]} />
+      <color attach="background" args={["#0b1424"]} />
+      <fogExp2 attach="fog" args={["#0b1424", 0.03]} />
       <ambientLight intensity={0.55} />
-      <directionalLight position={[5, 8, 7]} intensity={2.4} color="#ffd993" />
-      <pointLight position={[-5, -1, 3]} intensity={15} distance={18} color="#54d9d3" />
-      <Sparkles count={260} scale={[22, 13, 10]} size={1.4} speed={0.18} opacity={0.65} color="#dce8ff" />
+      <directionalLight position={[5, 8, 7]} intensity={2.2} color="#ffd78c" />
+      <pointLight position={[-5, -1, 3]} intensity={12} distance={18} color="#4dd4bc" />
+      <Sparkles count={180} scale={[22, 13, 10]} size={1.2} speed={animate ? 0.12 : 0} opacity={0.55} color="#dce8ff" />
       <group ref={constellation} rotation-x={-0.08}>
         {[3.1, 5.4, 7.4].map((radius) => (
           <mesh key={radius} rotation-x={Math.PI / 2} position-y={0.12}>
-            <torusGeometry args={[radius, 0.012, 8, 180]} />
-            <meshBasicMaterial color="#7584a5" transparent opacity={0.19} />
+            <torusGeometry args={[radius, 0.01, 8, 180]} />
+            <meshBasicMaterial color="#8c9fbc" transparent opacity={0.16} />
           </mesh>
         ))}
-        {COURSES.map((course) => (
-          <Planet key={course.id} course={course} selected={selectedId === course.id} onSelect={() => onSelect(course.id)} />
+        {DESTINATIONS.map((destination) => (
+          <Planet
+            key={destination.id}
+            destination={destination}
+            selected={selectedId === destination.id}
+            animate={animate}
+            onSelect={() => onSelect(destination.id)}
+          />
         ))}
       </group>
       <Environment>
         <Lightformer intensity={2} position={[0, 5, 2]} scale={[10, 10, 1]} color="#d7e4ff" />
-        <Lightformer intensity={1.2} position={[-5, 1, -2]} rotation-y={Math.PI / 2} scale={[12, 2, 1]} color="#44cfc1" />
+        <Lightformer intensity={1.1} position={[-5, 1, -2]} rotation-y={Math.PI / 2} scale={[12, 2, 1]} color="#4dd4bc" />
       </Environment>
     </>
   );
 }
 
-const navItems = [
-  { label: "Learning Universe", icon: Orbit, to: "/" as const },
-  { label: "Skills Page", icon: Hexagon, to: "/skills" as const },
-  { label: "AI Agent", icon: Bot, to: "/ai-agent" as const },
-  { label: "Journey", icon: Milestone, to: "/journey" as const },
-  { label: "Missions", icon: Target },
-  { label: "Achievements", icon: Medal },
-  { label: "Podcasts", icon: Mic },
-  { label: "Communities", icon: Users },
-  { label: "Playground", icon: Gamepad2 },
-];
+/* ─── Static planet (thumbnails + WebGL fallback) ────────────────────────── */
 
-function CourseSelectionModal({
-  isOpen,
-  onClose,
-  selectedId,
-  onSelect,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) {
-  if (!isOpen) return null;
-
-  // Group courses by discipline
-  const groupedCourses = COURSES.reduce((acc, course) => {
-    if (!acc[course.discipline]) acc[course.discipline] = [];
-    acc[course.discipline].push(course);
-    return acc;
-  }, {} as Record<string, Course[]>);
-
-  const groups = Object.entries(groupedCourses);
-
+function PlanetSwatch({ destination, size = 44 }: { destination: Destination; size?: number }) {
+  const color = destination.locked ? "#657d9e" : destination.color;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto pointer-events-auto">
-        <div className="flex items-center justify-between p-8 pb-6">
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">My courses</h2>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">
-            Edit Courses
-          </button>
-        </div>
+    <span
+      aria-hidden
+      className="relative inline-block shrink-0 rounded-full"
+      style={{
+        width: size,
+        height: size,
+        background: `radial-gradient(circle at 32% 28%, ${color} 0%, ${color}cc 38%, #17263d 100%)`,
+        boxShadow: `inset -${size / 8}px -${size / 10}px ${size / 4}px rgba(3,8,18,0.45), 0 0 0 1px rgba(154,185,255,0.12)`,
+      }}
+    >
+      <span
+        className="absolute left-1/2 top-1/2 rounded-[50%] border"
+        style={{
+          width: size * 1.55,
+          height: size * 0.42,
+          transform: "translate(-50%, -50%) rotate(-18deg)",
+          borderColor: `${color}66`,
+        }}
+      />
+    </span>
+  );
+}
 
-        <div className="p-8 pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-            {groups.map(([discipline, disciplineCourses]) => (
-              <div key={discipline}>
-                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                  <h3 className="text-lg font-bold text-gray-800">{discipline}</h3>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    See all ({disciplineCourses.length})
-                  </button>
-                </div>
-                
-                <div className="relative pl-6 space-y-8 mt-6">
-                  {/* Vertical line connecting nodes */}
-                  <div className="absolute left-[19px] top-[24px] bottom-[24px] w-px bg-gray-200" />
-                  
-                  {disciplineCourses.map((course) => (
-                    <div key={course.id} className="relative flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                        {/* Circular Icon */}
-                        <div 
-                          className="absolute -left-6 flex items-center justify-center w-10 h-10 rounded-full text-white z-10 shadow-sm"
-                          style={{ backgroundColor: course.color }}
-                        >
-                          <BookOpen className="size-5" />
-                        </div>
-                        
-                        <div className="pl-6">
-                          <button 
-                            onClick={() => {
-                              onSelect(course.id);
-                              onClose();
-                            }}
-                            className="text-blue-600 hover:text-blue-800 font-medium text-[15px] text-left"
-                          >
-                            {course.name}
-                          </button>
-                          <p className="text-sm text-gray-500 mt-0.5">
-                            {course.locked ? "Mastery unavailable" : `${course.progress}% Proficient`}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {!course.locked && (
-                        <button
-                          onClick={() => {
-                            onSelect(course.id);
-                            onClose();
-                          }}
-                          className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-                        >
-                          {course.progress > 0 ? "Resume" : "Start"}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+function StaticUniverse({ selectedId, onSelect }: { selectedId: string; onSelect: (id: string) => void }) {
+  return (
+    <div className="absolute inset-0 grid place-items-center">
+      <div className="grid grid-cols-3 gap-8 p-8">
+        {DESTINATIONS.map((d) => (
+          <button
+            key={d.id}
+            type="button"
+            onClick={() => onSelect(d.id)}
+            className={cn(
+              "grid place-items-center rounded-full p-3 transition-shadow",
+              selectedId === d.id && "shadow-[0_0_0_2px_#72e3ce]"
+            )}
+            aria-label={d.name}
+          >
+            <PlanetSwatch destination={d} size={d.id === "foundations" ? 88 : 60} />
+          </button>
+        ))}
       </div>
     </div>
   );
 }
 
-function useNarrow(query = "(max-width: 767px)") {
-  const [narrow, setNarrow] = useState(false);
-  useEffect(() => {
-    const m = window.matchMedia(query);
-    const sync = () => setNarrow(m.matches);
-    sync();
-    m.addEventListener("change", sync);
-    return () => m.removeEventListener("change", sync);
-  }, [query]);
-  return narrow;
+/* ─── UI pieces ──────────────────────────────────────────────────────────── */
+
+function StatusBadge({ destination }: { destination: Destination }) {
+  if (destination.locked) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2.5 py-0.5 text-meta font-semibold text-muted-foreground">
+        <Lock size={12} aria-hidden /> Locked
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-success-surface px-2.5 py-0.5 text-meta font-semibold text-success">
+      <Orbit size={12} aria-hidden /> Available
+    </span>
+  );
 }
 
-export function LearningUniverse({ orgslug }: { orgslug: string }) {
-  const [selectedId, setSelectedId] = useState("foundations");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const selected = useMemo(() => COURSES.find((course) => course.id === selectedId) ?? COURSES[0], [selectedId]);
-  const narrow = useNarrow();
-  const router = useRouter();
-
+function PreviewNote({ className }: { className?: string }) {
   return (
-    <main className="relative flex-1 min-h-0 overflow-hidden bg-background text-foreground">
-      <div className="absolute inset-0 z-0">
-        <Canvas dpr={[1, 1.5]} camera={{ position: [0, 1.2, 10.5], fov: 48 }} gl={{ antialias: true }}>
-          <Suspense fallback={null}>
-            <OrbitalScene selectedId={selected.id} onSelect={setSelectedId} />
-          </Suspense>
-        </Canvas>
+    <p className={cn("flex items-start gap-2 text-meta text-muted-foreground", className)}>
+      <Info size={14} className="mt-[3px] shrink-0" aria-hidden />
+      Preview destinations with sample progress. Your real courses are in the catalog.
+    </p>
+  );
+}
+
+function DestinationDetail({ destination, orgslug }: { destination: Destination; orgslug: string }) {
+  return (
+    <div className="sl-card flex h-full flex-col p-5 md:p-6" aria-live="polite">
+      <div className="flex items-start gap-4">
+        <PlanetSwatch destination={destination} size={52} />
+        <div className="min-w-0 flex-1">
+          <p className="sl-telemetry text-muted-foreground">{destination.discipline}</p>
+          <h2 className="mt-1 font-display text-section font-semibold tracking-tight text-foreground">{destination.name}</h2>
+        </div>
       </div>
-
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,transparent_28%,var(--background)_120%)]" />
-
-      {/* Course Selection Trigger */}
-      <div className="pointer-events-auto absolute top-6 right-6 md:top-8 md:right-10 z-40">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-5 py-2 bg-white text-gray-900 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all"
-        >
-          <BookOpen className="size-4" />
-          My Courses
-        </button>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <StatusBadge destination={destination} />
+        <span className="rounded-full border border-border px-2.5 py-0.5 text-meta font-semibold text-muted-foreground">Preview</span>
       </div>
+      <p className="mt-4 text-ui text-muted-foreground">{destination.summary}</p>
 
-      <CourseSelectionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        selectedId={selectedId} 
-        onSelect={setSelectedId} 
-      />
-
-      <div className="pointer-events-auto absolute bottom-0 left-1/2 z-30 -translate-x-1/2 md:bottom-auto md:left-6 md:top-1/2 md:translate-x-0 md:-translate-y-1/2">
-        <Dock
-          items={navItems.map((item) => ({
-            icon: <item.icon size={18} />,
-            label: item.label,
-            onClick: item.to 
-              ? () => router.push(getUriWithOrg(orgslug, item.to))
-              : () => toast(`${item.label} — coming in the next transmission`),
-          }))}
-          direction={narrow ? "horizontal" : "vertical"}
-          panelSize={56}
-          baseItemSize={40}
-          magnification={56}
-        />
-      </div>
-
-      <section className="pointer-events-none absolute left-4 top-12 z-20 md:left-32 md:top-16 max-w-xl">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-primary flex items-center gap-2">
-          <span className="size-1 rounded-full bg-primary" /> {selected.discipline}
-          {selected.locked && <Badge variant="outline" className="pointer-events-auto ml-2 h-5 text-[9px] border-primary/20">LOCKED</Badge>}
-        </p>
-        <h1 className="mt-4 font-display text-5xl font-light tracking-tight text-foreground md:text-7xl lg:text-8xl">
-          {selected.name}
-        </h1>
-        <p className="mt-6 max-w-sm text-base leading-relaxed text-muted-foreground">
-          {selected.id === "foundations" 
-            ? "Explore new disciplines, complete missions, and turn knowledge into momentum." 
-            : `Inspect progress and objectives for ${selected.name}.`}
-        </p>
-      </section>
-
-      <section className="pointer-events-auto absolute bottom-12 left-4 right-4 z-20 sm:left-auto sm:right-12 md:bottom-12 sm:w-[22rem] transition-all duration-300" aria-live="polite">
-        <div style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-            <div>
-              <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "#4ed6c6", marginBottom: 4 }}>Selected World</p>
-              <h2 style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: 0 }}>{selected.name}</h2>
-              <p style={{ fontSize: 11, color: "rgba(240,244,255,0.5)", marginTop: 4 }}>{selected.discipline}</p>
-            </div>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(78,214,198,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#4ed6c6", flexShrink: 0 }}>
-              <SparklesIcon className="size-4" />
-            </div>
+      {destination.locked ? (
+        <div className="mt-5 flex items-start gap-3 rounded-[10px] border border-border bg-muted p-4">
+          <Lock size={18} className="mt-0.5 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="text-ui text-foreground">{destination.lockedReason}</p>
+        </div>
+      ) : (
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-meta">
+            <span className="font-semibold text-foreground">Sample progress</span>
+            <span className="font-mono tabular-nums text-muted-foreground">{destination.sampleProgress}%</span>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 24, marginBottom: 20 }}>
-            <div>
-              <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,244,255,0.4)", marginBottom: 6 }}>Level</p>
-              <p style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: 26, fontWeight: 300, color: "#fff", margin: 0 }}>{selected.level}</p>
-            </div>
-            <div>
-              <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,244,255,0.4)", marginBottom: 6 }}>Earned XP</p>
-              <p style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: 26, fontWeight: 300, color: "#fff", margin: 0 }}>{selected.xp}</p>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,244,255,0.4)", margin: 0 }}>World explored</p>
-              <p style={{ fontFamily: "monospace", fontSize: 11, color: "#4ed6c6", margin: 0 }}>{selected.progress}%</p>
-            </div>
-            <div style={{ height: 4, width: "100%", background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${selected.progress}%`, background: "#4ed6c6", borderRadius: 2 }} />
-            </div>
-          </div>
-
-          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "10px 14px", marginBottom: 20 }}>
-            <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#4ed6c6", display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-              <Target className="size-3" /> Next Objective
-            </p>
-            <p style={{ fontSize: 13, color: "rgba(240,244,255,0.85)", fontWeight: 500, margin: 0 }}>{selected.next}</p>
-          </div>
-
-          <div className="pt-1 flex justify-center">
-            {selected.locked ? (
-              <button disabled style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "12px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "not-allowed" }}>
-                <Lock className="size-4" /> Sector Locked
-              </button>
-            ) : (
-              <LiquidMetalButton
-                label="LAUNCH MISSION"
-                onClick={() => toast.success(`Mission launch queued: ${selected.name}`, { icon: <Zap className="size-4" /> })}
-              />
-            )}
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={destination.sampleProgress}
+            aria-label={`Sample progress for ${destination.name}`}
+          >
+            <div className="h-full rounded-full bg-primary" style={{ width: `${destination.sampleProgress}%` }} />
           </div>
         </div>
-      </section>
+      )}
 
-      <section className="pointer-events-none absolute bottom-12 left-24 z-20 hidden max-w-sm md:left-32 lg:flex flex-col gap-3">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-primary flex items-center gap-2">
-          <span className="size-1 rounded-full bg-primary animate-pulse" /> Active Mission
-        </p>
-        <p className="text-sm text-foreground/80 tracking-wide">Ethics in the Wild · Checkpoint 3/5</p>
-      </section>
+      <div className="mt-auto pt-6">
+        <Link href={getUriWithOrg(orgslug, "/courses")} className="sl-btn sl-btn-primary w-full">
+          <BookOpen size={18} aria-hidden />
+          Browse courses
+        </Link>
+      </div>
+    </div>
+  );
+}
 
-    </main>
+function DestinationList({
+  selectedId,
+  onSelect,
+  orgslug,
+}: {
+  selectedId: string;
+  onSelect: (id: string) => void;
+  orgslug: string;
+}) {
+  return (
+    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {DESTINATIONS.map((d) => {
+        const selected = d.id === selectedId;
+        return (
+          <li key={d.id}>
+            <div
+              className={cn(
+                "sl-card sl-card-interactive flex h-full flex-col p-5",
+                selected && "border-primary shadow-glow"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => onSelect(d.id)}
+                aria-pressed={selected}
+                className="flex items-start gap-4 text-start"
+              >
+                <PlanetSwatch destination={d} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-meta text-muted-foreground">{d.discipline}</span>
+                  <span className="mt-0.5 block text-card-title font-semibold text-foreground">{d.name}</span>
+                </span>
+              </button>
+              <p className="mt-3 line-clamp-2 text-ui text-muted-foreground">{d.summary}</p>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <StatusBadge destination={d} />
+                {d.locked ? (
+                  <span className="text-meta text-muted-foreground">{d.lockedReason}</span>
+                ) : (
+                  <span className="font-mono text-meta tabular-nums text-muted-foreground">Sample {d.sampleProgress}%</span>
+                )}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+      <li className="sm:col-span-2 xl:col-span-3">
+        <Link href={getUriWithOrg(orgslug, "/courses")} className="sl-btn sl-btn-secondary">
+          See all courses <ArrowRight size={16} aria-hidden />
+        </Link>
+      </li>
+    </ul>
+  );
+}
+
+/* ─── Page ───────────────────────────────────────────────────────────────── */
+
+export function LearningUniverse({ orgslug }: { orgslug: string }) {
+  const session = useLHSession() as any;
+  const [selectedId, setSelectedId] = useState("foundations");
+  const narrow = useMediaQuery("(max-width: 767px)");
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const webgl = useWebGLAvailable();
+  const [view, setView] = useState<"map" | "list" | null>(null);
+  const [motionPaused, setMotionPaused] = useState(false);
+
+  // Mobile defaults to the list; desktop to the map. An explicit choice wins.
+  const activeView = view ?? (narrow ? "list" : "map");
+  const animate = !reducedMotion && !motionPaused;
+  const selected = useMemo(
+    () => DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0],
+    [selectedId]
   );
 
+  const user = session?.data?.user;
+  const firstName = user?.first_name || user?.username;
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-background text-foreground">
+      <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
+        {/* Greeting + next action */}
+        <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="sl-telemetry text-link">Learning universe</p>
+            <h1 className="mt-2 sl-page-title">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+            <p className="mt-2 text-reading text-muted-foreground">
+              Choose a destination to explore, or jump straight into your courses.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div role="tablist" aria-label="Universe view" className="inline-flex rounded-[10px] border border-border bg-muted p-1">
+              {([
+                { key: "map", label: "Map", icon: Orbit },
+                { key: "list", label: "List", icon: LayoutGrid },
+              ] as const).map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  role="tab"
+                  type="button"
+                  aria-selected={activeView === key}
+                  onClick={() => setView(key)}
+                  className={cn(
+                    "inline-flex h-9 items-center gap-2 rounded-[6px] px-3 text-sm font-semibold transition-colors",
+                    activeView === key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Icon size={16} aria-hidden /> {label}
+                </button>
+              ))}
+            </div>
+            <Link href={getUriWithOrg(orgslug, "/courses")} className="sl-btn sl-btn-primary">
+              <BookOpen size={18} aria-hidden /> My courses
+            </Link>
+          </div>
+        </header>
+
+        {activeView === "map" ? (
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+            {/* Bounded scene */}
+            <section aria-label="Destination map" className="flex min-w-0 flex-col gap-4">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-border bg-[#0b1424] shadow-card md:aspect-video">
+                {webgl === false ? (
+                  <StaticUniverse selectedId={selected.id} onSelect={setSelectedId} />
+                ) : webgl ? (
+                  <Canvas
+                    dpr={[1, 1.5]}
+                    frameloop={animate ? "always" : "demand"}
+                    camera={{ position: [0, 1.2, 10.5], fov: 48 }}
+                    gl={{ antialias: true }}
+                    aria-hidden
+                  >
+                    <Suspense fallback={null}>
+                      <OrbitalScene selectedId={selected.id} animate={animate} onSelect={setSelectedId} />
+                    </Suspense>
+                  </Canvas>
+                ) : null}
+
+                <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
+                  <span className="rounded-full border border-white/15 bg-[#111d30]/85 px-2.5 py-1 text-meta font-semibold text-[#b7c5da]">
+                    Preview map
+                  </span>
+                  {!reducedMotion && webgl && (
+                    <button
+                      type="button"
+                      onClick={() => setMotionPaused((p) => !p)}
+                      className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-[10px] border border-white/15 bg-[#111d30]/85 px-3 text-meta font-semibold text-[#f3f6fc] transition-colors hover:bg-[#20324b]"
+                    >
+                      {motionPaused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
+                      {motionPaused ? "Play motion" : "Pause motion"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Accessible destination labels (DOM, outside the canvas) */}
+              <div role="radiogroup" aria-label="Destinations" className="flex flex-wrap gap-2">
+                {DESTINATIONS.map((d) => {
+                  const isSelected = d.id === selected.id;
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => setSelectedId(d.id)}
+                      className={cn(
+                        "inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-semibold transition-colors",
+                        isSelected
+                          ? "border-primary bg-selected text-foreground"
+                          : "border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground"
+                      )}
+                    >
+                      <span aria-hidden className="size-2.5 rounded-full" style={{ backgroundColor: d.locked ? "#8c9fbc" : d.color }} />
+                      {d.name}
+                      {d.locked && <Lock size={13} aria-label="Locked" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <PreviewNote />
+            </section>
+
+            <aside aria-label="Selected destination">
+              <DestinationDetail destination={selected} orgslug={orgslug} />
+            </aside>
+          </div>
+        ) : (
+          <section aria-label="Destinations" className="mt-8 space-y-4">
+            <PreviewNote />
+            <DestinationList selectedId={selected.id} onSelect={setSelectedId} orgslug={orgslug} />
+          </section>
+        )}
+
+        {/* Next steps */}
+        <section className="mt-10 grid gap-4 md:grid-cols-3" aria-label="Next steps">
+          {[
+            { href: "/courses", icon: BookOpen, title: "Continue a course", body: "Open the catalog to resume or start a course." },
+            { href: "/trail", icon: Target, title: "Check your progress", body: "See the courses you are enrolled in and what is left." },
+            { href: "/skills", icon: Orbit, title: "Explore skills", body: "Pick the disciplines you want to focus on next." },
+          ].map(({ href, icon: Icon, title, body }) => (
+            <Link key={href} href={getUriWithOrg(orgslug, href)} className="sl-card sl-card-interactive group flex items-start gap-4 p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-[10px] bg-selected text-link">
+                <Icon size={20} aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-1 text-card-title font-semibold text-foreground">
+                  {title}
+                  <ArrowRight size={16} className="text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </span>
+                <span className="mt-1 block text-ui text-muted-foreground">{body}</span>
+              </span>
+            </Link>
+          ))}
+        </section>
+      </div>
+    </div>
+  );
 }
