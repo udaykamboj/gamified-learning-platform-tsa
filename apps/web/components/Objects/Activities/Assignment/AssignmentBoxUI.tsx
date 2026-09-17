@@ -2,7 +2,7 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext'
 import { useAssignmentDirtyTasks } from '@components/Contexts/Assignments/AssignmentDirtyTasksContext'
 import { useAutoSave, type SaveResult } from './useAutoSave'
-import { BookPlus, BookUser, Check, Code2, EllipsisVertical, FileUp, ListTodo, Loader2, MessageSquare, Save, TriangleAlert, Type } from 'lucide-react'
+import { BookPlus, BookUser, Check, Code2, FileUp, ListTodo, Loader2, MessageSquare, Save, TriangleAlert, Type } from 'lucide-react'
 import React from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
@@ -120,11 +120,11 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
     const isAuthenticated = session?.status === 'authenticated'
 
     return (
-        <div className='flex flex-col px-3 sm:px-6 py-4 nice-shadow rounded-md bg-slate-100/30'>
-            <div className='flex flex-col sm:flex-row sm:justify-between sm:space-x-2 pb-2 text-slate-400 sm:items-center'>
+        <div className='flex flex-col px-4 sm:px-6 py-4 rounded-xl border border-border bg-muted/40'>
+            <div className='flex flex-col sm:flex-row sm:justify-between sm:space-x-2 pb-3 text-muted-foreground sm:items-center'>
                 {/* Left side with type and badges */}
                 <div className='flex flex-wrap gap-2 items-center mb-2 sm:mb-0'>
-                    <div className='text-lg font-semibold'>
+                    <div className='text-card-title font-semibold text-foreground [&_svg]:text-muted-foreground'>
                         {type === 'quiz' &&
                             <div className='flex space-x-1.5 items-center'>
                                 <ListTodo size={17} />
@@ -147,17 +147,14 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                             </div>}
                     </div>
 
-                    <div className='flex items-center space-x-1'>
-                        <EllipsisVertical size={15} />
-                    </div>
                     {view === 'teacher' &&
-                        <div className='flex bg-amber-200/20 text-xs rounded-full space-x-1 px-2 py-0.5 font-bold outline items-center text-amber-600 outline-1 outline-amber-300/40'>
+                        <div className='sl-badge sl-badge-warning'>
                             <BookUser size={12} />
                             <p>{t('activities.teacher_view')}</p>
                         </div>
                     }
                     {maxPoints && !isUngraded &&
-                        <div className='flex bg-emerald-200/20 text-xs rounded-full space-x-1 px-2 py-0.5 font-bold outline items-center text-emerald-600 outline-1 outline-emerald-300/40'>
+                        <div className='sl-badge sl-badge-success'>
                             <BookPlus size={12} />
                             <p>{maxPoints} {t('assignments.points')}</p>
                         </div>
@@ -168,22 +165,22 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                 <div className='flex flex-wrap gap-2 items-center'>
                     {/* Auto-save status — answers persist automatically. */}
                     {autoSaveEnabled && (auto.isDirty || auto.status !== 'idle') && (
-                        <div className='flex space-x-1.5 items-center font-medium px-2 py-1 text-xs text-slate-400 sm:me-2'>
+                        <div className='flex gap-1.5 items-center font-medium px-2 py-1 text-meta text-muted-foreground sm:me-2'>
                             {auto.isBlocked ? (
                                 // Refused by policy, not a transient failure — no retry
                                 // is coming, so promising one would be a lie. The task
                                 // itself explains what needs to change (e.g. tests must
                                 // pass before the answer can be saved).
                                 <>
-                                    <TriangleAlert size={13} className='text-rose-500' />
-                                    <p className='text-rose-600'>{t('activities.autosave_blocked', { defaultValue: "Can't be saved yet" })}</p>
+                                    <TriangleAlert size={13} className='text-error' />
+                                    <p className='text-error'>{t('activities.autosave_blocked', { defaultValue: "Can't be saved yet" })}</p>
                                 </>
                             ) : auto.isError ? (
                                 // Failed save: show a distinct indicator (a retry
                                 // is already scheduled) instead of a stuck spinner.
                                 <>
-                                    <TriangleAlert size={13} className='text-amber-500' />
-                                    <p className='text-amber-600'>{t('activities.autosave_retry', { defaultValue: "Couldn't save — retrying…" })}</p>
+                                    <TriangleAlert size={13} className='text-warning' />
+                                    <p className='text-warning'>{t('activities.autosave_retry', { defaultValue: "Couldn't save — retrying…" })}</p>
                                 </>
                             ) : auto.isSaving ? (
                                 <>
@@ -195,12 +192,12 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                                 // a spinner + "Saving…" here claimed work that had not
                                 // started, which is exactly when an unmount lost it.
                                 <>
-                                    <TriangleAlert size={13} className='text-slate-400' />
+                                    <TriangleAlert size={13} className='text-muted-foreground' />
                                     <p>{t('activities.autosave_unsaved', { defaultValue: 'Unsaved changes' })}</p>
                                 </>
                             ) : (
                                 <>
-                                    <Check size={13} className='text-emerald-500' />
+                                    <Check size={13} className='text-success' />
                                     <p>{t('activities.autosaved', { defaultValue: 'Saved' })}</p>
                                 </>
                             )}
@@ -209,49 +206,52 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
 
                     {/* Teacher button */}
                     {view === 'teacher' &&
-                        <div
+                        <button
+                            type='button'
                             onClick={() => saveFC && saveFC()}
-                            className='flex px-2 py-1 cursor-pointer rounded-md space-x-2 items-center bg-linear-to-bl text-emerald-700 bg-emerald-300/20 hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 linear transition-all outline-offset-2 outline-dashed outline-emerald-500/60'>
-                            <Save size={14} />
-                            <p className='text-xs font-semibold'>{t('common.save')}</p>
-                        </div>
+                            className='sl-btn sl-btn-secondary sl-btn-sm'>
+                            <Save size={14} aria-hidden />
+                            {t('common.save')}
+                        </button>
                     }
 
                     {/* Student button - only show if authenticated and not yet submitted/graded.
                         Routed through the auto-save hook so a manual click can't race a
                         background save into a duplicate submission; disabled while saving. */}
                     {view === 'student' && isAuthenticated && canStudentSave &&
-                        <div
+                        <button
+                            type='button'
                             onClick={() => { if (!auto.isSaving) auto.saveNow() }}
-                            className={`flex px-2 py-1 rounded-md space-x-2 items-center justify-center mx-auto w-full sm:w-auto bg-linear-to-bl text-emerald-700 bg-emerald-300/20 hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 linear transition-all outline-offset-2 outline-dashed outline-emerald-500/60 ${auto.isSaving ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
-                            <Save size={14} />
-                            <p className='text-xs font-semibold'>{t('activities.save_answers', { defaultValue: 'Save answers' })}</p>
-                        </div>
+                            aria-busy={auto.isSaving}
+                            className={`sl-btn sl-btn-secondary sl-btn-sm w-full sm:w-auto ${auto.isSaving ? 'opacity-60 cursor-wait' : ''}`}>
+                            <Save size={14} aria-hidden />
+                            {t('activities.save_answers', { defaultValue: 'Save answers' })}
+                        </button>
                     }
 
                     {/* Grading controls — shared between 'grading' and 'custom-grading' views */}
                     {isGradingMode && maxPoints !== undefined && gradeCustomFC && (
                         <div className='flex flex-wrap sm:flex-nowrap w-full sm:w-auto px-0.5 py-0.5 rounded-md gap-2 sm:space-x-2 items-center'>
                             {currentPoints !== undefined && currentPoints > 0 && (
-                                <p className='font-semibold px-2 text-xs text-emerald-700 bg-emerald-50 rounded-full py-0.5'>{currentPoints}/{maxPoints} {t('assignments.points')}</p>
+                                <p className='sl-badge sl-badge-success'>{currentPoints}/{maxPoints} {t('assignments.points')}</p>
                             )}
                             <div className='flex items-center gap-1'>
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade(String(maxPoints))}
-                                    className='cursor-pointer text-meta font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors'>
+                                    className='sl-badge sl-badge-success cursor-pointer hover:opacity-80'>
                                     {t('assignments.quick_grade.full', { defaultValue: 'Full' })}
                                 </button>
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade(String(Math.round(maxPoints / 2)))}
-                                    className='cursor-pointer text-meta font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors'>
+                                    className='sl-badge sl-badge-warning cursor-pointer hover:opacity-80'>
                                     {t('assignments.quick_grade.half', { defaultValue: 'Half' })}
                                 </button>
                                 <button
                                     type='button'
                                     onClick={() => setManualGrade('0')}
-                                    className='cursor-pointer text-meta font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors'>
+                                    className='sl-badge sl-badge-error cursor-pointer hover:opacity-80'>
                                     {t('assignments.quick_grade.zero', { defaultValue: 'Zero' })}
                                 </button>
                             </div>
@@ -265,23 +265,25 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
                                     placeholder={`/${maxPoints}`}
                                     min={0}
                                     max={maxPoints}
-                                    className='w-[80px] light-shadow text-sm py-0.5 outline outline-gray-200 rounded-lg px-2'
+                                    className='sl-input w-24 text-sm'
                                     type='number'
                                 />
-                                <div
+                                <button
+                                    type='button'
                                     onClick={submitManualGrade}
-                                    className='cursor-pointer bg-orange-50 text-orange-700 hover:bg-orange-100 items-center flex rounded-md px-2 py-1 space-x-1.5 transition-colors'>
-                                    <BookPlus size={14} />
-                                    <p className='text-xs font-semibold'>{t('assignments.grade')}</p>
-                                </div>
+                                    className='sl-btn sl-btn-primary sl-btn-sm'>
+                                    <BookPlus size={14} aria-hidden />
+                                    {t('assignments.grade')}
+                                </button>
                             </div>
                             {view === 'grading' && gradeFC && (
-                                <div
+                                <button
+                                    type='button'
                                     onClick={() => gradeFC && gradeFC()}
-                                    className='cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200 items-center flex rounded-md px-2 py-1 space-x-1.5 transition-colors'>
-                                    <BookPlus size={14} />
-                                    <p className='text-xs font-semibold'>{autoGradable ? t('assignments.run_autograde') : t('assignments.grade')}</p>
-                                </div>
+                                    className='sl-btn sl-btn-secondary sl-btn-sm'>
+                                    <BookPlus size={14} aria-hidden />
+                                    {autoGradable ? t('assignments.run_autograde') : t('assignments.grade')}
+                                </button>
                             )}
                         </div>
                     )}
@@ -291,13 +293,13 @@ function AssignmentBoxUI({ type, view, currentPoints, currentFeedback, maxPoints
             {/* Per-task feedback — saved together with the manual grade. */}
             {isGradingMode && gradeCustomFC && (
                 <div className='flex items-start gap-2 mb-3 px-1'>
-                    <MessageSquare size={14} className='text-gray-400 mt-2 flex-none' />
+                    <MessageSquare size={14} className='text-muted-foreground mt-3 flex-none' />
                     <textarea
                         value={manualFeedback}
                         onChange={(e) => setManualFeedback(e.target.value)}
                         placeholder={t('assignments.task_feedback_placeholder', { defaultValue: 'Note for this task (saved with grade)' })}
                         rows={1}
-                        className='w-full px-2.5 py-1.5 text-xs text-gray-700 bg-card border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-200 placeholder:text-gray-400 resize-y'
+                        className='sl-input w-full text-sm resize-y'
                     />
                 </div>
             )}

@@ -10,7 +10,7 @@ import TaskCodeObject from '@components/Objects/Activities/Assignment/TaskTypes/
 import TaskShortAnswerObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskShortAnswerObject'
 import TaskNumberAnswerObject from '@components/Objects/Activities/Assignment/TaskTypes/TaskNumberAnswerObject'
 import toast from 'react-hot-toast';
-import { AlarmClockOff, Backpack, BookOpenCheck, Calendar, CheckCircle2, ClipboardCheck, Download, EllipsisVertical, Info, Lock, MessageSquare, RotateCcw, XCircle } from 'lucide-react';
+import { AlarmClockOff, Backpack, BookOpenCheck, Calendar, CheckCircle2, ClipboardCheck, Download, Info, Lock, MessageSquare, RotateCcw, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next';
@@ -158,19 +158,18 @@ function AssignmentStudentActivity() {
 
 
   return (
-    <div className='flex flex-col space-y-4 md:space-y-6'>
-      <div className='flex flex-col md:flex-row justify-center md:space-x-3 space-y-3 md:space-y-0 items-center'>
-        <div className='text-xs h-fit flex space-x-3 items-center'>
-          <div className='flex gap-2 py-2 px-4 md:px-5 h-fit text-sm text-slate-700 bg-slate-100/5 rounded-full nice-shadow items-center'>
+    <div className='flex flex-col gap-4 md:gap-6'>
+      <div className='flex flex-wrap justify-center gap-2 items-center'>
+        <div className='flex items-center'>
+          <div className='sl-badge min-h-8 px-3 text-sm text-foreground'>
             <Backpack size={14} className="md:size-[14px]" />
             <p className='font-semibold'>{roleLabel}</p>
           </div>
         </div>
         <div>
           <div className='flex gap-2 items-center flex-wrap justify-center'>
-            <EllipsisVertical className='text-slate-400 hidden md:block' size={18} />
-            {!isUngraded && passMark !== null && (
-              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 font-semibold nice-shadow'>
+                        {!isUngraded && passMark !== null && (
+              <div className='sl-badge min-h-8 px-3'>
                 <CheckCircle2 size={12} />
                 <span>Pass at {passMark}%{maxRetries === 0 ? ' · unlimited tries' : ''}</span>
               </div>
@@ -180,7 +179,7 @@ function AssignmentStudentActivity() {
                 still enforces it. */}
             {dueDateRaw && (
               <div className='flex gap-2 items-center'>
-                <div className={`flex gap-1 md:space-x-2 text-xs items-center ${isPastDue ? 'text-rose-500' : 'text-slate-400'}`}>
+                <div className={`sl-badge min-h-8 px-3 ${isPastDue ? 'sl-badge-error' : ''}`}>
                   <Calendar size={14} />
                   <p className='font-semibold'>{t('assignments.due_date')}</p>
                   <p className='font-semibold'>{dueDateLabel}</p>
@@ -188,13 +187,13 @@ function AssignmentStudentActivity() {
               </div>
             )}
             {isUngraded && (
-              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 font-semibold nice-shadow'>
+              <div className='sl-badge sl-badge-info min-h-8 px-3'>
                 <ClipboardCheck size={12} />
                 <span>{t('assignments.ungraded_badge', { defaultValue: 'Not graded' })}</span>
               </div>
             )}
             {showAttemptBadge && (
-              <div className='flex gap-1.5 items-center text-xs px-2.5 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 font-semibold nice-shadow'>
+              <div className='sl-badge min-h-8 px-3'>
                 <RotateCcw size={12} />
                 <span>
                   {maxRetries
@@ -215,13 +214,13 @@ function AssignmentStudentActivity() {
       {/* Overdue notice. The server 403s every save/submit once the deadline has
           passed, so say it plainly instead of letting auto-save fail silently. */}
       {isPastDue && !isGraded && (
-        <div className='flex items-start gap-3 p-4 rounded-md bg-rose-50/70 border border-rose-200/70 nice-shadow'>
-          <AlarmClockOff size={16} className='shrink-0 mt-0.5 text-rose-500' />
+        <div role='alert' className='flex items-start gap-3 p-4 rounded-xl bg-error-surface border border-error/30'>
+          <AlarmClockOff size={16} className='shrink-0 mt-0.5 text-error' />
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm font-semibold text-rose-700'>
+            <p className='text-sm font-semibold text-error'>
               {t('assignments.past_due_title', { defaultValue: 'Deadline passed' })}
             </p>
-            <p className='text-xs leading-relaxed text-rose-600/90'>
+            <p className='text-sm leading-relaxed text-foreground'>
               {t('assignments.past_due_description', {
                 date: dueDateLabel,
                 defaultValue: 'This assignment was due on {{date}}. Answers can no longer be saved or submitted for grading.',
@@ -232,14 +231,14 @@ function AssignmentStudentActivity() {
       )}
 
       {assignments?.assignment_object?.description && (
-        <div className='flex flex-col space-y-2 p-4 md:p-6 bg-slate-100/30 rounded-md nice-shadow'>
+        <div className='flex flex-col p-4 md:p-5 rounded-xl border border-border bg-muted/40'>
           <div className='flex flex-col space-y-3'>
-            <div className='flex items-center gap-2 text-slate-700'>
-              <Info size={16} className="text-slate-500" />
+            <div className='flex items-center gap-2 text-foreground'>
+              <Info size={16} className="text-muted-foreground" />
               <h3 className='text-sm font-semibold'>{t('assignments.assignment_description')}</h3>
             </div>
             <div className='ps-6'>
-              <p className='text-sm leading-relaxed text-slate-600'>{assignments.assignment_object.description}</p>
+              <p className='text-ui text-muted-foreground'>{assignments.assignment_object.description}</p>
             </div>
           </div>
         </div>
@@ -250,13 +249,13 @@ function AssignmentStudentActivity() {
           the document are withheld by the API until the learner hands their
           work in, so there is nothing here to read early. */}
       {hasSolution && !solutionUnlocked && (
-        <div className='flex items-start gap-3 p-4 rounded-md bg-slate-50 border border-slate-200/70 nice-shadow'>
-          <Lock size={16} className='shrink-0 mt-0.5 text-slate-400' />
+        <div className='flex items-start gap-3 p-4 rounded-xl border border-border bg-muted/40'>
+          <Lock size={16} className='shrink-0 mt-0.5 text-muted-foreground' />
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm font-semibold text-slate-700'>
+            <p className='text-sm font-semibold text-foreground'>
               {t('assignments.solution_locked_title', { defaultValue: 'Model answer locked' })}
             </p>
-            <p className='text-xs leading-relaxed text-slate-500'>
+            <p className='text-sm leading-relaxed text-muted-foreground'>
               {solutionRevealsOnSubmission
                 ? t('assignments.solution_locked_on_submission', { defaultValue: 'Hand your work in and the model answer unlocks right away.' })
                 : t('assignments.solution_locked_after_grading', { defaultValue: 'The model answer unlocks once your work has been graded.' })}
@@ -266,16 +265,16 @@ function AssignmentStudentActivity() {
       )}
 
       {solutionUnlocked && (solutionText || solutionFile) && (
-        <div className='flex flex-col space-y-3 p-4 md:p-6 rounded-md bg-teal-50/60 border border-teal-200/70 nice-shadow'>
-          <div className='flex items-center gap-2 text-teal-800'>
-            <BookOpenCheck size={16} className='text-teal-600' />
+        <div className='flex flex-col gap-3 p-4 md:p-5 rounded-xl bg-success-surface border border-success/30'>
+          <div className='flex items-center gap-2 text-foreground'>
+            <BookOpenCheck size={16} className='text-success' />
             <h3 className='text-sm font-semibold'>
               {t('assignments.solution_title', { defaultValue: 'Model answer' })}
             </h3>
           </div>
           <div className='ps-6 flex flex-col space-y-3'>
             {solutionText && (
-              <p className='text-sm leading-relaxed text-slate-700 whitespace-pre-wrap'>{solutionText}</p>
+              <p className='text-reading text-foreground whitespace-pre-wrap'>{solutionText}</p>
             )}
             {solutionFile && (
               <Link
@@ -288,9 +287,9 @@ function AssignmentStudentActivity() {
                 )}
                 target='_blank'
                 download={true}
-                className='px-3 py-1.5 w-fit flex items-center nice-shadow bg-card text-teal-800 rounded-full space-x-2 cursor-pointer'>
-                <Download size={13} />
-                <p className='text-xs font-semibold'>
+                className='sl-btn sl-btn-secondary sl-btn-sm w-fit'>
+                <Download size={14} aria-hidden />
+                <p>
                   {t('assignments.solution_download', { defaultValue: 'Download the model answer' })}
                 </p>
               </Link>
@@ -308,19 +307,20 @@ function AssignmentStudentActivity() {
         const taskPassed = taskPercentage >= passingThreshold;
 
         return (
-          <div className='flex flex-col space-y-2' key={task.assignment_task_uuid}>
-            <div className='flex flex-col md:flex-row md:justify-between py-2 space-y-2 md:space-y-0'>
-              <div className='flex flex-wrap space-x-2 font-semibold text-slate-800'>
-                <p>{t('assignments.task')} {index + 1} : </p>
-                <p className='text-slate-500 break-words'>{task.description}</p>
+          <div className='flex flex-col gap-3' key={task.assignment_task_uuid}>
+            <div className='flex flex-col md:flex-row md:justify-between md:items-center gap-2'>
+              <div className='flex flex-wrap items-baseline gap-x-2'>
+                <h3 className='sl-telemetry text-link'>{t('assignments.task')} {index + 1}</h3>
+                <p className='text-ui font-medium text-foreground break-words'>{task.description}</p>
               </div>
               <div className='flex flex-wrap gap-2'>
-                {task.hint && <div
+                {task.hint && <button
+                  type='button'
                   onClick={() => toast(task.hint, { icon: 'ℹ️' })}
-                  className='px-3 py-1 flex items-center nice-shadow bg-amber-50/40 text-amber-900 rounded-full space-x-2 cursor-pointer'>
-                  <Info size={13} />
-                  <p className='text-xs font-semibold'>{t('assignments.hint')}</p>
-                </div>}
+                  className='sl-btn sl-btn-secondary sl-btn-sm'>
+                  <Info size={14} aria-hidden className='text-warning' />
+                  {t('assignments.hint')}
+                </button>}
                 {task.reference_file && <Link
                   href={getTaskRefFileDir(
                     org?.org_uuid,
@@ -332,63 +332,60 @@ function AssignmentStudentActivity() {
                   )}
                   target='_blank'
                   download={true}
-                  className='px-3 py-1 flex items-center nice-shadow bg-cyan-50/40 text-cyan-900 rounded-full space-x-1 md:space-x-2 cursor-pointer'>
-                  <Download size={13} />
+                  className='sl-btn sl-btn-secondary sl-btn-sm'>
+                  <Download size={14} aria-hidden />
                   <div className='flex items-center space-x-1 md:space-x-2'>
                     {task.reference_file && (
                       <span className='relative'>
-                        <span className='absolute end-0 top-0 block h-2 w-2 rounded-full ring-2 ring-white bg-green-400'></span>
+                        <span className='absolute end-0 top-0 block h-2 w-2 rounded-full ring-2 ring-card bg-success'></span>
                       </span>
                     )}
-                    <p className='text-xs font-semibold'>{t('assignments.reference_document')}</p>
+                    <p>{t('assignments.reference_document')}</p>
                   </div>
                 </Link>}
               </div>
             </div>
             {isGraded && !isUngraded && taskSubmission && (
-              <div className={`relative overflow-hidden rounded-xl nice-shadow border ${
+              <div className={`relative overflow-hidden rounded-xl border ${
                 taskPassed
-                  ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200/60'
-                  : 'bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 border-rose-200/60'
+                  ? 'bg-success-surface border-success/30'
+                  : 'bg-error-surface border-error/30'
               }`}>
-                <div className={`absolute -top-10 -end-10 w-32 h-32 rounded-full blur-3xl opacity-40 ${
-                  taskPassed ? 'bg-emerald-300' : 'bg-rose-300'
-                }`} />
                 <div className='relative p-4 flex flex-col gap-3'>
                   <div className='flex items-center justify-between gap-3'>
                     <div className='flex items-center gap-2.5'>
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-card nice-shadow ${
-                        taskPassed ? 'text-emerald-600' : 'text-rose-600'
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-card border border-border ${
+                        taskPassed ? 'text-success' : 'text-error'
                       }`}>
                         {taskPassed ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
                       </div>
                       <div className='flex flex-col leading-tight'>
-                        <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${
-                          taskPassed ? 'text-emerald-700' : 'text-rose-700'
+                        <span className={`sl-telemetry ${
+                          taskPassed ? 'text-success' : 'text-error'
                         }`}>
                           {taskPassed ? t('assignments.task_passed') : t('assignments.task_not_passed')}
                         </span>
-                        <span className='text-[11px] text-slate-500 font-medium'>
+                        <span className='text-meta text-muted-foreground'>
                           {taskPercentage}% {t('assignments.score')}
                         </span>
                       </div>
                     </div>
-                    <div className='flex items-baseline gap-1 px-3 py-1.5 rounded-lg bg-card nice-shadow'>
-                      <span className='text-xl font-black text-slate-900 leading-none tabular-nums'>{taskGrade}</span>
-                      <span className='text-xs font-semibold text-slate-400 leading-none'>/ {taskMax}</span>
+                    <div className='flex items-baseline gap-1 px-3 py-1.5 rounded-lg bg-card border border-border'>
+                      <span className='font-display text-xl font-semibold text-foreground leading-none tabular-nums'>{taskGrade}</span>
+                      <span className='text-meta font-semibold text-muted-foreground leading-none'>/ {taskMax}</span>
                     </div>
                   </div>
                   {/* Progress fill */}
-                  <div className='h-1.5 w-full rounded-full bg-card/70 overflow-hidden'>
+                  <div className='h-1.5 w-full rounded-full bg-card overflow-hidden'>
                     <div
-                      className={`h-full rounded-full ${taskPassed ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                      className={`h-full rounded-full ${taskPassed ? 'bg-success' : 'bg-error'}`}
                       style={{ width: `${Math.max(0, Math.min(100, taskPercentage))}%` }}
                     />
                   </div>
                   {taskFeedback && (
-                    <div className='flex items-start gap-2 p-3 rounded-lg bg-card/70 border border-white'>
-                      <MessageSquare size={13} className='shrink-0 mt-0.5 text-slate-400' />
-                      <p className='text-xs text-slate-700 leading-relaxed whitespace-pre-wrap'>{taskFeedback}</p>
+                    <div className='flex items-start gap-2 p-3 rounded-lg bg-card border border-border'>
+                      <MessageSquare size={14} className='shrink-0 mt-0.5 text-muted-foreground' />
+                      <p className='text-sm text-foreground leading-relaxed whitespace-pre-wrap'>{taskFeedback}</p>
                     </div>
                   )}
                 </div>

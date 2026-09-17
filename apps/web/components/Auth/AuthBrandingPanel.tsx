@@ -188,7 +188,10 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                 )}>
                   {/* Organization logo */}
                   <Link prefetch href={getUriWithOrg(org?.slug, '/')}>
-                    <div className="w-24 h-24 rounded-2xl ring-1 ring-inset ring-white/15 bg-white flex items-center justify-center overflow-hidden shadow-overlay">
+                    <div className={cn(
+                      "w-24 h-24 rounded-2xl ring-1 ring-inset flex items-center justify-center overflow-hidden shadow-overlay",
+                      org?.logo_image ? "bg-white ring-white/15" : "bg-white/5 ring-white/20 backdrop-blur-sm"
+                    )}>
                       {org?.logo_image ? (
                         <img
                           src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
@@ -196,7 +199,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                           className="w-full h-full object-contain p-3"
                         />
                       ) : (
-                        <StarLabLogo className="h-auto w-[78%] text-[#0b1424]" />
+                        <StarLabLogo className="h-auto w-[78%] text-white" />
                       )}
                     </div>
                   </Link>
