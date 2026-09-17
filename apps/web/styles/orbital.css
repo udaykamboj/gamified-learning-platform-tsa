@@ -754,6 +754,15 @@
     border-color: var(--sl-line);
   }
 
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
   .tabular-nums,
   time {
     font-variant-numeric: tabular-nums;

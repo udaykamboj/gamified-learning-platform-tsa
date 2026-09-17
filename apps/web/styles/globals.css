@@ -231,14 +231,8 @@
     font-family: var(--font-arabic), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   }
 
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  button {
-    @apply cursor-pointer;
-  }
+  /* Link and button resets live in @layer base (see orbital.css) so
+     component classes such as .sl-btn-primary can set their own color. */
 
   * {
     box-sizing: border-box;

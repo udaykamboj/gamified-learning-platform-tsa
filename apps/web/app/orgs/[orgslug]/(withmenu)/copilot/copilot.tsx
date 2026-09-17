@@ -391,7 +391,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 ">
               <button
                 onClick={handleNewChat}
-                className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                className="sl-btn sl-btn-primary min-h-9 px-3"
               >
                 <Plus size={14} weight="bold" />
                 <span>New Chat</span>

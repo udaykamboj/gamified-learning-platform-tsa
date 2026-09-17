@@ -37,7 +37,7 @@ function CommunityCard(props: PropsType) {
     >
       <Link
         href={communityLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        className="block relative aspect-video overflow-hidden bg-muted"
       >
         {props.community.thumbnail_image && org?.org_uuid ? (
           <img
@@ -50,13 +50,13 @@ function CommunityCard(props: PropsType) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 gap-2">
+          <div className="flex flex-col items-center justify-center h-full w-full sl-atmosphere text-muted-foreground gap-2">
             <Users size={40} strokeWidth={1.5} />
           </div>
         )}
       </Link>
 
-      <div className="p-3 flex flex-col space-y-1.5">
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         <Link
           href={communityLink}
           className="text-card-title font-semibold text-foreground line-clamp-1"
@@ -65,22 +65,22 @@ function CommunityCard(props: PropsType) {
         </Link>
 
         {props.community.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-ui text-muted-foreground line-clamp-2">
             {props.community.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-gray-500">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
             <MessageCircle size={12} />
-            <span className="text-meta font-semibold">
+            <span className="text-meta">
               {props.community.course_id ? 'Course Q&A' : 'Everyone'}
             </span>
           </div>
 
           <Link
             href={communityLink}
-            className="sl-telemetry flex items-center gap-1 text-gray-400 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-1 text-sm font-semibold text-link hover:underline underline-offset-4"
           >
             {variant === 'dashboard' && <Shield size={10} />}
             {variant === 'dashboard' ? 'Moderate' : t('dashboard.courses.communities.card.view_community')}

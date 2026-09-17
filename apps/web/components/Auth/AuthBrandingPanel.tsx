@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import starlabIcon from 'public/starlab_bigicon_1.png'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 import { cn } from '@/lib/utils'
@@ -198,14 +196,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                           className="w-full h-full object-contain p-3"
                         />
                       ) : (
-                        <Image
-                          quality={100}
-                          width={96}
-                          height={96}
-                          src={starlabIcon}
-                          alt="StarLab"
-                          className="object-contain"
-                        />
+                        <StarLabLogo className="h-auto w-[78%] text-[#0b1424]" />
                       )}
                     </div>
                   </Link>

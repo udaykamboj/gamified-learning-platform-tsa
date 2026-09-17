@@ -98,17 +98,17 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
       {/* Banner */}
-      <div className="h-48 w-full bg-gray-100 rounded-t-xl mb-0 relative overflow-hidden">
+      <div className="h-48 w-full sl-atmosphere rounded-t-3xl border border-b-0 border-border mb-0 relative overflow-hidden">
         {/* Optional banner content */}
       </div>
       
       {/* Profile Content */}
-      <div className="bg-card rounded-b-xl nice-shadow p-8 relative">
+      <div className="bg-card rounded-b-3xl border border-border shadow-card p-6 md:p-8 relative">
         {/* Avatar Positioned on the banner */}
         <div className="absolute -top-24 start-8">
-          <div className="rounded-xl overflow-hidden shadow-lg border-4 border-white">
+          <div className="rounded-full overflow-hidden shadow-overlay border-4 border-card">
             <UserAvatar
               width={150}
               avatar_url={userData.avatar_image ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image) : ''}
@@ -139,12 +139,12 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
         </div>
 
         {/* Profile Content with right padding to avoid overlap */}
-        <div className="mt-20 md:mt-14">
+        <div className="mt-24">
           <div className="flex flex-col md:flex-row gap-12">
             {/* Left column with details - aligned with avatar */}
-            <div className="w-full md:w-1/6 ps-2">
+            <div className="w-full md:w-64 md:shrink-0">
               {/* Name */}
-              <h1 className="text-[32px] font-bold mb-8">
+              <h1 className="sl-page-title mb-6 break-words">
                 {userData.first_name} {userData.last_name}
               </h1>
 
@@ -155,18 +155,18 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                     <div className="flex-shrink-0">
                       <IconComponent iconName={detail.icon} />
                     </div>
-                    <span className="text-gray-700 text-[15px] font-medium">{detail.text}</span>
+                    <span className="text-ui text-foreground">{detail.text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Right column with about and related content */}
-            <div className="w-full md:w-4/6">
+            <div className="min-w-0 flex-1">
               <div className="mb-8">
                 <h2 className="sl-section-title mb-4">{t('common.about')}</h2>
                 {userData.bio ? (
-                  <p className="text-gray-700">{userData.bio}</p>
+                  <p className="text-reading text-foreground">{userData.bio}</p>
                 ) : (
                   <p className="text-gray-500 italic">{t('user.no_biography')}</p>
                 )}
@@ -215,7 +215,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                              className="flex items-center space-x-2 text-link hover:underline underline-offset-4"
                             >
                               <LinkIcon className="w-4 h-4" />
                               <span>{link.title}</span>
