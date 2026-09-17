@@ -232,7 +232,7 @@ export default function PlanUsage({
 
       {/* Free plan upgrade prompt */}
       {!subscription && !subLoading && currentPlanId === 'free' && (
-        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+        <div className="sl-card overflow-hidden">
           <div className="px-6 py-6 flex items-center justify-between gap-6 flex-wrap">
             <div className="flex items-center gap-4">
               {plan && (
@@ -262,7 +262,7 @@ export default function PlanUsage({
 
       {/* Non-Stripe managed plan (e.g. enterprise) */}
       {!subscription && !subLoading && currentPlanId !== 'free' && (
-        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+        <div className="sl-card overflow-hidden">
           <div className="px-6 py-6 flex items-center justify-between gap-6 flex-wrap">
             <div className="flex items-center gap-4">
               {plan && (
@@ -296,7 +296,7 @@ export default function PlanUsage({
       {subscription && (
         <div className="grid md:grid-cols-3 gap-5">
           {/* Plan card */}
-          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+          <div className="sl-card overflow-hidden">
             <div className="px-5 py-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
@@ -362,7 +362,7 @@ export default function PlanUsage({
           </div>
 
           {/* Billing card */}
-          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+          <div className="sl-card overflow-hidden">
             <div className="px-5 py-4 border-b border-border">
               <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
                 {t('billing.billing', { defaultValue: 'Billing' })}
@@ -396,7 +396,7 @@ export default function PlanUsage({
 
           {/* Included features */}
           {plan && plan.features.length > 0 && (
-            <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+            <div className="sl-card overflow-hidden">
               <div className="px-5 py-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <p className="text-xs font-semibold text-foreground/35 uppercase tracking-wider">
@@ -433,7 +433,7 @@ export default function PlanUsage({
       />
 
       {/* Usage breakdown */}
-      <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+      <div className="sl-card overflow-hidden">
         <div className="px-6 py-5 border-b border-border">
           <h2 className="font-bold text-base tracking-tight text-foreground">
             {t('billing.usage', { defaultValue: 'Usage' })}
@@ -598,7 +598,7 @@ export default function PlanUsage({
 
       {/* Add-ons (paid plans only) */}
       {!subLoading && currentPlanId !== 'free' && (
-        <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+        <div className="sl-card overflow-hidden">
           <div className="px-6 py-5 border-b border-border">
             <h2 className="font-bold text-base tracking-tight text-foreground">
               {t('billing.addons', { defaultValue: 'Add-ons' })}

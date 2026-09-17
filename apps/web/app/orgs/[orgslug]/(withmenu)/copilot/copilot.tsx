@@ -386,7 +386,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           onClick={() => setSidebarOpen(false)}
         />
         <div className="fixed inset-y-0 start-0 z-50 w-[280px] p-3 md:relative md:inset-auto md:z-auto md:flex-shrink-0 md:my-5 md:me-3 md:p-0">
-          <div className="flex flex-col h-full w-full bg-card rounded-2xl nice-shadow overflow-hidden md:mt-0 mt-[72px]">
+          <div className="flex flex-col h-full w-full sl-card overflow-hidden md:mt-0 mt-[72px]">
             {/* Sidebar header */}
             <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 ">
               <button
@@ -446,7 +446,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       )}
 
       {/* Main chat area */}
-      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 bg-card rounded-2xl nice-shadow overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 sl-card overflow-hidden">
         {/* Top bar */}
         {(aichatUuid && currentSessionTitle) ? (
           <ChatTopBar

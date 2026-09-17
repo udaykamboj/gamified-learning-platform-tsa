@@ -312,7 +312,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     // User already enrolled / started — show "you own this" notice + leave button
     if (isStarted) {
       return (
-        <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
+        <div className="sl-card overflow-hidden p-4">
           <div className="space-y-4">
             <div className="p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">

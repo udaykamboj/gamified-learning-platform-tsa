@@ -120,7 +120,7 @@ export default function PlaygroundViewClient({
 
             {/* Thumbnail */}
             {thumbnailUrl && (
-              <div className="bg-card nice-shadow rounded-lg overflow-hidden">
+              <div className="sl-card overflow-hidden">
                 <img
                   src={thumbnailUrl}
                   alt={playground.name}
@@ -130,7 +130,7 @@ export default function PlaygroundViewClient({
             )}
 
             {/* Info card */}
-            <div className="bg-card nice-shadow rounded-lg overflow-hidden">
+            <div className="sl-card overflow-hidden">
               <div className="p-3 border-b border-gray-100">
                 <p className="sl-telemetry text-gray-400 mb-2">{t('playgrounds.view.about')}</p>
                 <h1 className="text-sm font-bold text-gray-900 leading-snug">
@@ -204,7 +204,7 @@ export default function PlaygroundViewClient({
             </div>
 
             {/* Reactions card */}
-            <div className="bg-card nice-shadow rounded-lg p-3">
+            <div className="sl-card p-3">
               <p className="sl-telemetry text-gray-400 mb-2.5">
                 {t('playgrounds.view.reactions')}
               </p>
@@ -217,7 +217,7 @@ export default function PlaygroundViewClient({
         <div className="flex-1 min-w-0">
           <div
             ref={iframeContainerRef}
-            className="relative bg-card nice-shadow rounded-lg overflow-hidden"
+            className="relative sl-card overflow-hidden"
             style={{ height: 'calc(100vh - 200px)', minHeight: 480 }}
           >
             {/* Toolbar — top right of preview */}

@@ -114,7 +114,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
 
             {/* User strip */}
             {isAuthenticated && (
-              <div className="w-full mb-6 flex items-center justify-between bg-card rounded-2xl nice-shadow px-4 py-3">
+              <div className="w-full mb-6 flex items-center justify-between sl-card px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <UserAvatar border="border-2" rounded="rounded-full" width={36} />
                   <div className="flex flex-col min-w-0">
@@ -204,7 +204,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
               )}
 
               {isAuthenticated && orgs && orgs.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 bg-card rounded-2xl nice-shadow">
+                <div className="flex flex-col items-center justify-center py-14 px-6 sl-card">
                   <TentTree className="text-foreground/10" size={64} />
                   <p className="mt-4 text-sm font-semibold text-foreground/50 text-center">
                     {t('common.no_orgs_message')}
@@ -318,7 +318,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
   }
 
   return (
-    <div className="relative flex items-center p-4 bg-card rounded-2xl nice-shadow hover:shadow-lg transition-all group">
+    <div className="relative flex items-center p-4 sl-card hover:shadow-lg transition-all group">
       <Link
         href="/dashboard"
         onClick={(event) => {

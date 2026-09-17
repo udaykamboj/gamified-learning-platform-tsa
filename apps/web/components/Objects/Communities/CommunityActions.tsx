@@ -23,7 +23,7 @@ export function CommunityActions({
 
   const renderStatsSection = () => {
     return (
-      <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
+      <div className="relative sl-card overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{

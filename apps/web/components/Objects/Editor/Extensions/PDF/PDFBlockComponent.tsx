@@ -114,7 +114,7 @@ function PDFBlockComponent(props: any) {
     return (
       <NodeViewWrapper className="block-pdf">
         <div className="bg-neutral-50 rounded-xl px-5 py-4 nice-shadow">
-          <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
+          <div className="flex items-center justify-center gap-3 py-8 sl-card">
             <FileText weight="duotone" className="text-neutral-300" size={32} />
             <p className="text-neutral-500">{t('editor.blocks.pdf_block.no_pdf')}</p>
           </div>

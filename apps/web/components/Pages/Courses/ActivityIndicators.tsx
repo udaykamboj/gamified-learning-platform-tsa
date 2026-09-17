@@ -95,7 +95,7 @@ const ActivityTooltipContent = memo(({
 }) => {
   const { t } = useTranslation();
   return (
-  <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+  <div className="sl-card py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
     <div className="flex items-center gap-2">
       <ActivityTypeIcon activityType={activity.activity_type} activitySubType={activity.activity_sub_type} />
       <span className="text-sm text-gray-700">{activity.name}</span>
@@ -133,7 +133,7 @@ const ChapterTooltipContent = memo(({
 }) => {
   const { t } = useTranslation();
   return (
-  <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+  <div className="sl-card py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium text-gray-900">{t('courses.chapter')} {chapterNumber}</span>
       <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
@@ -165,7 +165,7 @@ const CertificationBadge = memo(({
     sideOffset={8}
     unstyled
     content={
-      <div className="bg-card rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+      <div className="sl-card py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
         <div className="flex items-center gap-2">
           <Trophy size={16} className="text-yellow-500" />
           <span className="text-sm font-medium text-gray-900">

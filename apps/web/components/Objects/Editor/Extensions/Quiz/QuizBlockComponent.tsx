@@ -353,7 +353,7 @@ function QuizBlockComponent(props: any) {
 
         {/* Empty state */}
         {totalQuestions === 0 && (
-          <div className="bg-card rounded-lg nice-shadow flex items-center justify-center gap-2 py-6">
+          <div className="sl-card flex items-center justify-center gap-2 py-6">
             <QuestionIcon weight="duotone" className="text-neutral-300" size={20} />
             <p className="text-xs text-neutral-500">
               {isEditable

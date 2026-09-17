@@ -79,7 +79,7 @@ const CommunityClient = ({
             </div>
 
             {/* Discussions List */}
-            <div className="bg-card nice-shadow rounded-lg overflow-hidden">
+            <div className="sl-card overflow-hidden">
               <DiscussionList
                 communityUuid={community.community_uuid}
                 orgslug={orgslug}

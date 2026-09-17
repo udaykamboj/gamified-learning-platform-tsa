@@ -93,7 +93,7 @@ function ActivityContentSkeleton({ activityType }: { activityType?: string }) {
 
   if (isDocument) {
     return (
-      <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-3" style={{ minHeight: '520px' }}>
+      <div className="sl-card p-3 sm:p-7 animate-pulse space-y-3" style={{ minHeight: '520px' }}>
         <div className="h-4 bg-gray-100 rounded w-full" />
         <div className="h-4 bg-gray-100 rounded w-[94%]" />
         <div className="h-4 bg-gray-100 rounded w-[88%]" />
@@ -106,7 +106,7 @@ function ActivityContentSkeleton({ activityType }: { activityType?: string }) {
   }
 
   return (
-    <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
+    <div className="sl-card p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
       <div className="h-7 bg-gray-100 rounded w-2/5 mb-2" />
       <div className="h-4 bg-gray-100 rounded w-full" />
       <div className="h-4 bg-gray-100 rounded w-[92%]" />
@@ -477,7 +477,7 @@ function ActivityClient(props: ActivityClientProps) {
             </div>
           </div>
           {/* Content box placeholder */}
-          <div className="bg-card nice-shadow rounded-lg p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
+          <div className="sl-card p-3 sm:p-7 animate-pulse space-y-4" style={{ minHeight: '420px' }}>
             <div className="h-7 bg-gray-100 rounded w-2/5 mb-2" />
             <div className="h-4 bg-gray-100 rounded w-full" />
             <div className="h-4 bg-gray-100 rounded w-[92%]" />

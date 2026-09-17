@@ -214,7 +214,7 @@ function UserBlockComponent(props: any) {
     return (
       <NodeViewWrapper className="block-user">
         <div className="bg-neutral-50 rounded-xl px-5 py-4 nice-shadow">
-          <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
+          <div className="flex items-center justify-center gap-3 py-8 sl-card">
             <User weight="duotone" className="text-neutral-300" size={32} />
             <span className="text-neutral-500">{t('editor.blocks.user_block.no_user')}</span>
           </div>
@@ -306,7 +306,7 @@ function UserBlockComponent(props: any) {
         </div>
 
         {/* User Card */}
-        <div className="bg-card rounded-lg nice-shadow overflow-hidden">
+        <div className="sl-card overflow-hidden">
           {/* User Info */}
           <div className="p-5">
             <div className="flex items-start gap-4">

@@ -94,7 +94,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
             transition={{ duration: 0.35, ease }}
             className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="bg-card rounded-2xl nice-shadow relative overflow-hidden">
+            <div className="sl-card relative overflow-hidden">
               {/* Close button */}
               <button
                 onClick={onClose}

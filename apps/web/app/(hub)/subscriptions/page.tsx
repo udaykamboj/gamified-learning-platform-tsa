@@ -256,7 +256,7 @@ function SubscriptionsClient() {
               )}
 
               {!showLoader && isAuthenticated && Array.isArray(orgs) && orgs.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 bg-card rounded-2xl nice-shadow">
+                <div className="flex flex-col items-center justify-center py-14 px-6 sl-card">
                   <TentTree className="text-foreground/10" size={64} />
                   <p className="mt-4 text-sm font-semibold text-foreground/50 text-center">
                     {t('common.no_orgs_message', {

@@ -47,7 +47,7 @@ export default function BillingSummary({
   const dueDate = formatDate(invoice.nextPaymentAttempt ?? invoice.periodEnd, i18n.language)
 
   return (
-    <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       <div className="px-6 py-5 border-b border-border flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Receipt size={15} className="text-foreground/40" />

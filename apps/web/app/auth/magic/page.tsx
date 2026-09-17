@@ -84,27 +84,27 @@ export default function MagicLinkConsumePage() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md mx-auto p-6">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="sl-card text-center w-full max-w-md p-6 md:p-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-amber-100 rounded-full">
-              <AlertTriangle className="w-12 h-12 text-amber-600" />
+            <div className="p-3 bg-warning-surface rounded-full">
+              <AlertTriangle className="w-10 h-10 text-warning" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+          <h1 className="sl-section-title mb-2">
             This link isn’t valid anymore
           </h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-ui text-muted-foreground mb-6">{error}</p>
           <div className="space-y-3">
             <Link
               href="/login"
-              className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary transition-colors"
+              className="sl-btn sl-btn-primary w-full"
             >
               Request a new link
             </Link>
             <Link
               href="/"
-              className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+              className="sl-btn sl-btn-secondary w-full"
             >
               Go Home
             </Link>
@@ -116,26 +116,26 @@ export default function MagicLinkConsumePage() {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="sl-card text-center w-full max-w-md p-6 md:p-8">
           <div className="flex justify-center mb-4">
-            <Loader2 className="w-12 h-12 text-green-600 animate-spin" />
+            <Loader2 className="w-10 h-10 text-success animate-spin" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">Success!</h1>
-          <p className="text-gray-500">Redirecting you now...</p>
+          <h1 className="sl-section-title mb-2">Success!</h1>
+          <p className="text-ui text-muted-foreground">Redirecting you now...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="sl-card text-center w-full max-w-md p-6 md:p-8">
         <div className="flex justify-center mb-4">
-          <Loader2 className="w-12 h-12 text-gray-600 animate-spin" />
+          <Loader2 className="w-10 h-10 text-muted-foreground animate-spin" />
         </div>
-        <h1 className="text-xl font-semibold text-gray-800 mb-2">Signing you in...</h1>
-        <p className="text-gray-500">Please wait while we verify your link.</p>
+        <h1 className="sl-section-title mb-2">Signing you in...</h1>
+        <p className="text-ui text-muted-foreground">Please wait while we verify your link.</p>
       </div>
     </div>
   )

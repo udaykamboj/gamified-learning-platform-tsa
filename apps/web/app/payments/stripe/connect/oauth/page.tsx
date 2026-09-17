@@ -66,7 +66,7 @@ function StripeConnectCallbackInner() {
   }, [session, router, searchParams])
 
   return (
-    <div className="h-screen w-full bg-muted flex items-center justify-center">
+    <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
       <div className="flex flex-col items-center">
         <div className="mb-10">
           <Image
@@ -82,16 +82,16 @@ function StripeConnectCallbackInner() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-card p-8 rounded-xl nice-shadow max-w-md w-full mx-4"
+          className="sl-card p-8 max-w-md w-full"
         >
           <div className="flex flex-col items-center text-center space-y-4">
             {status === 'processing' && (
               <>
-                <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+                <Loader2 className="h-10 w-10 text-primary animate-spin" />
                 <h2 className="sl-section-title">
                   {t('payments.stripe_completing')}
                 </h2>
-                <p className="text-gray-500">
+                <p className="text-ui text-muted-foreground">
                   {t('payments.stripe_wait')}
                 </p>
               </>
@@ -99,11 +99,11 @@ function StripeConnectCallbackInner() {
 
             {status === 'success' && (
               <>
-                <div className="bg-green-100 p-3 rounded-full">
-                  <Check className="h-8 w-8 text-green-600" />
+                <div className="bg-success-surface p-3 rounded-full">
+                  <Check className="h-8 w-8 text-success" />
                 </div>
                 <h2 className="sl-section-title">{message}</h2>
-                <p className="text-gray-500">
+                <p className="text-ui text-muted-foreground">
                   {t('payments.stripe_return')}
                 </p>
               </>
@@ -111,11 +111,11 @@ function StripeConnectCallbackInner() {
 
             {status === 'error' && (
               <>
-                <div className="bg-red-100 p-3 rounded-full">
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                <div className="bg-error-surface p-3 rounded-full">
+                  <AlertTriangle className="h-8 w-8 text-error" />
                 </div>
                 <h2 className="sl-section-title">{message}</h2>
-                <p className="text-gray-500">
+                <p className="text-ui text-muted-foreground">
                   {t('payments.stripe_retry')}
                 </p>
               </>
@@ -130,8 +130,8 @@ function StripeConnectCallbackInner() {
 export default function StripeConnectCallback() {
   return (
     <Suspense fallback={
-      <div className="h-screen w-full bg-muted flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+      <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
       </div>
     }>
       <StripeConnectCallbackInner />

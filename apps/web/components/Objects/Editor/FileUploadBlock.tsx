@@ -67,7 +67,7 @@ function FileUploadBlock({
 
   if (!isEditable && isEmpty)
     return (
-      <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
+      <div className="flex items-center justify-center gap-3 py-8 sl-card">
         {<Icon className="text-slate-300" size={32} />}
         <p className="text-slate-500">No file available for preview.</p>
       </div>

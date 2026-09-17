@@ -163,7 +163,7 @@ function LibraryBlockComponent(props: NodeViewProps) {
     if (!isEditable) {
       return (
         <NodeViewWrapper className="my-4">
-          <div className="flex items-center justify-center gap-3 py-8 bg-card rounded-lg nice-shadow">
+          <div className="flex items-center justify-center gap-3 py-8 sl-card">
             <Library className="text-slate-300" size={32} />
             <p className="text-slate-500">{t('library.no_resource_selected')}</p>
           </div>

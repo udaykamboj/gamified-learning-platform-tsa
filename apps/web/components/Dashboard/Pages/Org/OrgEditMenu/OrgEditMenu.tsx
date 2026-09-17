@@ -331,7 +331,7 @@ const OrgEditMenu: React.FC = () => {
                               disabled={!canEdit}
                             />
                           ) : (
-                            <div className="p-2 bg-card rounded-lg nice-shadow flex-shrink-0">
+                            <div className="p-2 sl-card flex-shrink-0">
                               <Icon size={18} weight="fill" className="text-gray-600" />
                             </div>
                           )}

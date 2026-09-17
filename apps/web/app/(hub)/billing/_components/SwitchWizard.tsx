@@ -247,7 +247,7 @@ export default function SwitchWizard({
       {/* Confirm View */}
       {view === 'confirm' && selectedPlanData && (
         <div className="max-w-md mx-auto space-y-5">
-          <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+          <div className="sl-card overflow-hidden">
             <div className="px-6 py-5 border-b border-border">
               <h2 className="font-bold text-base tracking-tight text-foreground">
                 {isUpgrade
@@ -462,7 +462,7 @@ export default function SwitchWizard({
       {/* Success View */}
       {view === 'success' && selectedPlanData && (
         <div className="max-w-md mx-auto">
-          <div className="bg-card rounded-2xl nice-shadow overflow-hidden text-center px-8 py-12">
+          <div className="sl-card overflow-hidden text-center px-8 py-12">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-center mb-5">
               <Check size={24} className="text-green-600" />
             </div>

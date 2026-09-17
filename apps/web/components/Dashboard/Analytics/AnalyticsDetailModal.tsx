@@ -41,7 +41,7 @@ export default function AnalyticsDetailModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-card rounded-2xl nice-shadow w-[90vw] max-w-[900px] max-h-[85vh] flex flex-col">
+      <div className="relative sl-card w-[90vw] max-w-[900px] max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2.5">

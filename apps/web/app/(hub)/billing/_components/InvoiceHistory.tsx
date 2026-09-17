@@ -24,7 +24,7 @@ export default function InvoiceHistory({ invoices }: { invoices: PastInvoice[] }
   if (!invoices || invoices.length === 0) return null
 
   return (
-    <div className="bg-card rounded-2xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}

@@ -72,7 +72,7 @@ export function CommunitySidebar({
   return (
     <div className="space-y-4">
       {/* Community Info Card */}
-      <div className="bg-card nice-shadow rounded-lg overflow-hidden">
+      <div className="sl-card overflow-hidden">
         {/* Header with community name */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export function CommunitySidebar({
       </div>
 
       {/* Quick Tips Card */}
-      <div className="bg-card nice-shadow rounded-lg overflow-hidden p-4">
+      <div className="sl-card overflow-hidden p-4">
         <h3 className="font-medium text-gray-900 mb-2 text-sm">{t('communities.community_guidelines')}</h3>
         <p className="text-xs text-gray-500 leading-relaxed">
           {t('communities.community_guidelines_text')}

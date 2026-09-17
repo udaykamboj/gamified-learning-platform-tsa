@@ -29,7 +29,7 @@ export function PodcastSidebar({ podcast, episodeCount, orgslug }: PodcastSideba
   const activeAuthors = podcast.authors?.filter(author => author.authorship_status === 'ACTIVE') || []
 
   return (
-    <div className="bg-card rounded-lg nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       {/* Thumbnail */}
       <div className="aspect-square w-full overflow-hidden bg-gray-100">
         <img

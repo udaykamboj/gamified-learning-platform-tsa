@@ -506,7 +506,7 @@ const HeroSectionEditor: React.FC<{
   }
 
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <LayoutTemplate className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.hero_editor.title')}</h3>
@@ -1198,7 +1198,7 @@ const TextAndImageSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <ImageIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.text_image_editor.title')}</h3>
@@ -1299,7 +1299,7 @@ const LogosSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <Award className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.logos_editor.title')}</h3>
@@ -1401,7 +1401,7 @@ const PeopleSectionEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <Users className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.people_editor.title')}</h3>
@@ -1554,7 +1554,7 @@ const FeaturedCoursesEditor: React.FC<{
   })
 
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <BookOpen className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('dashboard.organization.landing.courses_editor.title')}</h3>

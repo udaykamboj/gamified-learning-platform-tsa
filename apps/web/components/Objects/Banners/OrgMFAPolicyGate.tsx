@@ -242,7 +242,7 @@ function BlockingInterstitial({
       // menu's sign-out inside it — must stay reachable above this overlay.
       style={{ zIndex: 'var(--z-interactive)' }}
     >
-      <div className="w-full max-w-lg bg-card rounded-2xl nice-shadow outline outline-1 outline-neutral-200/40 p-8 flex flex-col items-center text-center space-y-5">
+      <div className="w-full max-w-lg sl-card outline outline-1 outline-neutral-200/40 p-8 flex flex-col items-center text-center space-y-5">
         <div className="bg-amber-100 p-3 rounded-2xl">
           <ShieldAlert className="text-amber-700" size={34} />
         </div>

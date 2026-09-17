@@ -553,7 +553,7 @@ const ImageGalleryEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <ImageIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.image_gallery.title')}</h3>
@@ -656,7 +656,7 @@ const TextEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <TextIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.text.title')}</h3>
@@ -696,7 +696,7 @@ const LinksEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <LinkIcon className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.links.title')}</h3>
@@ -781,7 +781,7 @@ const SkillsEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <Award className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.skills.title')}</h3>
@@ -884,7 +884,7 @@ const ExperienceEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <Briefcase className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.experience.title')}</h3>
@@ -1046,7 +1046,7 @@ const EducationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <GraduationCap className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.education.title')}</h3>
@@ -1222,7 +1222,7 @@ const AffiliationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <MapPin className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.affiliation.title')}</h3>
@@ -1333,7 +1333,7 @@ const CoursesEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-card rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 sl-card">
       <div className="flex items-center space-x-2">
         <BookOpen className="w-5 h-5 text-gray-500" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.courses.title')}</h3>
