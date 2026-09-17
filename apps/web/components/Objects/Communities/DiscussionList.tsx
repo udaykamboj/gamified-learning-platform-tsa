@@ -281,7 +281,7 @@ export function DiscussionList({
             dialogTrigger={
               <button
                 disabled={isDeleting}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-xs font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-md text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {isDeleting ? (
                   <Loader2 size={14} className="animate-spin" />

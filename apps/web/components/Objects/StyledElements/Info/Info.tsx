@@ -17,7 +17,7 @@ function InfoUI(params: { message?: string, submessage?: string, cta?: string, h
             {params.cta && <div className='flex space-x-4'>
                 <Link
                     href={params.href}
-                    className="flex space-x-2 items-center rounded-full px-4 py-1 text-yellow-200 bg-yellow-700 hover:bg-yellow-800 transition-all ease-linear shadow-lg "
+                    className="flex space-x-2 items-center rounded-full px-4 py-1 text-yellow-200 bg-yellow-700 hover:bg-yellow-500 transition-all ease-linear shadow-lg "
                 >
                     <PersonStanding className="text-yellow-200" size={17} />
                     <span className="text-md font-bold">{params.cta}</span>

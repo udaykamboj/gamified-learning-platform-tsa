@@ -453,8 +453,8 @@ export function LearningUniverse({ orgslug }: { orgslug: string }) {
   const firstName = user?.first_name || user?.username;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background text-foreground">
-      <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
+    <div className="bg-background text-foreground">
+      <div className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-8 md:px-6 md:pt-10 xl:px-8">
         {/* Greeting + next action */}
         <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">

@@ -312,7 +312,7 @@ function BillingClient() {
                 </p>
                 <button
                   onClick={() => refetchOrgs()}
-                  className="mt-3 inline-flex items-center rounded-full bg-rose-700 px-4 py-1.5 text-sm font-bold text-white hover:bg-rose-800"
+                  className="mt-3 inline-flex items-center rounded-full bg-rose-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-rose-500"
                 >
                   {t('common.retry', { defaultValue: 'Retry' })}
                 </button>

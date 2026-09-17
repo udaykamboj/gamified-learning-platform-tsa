@@ -490,7 +490,7 @@ function SearchPage() {
             aria-label={t('search.search_placeholder')}
             placeholder={t('search.search_placeholder')}
             className="w-full h-12 ps-12 pe-24 rounded-xl bg-white nice-shadow
-                       focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1
+                       focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1
                        text-sm placeholder:text-black/40 transition-all"
           />
           <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">

@@ -81,7 +81,7 @@ export default function PodcastsClient({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={t('podcasts.search_placeholder')}
                 placeholder={t('podcasts.search_placeholder')}
-                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-0"
               />
               {searchQuery && (
                 <button

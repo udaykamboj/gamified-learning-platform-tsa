@@ -799,7 +799,7 @@ const OrgTwoFactorPolicy: React.FC = () => {
                 type="button"
                 onClick={persist}
                 disabled={saving}
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-red-600 text-white hover:bg-red-500"
               >
                 {saving && <Loader2 className="w-4 h-4 me-2 animate-spin" />}
                 {t('dashboard.organization.security.confirm_button', {

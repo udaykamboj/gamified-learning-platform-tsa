@@ -586,7 +586,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 cx="16"
                                 cy="16"
                                 r="14"
-                                stroke="#e5e7eb"
+                                stroke="var(--sl-line)"
                                 strokeWidth="3"
                                 fill="none"
                               />
@@ -594,7 +594,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 cx="16"
                                 cy="16"
                                 r="14"
-                                stroke="#10b981"
+                                stroke="var(--sl-action)"
                                 strokeWidth="3"
                                 fill="none"
                                 strokeLinecap="round"
@@ -638,11 +638,11 @@ function ActivityClient(props: ActivityClientProps) {
                               />
                             </Link>
                           </div>
-                          <div className="flex flex-col -space-y-1">
-                            <p className="font-bold text-gray-700 text-sm">{t('search.course')} </p>
-                            <h1 className="font-bold text-gray-950 text-lg first-letter:uppercase">
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-meta font-medium text-muted-foreground">{t('search.course')}</p>
+                            <p className="text-card-title font-semibold text-foreground first-letter:uppercase">
                               {course.name}
-                            </h1>
+                            </p>
                           </div>
                         </motion.div>
 
@@ -816,7 +816,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
                               >
                                 <img
-                                  className="w-[60px] h-[34px] sm:w-[100px] sm:h-[57px] rounded-md drop-shadow-md"
+                                  className="w-[60px] h-[34px] sm:w-[88px] sm:h-[50px] rounded-[10px] border border-border object-cover"
                                   src={course.thumbnail_image
                                     ? getCourseThumbnailMediaDirectory(
                                         org?.org_uuid,
@@ -829,11 +829,11 @@ function ActivityClient(props: ActivityClientProps) {
                                 />
                               </Link>
                             </div>
-                            <div className="flex flex-col -space-y-1">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">{t('search.course')} </p>
-                              <h1 className="font-bold text-gray-950 text-lg sm:text-3xl first-letter:uppercase">
+                            <div className="flex flex-col gap-0.5">
+                              <p className="text-meta font-medium text-muted-foreground">{t('search.course')}</p>
+                              <p className="text-card-title font-semibold text-foreground first-letter:uppercase">
                                 {course.name}
-                              </h1>
+                              </p>
                             </div>
                           </div>
                           {activity && (
@@ -861,11 +861,11 @@ function ActivityClient(props: ActivityClientProps) {
 
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-3">
                           <div className="flex flex-1 items-center space-x-3 min-w-0">
-                            <div className="flex flex-col -space-y-1 min-w-0">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">
+                            <div className="flex flex-col gap-1 min-w-0">
+                              <p className="sl-telemetry text-link">
                                 {getChapterNameByActivityId(course, activity?.id) ?? chapterNameFromCourse}
                               </p>
-                              <h1 className="font-bold text-gray-950 text-base sm:text-2xl first-letter:uppercase">
+                              <h1 className="sl-page-title first-letter:uppercase">
                                 {displayName}
                               </h1>
                               {/* Authors and Dates Section */}
@@ -915,7 +915,7 @@ function ActivityClient(props: ActivityClientProps) {
                                               .filter((a: any) => a.authorship_status === 'ACTIVE')
                                               .slice(2)
                                               .map((author: any) => (
-                                                <div key={author.user.user_uuid} className="text-white text-sm py-1">
+                                                <div key={author.user.user_uuid} className="text-popover-foreground text-sm py-1">
                                                   {author.user.first_name && author.user.last_name
                                                     ? `${author.user.first_name} ${author.user.last_name}`
                                                     : `@${author.user.username}`}
@@ -932,7 +932,7 @@ function ActivityClient(props: ActivityClientProps) {
                                   </div>
                                 )}
                                 {/* Dates */}
-                                <div className="flex flex-wrap items-center text-xs text-gray-500 gap-1 sm:gap-2">
+                                <div className="flex flex-wrap items-center text-meta text-muted-foreground gap-1 sm:gap-2">
                                   <span>
                                     {t('courses.created_on')} {formatDate(course.creation_date, i18n.language, { dateStyle: undefined, year: 'numeric', month: 'long', day: 'numeric' })}
                                   </span>
@@ -967,8 +967,8 @@ function ActivityClient(props: ActivityClientProps) {
                       {activityLoading || !activity ? (
                         <ActivityContentSkeleton activityType={displayActivityType} />
                       ) : activity.published == false ? (
-                        <div className="p-7 rounded-lg bg-gray-800">
-                          <div className="text-white">
+                        <div className="p-7 rounded-2xl border border-border bg-muted">
+                          <div className="text-foreground">
                             <h1 className="font-bold text-2xl">
                               {t('activities.not_published_yet')}
                             </h1>
@@ -1635,7 +1635,7 @@ function AssignmentTools(props: {
     // generic failure toast with no explanation of why.
     if (isAssignmentPastDue(props.assignment?.due_date)) {
       return (
-        <div className="bg-rose-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+        <div className="bg-rose-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
           <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <BookOpenCheck size={17} />
@@ -1652,7 +1652,7 @@ function AssignmentTools(props: {
     // the bar is what the learner is looking at.
     if (isSubmitting) {
       return (
-        <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+        <div className="bg-cyan-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
           <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <Loader2 size={17} className="animate-spin" />
@@ -1682,7 +1682,7 @@ function AssignmentTools(props: {
             : t('assignments.submit_assignment_title')
         }
         dialogTrigger={
-          <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+          <div className="bg-cyan-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
             <span className="text-[11px] font-bold mb-1 uppercase">
               {isRetryAttempt
                 ? t('assignments.attempt_count', { current: attemptNumber })
@@ -1718,7 +1718,7 @@ function AssignmentTools(props: {
 
       return (
         <div className="flex items-center gap-2">
-          <div className="bg-teal-700 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+          <div className="bg-teal-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
             <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
             <div className="flex items-center space-x-2">
               <CheckCircle size={17} />
@@ -1756,7 +1756,7 @@ function AssignmentTools(props: {
     }
 
     return (
-      <div className="bg-amber-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="bg-amber-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
         <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
         <div className="flex items-center space-x-2">
           <UserRoundPen size={17} />

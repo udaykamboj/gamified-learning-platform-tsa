@@ -45,7 +45,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
 
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
-      <div className="text-[12px] text-neutral-400 font-semibold self-start">{t('courses.authors_and_updates')} </div>
+      <div className="text-sm font-semibold text-muted-foreground self-start">{t('courses.authors_and_updates')} </div>
       
       {/* Avatars row */}
       <div className="flex justify-center -space-x-6 relative">
@@ -247,7 +247,7 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
 
   return (
     <div className="antialiased">
-      <MultipleAuthors authors={sortedAuthors} isMobile={isMobile} />
+      {sortedAuthors.length > 0 && <MultipleAuthors authors={sortedAuthors} isMobile={isMobile} />}
       <UpdatesSection />
     </div>
   )

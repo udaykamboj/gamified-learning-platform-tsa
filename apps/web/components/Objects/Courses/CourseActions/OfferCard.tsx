@@ -102,7 +102,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
         >
           <div className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm transition-colors cursor-pointer ${
             isSubscription
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-primary-foreground'
+              ? 'bg-indigo-600 hover:bg-indigo-500 text-primary-foreground'
               : 'bg-primary hover:bg-primary text-primary-foreground'
           }`}>
             {isSubscription ? 'Subscribe now' : 'Get access'}

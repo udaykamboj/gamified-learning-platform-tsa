@@ -77,7 +77,7 @@ export function CommunityActions({
   }
 
   return (
-    <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="sl-card overflow-hidden p-4">
       <div className="space-y-4">
         {/* Stats Section */}
         {renderStatsSection()}

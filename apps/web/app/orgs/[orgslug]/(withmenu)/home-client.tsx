@@ -37,9 +37,9 @@ export default function HomeClient({ orgslug }: { orgslug: string }) {
     : null
 
   return (
-    <div className="w-full flex-1 min-h-0 flex flex-col">
+    <div className="w-full">
       {orgJsonLd && <JsonLd data={orgJsonLd} />}
-      <div className="learning-universe-theme flex flex-1 min-h-0 flex-col">
+      <div className="learning-universe-theme">
         <LearningUniverse orgslug={orgslug} />
       </div>
     </div>

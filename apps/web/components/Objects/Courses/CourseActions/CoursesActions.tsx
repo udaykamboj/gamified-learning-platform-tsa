@@ -9,7 +9,6 @@ import { ArrowRight, BookOpen, UserPlus } from 'lucide-react'
 import { OfferCard } from './OfferCard'
 import toast from 'react-hot-toast'
 import CourseProgress from '../CourseProgress/CourseProgress'
-import UserAvatar from '@components/Objects/UserAvatar'
 import { useOrg, useOrgMembership } from '@components/Contexts/OrgContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
@@ -147,31 +146,12 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     }
   }
 
-  const renderActionButton = (action: 'start' | 'leave') => {
-    if (!session.data?.user) {
-      return (
-        <>
-          <UserAvatar width={24} predefined_avatar="empty" rounded="rounded-full" border="border-2" borderColor="border-white" />
-          <span>{action === 'start' ? t('courses.start_course') : t('courses.leave_course')}</span>
-          <ArrowRight className="w-5 h-5" />
-        </>
-      );
-    }
-
-    return (
-      <>
-        <UserAvatar
-          width={24}
-          use_with_session={true}
-          rounded="rounded-full"
-          border="border-2"
-          borderColor="border-white"
-        />
-        <span>{action === 'start' ? t('courses.start_course') : t('courses.leave_course')}</span>
-        <ArrowRight className="w-5 h-5" />
-      </>
-    );
-  };
+  const renderActionButton = (action: 'start' | 'leave') => (
+    <>
+      <span>{action === 'start' ? t('courses.start_course') : t('courses.leave_course')}</span>
+      {action === 'start' && <ArrowRight className="w-5 h-5" aria-hidden />}
+    </>
+  );
 
   const renderProgressSection = () => {
     const totalActivities = course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) || 0;
@@ -189,7 +169,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (!isStarted) {
       return (
-        <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
+        <div className="relative rounded-[10px] border border-border bg-muted overflow-hidden">
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
@@ -217,7 +197,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{t('courses.ready_to_begin')}</div>
+                    <div className="text-sm font-semibold text-foreground">{t('courses.ready_to_begin')}</div>
                     <div className="text-sm text-gray-500">
                       {t('courses.start_learning_journey', { count: totalActivities })}
                     </div>
@@ -231,7 +211,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     }
 
     return (
-        <div className="relative bg-card nice-shadow rounded-lg overflow-hidden">
+        <div className="relative rounded-[10px] border border-border bg-muted overflow-hidden">
           <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -285,7 +265,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                   aria-label={t('courses.view_course_progress', { completed: completedActivities, total: totalActivities })}
                   className="flex-1 text-start hover:bg-neutral-50/50 p-2 rounded-lg transition-colors"
                 >
-                  <div className="text-sm font-medium text-gray-900">{t('courses.course_progress')}</div>
+                  <div className="text-sm font-semibold text-foreground">{t('courses.course_progress')}</div>
                   <div className="text-sm text-gray-500">
                     {t('courses.completed_of', { completed: completedActivities, total: totalActivities })}
                   </div>
@@ -305,9 +285,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   // Show join organization prompt for authenticated users who are not part of the org
   if (session.data?.user && !isUserPartOfTheOrg) {
     return (
-      <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+      <div className="sl-card overflow-hidden p-4">
         <div className="space-y-4">
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
+          <div className="p-4 bg-warning-surface border border-warning/30 rounded-[10px]">
             <div className="flex items-center gap-3">
               <UserPlus className="w-5 h-5 text-amber-800" />
               <h3 className="text-amber-800 font-semibold">{t('courses.join_org_required')}</h3>
@@ -318,7 +298,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           </div>
           <a
             href={getUriWithOrg(orgslug, '/signup')}
-            className="w-full bg-primary text-primary-foreground py-3 rounded-lg nice-shadow font-semibold hover:bg-primary transition-colors flex items-center justify-center gap-2"
+            className="sl-btn sl-btn-primary w-full"
           >
             <UserPlus className="w-5 h-5" />
             {t('courses.join_organization')}
@@ -347,10 +327,10 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
               onClick={handleCourseAction}
               disabled={isActionLoading}
               aria-label={t('courses.leave_course')}
-              className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400"
+              className="sl-btn sl-btn-secondary w-full text-error"
             >
               {isActionLoading
-                ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" aria-label="Loading" />
                 : renderActionButton('leave')
               }
             </button>
@@ -375,7 +355,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   }
 
   return (
-    <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="sl-card overflow-hidden p-4">
       <div className="space-y-4">
         {/* Progress Section */}
         {renderProgressSection()}
@@ -385,14 +365,10 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           onClick={handleCourseAction}
           disabled={isActionLoading}
           aria-label={isStarted ? t('courses.leave_course') : t('courses.start_course')}
-          className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-            isStarted
-              ? 'bg-red-500 text-primary-foreground hover:bg-red-600 disabled:bg-red-400'
-              : 'bg-primary text-primary-foreground hover:bg-primary disabled:bg-neutral-700'
-          }`}
+          className={`sl-btn w-full ${isStarted ? 'sl-btn-secondary text-error' : 'sl-btn-primary'}`}
         >
           {isActionLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" aria-label="Loading" />
           ) : (
             renderActionButton(isStarted ? 'leave' : 'start')
           )}

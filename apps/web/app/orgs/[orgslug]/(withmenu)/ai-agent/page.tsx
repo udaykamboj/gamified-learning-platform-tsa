@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   Loader2,
@@ -26,16 +27,20 @@ export default function AiAgentPage() {
     {
       role: "assistant",
       content:
-        "ASTRA online. Ask me anything about AI concepts, the tools you're using, or how to stay honest while using them.",
+        "Hi, I'm Astra. Ask me anything about AI concepts, the tools you're using, or how to stay honest while using them.",
     },
   ]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
+  // Only follow new messages when the reader is already near the bottom, so
+  // nobody is pulled away from an older answer they are reading.
+  const stickToBottom = useRef(true);
 
   useEffect(() => {
-    logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
+    const log = logRef.current;
+    if (log && stickToBottom.current) log.scrollTo({ top: log.scrollHeight, behavior: "smooth" });
   }, [messages, pending]);
 
   async function send(text: string) {
@@ -44,6 +49,7 @@ export default function AiAgentPage() {
     const next = [...messages, { role: "user" as const, content: trimmed }];
     setMessages(next);
     setInput("");
+    stickToBottom.current = true;
     setPending(true);
     setError(null);
     try {
@@ -51,163 +57,130 @@ export default function AiAgentPage() {
         messages: next.filter((m) => m.content).slice(-12),
       });
       if (result.error || !result.reply) {
-        setError(result.error ?? "The companion did not respond.");
+        setError(result.error ?? "Astra did not respond.");
+        // Restore the draft so Send retries it without duplicating the bubble.
+        setMessages(messages);
+        setInput(trimmed);
       } else {
         setMessages((prev) => [...prev, { role: "assistant", content: result.reply }]);
       }
     } catch {
-      setError("The transmission failed. Try again.");
+      setError("The message could not be sent. Check your connection and try again.");
+      setMessages(messages);
+      setInput(trimmed);
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <div style={{ background: "#050810", minHeight: "100svh", display: "flex", flexDirection: "column", color: "#f0f4ff" }}>
-      {/* Background shader */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 0, opacity: 0.6 }}>
-        <AtcShader />
-      </div>
-      {/* Radial vignette */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 1,
-        background: "radial-gradient(circle at 50% 45%, transparent 10%, #050810 92%)"
-      }} />
+    <div className="bg-background text-foreground">
+      <div className="mx-auto flex w-full max-w-[860px] flex-col px-4 pb-10 pt-8 md:px-6 md:pt-10">
+        <Link
+          href="/dashboard"
+          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft size={16} aria-hidden /> Learning universe
+        </Link>
 
-      {/* Content */}
-      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", flex: 1, maxWidth: 860, margin: "0 auto", width: "100%", padding: "3rem 1.25rem 2rem" }}>
-
-        {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2.5rem" }}>
-          <Link href="/dashboard" style={{
-            display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.6)",
-            textDecoration: "none", fontSize: 13, fontFamily: "var(--font-mono, monospace)",
-            letterSpacing: "0.05em", textTransform: "uppercase"
-          }}>
-            <ArrowLeft size={14} /> Command deck
-          </Link>
-          <span style={{
-            border: "1px solid rgba(78,214,198,0.4)", color: "#4ed6c6", padding: "4px 12px",
-            borderRadius: 4, fontSize: 11, fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.1em", textTransform: "uppercase"
-          }}>
-            ASTRA — online
-          </span>
-        </div>
-
-        {/* Title */}
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <p style={{ color: "#4ed6c6", fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 12 }}>
-            <Sparkles size={12} /> Onboard companion
-          </p>
-          <h1 style={{ fontFamily: "Space Grotesk, var(--font-display, sans-serif)", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, margin: 0, color: "#fff", lineHeight: 1.1 }}>
-            Your flight companion
-          </h1>
-          <p style={{ marginTop: 16, color: "rgba(240,244,255,0.55)", fontSize: 14, lineHeight: 1.8, maxWidth: 520, margin: "16px auto 0" }}>
-            A guide that travels with you through the learning universe — explaining concepts,
-            reviewing your prompts, and keeping your work honest.
-          </p>
-        </div>
-
-        {/* Chat card */}
-        <div style={{
-          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(20px)",
-          border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)", overflow: "hidden"
-        }}>
-          {/* Card header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(78,214,198,0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "#4ed6c6" }}>
-              <Bot size={16} />
-            </div>
-            <span style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: 14, fontWeight: 500, color: "#f0f4ff" }}>Ask anything about AI</span>
+        {/* Companion identity — bounded shader accent, never behind the transcript */}
+        <header className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="relative size-20 shrink-0 overflow-hidden rounded-3xl border border-border bg-[#0b1424] shadow-card">
+            <AtcShader className="opacity-80" />
+            <span className="absolute inset-0 grid place-items-center text-white">
+              <Bot size={28} aria-hidden />
+            </span>
           </div>
+          <div>
+            <p className="sl-telemetry flex items-center gap-1.5 text-discovery">
+              <Sparkles size={14} aria-hidden /> AI companion
+            </p>
+            <h1 className="mt-1 sl-page-title">Astra, your flight companion</h1>
+            <p className="mt-1 max-w-xl text-ui text-muted-foreground">
+              Explains concepts, reviews your prompts, and helps keep your work honest.
+            </p>
+          </div>
+        </header>
 
-          {/* Messages */}
-          <div ref={logRef} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16, maxHeight: "35vh", overflowY: "auto" }}>
+        {/* Conversation */}
+        <section aria-label="Conversation with Astra" className="sl-card mt-8 flex min-h-[420px] flex-col overflow-hidden">
+          <div
+            ref={logRef}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+            }}
+            className="flex max-h-[55vh] flex-1 flex-col gap-5 overflow-y-auto p-5 md:p-6"
+            aria-live="polite"
+          >
             {messages.map((msg, i) => (
-              <div key={i} style={{ alignSelf: msg.role === "user" ? "flex-end" : "flex-start", maxWidth: "85%" }}>
-                <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,244,255,0.4)", marginBottom: 6 }}>
+              <div
+                key={i}
+                className={cn("flex max-w-[85%] flex-col gap-1.5", msg.role === "user" ? "self-end items-end" : "self-start")}
+              >
+                <span className="text-meta font-semibold text-muted-foreground">
                   {msg.role === "user" ? "You" : "Astra"}
-                </p>
-                <div style={{
-                  fontSize: 13, lineHeight: 1.7, color: msg.role === "user" ? "#fff" : "rgba(240,244,255,0.8)",
-                  ...(msg.role === "assistant" ? { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "10px 14px" } : {})
-                }}>
+                </span>
+                <div
+                  className={cn(
+                    "whitespace-pre-wrap rounded-2xl px-4 py-3 text-ui select-text",
+                    msg.role === "user"
+                      ? "rounded-br-md bg-primary text-primary-foreground"
+                      : "rounded-bl-md border border-border bg-muted text-foreground"
+                  )}
+                >
                   {msg.content}
                 </div>
               </div>
             ))}
             {pending && (
-              <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "10px 14px" }}>
-                <Loader2 size={14} style={{ color: "#4ed6c6", animation: "spin 1s linear infinite" }} />
-                <span style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,244,255,0.4)" }}>Transmitting...</span>
+              <div className="flex items-center gap-2 self-start rounded-2xl border border-border bg-muted px-4 py-3 text-meta text-muted-foreground">
+                <Loader2 size={16} className="animate-spin text-discovery" aria-hidden />
+                Astra is thinking…
               </div>
             )}
           </div>
 
-          {/* Bottom section */}
-          <div style={{ padding: "12px 20px 20px", background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)" }}>
-            {error && <p style={{ color: "#f87171", fontSize: 12, marginBottom: 10 }}>{error}</p>}
+          <div className="border-t border-border bg-card p-4 md:p-5">
+            {error && (
+              <p role="alert" className="mb-3 rounded-[10px] border border-error/30 bg-error-surface px-3 py-2 text-ui text-error">
+                {error}
+              </p>
+            )}
 
-            {/* Starter chips */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+            {/* Starter questions */}
+            <div className="mb-3 flex flex-wrap gap-2">
               {starters.map((s) => (
                 <button
                   key={s}
+                  type="button"
                   disabled={pending}
                   onClick={() => void send(s)}
-                  style={{
-                    fontFamily: "monospace", fontSize: 10, letterSpacing: "0.05em", color: "rgba(240,244,255,0.5)",
-                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 6, padding: "6px 12px", cursor: "pointer", textAlign: "left",
-                    transition: "all 0.15s"
-                  }}
+                  className="rounded-full border border-border bg-card px-3 py-1.5 text-start text-meta font-medium text-muted-foreground transition-colors hover:border-line-control hover:bg-accent hover:text-foreground disabled:opacity-60"
                 >
                   {s}
                 </button>
               ))}
             </div>
 
-            {/* Input row */}
-            <form
-              onSubmit={(e) => { e.preventDefault(); void send(input); }}
-              style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 8px 6px 16px" }}
-            >
-              <label className="sr-only" htmlFor="agent-prompt">Ask ASTRA</label>
+            {/* Composer */}
+            <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="flex items-center gap-2">
+              <label className="sr-only" htmlFor="agent-prompt">Ask Astra</label>
               <input
                 id="agent-prompt"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="How do I know if an AI answer is trustworthy?"
-                style={{
-                  flex: 1, background: "transparent", border: "none", outline: "none",
-                  color: "#f0f4ff", fontSize: 14, fontFamily: "Space Grotesk, sans-serif",
-                  padding: "6px 0"
-                }}
+                className="sl-input flex-1"
                 autoComplete="off"
               />
-              <button
-                type="submit"
-                disabled={pending || !input.trim()}
-                style={{
-                  background: pending || !input.trim() ? "rgba(255,255,255,0.08)" : "#4ed6c6",
-                  color: pending || !input.trim() ? "rgba(255,255,255,0.3)" : "#050810",
-                  border: "none", borderRadius: 6, padding: "8px 16px", cursor: pending || !input.trim() ? "not-allowed" : "pointer",
-                  fontFamily: "monospace", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase",
-                  display: "flex", alignItems: "center", gap: 6, transition: "all 0.15s"
-                }}
-              >
-                <Send size={12} /> Send
+              <button type="submit" disabled={pending || !input.trim()} className="sl-btn sl-btn-primary">
+                <Send size={16} aria-hidden /> Send
               </button>
             </form>
           </div>
-        </div>
+        </section>
       </div>
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        input::placeholder { color: rgba(240,244,255,0.3) !important; }
-      `}</style>
     </div>
   );
 }

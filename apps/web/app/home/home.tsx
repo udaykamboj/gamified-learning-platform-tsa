@@ -494,7 +494,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
               type="button"
               onClick={handleDelete}
               disabled={!canDelete || deleting}
-              className="px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {deleting
                 ? t('common.deleting', { defaultValue: 'Deleting…' })
@@ -542,7 +542,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
             <button
               onClick={handleLeave}
               disabled={leaving}
-              className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-50"
             >
               {leaving
                 ? t('common.leaving', { defaultValue: 'Leaving…' })

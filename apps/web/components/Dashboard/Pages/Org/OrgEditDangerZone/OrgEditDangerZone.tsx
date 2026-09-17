@@ -201,7 +201,7 @@ const OrgEditDangerZone: React.FC = () => {
                       type="button"
                       onClick={handleDeleteOrg}
                       disabled={confirmText !== org.slug || isDeletingOrg}
-                      className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {isDeletingOrg ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                       <span>Delete organization</span>

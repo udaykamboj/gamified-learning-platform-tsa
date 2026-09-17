@@ -90,7 +90,7 @@ function EnrollmentCard({ enrollment, orgslug, onManageBilling, billingLoading }
             <button
               onClick={onManageBilling}
               disabled={billingLoading}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 transition-colors px-3 py-2 rounded-lg"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 transition-colors px-3 py-2 rounded-lg"
             >
               {billingLoading
                 ? <Loader2 size={12} className="animate-spin" />

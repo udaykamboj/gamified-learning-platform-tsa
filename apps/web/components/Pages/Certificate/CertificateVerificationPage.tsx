@@ -207,7 +207,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             </div>
 
             {/* Course Information */}
-            <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+            <div className="sl-card overflow-hidden p-4">
               <div className="flex items-start space-x-4">
                 {/* Course Thumbnail */}
                 <div className="flex-shrink-0">

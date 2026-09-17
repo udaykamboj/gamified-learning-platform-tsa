@@ -369,7 +369,7 @@ const CommunityEditModeration: React.FC = () => {
                       setError(null)
                     }}
                     placeholder={t('dashboard.courses.communities.moderation.batch_add_placeholder')}
-                    className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                    className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   />
                   <Button
                     type="button"

@@ -425,7 +425,7 @@ function OrgUsers() {
                       confirmationMessage={`Are you sure you want to remove ${selectedUserIds.size} user${selectedUserIds.size !== 1 ? 's' : ''} from the organization? This action cannot be undone.`}
                       dialogTitle="Remove selected users"
                       dialogTrigger={
-                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700 rounded-md text-xs font-medium transition-all">
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-500 rounded-md text-xs font-medium transition-all">
                           <LogOut className="w-3.5 h-3.5" />
                           <span>Remove selected</span>
                         </button>

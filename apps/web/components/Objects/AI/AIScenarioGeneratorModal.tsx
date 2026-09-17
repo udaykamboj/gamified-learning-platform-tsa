@@ -175,7 +175,7 @@ const AIScenarioGeneratorModal: React.FC<AIScenarioGeneratorModalProps> = ({
                   ? 'What should the scenario be about? (grounded on this activity)'
                   : 'What should the interactive scenario be about?'
               }
-              className="w-full p-3 border border-neutral-200 rounded-xl resize-none focus:outline-hidden focus:ring-2 focus:ring-neutral-900/10 text-sm"
+              className="w-full p-3 border border-neutral-200 rounded-xl resize-none focus:outline-hidden focus:ring-2 focus:ring-ring/10 text-sm"
             />
             <div className="flex flex-wrap items-center gap-3">
               <label className="flex items-center gap-1.5 text-xs text-neutral-500">

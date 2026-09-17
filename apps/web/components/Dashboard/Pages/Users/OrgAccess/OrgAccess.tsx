@@ -269,7 +269,7 @@ function OrgAccess() {
                   dialogTitle={t('dashboard.users.signups.invite_codes.actions.generate_title')}
                   dialogDescription={t('dashboard.users.signups.invite_codes.actions.generate_description')}
                   dialogTrigger={
-                    <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-500 transition-colors">
                       <Ticket className="w-4 h-4" />
                       <span>{t('dashboard.users.signups.invite_codes.actions.generate')}</span>
                     </button>

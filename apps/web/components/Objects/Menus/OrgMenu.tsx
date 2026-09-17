@@ -135,10 +135,6 @@ export const OrgMenu = (props: any) => {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  // On the home page (Learning Universe) the nav floats over the full-bleed
-  // 3D canvas, so we must NOT render the spacer that compensates for it.
-  const isHomePage = pathname !== null && (/\/orgs\/[^/]+\/?$/.test(pathname) || pathname === '/dashboard' || pathname === '/dashboard/')
-
   // Only hide menu if we're in an activity page and focus mode is enabled
   if (pathname?.includes('/activity/') && isFocusMode) {
     return null;
@@ -146,9 +142,7 @@ export const OrgMenu = (props: any) => {
 
   return (
     <>
-      {!isHomePage && (
-        <div aria-hidden className="h-14 md:h-16" style={{ marginTop: topOffset }}></div>
-      )}
+      <div aria-hidden className="h-14 md:h-16" style={{ marginTop: topOffset }}></div>
       <nav
         aria-label="Top navigation"
         className={`fixed start-0 end-0 h-14 md:h-16 border-b ${!primaryColor ? 'bg-background/90 backdrop-blur-md border-border' : 'border-black/10'}`}
@@ -158,7 +152,7 @@ export const OrgMenu = (props: any) => {
           top: topOffset
         }}
       >
-        <div className="flex items-center justify-between gap-4 w-full max-w-[1440px] mx-auto px-4 md:px-6 xl:px-8 h-full">
+        <div className="flex items-center justify-between gap-4 w-full max-w-[1280px] mx-auto px-4 md:px-6 xl:px-8 h-full">
           <div className="flex items-center gap-4 xl:gap-6 min-w-0">
             <div className="logo flex shrink-0">
               <Link href="/dashboard" aria-label={org?.name || 'StarLab'}>
@@ -177,12 +171,11 @@ export const OrgMenu = (props: any) => {
           </div>
 
           {/* Search Section */}
-          <div className="hidden lg:flex flex-1 justify-end max-w-xs">
+          <div className="hidden lg:flex flex-1 justify-end min-w-[12rem] max-w-xs">
             <SearchBar orgslug={orgslug} className="w-full" primaryColor={primaryColor} />
           </div>
 
           <div className="flex items-center gap-1">
-            {!primaryColor && <AppearanceToggle className="hidden xl:inline-flex me-1" />}
             {/* Progress / Trail */}
             <AuthenticatedClientElement checkMethod="authentication">
               <div className="hidden lg:flex">

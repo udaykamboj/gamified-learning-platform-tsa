@@ -123,7 +123,7 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
       {!chromeless && <OrgMFAPolicyGate />}
       <div
-        className={`flex-1 relative ${pathname === '/' || pathname === '/dashboard' || pathname === '/dashboard/' || (pathname !== null && /\/orgs\/[^/]+\/?$/.test(pathname)) ? 'flex flex-col min-h-0 overflow-hidden' : ''}`}
+        className="flex-1 relative"
         style={{ zIndex: 'var(--z-content)' }}
       >
         {children}

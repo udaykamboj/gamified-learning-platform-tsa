@@ -17,7 +17,7 @@ import React, { useState } from 'react'
 type Variant = 'primary' | 'neutral' | 'danger' | 'ghost'
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: 'text-white bg-rose-700 hover:bg-rose-800',
+  primary: 'text-white bg-rose-600 hover:bg-rose-500',
   neutral: 'text-gray-100 bg-gray-700 hover:bg-gray-800',
   danger: 'text-rose-700 bg-rose-100 hover:bg-rose-200',
   ghost: 'text-gray-600 bg-gray-100 hover:bg-gray-200',

@@ -391,7 +391,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 ">
               <button
                 onClick={handleNewChat}
-                className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors"
               >
                 <Plus size={14} weight="bold" />
                 <span>New Chat</span>
@@ -647,7 +647,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           <button
             onClick={() => sendMessage(input)}
             disabled={isInputDisabled || !input.trim()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white transition-colors"
           >
             <PaperPlaneRight size={14} weight="fill" />
           </button>

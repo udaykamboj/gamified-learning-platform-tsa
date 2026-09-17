@@ -201,7 +201,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <p className="text-red-600 mb-4">{error}</p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-500 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Course</span>
@@ -223,7 +223,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             </p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-500 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Course</span>
@@ -267,7 +267,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <button
               onClick={downloadCertificate}
               aria-label="Download certificate as PDF"
-              className="inline-flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-500 transition duration-200"
             >
               <Download className="w-5 h-5" />
               <span>Download PDF</span>

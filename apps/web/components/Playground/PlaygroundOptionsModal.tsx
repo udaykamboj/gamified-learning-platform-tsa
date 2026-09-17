@@ -209,7 +209,7 @@ function GeneralTab({
           <button
             onClick={handleSave}
             disabled={isSaving || !name.trim()}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-black nice-shadow transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-black nice-shadow transition-all disabled:opacity-50"
           >
             <FloppyDisk size={14} weight="bold" />
             {isSaving ? 'Saving…' : 'Save changes'}

@@ -12,6 +12,8 @@ import { searchMatchesAny } from '@/lib/search/normalize'
 import { useCourses } from '@/hooks/queries/useCourses'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
+import EmptyState from '@components/Objects/StyledElements/EmptyState/EmptyState'
+import SearchField from '@components/Objects/StyledElements/Form/SearchField'
 
 interface CourseProps {
   orgslug: string
@@ -77,21 +79,20 @@ function Courses(props: CourseProps) {
         <GeneralWrapperStyled>
           <div className="flex flex-col space-y-2 mb-2">
             {/* Header row: title placeholder */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="h-7 bg-gray-200 rounded w-28" />
+            <div className="mb-6 flex items-center gap-3">
+              <div className="size-10 rounded-[10px] bg-muted" />
+              <div className="h-9 w-40 rounded-[10px] bg-muted" />
             </div>
             {/* Search bar placeholder */}
-            <div className="h-10 bg-gray-200 rounded-lg w-full sm:w-80 mb-4" />
-            {/* Course card grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden">
-                  {/* Thumbnail area */}
-                  <div className="bg-gray-200 w-full h-40 rounded-xl" />
-                  {/* Card body */}
-                  <div className="pt-3 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+            <div className="mb-4 h-11 w-full rounded-[10px] bg-muted sm:w-80" />
+            {/* Course card grid — matches CourseThumbnail geometry */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="sl-card overflow-hidden">
+                  <div className="aspect-video w-full bg-muted" />
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 w-3/4 rounded-[6px] bg-muted" />
+                    <div className="h-3 w-1/2 rounded-[6px] bg-muted" />
                   </div>
                 </div>
               ))}
@@ -112,93 +113,72 @@ function Courses(props: CourseProps) {
 
           {/* Search */}
           {allCourses.length > 0 && (
-            <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label={t('courses.search_courses')}
-                  placeholder={t('courses.search_courses')}
-                  className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <SearchField
+                value={searchQuery}
+                onChange={setSearchQuery}
+                label={t('courses.search_courses')}
+              />
             </div>
           )}
 
           {/* Search Results Info */}
           {searchQuery && (
-            <div className="mb-2 text-sm text-gray-500 ">
+            <p className="mb-2 text-meta text-muted-foreground" aria-live="polite">
               {t('courses.search_results', { count: filteredCourses.length, query: searchQuery })}
-            </div>
+            </p>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {paginatedCourses.map((course: any, index: number) => (
               <div key={course.course_uuid} className="">
                 <CourseThumbnail course={course} orgslug={orgslug} isPriority={currentPage === 1 && index < 3} />
               </div>
             ))}
             {filteredCourses.length === 0 && searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
-                <Search className="w-12 h-12 text-gray-300 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-600 mb-2">
-                  {t('courses.no_search_results')}
-                </h2>
-                <p className="text-gray-400 ">
-                  {t('courses.try_different_search')}
-                </p>
-              </div>
+              <EmptyState
+                className="col-span-full"
+                icon={<Search />}
+                title={t('courses.no_search_results')}
+                description={t('courses.try_different_search')}
+                action={
+                  <button type="button" onClick={() => setSearchQuery('')} className="sl-btn sl-btn-secondary">
+                    <X size={16} aria-hidden /> Clear search
+                  </button>
+                }
+              />
             )}
             {allCourses.length === 0 && !searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 ">
-                <div className="p-4 bg-card rounded-full nice-shadow mb-4">
-                  {isAuthenticated ? (
-                    <BookCopy className="w-8 h-8 text-gray-300 " strokeWidth={1.5} />
-                  ) : (
-                    <LogIn className="w-8 h-8 text-gray-300 " strokeWidth={1.5} />
-                  )}
-                </div>
-                <h1 className="text-xl font-bold text-gray-600 mb-2">
-                  {isAuthenticated
+              /* An anonymous visitor sees an empty list whenever the org has no
+                 PUBLIC courses — the API filters non-public ones out rather than
+                 erroring, so "no courses" and "not signed in" are indistinguishable
+                 from here. Prompt for sign-in instead of implying the academy is
+                 empty. */
+              <EmptyState
+                className="col-span-full"
+                icon={isAuthenticated ? <BookCopy /> : <LogIn />}
+                title={
+                  isAuthenticated
                     ? t('courses.no_courses')
-                    : t('courses.sign_in_to_see_courses', 'Log in to see your courses')}
-                </h1>
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
-                  {!isAuthenticated ? (
-                    t(
-                      'courses.sign_in_to_see_courses_description',
-                      'Courses in this academy may only be visible once you are signed in.',
-                    )
-                  ) : (
-                    t('courses.no_courses_available')
-                  )}
-                </p>
-                {/* An anonymous visitor sees an empty list whenever the org has no
-                    PUBLIC courses — the API filters non-public ones out rather than
-                    erroring, so "no courses" and "not signed in" are indistinguishable
-                    from here. Prompt for sign-in instead of implying the academy is
-                    empty. */}
-                {!isAuthenticated && (
-                  <Link
-                    href={getUriWithOrg(orgslug, '/login')}
-                    className="inline-flex items-center gap-2 justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary transition-colors"
-                  >
-                    <LogIn size={16} />
-                    {t('auth.sign_in', 'Sign in')}
-                  </Link>
-                )}
-              </div>
+                    : t('courses.sign_in_to_see_courses', 'Log in to see your courses')
+                }
+                description={
+                  !isAuthenticated
+                    ? t(
+                        'courses.sign_in_to_see_courses_description',
+                        'Courses in this academy may only be visible once you are signed in.',
+                      )
+                    : t('courses.no_courses_available')
+                }
+                action={
+                  !isAuthenticated && (
+                    <Link href={getUriWithOrg(orgslug, '/login')} className="sl-btn sl-btn-primary">
+                      <LogIn size={16} aria-hidden />
+                      {t('auth.sign_in', 'Sign in')}
+                    </Link>
+                  )
+                }
+              />
             )}
           </div>
 

@@ -202,7 +202,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
               setConfirmText('')
               setConfirmOpen(true)
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-500 transition-colors"
           >
             <Trash2 size={15} />
             {t('account.delete.title', { defaultValue: 'Delete account' })}
@@ -276,7 +276,7 @@ function DangerZone({ user, access_token }: { user: any; access_token: string })
               type="button"
               onClick={handleDelete}
               disabled={!canDelete || deleting}
-              className="px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {deleting
                 ? t('account.delete.deleting', { defaultValue: 'Deleting…' })

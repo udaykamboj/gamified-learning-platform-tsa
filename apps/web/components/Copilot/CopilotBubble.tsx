@@ -341,7 +341,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
             <div className="flex-1 overflow-y-auto px-2 py-2">
               <button
                 onClick={handleNewChat}
-                className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold rounded-xl bg-violet-600 hover:bg-violet-700 text-white transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
               >
                 <Plus size={13} weight="bold" />
                 New Chat
@@ -501,7 +501,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                   aria-label="Send message"
                   onClick={() => sendMessage(input)}
                   disabled={isInputDisabled || !input.trim()}
-                  className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white transition-colors"
+                  className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white transition-colors"
                 >
                   <PaperPlaneRight size={12} weight="fill" />
                 </button>
@@ -517,7 +517,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
           if (!open) track(AnalyticsEvent.CopilotBubbleOpened, { current_path: pathname })
           onOpenChange(!open)
         }}
-        className="fixed bottom-4 end-4 z-[9999] flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-700 text-white transition-all duration-200 hover:scale-105 active:scale-95 nice-shadow"
+        className="fixed bottom-4 end-4 z-[9999] flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-500 text-white transition-all duration-200 hover:scale-105 active:scale-95 nice-shadow"
         style={{ width: 44, height: 44 }}
         aria-label="Open Copilot"
       >

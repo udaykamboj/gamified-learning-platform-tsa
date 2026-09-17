@@ -133,7 +133,7 @@ const CourseClient = (props: any) => {
           {/* Chapter list */}
           <div className="w-full my-5 mb-10">
             <div className="h-7 bg-gray-200 rounded w-40 mb-5" />
-            <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
+            <div className="sl-card overflow-hidden">
               {Array.from({ length: 3 }).map((_, chIdx) => (
                 <div key={chIdx}>
                   {/* Chapter header */}
@@ -501,7 +501,7 @@ const CourseClient = (props: any) => {
                 <CoursesActions courseuuid={courseuuid} orgslug={orgslug} course={course} trailData={trailData} />
                 
                 {/* Authors & Updates Box */}
-                <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+                <div className="sl-card overflow-hidden p-4">
                   <CourseProvider courseuuid={course.course_uuid}>
                     <CourseAuthors authors={course.authors} />
                   </CourseProvider>
@@ -518,7 +518,7 @@ const CourseClient = (props: any) => {
               return (
                 <div className="w-full">
                   <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.what_you_will_learn')}</h2>
-                  <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
+                  <div className="sl-card overflow-hidden px-5 py-5 space-y-2">
                     {displayLearnings.map((learning: any) => {
                       const learningText = typeof learning === 'string' ? learning : learning.text
                       const learningEmoji = typeof learning === 'string' ? null : learning.emoji
@@ -557,7 +557,7 @@ const CourseClient = (props: any) => {
 
             <div className="w-full my-5 mb-10">
               <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.course_lessons')}</h2>
-              <div className="bg-card shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
+              <div className="sl-card overflow-hidden">
                 {(course.chapters ?? []).map((chapter: any, idx: number) => {
                   const isExpanded = expandedChapters[chapter.chapter_uuid] ?? (idx === 0); // Default to expanded for first chapter
                   return (
@@ -584,13 +584,13 @@ const CourseClient = (props: any) => {
                         <div className="flex flex-col items-start w-full">
                           <div className="flex items-center flex-wrap mb-1 w-full min-w-0">
                             {/* Numbered badge */}
-                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-neutral-200 text-neutral-600 text-xs font-semibold me-2 border border-neutral-300 flex-shrink-0">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-semibold me-2 border border-border flex-shrink-0 tabular-nums">
                               {idx + 1}
                             </span>
-                            <h3 className="text-lg font-bold leading-tight truncate min-w-0 sm:text-base md:text-lg" style={{lineHeight: '1.2'}}>{chapter.name}</h3>
+                            <h3 className="text-card-title font-semibold text-foreground truncate min-w-0">{chapter.name}</h3>
                             {chapter.is_locked && (
-                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-semibold">
-                                <Lock size={10} />
+                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground text-meta font-semibold">
+                                <Lock size={12} aria-hidden />
                                 {t('course.locked', 'Locked')}
                               </span>
                             )}
@@ -609,7 +609,7 @@ const CourseClient = (props: any) => {
                               <div className="flex space-x-3 items-center">
                                 <div className="flex items-center">
                                   {locked ? (
-                                    <div className="text-rose-400">
+                                    <div className="text-muted-foreground">
                                       <Lock size={14} className="stroke-[2]" />
                                     </div>
                                   ) : isActivityDone(activity) ? (
@@ -627,13 +627,13 @@ const CourseClient = (props: any) => {
                                   <div className="flex items-center space-x-2 w-full">
                                     <p className={`font-semibold transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
                                     {locked && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-semibold">
-                                        <Lock size={10} />
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground text-meta font-semibold">
+                                        <Lock size={12} aria-hidden />
                                         {t('course.locked', 'Locked')}
                                       </span>
                                     )}
                                     {!locked && isActivityCurrent(activity) && (
-                                      <div className="flex items-center space-x-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse">
+                                      <div className="flex items-center space-x-1 text-info bg-info-surface px-2 py-0.5 rounded-full text-meta font-semibold">
                                         <span>{t('activities.current')}</span>
                                       </div>
                                     )}

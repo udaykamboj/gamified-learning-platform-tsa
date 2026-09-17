@@ -251,7 +251,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 disabled={loading}
                 className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                   isSubscription
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-primary-foreground'
+                    ? 'bg-indigo-600 hover:bg-indigo-500 text-primary-foreground'
                     : 'bg-primary hover:bg-primary text-primary-foreground'
                 }`}
               >

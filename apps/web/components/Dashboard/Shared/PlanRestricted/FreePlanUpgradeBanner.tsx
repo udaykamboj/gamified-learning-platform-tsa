@@ -39,7 +39,7 @@ export default function FreePlanUpgradeBanner() {
             track(AnalyticsEvent.UpgradeBannerCtaClicked, { upgrade_url_present: !!upgradeUrl })
             setModalOpen(true)
           }}
-          className="relative text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 px-3 py-1 rounded-md flex-shrink-0 transition-colors cursor-pointer"
+          className="relative text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 px-3 py-1 rounded-md flex-shrink-0 transition-colors cursor-pointer"
         >
           {t('banner.free_plan_upgrade_button')}
         </button>

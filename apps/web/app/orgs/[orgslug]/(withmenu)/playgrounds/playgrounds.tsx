@@ -122,7 +122,7 @@ export default function PlaygroundsClient({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     aria-label="Search playgrounds"
                     placeholder={t('playgrounds.search_placeholder')}
-                    className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                    className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-0"
                   />
                   {searchQuery && (
                     <button
@@ -217,7 +217,7 @@ export default function PlaygroundsClient({
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setShowNameModal(false) }}
             placeholder="e.g. Photosynthesis Quiz"
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-black focus:border-transparent mb-4"
+            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-ring focus:border-transparent mb-4"
           />
           <div className="flex gap-2 justify-end">
             <button onClick={() => setShowNameModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">

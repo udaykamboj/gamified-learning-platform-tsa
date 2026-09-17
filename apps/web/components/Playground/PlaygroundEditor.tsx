@@ -365,7 +365,7 @@ export default function PlaygroundEditor({
             className={`flex items-center gap-1.5 h-9 px-3 py-2 font-black text-sm nice-shadow rounded-lg transition-all ease-linear hover:cursor-pointer disabled:opacity-50 ${
               saveStatus === 'saved'
                 ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'bg-sky-600 hover:bg-sky-700 text-white'
+                : 'bg-sky-600 hover:bg-sky-500 text-white'
             }`}
           >
             {saveStatus === 'saved' ? (

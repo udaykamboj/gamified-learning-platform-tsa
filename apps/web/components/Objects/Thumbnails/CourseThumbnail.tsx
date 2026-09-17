@@ -10,6 +10,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import React from 'react'
 import UserAvatar from '@components/Objects/UserAvatar'
+import SubjectArtwork from '@components/Objects/Thumbnails/SubjectArtwork'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/lib/format'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
@@ -87,7 +88,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
 
   const thumbnailImage = course.thumbnail_image
     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
-    : '/empty_thumbnail.png'
+    : null
 
   const courseLink = customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)
 
@@ -110,10 +111,9 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         </button>
       )}
 
-      <Link prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <Link prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-muted" tabIndex={-1} aria-hidden>
         {/* Hidden img gives the browser a real resource hint so it can fetch the background-image early as an LCP candidate */}
-        {isPriority && (
-           
+        {isPriority && thumbnailImage && (
           <img
             src={thumbnailImage}
             alt=""
@@ -122,19 +122,22 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             className="absolute w-0 h-0 opacity-0 pointer-events-none"
           />
         )}
-        <div
-          className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          style={{ backgroundImage: `url(${thumbnailImage})` }}
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-foreground/5 transition-colors duration-300" />
+        {thumbnailImage ? (
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${thumbnailImage})` }}
+          />
+        ) : (
+          <SubjectArtwork seed={course.course_uuid} />
+        )}
         {isDashboard && (
           <div className="absolute bottom-2 start-2">
             {course.published ? (
-              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <span className="px-2.5 py-0.5 text-meta font-semibold bg-success-surface text-success rounded-full">
                 {t('courses.published')}
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
+              <span className="px-2.5 py-0.5 text-meta font-semibold bg-warning-surface text-warning rounded-full">
                 {t('courses.unpublished')}
               </span>
             )}
@@ -142,28 +145,28 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         )}
       </Link>
 
-      <div className="p-3 flex flex-col space-y-1.5">
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         <div className="flex items-start justify-between">
           <Link
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
-           dir="auto">
+            className="text-card-title font-semibold text-foreground line-clamp-1 after:absolute after:inset-0 after:content-['']"
+            dir="auto">
             {course.name}
           </Link>
         </div>
         
         {course.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-ui text-muted-foreground line-clamp-2">
             {course.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
           <div className="flex items-center gap-2">
             {displayedAuthors.length > 0 && (
-              <div className="flex -space-x-2 items-center">
+              <div className="relative z-10 flex -space-x-2 items-center">
                 {displayedAuthors.map((author, index) => (
                   <div 
                     key={author.user.user_uuid} 
@@ -183,7 +186,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
                 ))}
                 {hasMoreAuthors && (
                   <div className="relative z-0">
-                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[11px] font-bold text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[11px] font-semibold text-muted-foreground bg-muted border-2 border-card rounded-full">
                       +{remainingAuthorsCount}
                     </div>
                   </div>
@@ -192,7 +195,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             )}
             
             {course.update_date && (
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <span className="text-meta text-muted-foreground tabular-nums">
                 {formatDate(course.update_date, i18n.language, { dateStyle: undefined, month: 'short', day: 'numeric' })}
               </span>
             )}
@@ -202,7 +205,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="relative z-10 text-sm font-semibold text-link hover:underline underline-offset-4"
           >
             {t('courses.start_learning')}
           </Link>

@@ -59,7 +59,7 @@ export default function CaptionsSettings({
             type="checkbox"
             checked={value.enabled}
             onChange={(e) => onChange({ ...value, enabled: e.target.checked })}
-            className="rounded border-gray-300 text-foreground focus:ring-black"
+            className="rounded border-gray-300 text-foreground focus:ring-ring"
           />
           <span className="text-sm text-gray-600">Generate with AI</span>
         </label>

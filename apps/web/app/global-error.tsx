@@ -95,7 +95,7 @@ export default function GlobalError({
           <p className="text-gray-600">{category.description}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => reset()} className={`${btn} text-white bg-rose-700 hover:bg-rose-800`}>
+            <button onClick={() => reset()} className={`${btn} text-white bg-rose-600 hover:bg-rose-500`}>
               <RefreshCcw size={16} />
               <span>Try again</span>
             </button>

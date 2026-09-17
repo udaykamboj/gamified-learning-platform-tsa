@@ -1010,7 +1010,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                 <button
                   onClick={runCode}
                   disabled={isRunning}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-500 disabled:opacity-50"
                 >
                   {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                   <span>{isRunning ? 'Running...' : 'Run Tests'}</span>

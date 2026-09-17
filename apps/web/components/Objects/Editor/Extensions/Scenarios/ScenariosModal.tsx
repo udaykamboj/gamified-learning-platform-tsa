@@ -330,7 +330,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
             </div>
             <button
               onClick={() => setShowPreview(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md"
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all font-medium text-sm shadow-sm hover:shadow-md"
             >
               <Play size={14} />
               Preview

@@ -40,7 +40,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
             <div className='flex justify-end pt-1'>
                 <button
                     onClick={handleGenerate}
-                    className='flex space-x-2 hover:cursor-pointer p-2 px-5 rounded-lg font-bold items-center text-sm transition-colors bg-green-700 text-green-100 hover:bg-green-800'
+                    className='flex space-x-2 hover:cursor-pointer p-2 px-5 rounded-lg font-bold items-center text-sm transition-colors bg-green-700 text-green-100 hover:bg-green-500'
                 >
                     <Ticket className="w-4 h-4" />
                     <span>{t('dashboard.users.signups.generate_modal.generate_button')}</span>

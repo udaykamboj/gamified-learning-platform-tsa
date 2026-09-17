@@ -191,7 +191,7 @@ const AIImagePicker: React.FC<AIImagePickerProps> = ({ onSelect, onSelectFile, o
                 </button>
               </div>
             )}
-            <div className="rounded-2xl border border-neutral-200 focus-within:border-neutral-300 focus-within:ring-4 focus-within:ring-neutral-900/5 transition-all bg-neutral-50/50">
+            <div className="rounded-2xl border border-neutral-200 focus-within:border-neutral-300 focus-within:ring-4 focus-within:ring-ring/5 transition-all bg-neutral-50/50">
               <textarea
                 ref={promptRef}
                 value={prompt}

@@ -64,7 +64,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
           placeholder={t('boards.name_placeholder')}
           required
         />
@@ -74,7 +74,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
           placeholder={t('boards.description_placeholder')}
           rows={3}
         />
@@ -264,7 +264,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boards.search_placeholder')}
-                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                className="w-full ps-10 pe-10 py-2.5 bg-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-0"
               />
               {searchQuery && (
                 <button

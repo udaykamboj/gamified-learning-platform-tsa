@@ -197,7 +197,7 @@ function OfferCard({ offer, orgslug, orgUuid, position }: { offer: Offer; orgslu
             </div>
             <div className={`flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-xl transition-colors ${
               isSubscription
-                ? 'bg-indigo-600 text-primary-foreground group-hover:bg-indigo-700'
+                ? 'bg-indigo-600 text-primary-foreground group-hover:bg-indigo-500'
                 : 'bg-primary text-primary-foreground group-hover:bg-primary'
             }`}>
               {isSubscription ? 'Subscribe' : 'Get access'}

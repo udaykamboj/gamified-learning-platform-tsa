@@ -274,7 +274,7 @@ export default function PlaygroundChatPanel({
               disabled={!canSend}
               className={`flex items-center gap-1.5 h-7 px-3 rounded-lg text-xs font-black nice-shadow transition-all ease-linear ${
                 canSend
-                  ? 'bg-sky-600 hover:bg-sky-700 text-white cursor-pointer'
+                  ? 'bg-sky-600 hover:bg-sky-500 text-white cursor-pointer'
                   : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
               }`}
             >
