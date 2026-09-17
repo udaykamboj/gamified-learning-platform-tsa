@@ -50,15 +50,15 @@ export default function CourseEnrollmentTrend({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-indigo-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
+                <p className="sl-telemetry text-indigo-400">{t('analytics.course_analytics.common.total')}</p>
                 <p className="text-2xl font-bold text-indigo-600">{totalEnrollments}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.daily_avg')}</p>
+                <p className="sl-telemetry text-gray-400">{t('analytics.course_analytics.common.daily_avg')}</p>
                 <p className="text-2xl font-bold text-gray-700">{avgDaily}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.latest_day')}</p>
+                <p className="sl-telemetry text-gray-400">{t('analytics.course_analytics.common.latest_day')}</p>
                 <p className="text-2xl font-bold text-gray-700">{latestDay}</p>
               </div>
             </div>

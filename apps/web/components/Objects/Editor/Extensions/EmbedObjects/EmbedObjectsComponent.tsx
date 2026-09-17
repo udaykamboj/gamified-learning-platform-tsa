@@ -488,7 +488,7 @@ function EmbedObjectsComponent(props: any) {
             <div className="absolute inset-0 bg-neutral-50/95 backdrop-blur-sm flex items-center justify-center p-4 z-10">
               <form
                 onSubmit={handleInputSubmit}
-                className="w-full max-w-lg bg-card rounded-xl nice-shadow p-4"
+                className="w-full max-w-lg sl-card p-4"
                 onKeyDown={handleKeyDown}
               >
                 <div className="flex justify-between items-center mb-3">

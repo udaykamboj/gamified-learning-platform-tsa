@@ -53,22 +53,22 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
               </div>
             ))}
             {courses.length === 0 && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+                <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
                   {isAuthenticated ? (
                     <BookCopy className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                   ) : (
                     <LogIn className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                   )}
                 </div>
-                <h1 className="text-xl font-bold text-gray-600 mb-2">
+                <h1 className="text-card-title font-semibold text-foreground mb-1">
                   {isAuthenticated
                     ? t('courses.no_courses')
                     : t('courses.sign_in_to_see_courses', 'Log in to see your courses')}
                 </h1>
                 {/* Anonymous visitors only ever receive PUBLIC courses from the API,
                     so an empty list here usually means "sign in", not "empty academy". */}
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+                <p className="text-ui text-muted-foreground mb-6 text-center max-w-md">
                   {isAuthenticated ? (
                     <ContentPlaceHolderIfUserIsNotAdmin text={t('courses.create_courses_placeholder')} />
                   ) : (

@@ -66,7 +66,7 @@ function MediaThumbnail({ media, orgslug, org_id, isDashboard = false, onChanged
   }
 
   return (
-    <div className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div className="group relative flex flex-col sl-card sl-card-interactive overflow-hidden w-full">
       {isDashboard && (
         <AuthenticatedClientElement
           action="update"
@@ -122,7 +122,7 @@ function MediaThumbnail({ media, orgslug, org_id, isDashboard = false, onChanged
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-bold text-gray-900 leading-tight truncate">{media.name}</h3>
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{typeLabel}</span>
+            <span className="sl-telemetry text-gray-400">{typeLabel}</span>
           </div>
           {media.media_type === 'EMBED' ? (
             <ExternalLink className="w-4 h-4 text-gray-300 flex-shrink-0" />

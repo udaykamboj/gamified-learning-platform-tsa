@@ -655,7 +655,7 @@ function AccountGeneral() {
 
   if (!userData) {
     return (
-      <div className="bg-card rounded-xl nice-shadow p-8">
+      <div className="sl-card p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -664,7 +664,7 @@ function AccountGeneral() {
   }
 
   return (
-    <div className="bg-card rounded-xl nice-shadow">
+    <div className="sl-card">
       <Formik<FormValues>
         enableReinitialize
         initialValues={{

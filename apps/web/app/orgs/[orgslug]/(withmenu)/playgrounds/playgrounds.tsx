@@ -103,10 +103,11 @@ export default function PlaygroundsClient({
                 <button
                   onClick={openCreateModal}
                   disabled={isCreating}
-                  className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
+                  type="button"
+                  className="sl-btn sl-btn-primary"
                 >
-                  <div>{t('playgrounds.new_playground')}</div>
-                  <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                  <span aria-hidden className="text-lg leading-none">+</span>
+                  {t('playgrounds.new_playground')}
                 </button>
               )}
             </div>
@@ -144,7 +145,7 @@ export default function PlaygroundsClient({
             )}
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {paginated.map((pg) => (
                 <PlaygroundCard
                   key={pg.playground_uuid}
@@ -157,17 +158,17 @@ export default function PlaygroundsClient({
               {filtered.length === 0 && searchQuery && (
                 <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
                   <Search className="w-12 h-12 text-gray-300 mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('playgrounds.no_results_for')} &quot;{searchQuery}&quot;</h2>
+                  <h2 className="sl-section-title mb-2">{t('playgrounds.no_results_for')} &quot;{searchQuery}&quot;</h2>
                   <p className="text-gray-400">{t('playgrounds.try_different_search')}</p>
                 </div>
               )}
 
               {playgrounds.length === 0 && !searchQuery && (
-                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                  <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+                  <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
                     <Cube className="w-8 h-8 text-gray-300" />
                   </div>
-                  <h1 className="text-xl font-bold text-gray-600 mb-2">{t('playgrounds.no_playgrounds_yet')}</h1>
+                  <h1 className="text-card-title font-semibold text-foreground mb-1">{t('playgrounds.no_playgrounds_yet')}</h1>
                   <p className="text-md text-gray-400 mb-6 max-w-xs text-center">
                     {t('playgrounds.playgrounds_description')}
                   </p>
@@ -175,10 +176,11 @@ export default function PlaygroundsClient({
                     <button
                       onClick={openCreateModal}
                       disabled={isCreating}
-                      className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
-                    >
-                      <div>{t('playgrounds.new_playground')}</div>
-                      <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                      type="button"
+                  className="sl-btn sl-btn-primary"
+                >
+                  <span aria-hidden className="text-lg leading-none">+</span>
+                  {t('playgrounds.new_playground')}
                     </button>
                   )}
                 </div>

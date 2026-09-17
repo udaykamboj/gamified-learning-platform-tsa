@@ -370,13 +370,13 @@ export default function PlanUsage({
             </div>
             <div className="px-5 py-5 space-y-5">
               <div>
-                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
+                <p className="sl-telemetry text-foreground/30">
                   {t('billing.cycle', { defaultValue: 'Cycle' })}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-foreground capitalize">{subscription.billing}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
+                <p className="sl-telemetry text-foreground/30">
                   {subscription.cancelAtPeriodEnd
                     ? t('billing.access_until', { defaultValue: 'Access until' })
                     : t('billing.next_payment', { defaultValue: 'Next payment' })}
@@ -384,7 +384,7 @@ export default function PlanUsage({
                 <p className="mt-1 text-sm font-semibold text-foreground">{periodEnd ?? '—'}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
+                <p className="sl-telemetry text-foreground/30">
                   {t('billing.status', { defaultValue: 'Status' })}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-foreground capitalize">
@@ -618,7 +618,7 @@ export default function PlanUsage({
                 }, {})
                 return (
                   <div className="space-y-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25">
+                    <p className="sl-telemetry text-foreground/25">
                       {t('billing.active_subscriptions', { defaultValue: 'Active subscriptions' })}
                     </p>
                     <div className="grid md:grid-cols-2 gap-3">
@@ -670,7 +670,7 @@ export default function PlanUsage({
             {/* Available add-ons */}
             <div className="space-y-3">
               {activePacks.length > 0 && (
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25">
+                <p className="sl-telemetry text-foreground/25">
                   {t('billing.available', { defaultValue: 'Available' })}
                 </p>
               )}
@@ -777,7 +777,7 @@ export default function PlanUsage({
 
                 {aiCredits && disclaimerPack.type === 'ai_credits' && (
                   <div className="bg-foreground/[0.02] rounded-xl px-4 py-3">
-                    <p className="text-[11px] font-semibold text-foreground/40 uppercase tracking-wider mb-1.5">
+                    <p className="sl-telemetry text-foreground/40 mb-1.5">
                       {t('billing.after_purchase', { defaultValue: 'After purchase' })}
                     </p>
                     <p className="text-[13px] font-semibold text-foreground">

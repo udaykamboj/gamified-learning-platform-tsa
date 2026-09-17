@@ -32,7 +32,7 @@ function OrgNotFound() {
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
             <Building2 className="h-8 w-8 text-gray-600" />
           </div>
-          <h1 className="mt-6 text-2xl font-bold text-gray-900">
+          <h1 className="mt-6 sl-page-title">
             Enter Your Organization
           </h1>
           <p className="mt-3 text-sm text-gray-600">

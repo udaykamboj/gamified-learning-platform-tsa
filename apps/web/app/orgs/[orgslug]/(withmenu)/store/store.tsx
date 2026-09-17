@@ -104,7 +104,7 @@ function OfferCard({ offer, orgslug, orgUuid, position }: { offer: Offer; orgslu
       href={getUriWithOrg(orgslug, `/store/offers/${offer.offer_uuid}`)}
       onClick={() => track(AnalyticsEvent.StoreOfferCardClicked, { offer_type: offer.offer_type, amount: offer.amount, position })}
     >
-      <div className="group bg-card rounded-xl nice-shadow overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200 hover:scale-[1.01]">
+      <div className="group sl-card overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200">
 
         {/* Thumbnail area */}
         <div className={`relative aspect-video overflow-hidden flex items-center justify-center ${
@@ -223,7 +223,7 @@ function Store({ orgslug, offers }: StoreProps) {
             <ShoppingBag size={18} className="text-gray-800" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Store</h1>
+            <h1 className="sl-page-title">Store</h1>
             {org?.name && (
               <p className="text-sm text-gray-400 mt-0.5">Unlock premium content from {org.name}</p>
             )}
@@ -235,7 +235,7 @@ function Store({ orgslug, offers }: StoreProps) {
             <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center mb-4 nice-shadow">
               <ShoppingBag size={28} className="text-gray-300" strokeWidth={1.5} />
             </div>
-            <h2 className="text-xl font-bold text-gray-600 mb-2">No offers available yet</h2>
+            <h2 className="text-card-title font-semibold text-foreground mb-1">No offers available yet</h2>
             <p className="text-gray-400 text-sm max-w-sm">
               Check back soon — offers and subscriptions will appear here when they become available.
             </p>

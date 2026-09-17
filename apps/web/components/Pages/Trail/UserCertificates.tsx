@@ -36,15 +36,15 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   if (isLoading) {
     return (
       <div className="flex flex-col space-y-2">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+        <div className="mt-10 flex items-center gap-3 mb-4">
+          <div className="grid size-10 place-items-center rounded-[10px] border border-border bg-card text-reward shadow-sm">
+            <Award className="w-5 h-5" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
+          <h2 className="sl-section-title">{t('certificate.my_certificates')}</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-card rounded-xl nice-shadow overflow-hidden animate-pulse">
+            <div key={i} className="sl-card overflow-hidden animate-pulse">
               <div className="aspect-video bg-gray-100" />
               <div className="p-3 space-y-2">
                 <div className="h-4 bg-gray-100 rounded w-3/4" />
@@ -60,14 +60,14 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   if (error) {
     return (
       <div className="flex flex-col space-y-2">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+        <div className="mt-10 flex items-center gap-3 mb-4">
+          <div className="grid size-10 place-items-center rounded-[10px] border border-border bg-card text-reward shadow-sm">
+            <Award className="w-5 h-5" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
+          <h2 className="sl-section-title">{t('certificate.my_certificates')}</h2>
         </div>
-        <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-          <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+        <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+          <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
             <Award className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
           </div>
           <p className="text-gray-500">{t('certificate.failed_load_certificates')}</p>
@@ -79,20 +79,20 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   if (!certificatesData || certificatesData.length === 0) {
     return (
       <div className="flex flex-col space-y-2">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+        <div className="mt-10 flex items-center gap-3 mb-4">
+          <div className="grid size-10 place-items-center rounded-[10px] border border-border bg-card text-reward shadow-sm">
+            <Award className="w-5 h-5" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
+          <h2 className="sl-section-title">{t('certificate.my_certificates')}</h2>
         </div>
-        <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-          <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+        <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+          <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
             <Award className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
           </div>
-          <h1 className="text-xl font-bold text-gray-600 mb-2">
+          <h1 className="text-card-title font-semibold text-foreground mb-1">
             {t('certificate.no_certificates_earned')}
           </h1>
-          <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+          <p className="text-ui text-muted-foreground mb-6 text-center max-w-md">
             {t('certificate.complete_courses_to_earn')}
           </p>
         </div>
@@ -102,17 +102,17 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
 
   return (
     <div className="flex flex-col space-y-2">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 bg-yellow-50 rounded-lg">
-          <Award className="w-5 h-5 text-yellow-500" />
+      <div className="mt-10 flex items-center gap-3 mb-4">
+        <div className="grid size-10 place-items-center rounded-[10px] border border-border bg-card text-reward shadow-sm">
+          <Award className="w-5 h-5" />
         </div>
-        <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
+        <h2 className="sl-section-title">{t('certificate.my_certificates')}</h2>
         <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
           {certificatesData.length}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {certificatesData.map((certificate: any) => {
           const verificationLink = getUriWithOrg(orgslug, `/certificates/${certificate.certificate_user.user_certification_uuid}/verify`)
           const awardedDate = new Date(certificate.certificate_user.created_at).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', {
@@ -124,7 +124,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
           return (
             <div
               key={certificate.certificate_user.user_certification_uuid}
-              className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
+              className="group relative flex flex-col sl-card sl-card-interactive overflow-hidden w-full"
             >
               {/* Thumbnail */}
               <Link
@@ -157,7 +157,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                   href={verificationLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
+                  className="text-card-title font-semibold text-foreground line-clamp-1"
                 >
                   {certificate.certification.config.certification_name}
                 </Link>
@@ -170,7 +170,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                 <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
                   <div className="flex items-center gap-1.5 text-gray-500">
                     <Calendar size={12} />
-                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                    <span className="text-meta font-semibold">
                       {awardedDate}
                     </span>
                   </div>
@@ -179,7 +179,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                     href={verificationLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider"
+                    className="sl-telemetry inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
                   >
                     {t('certificate.verify')}
                     <ExternalLink className="w-3 h-3" />

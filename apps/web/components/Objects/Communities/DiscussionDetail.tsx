@@ -110,7 +110,7 @@ export function DiscussionDetail({
         {/* Title Row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 break-words flex items-start gap-3">
+            <h1 className="sl-page-title break-words flex items-start gap-3">
               {discussion.emoji && (
                 <span className="text-3xl flex-shrink-0">{discussion.emoji}</span>
               )}

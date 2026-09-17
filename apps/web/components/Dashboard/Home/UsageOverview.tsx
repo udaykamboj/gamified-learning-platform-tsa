@@ -123,7 +123,7 @@ export default function UsageOverview() {
   return (
     <div className="space-y-6">
       {/* Usage card */}
-      <div className="bg-card rounded-xl nice-shadow p-5">
+      <div className="sl-card p-5">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-sm font-semibold text-gray-700">{t('dashboard.home.plan_and_usage')}</h3>
           <span
@@ -210,7 +210,7 @@ export default function UsageOverview() {
       </div>
 
       {/* Features card */}
-      <div className="bg-card rounded-xl nice-shadow p-5">
+      <div className="sl-card p-5">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">
           {t('dashboard.home.features')}
         </h3>

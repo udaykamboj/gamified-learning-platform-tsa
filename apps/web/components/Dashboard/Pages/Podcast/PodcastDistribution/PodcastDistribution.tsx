@@ -28,10 +28,10 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
   return (
     <div className="sm:mx-10 mx-4 my-6 space-y-6">
       {/* RSS Feed URL */}
-      <div className="bg-card rounded-xl nice-shadow p-6">
+      <div className="sl-card p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Rss size={20} className="text-orange-500" />
-          <h2 className="font-bold text-xl text-gray-800">RSS Feed</h2>
+          <h2 className="sl-section-title">RSS Feed</h2>
         </div>
         <p className="text-gray-500 text-sm mb-4">
           Your podcast RSS feed is automatically generated. Use this URL to submit your podcast to directories.
@@ -67,8 +67,8 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
       </div>
 
       {/* Distribution Guide */}
-      <div className="bg-card rounded-xl nice-shadow p-6">
-        <h2 className="font-bold text-xl text-gray-800 mb-4">Submit to Podcast Directories</h2>
+      <div className="sl-card p-6">
+        <h2 className="sl-section-title mb-4">Submit to Podcast Directories</h2>
         <p className="text-gray-500 text-sm mb-6">
           Follow these steps to get your podcast listed on major platforms. Each platform requires you to submit your RSS feed URL.
         </p>
@@ -197,8 +197,8 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
       </div>
 
       {/* Tips */}
-      <div className="bg-card rounded-xl nice-shadow p-6">
-        <h2 className="font-bold text-xl text-gray-800 mb-3">Tips for Successful Distribution</h2>
+      <div className="sl-card p-6">
+        <h2 className="sl-section-title mb-3">Tips for Successful Distribution</h2>
         <ul className="text-sm text-gray-600 space-y-2">
           <li className="flex items-start space-x-2">
             <span className="text-green-500 shrink-0 mt-0.5">&#10003;</span>

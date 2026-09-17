@@ -82,7 +82,7 @@ const PaymentsConfigurationPage: React.FC = () => {
   }, [org?.id, queryClient]);
 
   if (isLoading) return (
-    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4 animate-pulse">
+    <div className="ms-10 me-10 mx-auto sl-card px-4 py-4 animate-pulse">
       <div className="h-14 bg-gray-100 rounded-md mb-4" />
       <div className="space-y-3">
         {[1, 2].map((i) => (
@@ -105,7 +105,7 @@ const PaymentsConfigurationPage: React.FC = () => {
   const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
 
   return (
-    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4">
+    <div className="ms-10 me-10 mx-auto sl-card px-4 py-4">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
         <h1 className="font-bold text-xl text-gray-800">Payments Configuration</h1>
         <h2 className="text-gray-500 text-sm">

@@ -96,7 +96,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
       : getUriWithOrg(orgslug, `/podcast/${removePodcastPrefix(podcast.podcast_uuid)}`)
 
   return (
-    <div className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div className="group relative flex flex-col sl-card sl-card-interactive overflow-hidden w-full">
       {/* Options menu */}
       <AdminEditOptions
         podcast={podcast}
@@ -118,11 +118,11 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
         {isDashboard && (
           <div className="absolute bottom-2 start-2">
             {podcast.published ? (
-              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <span className="px-2 py-0.5 text-meta font-semibold bg-green-100 text-green-700 rounded-full">
                 {t('podcasts.published')}
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
+              <span className="px-2 py-0.5 text-meta font-semibold bg-yellow-100 text-yellow-700 rounded-full">
                 {t('podcasts.unpublished')}
               </span>
             )}
@@ -141,7 +141,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
           <Link
             href={podcastLink}
             onClick={handleCardOpen}
-            className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
+            className="text-card-title font-semibold text-foreground line-clamp-1"
            dir="auto">
             {podcast.name}
           </Link>
@@ -185,7 +185,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
             )}
 
             {podcast.update_date && (
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <span className="sl-telemetry text-gray-400">
                 {formatDate(podcast.update_date, i18n.language, { dateStyle: undefined, month: 'short', day: 'numeric' })}
               </span>
             )}
@@ -194,7 +194,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
           <Link
             href={podcastLink}
             onClick={handleCardOpen}
-            className="text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="sl-telemetry text-gray-400 hover:text-gray-900 transition-colors"
           >
             {t('podcasts.listen_now')}
           </Link>

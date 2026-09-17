@@ -271,7 +271,7 @@ const markdownComponents: MarkdownComponents = {
   h4: ({ node: _node, ...p }) => <h4 className="text-xs font-semibold text-gray-700 mt-2 mb-1" {...p} />,
   h5: ({ node: _node, ...p }) => <h5 className="text-xs font-semibold text-gray-700 mt-1.5 mb-1" {...p} />,
   h6: ({ node: _node, ...p }) => (
-    <h6 className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mt-1.5 mb-1" {...p} />
+    <h6 className="sl-telemetry text-gray-500 mt-1.5 mb-1" {...p} />
   ),
   p: ({ node: _node, ...p }) => <p className="my-1.5" {...p} />,
   ul: ({ node: _node, ...p }) => <ul className="list-disc ps-5 my-1.5 space-y-0.5" {...p} />,

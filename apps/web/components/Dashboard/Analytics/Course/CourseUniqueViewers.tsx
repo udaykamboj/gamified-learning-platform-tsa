@@ -48,11 +48,11 @@ export default function CourseUniqueViewers({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-sky-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-sky-400 font-semibold">{t('analytics.course_analytics.unique_viewers.total_views')}</p>
+                <p className="sl-telemetry text-sky-400">{t('analytics.course_analytics.unique_viewers.total_views')}</p>
                 <p className="text-2xl font-bold text-sky-600">{totalViews}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.unique_viewers.peak_viewers')}</p>
+                <p className="sl-telemetry text-gray-400">{t('analytics.course_analytics.unique_viewers.peak_viewers')}</p>
                 <p className="text-2xl font-bold text-gray-700">{peakViewers}</p>
               </div>
             </div>

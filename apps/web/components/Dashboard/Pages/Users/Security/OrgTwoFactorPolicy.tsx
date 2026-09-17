@@ -248,7 +248,7 @@ const OrgTwoFactorPolicy: React.FC = () => {
   if (loadError && !compliance) {
     return (
       <div className="sm:mx-10 mx-0">
-        <div className="bg-card rounded-xl nice-shadow p-6 flex items-start gap-3">
+        <div className="sl-card p-6 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <div className="grow">
             <h2 className="font-semibold text-gray-800">
@@ -302,7 +302,7 @@ const OrgTwoFactorPolicy: React.FC = () => {
       {/* 1. Compliance summary — only while the requirement is on.          */}
       {/* ------------------------------------------------------------------ */}
       {showCoverage && (
-      <div className="bg-card rounded-xl nice-shadow p-5 space-y-4">
+      <div className="sl-card p-5 space-y-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="font-bold text-gray-800">
@@ -397,7 +397,7 @@ const OrgTwoFactorPolicy: React.FC = () => {
       {/* 2. Member list — same condition as the coverage panel above.       */}
       {/* ------------------------------------------------------------------ */}
       {showCoverage && (
-      <div className="bg-card rounded-xl nice-shadow overflow-hidden">
+      <div className="sl-card overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-100">
           <Users className="w-4 h-4 text-gray-400" />
           <h2 className="font-bold text-gray-800">
@@ -526,7 +526,7 @@ const OrgTwoFactorPolicy: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {/* 3. The policy itself                                                */}
       {/* ------------------------------------------------------------------ */}
-      <div className="bg-card rounded-xl nice-shadow p-5 space-y-5">
+      <div className="sl-card p-5 space-y-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="font-bold text-gray-800">

@@ -23,7 +23,7 @@ export default function PopularCourses() {
   const courses = (data || []).filter((course) => course.published).slice(0, 6)
 
   return (
-    <div className="bg-card rounded-xl nice-shadow p-5">
+    <div className="sl-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-gray-700">Most popular courses</h3>
         <Link href="/dash/courses" className="text-xs font-medium text-gray-400 hover:text-gray-700">

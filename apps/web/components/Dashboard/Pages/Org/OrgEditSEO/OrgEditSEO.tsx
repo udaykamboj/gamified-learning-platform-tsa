@@ -103,7 +103,7 @@ const OrgEditSEO: React.FC = () => {
 
   return (
     <FeatureGate feature="seo">
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 sl-card">
       <Formik
         enableReinitialize
         initialValues={initialValues}

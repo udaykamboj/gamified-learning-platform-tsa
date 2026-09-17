@@ -297,11 +297,11 @@ function EpisodeRow({
             <span className="text-xs font-medium text-gray-400">#{index + 1}</span>
             <h3 className="text-sm font-medium text-gray-900 truncate">{episode.title}</h3>
             {episode.published ? (
-              <span className="px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded">
+              <span className="px-1.5 py-0.5 text-meta font-semibold bg-green-100 text-green-700 rounded">
                 {t('podcasts.published')}
               </span>
             ) : (
-              <span className="px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded">
+              <span className="px-1.5 py-0.5 text-meta font-semibold bg-yellow-100 text-yellow-700 rounded">
                 {t('podcasts.unpublished')}
               </span>
             )}

@@ -1109,7 +1109,7 @@ function AccountSecurity() {
 
   return (
     <>
-    <div className="bg-card rounded-xl nice-shadow">
+    <div className="sl-card">
       <div className="flex flex-col gap-0">
         {/* Current session / device */}
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-3 rounded-md">

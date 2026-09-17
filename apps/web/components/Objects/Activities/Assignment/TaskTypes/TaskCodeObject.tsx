@@ -856,7 +856,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[11px] font-semibold text-slate-400 uppercase">Stdin</label>
+                      <label className="sl-telemetry text-slate-400">Stdin</label>
                       <textarea
                         value={tc.stdin}
                         onChange={(e) => updateTestCase(index, 'stdin', e.target.value)}
@@ -866,7 +866,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id, onGraded }: TaskCod
                       />
                     </div>
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[11px] font-semibold text-slate-400 uppercase">Expected Stdout</label>
+                      <label className="sl-telemetry text-slate-400">Expected Stdout</label>
                       <textarea
                         value={tc.expectedStdout}
                         onChange={(e) => updateTestCase(index, 'expectedStdout', e.target.value)}

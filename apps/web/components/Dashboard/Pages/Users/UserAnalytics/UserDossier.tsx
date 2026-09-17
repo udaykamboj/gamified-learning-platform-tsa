@@ -42,7 +42,7 @@ export default function UserDossier({ dossier }: { dossier: any }) {
           />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="font-bold text-xl tracking-tight truncate">{fullName(user)}</h2>
+              <h2 className="sl-section-title truncate">{fullName(user)}</h2>
               {membership.role && <Badge variant="secondary">{membership.role}</Badge>}
             </div>
             <div className="text-sm text-gray-500 truncate">@{user.username} · {user.email}</div>

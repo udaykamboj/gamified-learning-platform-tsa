@@ -60,7 +60,7 @@ export default function OrgEditSocials() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 sl-card">
       <Formik
         enableReinitialize
         initialValues={initialValues}

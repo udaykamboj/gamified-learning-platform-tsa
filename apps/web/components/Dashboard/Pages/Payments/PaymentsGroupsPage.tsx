@@ -292,7 +292,7 @@ export default function PaymentsGroupsPage() {
   if (!isEnabled && !isLoading) return <UnconfiguredPaymentsDisclaimer />;
   if (error) return <div className="p-8 text-sm text-red-500">Failed to load groups.</div>;
   if (!groups) return (
-    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4 animate-pulse">
+    <div className="ms-10 me-10 mx-auto sl-card px-4 py-4 animate-pulse">
       <div className="flex items-center justify-between bg-gray-50 px-5 py-3 rounded-md mb-5">
         <div className="space-y-1.5">
           <div className="h-5 bg-gray-200 rounded w-36" />
@@ -348,7 +348,7 @@ export default function PaymentsGroupsPage() {
   };
 
   return (
-    <div className="ms-10 me-10 mx-auto bg-card rounded-xl nice-shadow px-4 py-4">
+    <div className="ms-10 me-10 mx-auto sl-card px-4 py-4">
       <Modal
         isDialogOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}

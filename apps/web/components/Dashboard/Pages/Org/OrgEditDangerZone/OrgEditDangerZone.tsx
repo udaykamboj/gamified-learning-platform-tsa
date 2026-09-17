@@ -40,7 +40,7 @@ const OrgEditDangerZone: React.FC = () => {
   if (!canManageOrg) {
     return (
       <div className="sm:mx-10 mx-0">
-        <div className="bg-card rounded-xl nice-shadow p-6 text-gray-500">
+        <div className="sl-card p-6 text-gray-500">
           You don&apos;t have permission to manage this organization&apos;s danger zone.
         </div>
       </div>

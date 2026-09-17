@@ -28,7 +28,7 @@ export default function UserProgressSnapshot({ days = '90' }: { days?: string })
   const chartRows = Array.from(courseMap.values()).slice(0, 10)
 
   return (
-    <div className="bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
+    <div className="sl-card p-5 min-h-[300px] overflow-hidden min-w-0">
       <h3 className="text-sm font-semibold text-gray-700 mb-1">User Progress Snapshot</h3>
       <p className="text-xs text-gray-400 mb-4">Users at each completion bracket per course</p>
       {isLoading ? (

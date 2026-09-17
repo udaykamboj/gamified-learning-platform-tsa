@@ -66,7 +66,7 @@ function FolderThumbnail({ folder, orgslug, org_id, isDashboard = false, onChang
   }
 
   return (
-    <div className="group relative bg-card nice-shadow rounded-xl p-3 hover:bg-gray-50/50 transition-colors">
+    <div className="group relative sl-card p-3 hover:bg-gray-50/50 transition-colors">
       {isDashboard && (
         <AuthenticatedClientElement action="update" ressourceType={'folders' as any} checkMethod="roles" orgId={org_id ?? org?.id}>
           <div className={`absolute top-2 end-2 z-20 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>

@@ -309,11 +309,11 @@ function LibraryBlockComponent(props: NodeViewProps) {
             />
           </div>
         ) : (
-          <div className="flex items-center gap-3 bg-card rounded-xl nice-shadow px-4 py-3">
+          <div className="flex items-center gap-3 sl-card px-4 py-3">
             <Icon size={22} className="text-slate-400 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              <p className="text-meta font-semibold text-gray-400">
                 {t(`library.tabs.${kind}s`)}
               </p>
             </div>

@@ -70,7 +70,7 @@ export default function PlaygroundOptionsModal({
         <div className="flex h-full min-h-[680px]">
           {/* Sidebar */}
           <div className="w-44 flex-shrink-0 border-e border-gray-100 bg-gray-50/60 flex flex-col py-4 px-3 gap-1">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">
+            <p className="sl-telemetry text-gray-400 px-2 mb-2">
               Playground
             </p>
             {tabs.map((tab) => (

@@ -27,7 +27,7 @@ export default function UsersComparisonTable({ userIds, days = 365, onOpenUser }
   }
 
   return (
-    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>

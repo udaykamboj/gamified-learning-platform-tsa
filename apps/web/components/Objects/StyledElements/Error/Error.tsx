@@ -73,22 +73,22 @@ function ErrorUI({
       }`}
     >
       <div className="flex items-center gap-4">
-        <div className="bg-rose-100 p-3 rounded-2xl shrink-0">
-          <AlertTriangle className="text-rose-700" size={compact ? 28 : 38} />
+        <div className="bg-error-surface p-3 rounded-2xl shrink-0">
+          <AlertTriangle className="text-error" size={compact ? 28 : 38} />
         </div>
         <div className="flex flex-col text-start">
-          <p className={`font-bold text-rose-700 ${compact ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+          <p className={`font-display font-semibold text-foreground ${compact ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
             {title}
           </p>
           {classified?.category.kind && (
-            <span className="text-[11px] uppercase tracking-wide font-semibold text-rose-400">
+            <span className="sl-telemetry text-error">
               {classified.category.kind.replace(/_/g, ' ')}
             </span>
           )}
         </div>
       </div>
 
-      <p className={`text-gray-600 ${compact ? 'text-sm' : 'text-base'} max-w-prose`}>
+      <p className={`text-muted-foreground ${compact ? 'text-sm' : 'text-base'} max-w-prose`}>
         {description}
       </p>
 

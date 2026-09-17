@@ -350,7 +350,7 @@ const OrgEditAutomations: React.FC = () => {
       <>
         {/* ── Zapier hero card (hidden until the StarLab Zapier app is live) ────────────────────── */}
         {showZapierHeroCard && (
-        <div className="sm:mx-10 mx-0 mb-6 bg-card rounded-xl nice-shadow overflow-hidden">
+        <div className="sm:mx-10 mx-0 mb-6 sl-card overflow-hidden">
           <div className="px-5 py-4 flex items-center gap-4">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden nice-shadow">
               <ZapierLogo size={40} className="w-full h-full object-cover" />
@@ -358,11 +358,11 @@ const OrgEditAutomations: React.FC = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="font-semibold text-gray-800 text-[15px]">Zapier</h2>
-                <Badge className="bg-violet-50 text-violet-700 border border-violet-200 text-[11px] font-semibold uppercase tracking-wider hover:bg-violet-50">
+                <Badge className="sl-telemetry bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-50">
                   Beta
                 </Badge>
                 {zapierWebhooks.length > 0 && (
-                  <Badge className="bg-[#FFF5F0] text-[#FF4A00] border border-[#FFE5D6] text-[11px] font-semibold uppercase tracking-wider hover:bg-[#FFF5F0]">
+                  <Badge className="sl-telemetry bg-[#FFF5F0] text-[#FF4A00] border border-[#FFE5D6] hover:bg-[#FFF5F0]">
                     {zapierWebhooks.length} active {zapierWebhooks.length === 1 ? 'Zap' : 'Zaps'}
                   </Badge>
                 )}
@@ -419,7 +419,7 @@ const OrgEditAutomations: React.FC = () => {
         )}
 
         {/* ── Manual webhooks ──────────────────────────────────────── */}
-        <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow pt-3">
+        <div className="sm:mx-10 mx-0 sl-card pt-3">
           <div className="flex flex-col gap-0">
             <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
               <h1 className="font-bold text-xl text-gray-800">{t('dashboard.organization.automations.webhooks_title')}</h1>

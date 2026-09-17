@@ -48,7 +48,7 @@ function AIFollowUpSuggestions({
                 ${
                   disabled
                     ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:bg-white/10 hover:text-white/80 hover:border-white/20 cursor-pointer hover:scale-[1.02]'
+                    : 'hover:bg-white/10 hover:text-white/80 hover:border-white/20 cursor-pointer'
                 }
               `}
             >

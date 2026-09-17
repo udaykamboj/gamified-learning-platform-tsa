@@ -214,7 +214,7 @@ const CommunityEditModeration: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 sl-card">
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.moderation.title')}</h1>

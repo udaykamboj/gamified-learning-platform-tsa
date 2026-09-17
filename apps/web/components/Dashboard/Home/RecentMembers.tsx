@@ -29,7 +29,7 @@ export default function RecentMembers() {
   const totalMembers = membersData?.total ?? 0
 
   return (
-    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-semibold text-gray-700">

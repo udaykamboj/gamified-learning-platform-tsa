@@ -132,7 +132,7 @@ export default function PlaygroundViewClient({
             {/* Info card */}
             <div className="bg-card nice-shadow rounded-lg overflow-hidden">
               <div className="p-3 border-b border-gray-100">
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('playgrounds.view.about')}</p>
+                <p className="sl-telemetry text-gray-400 mb-2">{t('playgrounds.view.about')}</p>
                 <h1 className="text-sm font-bold text-gray-900 leading-snug">
                   {playground.name}
                 </h1>
@@ -205,7 +205,7 @@ export default function PlaygroundViewClient({
 
             {/* Reactions card */}
             <div className="bg-card nice-shadow rounded-lg p-3">
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+              <p className="sl-telemetry text-gray-400 mb-2.5">
                 {t('playgrounds.view.reactions')}
               </p>
               <PlaygroundReactionButton playgroundUuid={playground.playground_uuid} />

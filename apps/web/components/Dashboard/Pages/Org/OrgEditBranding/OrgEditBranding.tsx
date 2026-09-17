@@ -461,7 +461,7 @@ export default function OrgEditBranding() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
+    <div className="sm:mx-10 mx-0 sl-card px-3 py-3 sm:mb-0 mb-16">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mb-2 rounded-md">
         <h1 className="font-bold text-xl text-gray-800">
           {t('dashboard.organization.branding.title')}

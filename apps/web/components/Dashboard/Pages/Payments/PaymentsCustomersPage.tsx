@@ -60,7 +60,7 @@ function CardChip({ brand, last4 }: { brand?: string; last4?: string }) {
   if (!brand) return <span className="text-gray-400">—</span>
   return (
     <div className="flex items-center space-x-1.5">
-      <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+      <span className="text-meta font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
         {labels[brand.toLowerCase()] ?? brand}
       </span>
       {last4 && <span className="text-sm text-gray-600 font-mono">••••&nbsp;{last4}</span>}

@@ -52,7 +52,7 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
   const users: Record<number, any> = data?.users ?? {}
 
   return (
-    <div className="bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
+    <div className="sl-card p-5 min-h-[300px] overflow-hidden min-w-0">
       <h3 className="text-sm font-semibold text-gray-700 mb-1">Learner Engagement Score</h3>
       <p className="text-xs text-gray-400 mb-4">Top learners by composite engagement</p>
       {isLoading ? (

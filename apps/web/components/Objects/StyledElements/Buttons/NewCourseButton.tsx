@@ -9,12 +9,11 @@ function NewCourseButton({ disabled = false }: NewCourseButtonProps) {
   const { t } = useTranslation()
   return (
     <div
-      className={`rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center ${
-        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
-      }`}
+      className={`sl-btn sl-btn-primary ${disabled ? 'pointer-events-none bg-disabled text-disabled-fg' : ''}`}
+      aria-disabled={disabled || undefined}
     >
-      <div>{t('courses.new_course')} </div>
-      <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+      <span aria-hidden className="text-lg leading-none">+</span>
+      {t('courses.new_course')}
     </div>
   )
 }

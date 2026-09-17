@@ -144,20 +144,20 @@ function FunnelModalContent({
     <div className="space-y-5">
       <div className="flex gap-4">
         <div className="bg-indigo-50 rounded-xl px-5 py-3 flex-1">
-          <p className="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.common.total_views')}</p>
+          <p className="sl-telemetry text-indigo-400">{t('analytics.course_analytics.common.total_views')}</p>
           <p className="text-2xl font-bold text-indigo-600">{totalViews}</p>
         </div>
         <div className="bg-emerald-50 rounded-xl px-5 py-3 flex-1">
-          <p className="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total_completions')}</p>
+          <p className="sl-telemetry text-emerald-400">{t('analytics.course_analytics.common.total_completions')}</p>
           <p className="text-2xl font-bold text-emerald-600">{totalCompletions}</p>
         </div>
         <div className="bg-gray-50 rounded-xl px-5 py-3 flex-1">
-          <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.avg_rate')}</p>
+          <p className="sl-telemetry text-gray-400">{t('analytics.course_analytics.common.avg_rate')}</p>
           <p className="text-2xl font-bold text-gray-700">{avgRate}%</p>
         </div>
         {lowConversion.length > 0 && (
           <div className="bg-rose-50 rounded-xl px-5 py-3 flex-1">
-            <p className="text-[11px] uppercase tracking-wider text-rose-400 font-semibold">{t('analytics.course_analytics.common.needs_attention')}</p>
+            <p className="sl-telemetry text-rose-400">{t('analytics.course_analytics.common.needs_attention')}</p>
             <p className="text-2xl font-bold text-rose-600">{lowConversion.length}</p>
           </div>
         )}

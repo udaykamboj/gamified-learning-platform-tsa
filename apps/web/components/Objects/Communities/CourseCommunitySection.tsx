@@ -49,7 +49,7 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
 
   return (
     <div className="w-full my-5">
-      <h2 className="py-5 text-xl md:text-2xl font-bold text-gray-900">
+      <h2 className="sl-section-title py-5">
         {t('communities.course_section.title')}
       </h2>
       <div className="sl-card overflow-hidden">

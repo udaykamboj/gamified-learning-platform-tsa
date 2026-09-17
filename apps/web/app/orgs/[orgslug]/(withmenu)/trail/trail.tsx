@@ -98,7 +98,7 @@ function Trail(params: any) {
 
         {!trail ? (
           <div className="animate-pulse">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="rounded-xl overflow-hidden">
                   {/* Progress thumbnail */}
@@ -115,19 +115,19 @@ function Trail(params: any) {
             </div>
           </div>
         ) : trail.runs.length === 0 ? (
-          <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-            <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+          <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+            <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
               <BookOpen className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
             </div>
-            <h1 className="text-xl font-bold text-gray-600 mb-2">
+            <h1 className="text-card-title font-semibold text-foreground mb-1">
               {t('user.no_courses_in_progress')}
             </h1>
-            <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+            <p className="text-ui text-muted-foreground mb-6 text-center max-w-md">
               {t('user.start_course_to_see_progress')}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {trail.runs.map((run: any) => (
               <TrailCourseCard
                 key={run.course.course_uuid}

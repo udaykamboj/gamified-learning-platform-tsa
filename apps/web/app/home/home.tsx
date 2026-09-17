@@ -102,7 +102,7 @@ function HomeClient({ redirectEmptyOrgs = true }: { redirectEmptyOrgs?: boolean 
                 height={30}
                 className="opacity-90"
               />
-              <h1 className="mt-6 font-black tracking-tight text-2xl text-gray-900 text-center">
+              <h1 className="mt-6 sl-page-title text-center">
                 {t('common.your_organizations')}
               </h1>
               <p className="mt-1.5 text-sm text-foreground/40 text-center">
@@ -349,7 +349,7 @@ function OrgRow({ org, access_token }: { org: any; access_token: string }) {
             {org.is_demo && (
               // Marks the shared sandbox in a list of the user's real
               // organizations, so nobody mistakes it for one of theirs.
-              <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">
+              <span className="sl-telemetry shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-amber-800">
                 {t('demo.badge', { defaultValue: 'Demo' })}
               </span>
             )}

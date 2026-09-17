@@ -185,7 +185,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
         }
       />
       <div className={`flex w-full ${alignClass}`}> {/* CardWrapper */}
-        <div className="bg-card nice-shadow rounded-xl max-w-[420px] min-w-[260px] my-2 px-6 pt-6 pb-4 relative "> {/* PreviewCard */}
+        <div className="sl-card max-w-[420px] min-w-[260px] my-2 px-6 pt-6 pb-4 relative "> {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
           {isEditable && !editing && (
             <div className="flex flex-col gap-2 absolute -top-3 -end-3 z-20">

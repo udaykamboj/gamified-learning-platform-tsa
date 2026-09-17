@@ -414,7 +414,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
                   <div key={group.label} className="mb-3">
-                    <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider px-2 py-1.5">
+                    <p className="sl-telemetry text-neutral-400 px-2 py-1.5">
                       {group.label}
                     </p>
                     {group.sessions.map((s) => (
@@ -494,7 +494,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </svg>
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-bold text-neutral-900 ">Course Copilot</h2>
+                <h2 className="sl-section-title">Course Copilot</h2>
                 <p className="text-sm text-neutral-500 max-w-md leading-relaxed">
                   Ask questions about your courses and get answers grounded in course content, with references to the source material.
                 </p>
@@ -1062,7 +1062,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
 }) {
   const positionClass = position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
   return (
-    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white nice-shadow z-50 py-1`}>
+    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-card nice-shadow z-50 py-1`}>
       <button
         onClick={() => onSelect(null)}
         className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 transition-colors flex items-center gap-2.5 ${

@@ -9,11 +9,12 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUserCertificates } from '@services/courses/certifications'
 import { useCourseCertification } from '@components/Hooks/useCourseCertification'
 import Link from 'next/link'
+import SubjectArtwork from '@components/Objects/Thumbnails/SubjectArtwork'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { Award, ExternalLink, BookOpen, MoreVertical, Trash2 } from 'lucide-react'
+import { Award, ExternalLink, MoreVertical, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import {
@@ -109,7 +110,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const courseLink = getUriWithOrg(props.orgslug, '/course/' + courseid)
 
   return (
-    <div className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]" onMouseEnter={handleMouseEnter}>
+    <div className="group relative flex flex-col sl-card sl-card-interactive overflow-hidden w-full" onMouseEnter={handleMouseEnter}>
       {/* Dropdown Menu */}
       <div className="absolute top-2 end-2 z-20">
         <DropdownMenu>
@@ -140,7 +141,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       {/* Thumbnail */}
       <Link
         href={courseLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        className="block relative aspect-video overflow-hidden bg-muted"
       >
         {props.course.thumbnail_image && org?.org_uuid ? (
           <img
@@ -153,61 +154,56 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 gap-2">
-            <BookOpen size={40} strokeWidth={1.5} />
-          </div>
+          <SubjectArtwork seed={props.course.course_uuid} />
         )}
         {/* Progress overlay */}
-        <div className="absolute bottom-0 start-0 end-0 h-1.5 bg-gray-200/80">
+        <div className="absolute bottom-0 start-0 end-0 h-1.5 bg-black/30" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={course_progress} aria-label={`${course.name} progress`}>
           <div
-            className={`h-full ${course_progress === 100 ? 'bg-green-500' : 'bg-teal-500'}`}
+            className="h-full bg-primary"
             style={{ width: `${course_progress}%` }}
           />
         </div>
       </Link>
 
       {/* Content */}
-      <div className="p-3 flex flex-col space-y-1.5">
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         <Link
           href={courseLink}
-          className="text-base font-bold text-gray-900 leading-tight hover:text-foreground transition-colors line-clamp-1"
+          className="text-card-title font-semibold text-foreground line-clamp-1"
         >
           {course.name}
         </Link>
 
         <div className="flex items-center gap-2 text-sm">
-          <span className={`font-semibold ${course_progress === 100 ? 'text-green-600' : 'text-teal-600'}`}>
+          <span className="font-semibold tabular-nums text-link">
             {course_progress}%
           </span>
-          <span className="text-gray-400 text-xs">
+          <span className="text-meta text-muted-foreground">
             {t('courses.completed_of', { completed: course_completed_steps, total: course_total_steps })}
           </span>
         </div>
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
           {/* Certificate or Progress indicator */}
           {course_progress === 100 ? (
             showCertificateUI && (isLoadingCertificate || isLoadingCertificationStatus) ? (
               <div className="flex items-center gap-1.5 text-gray-400">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-500"></div>
-                <span className="text-[11px] font-bold uppercase tracking-wider">{t('common.loading')}</span>
+                <span className="text-meta font-semibold">{t('common.loading')}</span>
               </div>
             ) : showCertificateUI && courseCertificate ? (
-              <div className="flex items-center gap-1.5 text-yellow-600">
+              <div className="flex items-center gap-1.5 text-reward">
                 <Award size={12} />
-                <span className="text-[11px] font-bold uppercase tracking-wider">{t('certificate.certificate')}</span>
+                <span className="text-meta font-semibold">{t('certificate.certificate')}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-green-600">
+              <div className="flex items-center gap-1.5 text-success">
                 <Award size={12} />
-                <span className="text-[11px] font-bold uppercase tracking-wider">{t('common.completed')}</span>
+                <span className="text-meta font-semibold">{t('common.completed')}</span>
               </div>
             )
           ) : (
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <BookOpen size={12} />
-              <span className="text-[11px] font-bold uppercase tracking-wider">{t('courses.course_progress')}</span>
-            </div>
+            <span className="text-meta text-muted-foreground">{t('courses.course_progress')}</span>
           )}
 
           {course_progress === 100 && showCertificateUI && courseCertificate ? (
@@ -215,7 +211,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
               href={getUriWithOrg(props.orgslug, `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-link hover:underline underline-offset-4"
             >
               {t('certificate.verify')}
               <ExternalLink className="w-3 h-3" />
@@ -223,7 +219,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           ) : (
             <Link
               href={courseLink}
-              className="text-[11px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-sm font-semibold text-link hover:underline underline-offset-4"
             >
               {t('courses.continue_learning')}
             </Link>

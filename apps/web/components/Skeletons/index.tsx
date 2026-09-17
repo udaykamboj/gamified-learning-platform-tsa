@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------------
 export function CourseCardSkeleton() {
   return (
-    <div className="flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full">
+    <div className="flex flex-col sl-card overflow-hidden w-full">
       {/* Thumbnail – aspect-video */}
       <div className="relative aspect-video bg-gray-200 animate-pulse" />
 

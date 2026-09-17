@@ -476,11 +476,11 @@ function SearchPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 pt-10 pb-4 max-w-5xl">
-        <h1 className="text-2xl font-semibold text-foreground/80 mb-1">
+      <div className="mx-auto w-full max-w-[1280px] px-4 pt-8 pb-4 md:px-6 md:pt-10 xl:px-8">
+        <h1 className="sl-page-title mb-2">
           {t('common.search')}
         </h1>
-        <p className="text-sm text-foreground/50 mb-6">{t('search.start_subtitle')}</p>
+        <p className="text-reading text-muted-foreground mb-6">{t('search.start_subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="relative group">
           <input
@@ -489,9 +489,7 @@ function SearchPage() {
             onChange={(e) => setInputValue(e.target.value)}
             aria-label={t('search.search_placeholder')}
             placeholder={t('search.search_placeholder')}
-            className="w-full h-12 ps-12 pe-24 rounded-xl bg-white nice-shadow
-                       focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1
-                       text-sm placeholder:text-black/40 transition-all"
+            className="sl-input h-12 ps-12 pe-28 text-ui"
           />
           <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
             <SearchIcon
@@ -501,14 +499,14 @@ function SearchPage() {
           </div>
           <button
             type="submit"
-            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-action-hover transition-colors"
+            className="absolute inset-y-1.5 end-1.5 sl-btn sl-btn-primary min-h-0 px-4"
           >
             {t('common.search')}
           </button>
         </form>
 
         {urlQuery && (
-          <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
             <TabButton
               label={t('search.types.all')}
               icon={SearchIcon}
@@ -530,7 +528,7 @@ function SearchPage() {
         )}
       </div>
 
-      <div className="container mx-auto px-4 pb-12 max-w-5xl">
+      <div className="mx-auto w-full max-w-[1280px] px-4 pb-16 md:px-6 xl:px-8">
         {!urlQuery.trim() ? (
           <StartState label={t('search.start_heading')} />
         ) : isLoading ? (
@@ -552,7 +550,7 @@ function SearchPage() {
                 const items = section.items(results)
                 return (
                   <section key={section.key}>
-                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-foreground/50 mb-3 flex items-center gap-2">
+                    <h2 className="sl-telemetry text-foreground/50 mb-3 flex items-center gap-2">
                       <section.icon size={13} />
                       {t(`search.types.${section.key}`)}
                       <span className="text-foreground/30 font-normal normal-case tracking-normal">
@@ -612,16 +610,18 @@ function TabButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+      aria-pressed={active}
+      className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap transition-colors ${
         active
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-foreground/5 text-foreground/70 hover:bg-foreground/10'
+          ? 'border-primary bg-selected text-foreground'
+          : 'border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground'
       }`}
     >
-      <Icon size={14} />
+      <Icon size={16} aria-hidden />
       {label}
-      <span className={active ? 'text-white/70' : 'text-foreground/40'}>{count}</span>
+      <span className="rounded-full bg-muted px-1.5 text-meta tabular-nums text-muted-foreground">{count}</span>
     </button>
   )
 }

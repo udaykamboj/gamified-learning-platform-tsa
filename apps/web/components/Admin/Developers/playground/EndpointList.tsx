@@ -101,7 +101,7 @@ export default function EndpointList({
                         >
                           <span
                             className={
-                              'shrink-0 mt-0.5 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border font-mono w-12 ' +
+                              'shrink-0 mt-0.5 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-meta font-semibold border font-mono w-12 ' +
                               METHOD_CLS[e.method]
                             }
                           >

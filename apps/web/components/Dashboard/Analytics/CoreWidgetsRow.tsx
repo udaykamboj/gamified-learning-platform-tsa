@@ -80,7 +80,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
 
   return (
     <>
-      <div className="bg-card nice-shadow rounded-xl overflow-hidden flex divide-x divide-gray-100">
+      <div className="sl-card overflow-hidden flex divide-x divide-gray-100">
         {/* {t('analytics.overview.enrollment_funnel')} */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">

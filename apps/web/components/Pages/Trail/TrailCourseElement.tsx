@@ -114,7 +114,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
             <div className="course_basic flex flex-col flex-end -space-y-2">
               <p className="p-0 font-bold text-sm text-gray-700">{t('search.course')}</p>
               <div className="course_progress flex items-center space-x-2">
-                <h2 className="font-bold text-xl">{course.name}</h2>
+                <h2 className="sl-section-title">{course.name}</h2>
                 <div className="bg-slate-300 rounded-full w-[10px] h-[5px]"></div>
                 <h2>{course_progress}%</h2>
               </div>

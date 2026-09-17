@@ -233,10 +233,10 @@ export default function OrgSignupFields() {
   }
 
   return (
-    <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow mt-6">
+    <div className="mx-4 sm:mx-10 sl-card mt-6">
       <div className="px-4 sm:px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="font-bold text-xl text-gray-800">
+          <h2 className="sl-section-title">
             {t('dashboard.users.signup_fields.title', { defaultValue: 'Custom signup fields' })}
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">

@@ -60,9 +60,9 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
       <div className="w-full animate-pulse">
         <GeneralWrapperStyled>
           <div className="h-7 bg-gray-200 rounded w-28 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-xl nice-shadow p-3 h-16" />
+              <div key={i} className="sl-card p-3 h-16" />
             ))}
           </div>
         </GeneralWrapperStyled>
@@ -81,7 +81,7 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
 
             <div className="flex flex-col gap-7">
               {folders.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   {folders.map((folder: any) => (
                     <FolderCard key={folder.folder_uuid} folder={folder} orgslug={orgslug} />
                   ))}
@@ -89,7 +89,7 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
               )}
 
               {rootItems.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 items-start">
                   {rootItems.map((item: any) => (
                     <LibraryItemCard key={item.resource_uuid} item={item} orgslug={orgslug} />
                   ))}
@@ -97,8 +97,8 @@ function LibraryClient({ orgslug }: { orgslug: string }) {
               )}
 
               {folders.length === 0 && rootItems.length === 0 && (
-                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 ">
-                  <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center ">
+                  <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
                     <FolderSimple className="w-8 h-8 text-gray-300 " weight="duotone" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-600 mb-1">

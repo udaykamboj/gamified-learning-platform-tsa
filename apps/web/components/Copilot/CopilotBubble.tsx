@@ -354,7 +354,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
                   <div key={group.label} className="mb-3">
-                    <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider px-2 py-1">
+                    <p className="sl-telemetry text-neutral-400 px-2 py-1">
                       {group.label}
                     </p>
                     {group.sessions.map((s) => (

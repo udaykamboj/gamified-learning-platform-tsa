@@ -89,11 +89,11 @@ export default function CourseAvgSessionDuration({
           <div className="space-y-5">
             <div className="flex gap-8">
               <div className="bg-purple-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.total_time')}</p>
+                <p className="sl-telemetry text-purple-400">{t('analytics.course_analytics.avg_session_duration.total_time')}</p>
                 <p className="text-2xl font-bold text-purple-600">{formatSeconds(totalSeconds)}</p>
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3">
-                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.avg_per_day')}</p>
+                <p className="sl-telemetry text-gray-400">{t('analytics.course_analytics.avg_session_duration.avg_per_day')}</p>
                 <p className="text-2xl font-bold text-gray-700">{avgMinutes}m</p>
               </div>
             </div>

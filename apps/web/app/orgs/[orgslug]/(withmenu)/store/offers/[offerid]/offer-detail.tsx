@@ -63,7 +63,7 @@ function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: stri
 
   const url = getResourceUrl(orgslug, resource)
   const card = (
-    <div className={`bg-card rounded-xl nice-shadow overflow-hidden flex flex-col ${url ? 'cursor-pointer hover:scale-[1.01] transition-transform duration-150' : ''}`}>
+    <div className={`sl-card overflow-hidden flex flex-col ${url ? 'cursor-pointer transition-transform duration-150' : ''}`}>
       {/* Thumbnail */}
       <div
         className="w-full aspect-video overflow-hidden bg-gray-100"
@@ -195,7 +195,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight">{offer.name}</h1>
+              <h1 className="sl-page-title">{offer.name}</h1>
               <p className="mt-3 text-gray-600 leading-relaxed text-base">{offer.description}</p>
             </div>
 
@@ -215,7 +215,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
 
             {/* Benefits */}
             {benefits.length > 0 && (
-              <div className="bg-card rounded-xl nice-shadow p-5">
+              <div className="sl-card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Benefits</h2>
                 <ul className="space-y-2.5">
                   {benefits.map((b, i) => (

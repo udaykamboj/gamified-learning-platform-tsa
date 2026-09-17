@@ -27,7 +27,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-xl nice-shadow p-8">
+      <div className="sl-card p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -37,7 +37,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
 
   if (error) {
     return (
-      <div className="bg-card rounded-xl nice-shadow p-8">
+      <div className="sl-card p-8">
         <div className="text-center text-red-500">
           {t('common.something_went_wrong')}
         </div>
@@ -46,7 +46,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
   }
 
   return (
-    <div className="bg-card rounded-xl nice-shadow">
+    <div className="sl-card">
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">{t('account.my_courses')}</h1>
@@ -68,7 +68,7 @@ function AccountMyCourses({ orgId, orgslug }: AccountMyCoursesProps) {
                 <div className="mb-4">
                   <BookOpen className="w-12 h-12 mx-auto text-gray-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-600 mb-2">
+                <h2 className="text-card-title font-semibold text-foreground mb-1">
                   {t('account.no_purchased_courses')}
                 </h2>
                 <p className="text-md text-gray-400">

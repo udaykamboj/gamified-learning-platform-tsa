@@ -116,7 +116,7 @@ function OrgAccess() {
       {!isLoading ? (
         <>
           <div className="h-6"></div>
-          <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow">
+          <div className="mx-4 sm:mx-10 sl-card">
             {/* Join method header */}
             <div className="px-4 sm:px-6 py-5 border-b border-gray-100">
               <h1 className="font-bold text-xl text-gray-800">{t('dashboard.users.signups.title')}</h1>

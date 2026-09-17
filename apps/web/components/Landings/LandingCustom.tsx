@@ -117,7 +117,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               section.flow === 'right' ? 'md:flex-row-reverse' : ''
             }`}>
               <div className="flex-1 w-full max-w-2xl">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 tracking-tight">{section.title}</h2>
+                <h2 className="sl-section-title mb-4">{section.title}</h2>
                 <div className="prose prose-lg prose-gray max-w-none">
                   <p className="text-base md:text-lg leading-relaxed text-gray-600 whitespace-pre-line">
                     {section.text}
@@ -160,7 +160,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
             {section.title && (
-              <h2 className="text-2xl md:text-3xl font-bold text-start mb-16 text-gray-900">{section.title}</h2>
+              <h2 className="sl-section-title text-start mb-16">{section.title}</h2>
             )}
             <div className="flex justify-center w-full">
               <div className="flex flex-wrap justify-center gap-16 max-w-7xl">
@@ -183,7 +183,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             key={`people-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-start mb-10 text-gray-900">{section.title}</h2>
+            <h2 className="sl-section-title text-start mb-10">{section.title}</h2>
             <div className="flex flex-wrap justify-center gap-x-20 gap-y-8">
               {section.people.map((person, index) => (
                 <div key={index} className="w-[140px] flex flex-col items-center">
@@ -218,7 +218,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               key={`featured-courses-${section.title}`}
               className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
             >
-              <h2 className="text-2xl md:text-3xl font-bold text-start mb-6 text-gray-900">{section.title}</h2>
+              <h2 className="sl-section-title text-start mb-6">{section.title}</h2>
               <div className="text-center py-6 text-gray-500">{t('courses.loading_courses')}</div>
             </div>
           )
@@ -233,7 +233,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             key={`featured-courses-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-start mb-6 text-gray-900">{section.title}</h2>
+            <h2 className="sl-section-title text-start mb-6">{section.title}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
               {featuredCourses.map((course: any) => (
                 <div key={course.course_uuid} className="w-full flex justify-center">

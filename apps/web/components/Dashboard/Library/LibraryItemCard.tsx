@@ -126,9 +126,9 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
       <div className="p-3 flex flex-col space-y-1.5">
         <h3 className="text-base font-bold text-gray-900 leading-tight line-clamp-1">{name}</h3>
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{typeLabel}</span>
+          <span className="text-meta font-semibold text-gray-400">{typeLabel}</span>
           {(href || internalHref) && (
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 inline-flex items-center gap-1">
+            <span className="text-meta font-semibold text-gray-400 inline-flex items-center gap-1">
               {type === 'media' ? t('library.preview') : t('library.open_resource')}
               {type === 'media' ? <Eye size={11} /> : <ArrowSquareOut size={11} />}
             </span>
@@ -139,7 +139,7 @@ export default function LibraryItemCard({ item, orgslug, onRemove }: Props) {
   )
 
   return (
-    <div className="group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all hover:bg-gray-50/40">
+    <div className="group relative flex flex-col sl-card overflow-hidden w-full transition-all hover:bg-gray-50/40">
       <div className={`absolute top-2 end-2 z-20 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
         <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <DropdownMenuTrigger asChild>

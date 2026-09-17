@@ -339,7 +339,7 @@ const UserProfileBuilder = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-xl nice-shadow p-6">
+      <div className="sl-card p-6">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -348,7 +348,7 @@ const UserProfileBuilder = () => {
   }
 
   return (
-    <div className="bg-card rounded-xl nice-shadow">
+    <div className="sl-card">
       <div className="flex flex-col gap-0">
         {/* Header */}
         <div className="flex items-center justify-between bg-gray-50 px-5 py-3 mx-3 my-3 rounded-md">

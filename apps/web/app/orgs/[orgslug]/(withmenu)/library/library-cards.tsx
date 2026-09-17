@@ -66,7 +66,7 @@ function typeIcon(type: string, resource: any): React.ComponentType<IconProps> {
   }
 }
 
-const CARD = 'group relative bg-card nice-shadow rounded-xl p-3 hover:bg-gray-50/50 transition-colors'
+const CARD = 'group relative sl-card p-3 hover:bg-gray-50/50 transition-colors'
 
 export function FolderCard({ folder, orgslug }: { folder: any; orgslug: string }) {
   const { t } = useTranslation()
@@ -139,9 +139,9 @@ export function LibraryItemCard({ item, orgslug }: { item: any; orgslug: string 
       <div className="p-3 flex flex-col space-y-1.5">
         <h3 className="text-base font-bold text-gray-900 leading-tight line-clamp-1">{name}</h3>
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t(`library.tabs.${type}`)}</span>
+          <span className="text-meta font-semibold text-gray-400">{t(`library.tabs.${type}`)}</span>
           {(href || type === 'media') && (
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 inline-flex items-center gap-1">
+            <span className="text-meta font-semibold text-gray-400 inline-flex items-center gap-1">
               {type === 'media' ? t('library.preview') : t('library.open_resource')}
               {type === 'media' ? <Eye size={11} /> : <ArrowSquareOut size={11} />}
             </span>
@@ -151,7 +151,7 @@ export function LibraryItemCard({ item, orgslug }: { item: any; orgslug: string 
     </>
   )
 
-  const BIG = 'group relative flex flex-col bg-card rounded-xl nice-shadow overflow-hidden w-full transition-all hover:bg-gray-50/40'
+  const BIG = 'group relative flex flex-col sl-card overflow-hidden w-full transition-all hover:bg-gray-50/40'
   // Media opens in-app rather than sending the learner off to the raw file.
   if (type === 'media') {
     return (

@@ -245,7 +245,7 @@ function GateCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       <div className={`flex flex-col items-center justify-center py-14 px-6 text-center bg-gradient-to-b ${gradient} via-white to-white`}>
         {children}
       </div>

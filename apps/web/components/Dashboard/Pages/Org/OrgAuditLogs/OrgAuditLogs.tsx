@@ -175,7 +175,7 @@ const OrgAuditLogs = () => {
   return (
     <FeatureGate feature="audit_logs">
       <>
-        <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow px-4 py-4">
+        <div className="mx-4 sm:mx-10 sl-card px-4 py-4">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3">
           <div className="flex flex-wrap gap-3 justify-between items-start">
             <div>

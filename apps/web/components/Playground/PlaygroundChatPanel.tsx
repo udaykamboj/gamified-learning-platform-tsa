@@ -114,7 +114,7 @@ export default function PlaygroundChatPanel({
         {/* Source toggle — only shown before session starts and when courses exist */}
         {orgCourses.length > 0 && !sessionStarted && (
           <div className="mt-3 space-y-2">
-            <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Source</p>
+            <p className="sl-telemetry text-neutral-400">Source</p>
             <div className="flex gap-1.5">
               <button
                 onClick={() => handleSourceMode('ai')}

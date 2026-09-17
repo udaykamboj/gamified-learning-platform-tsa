@@ -46,7 +46,7 @@ export default function CourseMonitoringOverview() {
     <div className="px-4 sm:px-10 py-6 space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="bg-card rounded-xl nice-shadow p-4">
+          <div key={label} className="sl-card p-4">
             <div className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-2">
               <Icon size={14} /> {label}
             </div>
@@ -55,9 +55,9 @@ export default function CourseMonitoringOverview() {
         ))}
       </div>
 
-      <div className="bg-card rounded-xl nice-shadow">
+      <div className="sl-card">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-t-xl">
-          <h2 className="font-bold text-xl text-gray-800">Course content</h2>
+          <h2 className="sl-section-title">Course content</h2>
           <p className="text-gray-500 text-sm">
             Platform-authored. Content changes are made in the course catalog, not here.
           </p>

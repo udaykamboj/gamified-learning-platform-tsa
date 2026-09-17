@@ -273,7 +273,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="sl-page-title">
             {t('courses.congratulations')}
           </h1>
           
@@ -302,7 +302,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           ) : userCertificate && certificatePreviewProps ? (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{t('certificate.your_certificate')}</h2>
+              <h2 className="sl-section-title">{t('certificate.your_certificate')}</h2>
               <div className="max-w-2xl mx-auto" id="certificate-preview">
                 <div id="certificate-content">
                   <CertificatePreview {...certificatePreviewProps} />
@@ -384,7 +384,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="sl-page-title">
             {t('courses.keep_going')}
           </h1>
           

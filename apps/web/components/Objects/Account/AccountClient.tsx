@@ -94,7 +94,7 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
           <div className="flex-1 min-w-0">
             {/* Mobile only shows user name */}
             <div className="md:hidden mb-4">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="sl-page-title">
                 {user?.first_name} {user?.last_name}
               </h1>
               <p className="mt-1 text-sm text-gray-500">@{user?.username}</p>

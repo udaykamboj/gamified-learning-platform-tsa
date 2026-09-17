@@ -88,7 +88,7 @@ export default function GlobalError({
           </div>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-rose-700">{category.title}</h2>
-            <span className="text-[11px] uppercase tracking-wide font-semibold text-rose-400">
+            <span className="sl-telemetry text-rose-400">
               {category.kind.replace(/_/g, ' ')}
             </span>
           </div>

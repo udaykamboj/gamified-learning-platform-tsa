@@ -88,7 +88,7 @@ function StripeConnectCallbackInner() {
             {status === 'processing' && (
               <>
                 <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
-                <h2 className="text-xl font-semibold text-gray-800">
+                <h2 className="sl-section-title">
                   {t('payments.stripe_completing')}
                 </h2>
                 <p className="text-gray-500">
@@ -102,7 +102,7 @@ function StripeConnectCallbackInner() {
                 <div className="bg-green-100 p-3 rounded-full">
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
+                <h2 className="sl-section-title">{message}</h2>
                 <p className="text-gray-500">
                   {t('payments.stripe_return')}
                 </p>
@@ -114,7 +114,7 @@ function StripeConnectCallbackInner() {
                 <div className="bg-red-100 p-3 rounded-full">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
+                <h2 className="sl-section-title">{message}</h2>
                 <p className="text-gray-500">
                   {t('payments.stripe_retry')}
                 </p>

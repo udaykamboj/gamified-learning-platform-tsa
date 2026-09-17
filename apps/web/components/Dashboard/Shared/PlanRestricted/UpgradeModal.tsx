@@ -105,7 +105,7 @@ export default function UpgradeModal({ open, onClose, source = 'free_plan_banner
 
               {/* Header */}
               <div className="px-10 pt-10 pb-2 text-center">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                <h1 className="sl-page-title">
                   {t('upgrade_modal.title')}
                 </h1>
                 <p className="text-sm text-gray-400 mt-2 max-w-md mx-auto">

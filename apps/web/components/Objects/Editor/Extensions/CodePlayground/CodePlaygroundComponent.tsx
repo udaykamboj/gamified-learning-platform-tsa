@@ -1009,7 +1009,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
       {isEditable ? (
         <>
           <div>
-            <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 block">
+            <label className="sl-telemetry text-neutral-400 mb-1.5 block">
               Description
             </label>
             <textarea
@@ -1021,7 +1021,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 block">
+            <label className="sl-telemetry text-neutral-400 mb-1.5 block">
               Difficulty
             </label>
             <div className="flex gap-2">
@@ -1046,7 +1046,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
           </div>
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Hints</label>
+              <label className="sl-telemetry text-neutral-400">Hints</label>
               <button onClick={addHint} className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 hover:text-neutral-600 transition-colors">
                 <Plus weight="duotone" size={11} /> Add
               </button>
@@ -1069,7 +1069,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
           {/* SQLite Database Upload (SQL only) */}
           {isSqlLanguage && (
             <div>
-              <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 block">
+              <label className="sl-telemetry text-neutral-400 mb-1.5 block">
                 SQLite Database
               </label>
               {sqliteDbPath ? (
@@ -1115,7 +1115,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
           <div className="border-t border-neutral-100 pt-3">
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center gap-2 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider hover:text-neutral-600 transition-colors w-full"
+              className="sl-telemetry flex items-center gap-2 text-neutral-400 hover:text-neutral-600 transition-colors w-full"
             >
               <GearSix weight="duotone" size={12} />
               Advanced
@@ -1124,7 +1124,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
             {showAdvanced && (
               <div className="mt-3 space-y-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Solution Code</label>
+                  <label className="sl-telemetry text-neutral-400 mb-1 block">Solution Code</label>
                   <p className="text-[11px] text-neutral-400 mb-1.5">Revealed to learners after enough attempts.</p>
                   <textarea
                     value={solutionCode}
@@ -1136,11 +1136,11 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Attempts to unlock</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Attempts to unlock</label>
                     <input type="number" min={1} value={maxAttemptsBeforeReveal} onChange={(e) => updateAttributes({ maxAttemptsBeforeReveal: parseInt(e.target.value) || 3 })} className="w-full text-[12px] text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-neutral-300 transition-colors nice-shadow" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Time Limit</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Time Limit</label>
                     <div className="relative">
                       <input type="number" min={1000} step={1000} value={timeLimitMs} onChange={(e) => updateAttributes({ timeLimitMs: parseInt(e.target.value) || 10000 })} className="w-full text-[12px] text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 pr-10 outline-none focus:border-neutral-300 transition-colors nice-shadow" />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400">ms</span>
@@ -1149,13 +1149,13 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Expected Speed</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Expected Speed</label>
                     <select value={timeComplexity} onChange={(e) => updateAttributes({ timeComplexity: e.target.value })} className="w-full text-[12px] text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-neutral-300 transition-colors appearance-none cursor-pointer nice-shadow">
                       {COMPLEXITY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Expected Memory</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Expected Memory</label>
                     <select value={spaceComplexity} onChange={(e) => updateAttributes({ spaceComplexity: e.target.value })} className="w-full text-[12px] text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-neutral-300 transition-colors appearance-none cursor-pointer nice-shadow">
                       {COMPLEXITY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
                     </select>
@@ -1163,7 +1163,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Timed Challenge</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Timed Challenge</label>
                     <p className="text-[11px] text-neutral-400">Add a countdown timer to the challenge.</p>
                   </div>
                   <button
@@ -1175,7 +1175,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 {timedMode && (
                   <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Duration (minutes)</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Duration (minutes)</label>
                     <input
                       type="number"
                       min={1}
@@ -1188,7 +1188,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 )}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Additional Files</label>
+                    <label className="sl-telemetry text-neutral-400">Additional Files</label>
                     <button onClick={addAdditionalFile} className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 hover:text-neutral-600 transition-colors">
                       <Plus weight="duotone" size={11} /> Add File
                     </button>
@@ -1259,7 +1259,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
 
           {additionalFiles.length > 0 && (
             <div className="space-y-1">
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Available Files</span>
+              <span className="sl-telemetry text-neutral-400">Available Files</span>
               {additionalFiles.map((f, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg text-neutral-500 bg-neutral-50 border border-neutral-100 nice-shadow w-fit">
                   <FileText weight="duotone" size={10} className="text-neutral-400" />
@@ -1317,7 +1317,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
 
           {hints.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="sl-telemetry text-neutral-400 flex items-center gap-1.5">
                 <Lightbulb weight="duotone" size={12} className="text-amber-400" /> Hints
               </span>
               {hints.map((hint, i) => (
@@ -1388,7 +1388,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 </div>
                 <div className="px-3.5 pb-3 space-y-2 border-t border-neutral-100">
                   <div className="pt-2.5">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Input</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Input</label>
                     {isEditable ? (
                       <textarea value={tc.stdin} onChange={(e) => updateTestCase(tc.id, 'stdin', e.target.value)} className="w-full text-[12px] font-mono text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 outline-none focus:border-neutral-300 resize-none transition-colors" rows={2} placeholder="stdin..." />
                     ) : (
@@ -1396,7 +1396,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                     )}
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1 block">Expected Output</label>
+                    <label className="sl-telemetry text-neutral-400 mb-1 block">Expected Output</label>
                     {isEditable ? (
                       <textarea value={tc.expectedStdout} onChange={(e) => updateTestCase(tc.id, 'expectedStdout', e.target.value)} className="w-full text-[12px] font-mono text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg p-2.5 outline-none focus:border-neutral-300 resize-none transition-colors" rows={2} placeholder="expected stdout..." />
                     ) : (
@@ -1405,7 +1405,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                   </div>
                   {r && !r.passed && r.actual_stdout != null && (
                     <div>
-                      <label className="text-[11px] font-semibold text-red-400 uppercase tracking-wider mb-1 block">Your Output</label>
+                      <label className="sl-telemetry text-red-400 mb-1 block">Your Output</label>
                       <pre className="text-[12px] font-mono text-red-600 bg-red-50 border border-red-100 rounded-lg p-2.5 whitespace-pre-wrap">{r.actual_stdout || '(no output)'}</pre>
                     </div>
                   )}
@@ -1418,7 +1418,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
       {!isEditable && (
         <div className="mt-4 pt-3 border-t border-neutral-100">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+            <label className="sl-telemetry text-neutral-400">
               Your Test Cases
             </label>
             <button
@@ -1445,7 +1445,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
               </div>
               <div className="space-y-1.5">
                 <div>
-                  <label className="text-[11px] font-semibold text-neutral-400 uppercase">Input (stdin)</label>
+                  <label className="sl-telemetry text-neutral-400">Input (stdin)</label>
                   <textarea
                     value={tc.stdin}
                     onChange={(e) => updateStudentTestCase(tc.id, 'stdin', e.target.value)}
@@ -1455,7 +1455,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-neutral-400 uppercase">Expected Output</label>
+                  <label className="sl-telemetry text-neutral-400">Expected Output</label>
                   <textarea
                     value={tc.expectedStdout}
                     onChange={(e) => updateStudentTestCase(tc.id, 'expectedStdout', e.target.value)}
@@ -1484,7 +1484,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
           <thead>
             <tr className="bg-white/[0.06]">
               {headers.map((h, i) => (
-                <th key={i} className="px-3 py-2 text-left text-[11px] font-bold text-neutral-300 uppercase tracking-wider border-b border-white/10">
+                <th key={i} className="sl-telemetry px-3 py-2 text-left text-neutral-300 border-b border-white/10">
                   {h}
                 </th>
               ))}
@@ -1552,7 +1552,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
             {testCases.length > 0 && !isEditable && results && (
               <div className="rounded-lg p-3.5 border border-neutral-100 nice-shadow">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Score</span>
+                  <span className="sl-telemetry text-neutral-400">Score</span>
                   <span className="text-[15px] font-bold text-neutral-800">{Math.round((passedCount / totalCount) * 100)}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
@@ -1584,7 +1584,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 {r.actual_stdout != null && (
                   <div className="px-3.5 pb-2.5">
                     <div className="flex items-center justify-between mb-0.5">
-                      <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Output</label>
+                      <label className="sl-telemetry text-neutral-400">Output</label>
                       <CopyButton text={r.actual_stdout || ''} />
                     </div>
                     {isSqlLanguage && r.actual_stdout && r.actual_stdout.includes('|') ? (
@@ -1593,7 +1593,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                           <thead>
                             <tr className="bg-neutral-50">
                               {r.actual_stdout.trim().split('\n')[0].split('|').map((h, i) => (
-                                <th key={i} className="px-2.5 py-1.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider border-b border-neutral-200">
+                                <th key={i} className="sl-telemetry px-2.5 py-1.5 text-left text-neutral-500 border-b border-neutral-200">
                                   {h}
                                 </th>
                               ))}
@@ -1619,7 +1619,7 @@ const CodePlaygroundComponent: React.FC = (props: any) => {
                 )}
                 {!r.passed && r.expected_stdout && (
                   <div className="px-3.5 pb-2.5">
-                    <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-0.5 block">Expected</label>
+                    <label className="sl-telemetry text-neutral-400 mb-0.5 block">Expected</label>
                     <pre className="text-[11px] font-mono text-emerald-700 bg-emerald-50/50 border border-emerald-100 rounded-lg p-2 whitespace-pre-wrap nice-shadow">{r.expected_stdout}</pre>
                   </div>
                 )}

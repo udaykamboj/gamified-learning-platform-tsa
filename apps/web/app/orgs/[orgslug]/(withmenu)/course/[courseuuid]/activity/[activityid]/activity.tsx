@@ -1265,7 +1265,7 @@ export function MarkStatus(props: {
               dialogTitle={t('activities.unmark_activity_title')}
               dialogTrigger={
                 <div className="bg-teal-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
-                  <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+                  <span className="sl-telemetry mb-1">{t('common.status')}</span>
                   <div className="flex items-center space-x-2">
                     <svg 
                       width="17" 
@@ -1306,7 +1306,7 @@ export function MarkStatus(props: {
               className={`${isLoading ? 'opacity-90' : ''} bg-primary rounded-md px-4 nice-shadow flex flex-col p-2.5 text-primary-foreground hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-action-hover'}`}
               onClick={!isLoading ? markActivityAsCompleteFront : undefined}
             >
-              <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+              <span className="sl-telemetry mb-1">{t('common.status')}</span>
               <div className="flex items-center space-x-2">
                 {isLoading ? (
                   <div className="animate-spin">
@@ -1410,7 +1410,7 @@ function NextActivityButton({ course, currentActivityId, orgslug }: { course: an
       onClick={navigateToActivity}
       className="bg-gray-200 rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:bg-gray-200"
     >
-      <span className="text-[11px] font-bold text-gray-500 mb-1 uppercase">{t('common.next')}</span>
+      <span className="sl-telemetry text-gray-500 mb-1">{t('common.next')}</span>
       <div className="flex items-center space-x-1">
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">
           {isLastActivity ? t('course.finish_course', 'Finish course') : nextActivity.name}
@@ -1465,7 +1465,7 @@ function PreviousActivityButton({ course, currentActivityId, orgslug }: { course
       onClick={navigateToActivity}
       className="bg-card rounded-md px-3 sm:px-4 nice-shadow flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
     >
-      <span className="text-[11px] font-bold text-gray-500 mb-1 uppercase">{t('common.previous')}</span>
+      <span className="sl-telemetry text-gray-500 mb-1">{t('common.previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} className="shrink-0" />
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{previousActivity.name}</span>
@@ -1636,7 +1636,7 @@ function AssignmentTools(props: {
     if (isAssignmentPastDue(props.assignment?.due_date)) {
       return (
         <div className="bg-rose-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-          <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+          <span className="sl-telemetry mb-1">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <BookOpenCheck size={17} />
             <span className="text-xs font-bold">
@@ -1653,7 +1653,7 @@ function AssignmentTools(props: {
     if (isSubmitting) {
       return (
         <div className="bg-cyan-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-          <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+          <span className="sl-telemetry mb-1">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <Loader2 size={17} className="animate-spin" />
             <span className="text-xs font-bold">
@@ -1683,7 +1683,7 @@ function AssignmentTools(props: {
         }
         dialogTrigger={
           <div className="bg-cyan-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
-            <span className="text-[11px] font-bold mb-1 uppercase">
+            <span className="sl-telemetry mb-1">
               {isRetryAttempt
                 ? t('assignments.attempt_count', { current: attemptNumber })
                 : t('common.status')}
@@ -1719,7 +1719,7 @@ function AssignmentTools(props: {
       return (
         <div className="flex items-center gap-2">
           <div className="bg-teal-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-            <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+            <span className="sl-telemetry mb-1">{t('common.status')}</span>
             <div className="flex items-center space-x-2">
               <CheckCircle size={17} />
               <span className="text-xs font-bold">
@@ -1757,7 +1757,7 @@ function AssignmentTools(props: {
 
     return (
       <div className="bg-amber-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
-        <span className="text-[11px] font-bold mb-1 uppercase">{t('common.status')}</span>
+        <span className="sl-telemetry mb-1">{t('common.status')}</span>
         <div className="flex items-center space-x-2">
           <UserRoundPen size={17} />
           <span className="text-xs font-bold">{t('assignments.grading_in_progress')}</span>
@@ -1805,7 +1805,7 @@ function AssignmentTools(props: {
           onClick={() => setIsGradeModalOpen(true)}
           className={`${pillBg} rounded-md px-3 sm:px-4 nice-shadow flex flex-col items-start text-start p-2 sm:p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out`}
         >
-          <span className="text-[11px] font-bold mb-1 uppercase text-white/90 flex items-center gap-1.5">
+          <span className="sl-telemetry mb-1 text-white/90 flex items-center gap-1.5">
             <span>{t('common.status')}</span>
             {allowRetries && currentAttempt > 1 && (
               <span className="bg-white/20 text-white px-1.5 py-px rounded-full text-[11px] font-bold tracking-normal normal-case">
@@ -1908,7 +1908,7 @@ function AssignmentTools(props: {
               <div className="px-6 pt-5 pb-6 space-y-5">
                 {tasks && tasks.length > 0 && (
                   <div className="space-y-2.5">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    <p className="text-meta font-semibold text-gray-400">
                       {t('assignments.task_breakdown')}
                     </p>
                     <div className="space-y-1.5">
@@ -1960,7 +1960,7 @@ function AssignmentTools(props: {
 
                 {feedback && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    <div className="flex items-center gap-1.5 text-meta font-semibold text-gray-400">
                       <MessageSquare size={11} />
                       <span>{t('dashboard.assignments.submissions.feedback.label')}</span>
                     </div>

@@ -259,7 +259,7 @@ export default function SwitchWizard({
               {/* From → To */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 bg-foreground/[0.03] rounded-xl px-4 py-3">
-                  <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
+                  <p className="sl-telemetry text-foreground/30">
                     {t('billing.current', { defaultValue: 'Current' })}
                   </p>
                   <p className="mt-1 text-sm font-bold text-foreground/50 capitalize">{currentPlanData?.name ?? currentPlanId}</p>
@@ -270,7 +270,7 @@ export default function SwitchWizard({
                 </div>
                 <ArrowRight size={16} className="text-foreground/20 flex-shrink-0" />
                 <div className="flex-1 rounded-xl px-4 py-3 border-2 border-border" style={{ background: selectedPlanData.topGlow }}>
-                  <p className="text-[11px] font-semibold text-foreground/30 uppercase tracking-wider">
+                  <p className="sl-telemetry text-foreground/30">
                     {t('billing.new', { defaultValue: 'New' })}
                   </p>
                   <p className="mt-1 text-sm font-bold text-foreground">{selectedPlanData.name}</p>
@@ -345,7 +345,7 @@ export default function SwitchWizard({
               {/* Features */}
               {selectedPlanData.features.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-foreground/25 mb-2.5">
+                  <p className="sl-telemetry text-foreground/25 mb-2.5">
                     {t('billing.whats_included', { defaultValue: "What's included" })}
                   </p>
                   <ul className="space-y-1.5">
@@ -466,7 +466,7 @@ export default function SwitchWizard({
             <div className="mx-auto w-14 h-14 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-center mb-5">
               <Check size={24} className="text-green-600" />
             </div>
-            <h2 className="text-xl font-black tracking-tight text-foreground">
+            <h2 className="sl-section-title">
               {isUpgrade
                 ? t('billing.plan_updated', { defaultValue: 'Plan updated!' })
                 : selectedPlan === 'free'

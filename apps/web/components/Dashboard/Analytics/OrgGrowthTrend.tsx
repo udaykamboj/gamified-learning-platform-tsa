@@ -24,7 +24,7 @@ export default function OrgGrowthTrend({ days = '90' }: { days?: string }) {
   }))
 
   return (
-    <div className="bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
+    <div className="sl-card p-5 min-h-[300px] overflow-hidden min-w-0">
       <h3 className="text-sm font-semibold text-gray-700 mb-1">Org Growth Trend</h3>
       <p className="text-xs text-gray-400 mb-4">Weekly signups, enrollments, completions</p>
       {isLoading ? (

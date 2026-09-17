@@ -303,7 +303,7 @@ function QuizBlockComponent(props: any) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <QuestionIcon weight="duotone" className="text-neutral-400" size={15} />
-            <span className="uppercase tracking-widest text-[11px] font-bold text-neutral-400">
+            <span className="sl-telemetry text-neutral-400">
               {t('editor.blocks.quiz')}
             </span>
           </div>
@@ -382,7 +382,7 @@ function QuizBlockComponent(props: any) {
                 {/* Question header */}
                 <div className="flex items-start justify-between gap-2 mb-1.5 px-1">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[11px] uppercase tracking-widest font-bold text-neutral-400 mb-0.5">
+                    <div className="sl-telemetry text-neutral-400 mb-0.5">
                       {t('editor.blocks.quiz_block.question_label', {
                         defaultValue: 'Question',
                       })}{' '}

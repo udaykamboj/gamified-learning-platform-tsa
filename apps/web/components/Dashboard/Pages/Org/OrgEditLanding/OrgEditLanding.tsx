@@ -281,12 +281,12 @@ const OrgEditLanding = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 sl-card">
       <div className="p-6 space-y-6">
         {/* Enable/Disable Landing Page */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center">{t('dashboard.organization.landing.title')} <div className="text-xs ms-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full"> {t('dashboard.organization.landing.beta')} </div></h2>
+            <h2 className="sl-section-title flex items-center">{t('dashboard.organization.landing.title')} <div className="text-xs ms-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full"> {t('dashboard.organization.landing.beta')} </div></h2>
             <p className="text-gray-600">{t('dashboard.organization.landing.subtitle')}</p>
           </div>
           <div className="flex items-center space-x-4">

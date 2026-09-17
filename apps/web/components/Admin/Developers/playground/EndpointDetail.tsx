@@ -143,7 +143,7 @@ export default function EndpointDetail({
         <div className="flex items-center gap-2 mb-2">
           <span
             className={
-              'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border font-mono ' +
+              'inline-flex items-center px-2 py-0.5 rounded text-meta font-semibold border font-mono ' +
               METHOD_CLS[endpoint.method]
             }
           >
@@ -259,7 +259,7 @@ export default function EndpointDetail({
           {result && (
             <span
               className={
-                'inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border font-mono ' +
+                'inline-flex items-center px-1.5 py-0.5 rounded text-meta font-semibold border font-mono ' +
                 (result.ok
                   ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                   : 'bg-red-100 text-red-700 border-red-200')
@@ -325,7 +325,7 @@ function ParamRow({
           path
         </span>
         {param.required && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border font-mono bg-red-100 text-red-700 border-red-200">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-meta font-semibold border font-mono bg-red-100 text-red-700 border-red-200">
             required
           </span>
         )}

@@ -34,7 +34,7 @@ export default function DAUChart({ days = '30' }: { days?: string }) {
   const rows = data?.data ?? []
 
   return (
-    <div className="bg-card nice-shadow rounded-xl p-5">
+    <div className="sl-card p-5">
       <h3 className="text-sm font-semibold text-gray-700 mb-4">Daily Active Users</h3>
       {isLoading ? (
         <div className="h-[260px] flex items-center justify-center text-gray-300">Loading...</div>

@@ -95,7 +95,7 @@ const OrgSignInMethods: React.FC = () => {
 
       {readOnly && <ReadOnlyNotice />}
 
-      <div className="bg-card rounded-xl nice-shadow p-5 space-y-5">
+      <div className="sl-card p-5 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {AUTH_METHOD_OPTIONS.map((m) => {
             const checked = draftMethods.includes(m.key)

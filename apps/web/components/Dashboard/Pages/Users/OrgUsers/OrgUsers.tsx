@@ -276,7 +276,7 @@ function OrgUsers() {
     <div>
       <Toast></Toast>
       <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-card rounded-xl nice-shadow">
+      <div className="mx-4 sm:mx-10 sl-card">
             {/* Header */}
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-4 sm:px-6 py-5 border-b border-gray-100">
               <div className="flex-1 min-w-0">
@@ -828,7 +828,7 @@ function OrgUsers() {
       <UserDossierModal userId={analyticsUserId} onOpenChange={(o) => !o && setAnalyticsUserId(null)} />
       <Dialog open={comparing} onOpenChange={setComparing}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-muted p-6 sm:p-8">
-          <h2 className="font-bold text-xl tracking-tight mb-4">{t('dashboard.users.analytics.compare_students')}</h2>
+          <h2 className="sl-section-title mb-4">{t('dashboard.users.analytics.compare_students')}</h2>
           <UsersComparisonTable
             userIds={Array.from(selectedUserIds)}
             onOpenUser={(id) => { setComparing(false); setAnalyticsUserId(id) }}

@@ -257,7 +257,7 @@ const OrgEditMenu: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow">
+    <div className="sm:mx-10 mx-0 sl-card">
       <div className="pt-0.5">
         <div className="flex items-center justify-between bg-gray-50 px-5 py-3 mx-3 my-3 rounded-md">
           <div className="flex flex-col -space-y-1">

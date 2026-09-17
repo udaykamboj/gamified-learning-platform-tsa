@@ -39,7 +39,7 @@ export default function CourseWidgetCard({
       <div
         onClick={noExpand ? undefined : () => setOpen(true)}
         className={`
-          bg-card rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0
+          sl-card p-5 min-h-[300px] overflow-hidden min-w-0
           ${noExpand ? '' : 'cursor-pointer group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200'}
           ${className}
         `}

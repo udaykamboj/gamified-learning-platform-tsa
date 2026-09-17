@@ -220,7 +220,7 @@ function SubscriptionsClient() {
             {/* Heading + manage billing */}
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="min-w-0">
-                <h1 className="font-black tracking-tight text-2xl text-gray-900">
+                <h1 className="sl-page-title">
                   {t('subscriptions.title', { defaultValue: 'Subscriptions' })}
                 </h1>
                 <p className="mt-1.5 text-sm text-foreground/40">

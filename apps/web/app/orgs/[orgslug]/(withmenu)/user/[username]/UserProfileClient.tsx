@@ -164,7 +164,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             {/* Right column with about and related content */}
             <div className="w-full md:w-4/6">
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{t('common.about')}</h2>
+                <h2 className="sl-section-title mb-4">{t('common.about')}</h2>
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
@@ -177,7 +177,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 <div>
                   {profile.sections.map((section: any, index: number) => (
                     <div key={index} className="mb-8">
-                      <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
+                      <h2 className="sl-section-title mb-4">{section.title}</h2>
                       
                       {/* Add Image Gallery section */}
                       {section.type === 'image-gallery' && (

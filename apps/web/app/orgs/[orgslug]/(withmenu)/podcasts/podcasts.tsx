@@ -101,7 +101,7 @@ export default function PodcastsClient({
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {paginatedPodcasts.map((podcast: PodcastWithEpisodeCount) => (
               <div key={podcast.podcast_uuid} className="">
                 <PodcastThumbnail podcast={podcast} orgslug={orgslug} />
@@ -110,7 +110,7 @@ export default function PodcastsClient({
             {filteredPodcasts.length === 0 && searchQuery && (
               <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
                 <Search className="w-12 h-12 text-gray-300 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-600 mb-2">
+                <h2 className="sl-section-title mb-2">
                   {t('podcasts.no_search_results')}
                 </h2>
                 <p className="text-gray-400">
@@ -119,14 +119,14 @@ export default function PodcastsClient({
               </div>
             )}
             {allPodcasts.length === 0 && !searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center">
+                <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
                   <Headphones className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                 </div>
-                <h1 className="text-xl font-bold text-gray-600 mb-2">
+                <h1 className="text-card-title font-semibold text-foreground mb-1">
                   {t('podcasts.no_podcasts')}
                 </h1>
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+                <p className="text-ui text-muted-foreground mb-6 text-center max-w-md">
                   {t('podcasts.no_podcasts_description')}
                 </p>
               </div>

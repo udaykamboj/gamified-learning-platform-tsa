@@ -99,7 +99,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Verifying Certificate</h1>
+            <h1 className="sl-page-title mb-2">Verifying Certificate</h1>
             <p className="text-gray-600">Please wait while we verify the certificate...</p>
           </div>
         </div>
@@ -116,7 +116,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
               <XCircle className="w-16 h-16 text-red-600" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 text-center">
+            <h1 className="sl-page-title text-center">
               Certificate Not Found
             </h1>
             
@@ -169,7 +169,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Certificate Verification</h1>
+                <h1 className="sl-page-title">Certificate Verification</h1>
                 <p className="text-gray-600">Verify the authenticity of this certificate</p>
               </div>
             </div>
@@ -187,7 +187,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           <div className="lg:col-span-2 space-y-6">
             {/* Certificate Preview */}
             <div className="bg-card rounded-2xl p-6 nice-shadow">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Certificate Preview</h2>
+              <h2 className="sl-section-title mb-4">Certificate Preview</h2>
               <div className="max-w-2xl mx-auto" id="certificate-preview">
                 <CertificatePreview
                   certificationName={certificateData.certification.config.certification_name}
@@ -285,7 +285,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           {/* Certificate Details */}
           <div className="space-y-6">
             <div className="bg-card rounded-2xl p-6 nice-shadow">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Certificate Information</h2>
+              <h2 className="sl-section-title mb-4">Certificate Information</h2>
               
               <div className="space-y-4">
                 <div>

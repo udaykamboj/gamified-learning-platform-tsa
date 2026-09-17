@@ -170,7 +170,7 @@ const CourseClient = (props: any) => {
     return (
       <GeneralWrapperStyled>
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+          <h2 className="sl-section-title mb-2">
             {t('course.accessDenied', 'Unable to access this course')}
           </h2>
           <p className="text-gray-500 mb-4">
@@ -517,7 +517,7 @@ const CourseClient = (props: any) => {
               if (displayLearnings.length === 0) return null
               return (
                 <div className="w-full">
-                  <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.what_you_will_learn')}</h2>
+                  <h2 className="sl-section-title py-5">{t('courses.what_you_will_learn')}</h2>
                   <div className="sl-card overflow-hidden px-5 py-5 space-y-2">
                     {displayLearnings.map((learning: any) => {
                       const learningText = typeof learning === 'string' ? learning : learning.text
@@ -556,7 +556,7 @@ const CourseClient = (props: any) => {
             })()}
 
             <div className="w-full my-5 mb-10">
-              <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.course_lessons')}</h2>
+              <h2 className="sl-section-title py-5">{t('courses.course_lessons')}</h2>
               <div className="sl-card overflow-hidden">
                 {(course.chapters ?? []).map((chapter: any, idx: number) => {
                   const isExpanded = expandedChapters[chapter.chapter_uuid] ?? (idx === 0); // Default to expanded for first chapter

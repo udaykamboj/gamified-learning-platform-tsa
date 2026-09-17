@@ -75,7 +75,7 @@ async function UserPage({ params }: UserPageProps) {
     console.error('Error fetching user data:', error)
     return (
       <div className="container mx-auto py-8">
-        <div className="bg-card rounded-xl nice-shadow p-6">
+        <div className="sl-card p-6">
           <p className="text-red-600">Error loading user profile. The user may not exist or you may not have permission to view this profile.</p>
         </div>
       </div>

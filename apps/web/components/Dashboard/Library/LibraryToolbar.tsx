@@ -32,9 +32,9 @@ export function StatPill({
   value: number
 }) {
   return (
-    <div className="flex items-center gap-2 bg-card nice-shadow rounded-xl px-3.5 py-2">
+    <div className="flex items-center gap-2 sl-card px-3.5 py-2">
       {icon}
-      <span className="text-[11px] uppercase tracking-wider font-semibold text-gray-400">{label}</span>
+      <span className="sl-telemetry text-gray-400">{label}</span>
       <span className="text-sm font-bold text-gray-900">{value}</span>
     </div>
   )

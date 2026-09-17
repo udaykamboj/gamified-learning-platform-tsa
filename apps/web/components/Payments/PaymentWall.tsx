@@ -75,7 +75,7 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
 
       <div className="space-y-2 max-w-md">
         {resourceName && (
-          <h2 className="text-xl font-bold text-gray-900">{resourceName}</h2>
+          <h2 className="sl-section-title">{resourceName}</h2>
         )}
         <p className="text-gray-500 text-sm">
           This content is part of <strong>{offer.offer_name}</strong> and requires a purchase to access.

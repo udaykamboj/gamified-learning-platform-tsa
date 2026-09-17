@@ -61,9 +61,9 @@ function FolderClient({
       <div className="w-full animate-pulse">
         <GeneralWrapperStyled>
           <div className="h-7 bg-gray-200 rounded w-40 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-xl nice-shadow p-3 h-16" />
+              <div key={i} className="sl-card p-3 h-16" />
             ))}
           </div>
         </GeneralWrapperStyled>
@@ -102,7 +102,7 @@ function FolderClient({
             />
 
             <div className="flex items-center justify-between gap-3">
-              <h1 className="text-2xl font-bold text-gray-800">{folder?.name}</h1>
+              <h1 className="sl-page-title">{folder?.name}</h1>
               {folder && (
                 <button
                   onClick={() => shareFolderLink(orgslug, folderUuid, folder.name, t('library.link_copied'), t('library.link_copy_error'))}
@@ -120,7 +120,7 @@ function FolderClient({
 
             <div className="flex flex-col gap-7">
               {subfolders.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   {subfolders.map((sub: any) => (
                     <FolderCard key={sub.folder_uuid} folder={sub} orgslug={orgslug} />
                   ))}
@@ -128,7 +128,7 @@ function FolderClient({
               )}
 
               {items.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 items-start">
                   {items.map((item: any) => (
                     <LibraryItemCard key={item.resource_uuid} item={item} orgslug={orgslug} />
                   ))}
@@ -136,8 +136,8 @@ function FolderClient({
               )}
 
               {isEmpty && (
-                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 ">
-                  <div className="p-4 bg-card rounded-full nice-shadow mb-4">
+                <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 sl-card text-center ">
+                  <div className="mb-4 grid size-12 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-6">
                     <FolderSimple className="w-8 h-8 text-gray-300 " weight="duotone" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-600 mb-1">

@@ -62,7 +62,7 @@ export default function AccountDangerZone() {
   }
 
   return (
-    <div className="bg-card rounded-xl nice-shadow ring-1 ring-inset ring-red-100 overflow-hidden mt-6">
+    <div className="sl-card ring-1 ring-inset ring-red-100 overflow-hidden mt-6">
       <div className="flex flex-col bg-red-50/60 -space-y-1 px-5 py-3 mx-3 mt-3 rounded-md">
         <h1 className="font-bold text-xl text-red-700 flex items-center gap-2">
           <AlertTriangle size={18} />

@@ -368,7 +368,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
                   minWidth: 180,
                 }}
               >
-                <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 px-1">{t('boards.timer.set_timer_title')}</p>
+                <p className="sl-telemetry text-neutral-400 mb-2 px-1">{t('boards.timer.set_timer_title')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {TIMER_PRESETS.map((preset) => (
                     <button
@@ -472,7 +472,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
           >
             {/* Pomodoro phase label */}
             {pomColors && (
-              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: pomColors.on }}>
+              <span className="text-meta font-semibold" style={{ color: pomColors.on }}>
                 {pomColors.label}
               </span>
             )}

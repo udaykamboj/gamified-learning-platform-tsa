@@ -1600,7 +1600,8 @@
       "communities": "Communities",
       "discussions": "Discussions",
       "playgrounds": "Playgrounds",
-      "podcasts": "Podcasts"
+      "podcasts": "Podcasts",
+      "folders": "Folders"
     },
     "course": "Course",
     "user": "Member"
@@ -2929,7 +2930,7 @@
         "footer_text_desc": "Custom text displayed at the bottom of your organization pages",
         "email_sender_name": "Email Sender Name",
         "email_sender_name_placeholder": "Your organization's name",
-        "email_sender_name_desc": "The name recipients see on emails sent for this organization. Only the name changes \u2014 the sending address stays the platform's, which is what keeps these emails passing SPF and DKIM checks. Leave empty to use the platform default.",
+        "email_sender_name_desc": "The name recipients see on emails sent for this organization. Only the name changes — the sending address stays the platform's, which is what keeps these emails passing SPF and DKIM checks. Leave empty to use the platform default.",
         "default_language": "Default Language",
         "default_language_desc": "The language new visitors see by default and the language used for emails sent on behalf of this organization. Members can still switch their own UI language.",
         "watermark_label": "\"Made with StarLab\" watermark",

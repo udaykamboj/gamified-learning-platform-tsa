@@ -100,7 +100,7 @@ function WrittenItem({ item }: { item: any }) {
       <QuestionHeader item={item} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="bg-gray-50 rounded-lg p-2">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="sl-telemetry text-gray-400">
             {t(`${P}.answer.answered`, { defaultValue: 'Answered' })}
           </div>
           <div className="text-xs text-gray-700 break-words">
@@ -113,7 +113,7 @@ function WrittenItem({ item }: { item: any }) {
         </div>
         {item.expected_text && (
           <div className="bg-emerald-50/60 rounded-lg p-2">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">
+            <div className="sl-telemetry text-emerald-600">
               {t(`${P}.answer.expected`, { defaultValue: 'Expected answer' })}
             </div>
             <div className="text-xs text-emerald-800 break-words">{item.expected_text}</div>
@@ -148,7 +148,7 @@ function CodeAnswer({ code }: { code: any }) {
       )}
       {(code.test_results || []).length > 0 && (
         <div className="space-y-1">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="sl-telemetry text-gray-400">
             {t(`${P}.answer.test_cases`, { defaultValue: 'Test cases' })}
           </div>
           {code.test_results.map((tr: any, i: number) => (

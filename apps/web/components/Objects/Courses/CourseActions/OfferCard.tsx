@@ -34,7 +34,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
   const formattedPrice = formatCurrency(offer.amount, offer.currency ?? 'USD', i18n.language)
 
   return (
-    <div className="bg-card rounded-xl nice-shadow overflow-hidden">
+    <div className="sl-card overflow-hidden">
       {/* Type stripe */}
       <div className={`px-4 py-2 flex items-center gap-2 ${isSubscription ? 'bg-indigo-50' : 'bg-gray-50'}`}>
         {isSubscription

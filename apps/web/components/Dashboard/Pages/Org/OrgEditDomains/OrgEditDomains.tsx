@@ -337,7 +337,7 @@ const OrgEditDomains: React.FC = () => {
   return (
     <FeatureGate feature="custom_domains">
       <>
-        <div className="sm:mx-10 mx-0 bg-card rounded-xl nice-shadow pt-3">
+        <div className="sm:mx-10 mx-0 sl-card pt-3">
           <div className="flex flex-col gap-0">
             <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
               <h1 className="font-bold text-xl text-gray-800">{t('dashboard.organization.domains.title')}</h1>

@@ -159,7 +159,7 @@ const OrgEditOther: React.FC = () => {
   return (
     <div className="sm:mx-10 mx-0 space-y-4">
       {/* Watermark Toggle */}
-      <div className="bg-card rounded-xl nice-shadow p-4">
+      <div className="sl-card p-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label className="text-base font-medium">{t('dashboard.organization.settings.watermark_label')}</Label>
@@ -180,7 +180,7 @@ const OrgEditOther: React.FC = () => {
       </div>
 
       {/* Scripts Section */}
-      <div className="bg-card rounded-xl nice-shadow">
+      <div className="sl-card">
       <div className="pt-0.5">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <div className="flex items-center justify-between">

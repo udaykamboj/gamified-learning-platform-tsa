@@ -396,7 +396,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       </div>
 
       <div 
-        className={`absolute z-dropdown w-full mt-2 bg-card rounded-xl nice-shadow 
+        className={`absolute z-dropdown w-full mt-2 sl-card 
                    overflow-hidden divide-y divide-border
                    transition-all duration-200 ease-in-out transform
                    ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
