@@ -20,7 +20,7 @@ interface BoardThumbnailTabProps {
   board: any
   boardUuid: string
   orgUuid: string
-  boardKey: string | null
+  boardKey?: string | null
 }
 
 function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: BoardThumbnailTabProps) {
@@ -52,29 +52,28 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
     setIsUploading(true)
     try {
       await updateBoardThumbnail(boardUuid, file, access_token)
-      toast.success(t('boards.thumbnail.thumbnail_updated'))
+      toast.success(t('boards.thumbnail.thumbnail_updated', 'Thumbnail updated'))
       setLocalThumbnail(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.boards.detail(boardUuid) })
       queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(org?.slug) })
     } catch {
-      toast.error(t('boards.thumbnail.thumbnail_updated_error'))
+      toast.error(t('boards.thumbnail.thumbnail_updated_error', 'Failed to update thumbnail'))
     } finally {
       setIsUploading(false)
     }
   }
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (!file) return
 
     if (!VALID_IMAGE_MIME_TYPES.includes(file.type as any)) {
-      toast.error('Please upload a PNG or JPG/JPEG image')
-      event.target.value = ''
+      toast.error(t('boards.thumbnail.supported_formats', 'Supported formats: JPG, JPEG, PNG. Max 8MB.'))
       return
     }
+
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the 8MB limit`)
-      event.target.value = ''
+      toast.error(t('boards.thumbnail.supported_formats', 'Supported formats: JPG, JPEG, PNG. Max 8MB.'))
       return
     }
 
@@ -90,13 +89,9 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
   }
 
   const handleUnsplashSelect = async (imageUrl: string) => {
+    setShowUnsplashPicker(false)
+    setIsUploading(true)
     try {
-      const url = new URL(imageUrl)
-      if (!['https:', 'http:'].includes(url.protocol)) {
-        toast.error('Invalid image URL')
-        return
-      }
-      setIsUploading(true)
       const response = await fetch(imageUrl)
       const blob = await response.blob()
       if (!blob.type.startsWith('image/')) {
@@ -116,65 +111,56 @@ function BoardThumbnailTab({ board, boardUuid, orgUuid, boardKey: _boardKey }: B
   }
 
   return (
-    <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.thumbnail.title')}</h1>
-          <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.thumbnail.description')}</h2>
-        </div>
-        <div className="px-3 sm:px-5 py-3 space-y-4">
-          <div className="max-w-[480px]">
-            <img
-              src={thumbnailUrl}
-              alt={t('boards.thumbnail.alt')}
-              className={`w-full aspect-video object-cover rounded-lg border border-gray-200 ${isUploading ? 'animate-pulse' : ''}`}
-            />
-          </div>
-
-          {isUploading ? (
-            <div className="flex items-center gap-2">
-              <div className="font-medium text-sm text-green-800 bg-green-50 rounded-full px-4 py-2 flex items-center">
-                <ArrowBigUpDash size={16} className="me-2 animate-bounce" />
-                {t('boards.thumbnail.uploading')}
-              </div>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                ref={imageInputRef}
-                type="file"
-                className="hidden"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
-              <button
-                type="button"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={() => imageInputRef.current?.click()}
-              >
-                <UploadCloud size={16} />
-                {t('boards.thumbnail.upload_image')}
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={() => setShowUnsplashPicker(true)}
-              >
-                <ImageIcon size={16} />
-                {t('boards.thumbnail.gallery')}
-              </button>
-              <AIImageButton
-                onSelect={handleUnsplashSelect}
-                onSelectFile={handleAIImageFile}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              />
-            </div>
-          )}
-
-          <p className="text-sm text-gray-500">{t('boards.thumbnail.supported_formats')}</p>
-        </div>
+    <div className="space-y-4">
+      <div className="max-w-[480px]">
+        <img
+          src={thumbnailUrl}
+          alt={t('boards.thumbnail.alt', 'Board thumbnail')}
+          className={`w-full aspect-video object-cover rounded-lg border border-gray-200 ${isUploading ? 'animate-pulse' : ''}`}
+        />
       </div>
+
+      {isUploading ? (
+        <div className="flex items-center gap-2">
+          <div className="font-medium text-sm text-green-800 bg-green-50 rounded-full px-4 py-2 flex items-center">
+            <ArrowBigUpDash size={16} className="me-2 animate-bounce" />
+            {t('boards.thumbnail.uploading', 'Uploading...')}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <input
+            ref={imageInputRef}
+            type="file"
+            className="hidden"
+            accept=".jpg,.jpeg,.png"
+            onChange={handleFileChange}
+          />
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            onClick={() => imageInputRef.current?.click()}
+          >
+            <UploadCloud size={16} />
+            {t('boards.thumbnail.upload_image', 'Upload Image')}
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            onClick={() => setShowUnsplashPicker(true)}
+          >
+            <ImageIcon size={16} />
+            {t('boards.thumbnail.gallery', 'Gallery')}
+          </button>
+          <AIImageButton
+            onSelect={handleUnsplashSelect}
+            onSelectFile={handleAIImageFile}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+      )}
+
+      <p className="text-xs text-gray-400">{t('boards.thumbnail.supported_formats', 'Supported formats: JPG, JPEG, PNG. Max 8MB.')}</p>
 
       {showUnsplashPicker && (
         <UnsplashImagePicker

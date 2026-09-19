@@ -1,9 +1,10 @@
 'use client'
+
 import React, { use } from 'react'
 import Link from 'next/link'
-import { motion } from 'motion/react'
-import { Info, Globe, Users, Image as ImageIcon, Eye } from 'lucide-react'
+import { Info, Globe, Users, Image as ImageIcon, Eye, Lock, Calendar } from 'lucide-react'
 import { ChalkboardSimple } from '@phosphor-icons/react'
+import dayjs from 'dayjs'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
@@ -12,11 +13,12 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { getBoard } from '@services/boards/boards'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import BoardGeneralTab from '@components/Dashboard/Boards/Tabs/BoardGeneralTab'
 import BoardThumbnailTab from '@components/Dashboard/Boards/Tabs/BoardThumbnailTab'
 import BoardAccessTab from '@components/Dashboard/Boards/Tabs/BoardAccessTab'
 import BoardMembersTab from '@components/Dashboard/Boards/Tabs/BoardMembersTab'
-import { DashTabBar, DashTabItem } from '@components/Dashboard/Shared/DashTabBar/DashTabBar'
+import { useTranslation } from 'react-i18next'
 
 export type BoardSettingsParams = {
   orgslug: string
@@ -29,6 +31,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const { t } = useTranslation()
 
   const boardUuid = params.boarduuid.startsWith('board_')
     ? params.boarduuid
@@ -41,68 +44,72 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     staleTime: 60_000,
   })
 
-  // boardKey passed as null — tabs use queryKeys directly now
-  const boardKey = null
-
-  const tabs: DashTabItem[] = [
+  const tabs = [
     {
       key: 'general',
-      label: 'General',
+      label: t('boards.general.title', 'General'),
+      description: t('boards.general.description', 'Basic board information and details'),
       icon: <Info size={16} />,
       href: getUriWithOrg(params.orgslug, '') + `/boards/${params.boarduuid}/general`,
       active: params.subpage === 'general',
     },
     {
       key: 'thumbnail',
-      label: 'Thumbnail',
+      label: t('boards.thumbnail.title', 'Thumbnail'),
+      description: t('boards.thumbnail.description', 'Board cover image shown on cards'),
       icon: <ImageIcon size={16} />,
       href: getUriWithOrg(params.orgslug, '') + `/boards/${params.boarduuid}/thumbnail`,
       active: params.subpage === 'thumbnail',
     },
     {
       key: 'access',
-      label: 'Sharing',
+      label: t('boards.access.title', 'Sharing'),
+      description: t('boards.access.description', 'Configure public link sharing or private member access'),
       icon: <Globe size={16} />,
       href: getUriWithOrg(params.orgslug, '') + `/boards/${params.boarduuid}/access`,
       active: params.subpage === 'access',
     },
     {
       key: 'members',
-      label: 'Members',
+      label: t('boards.members.title', 'Members'),
+      description: t('boards.members.description', 'Manage collaborators and roles for this board'),
       icon: <Users size={16} />,
       href: getUriWithOrg(params.orgslug, '') + `/boards/${params.boarduuid}/members`,
       active: params.subpage === 'members',
     },
   ]
 
+  const currentTab = tabs.find((t) => t.active) || tabs[0]
+
   if (isLoading || !board) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
-        <div className="ps-10 pe-10 bg-[#fcfbfc] nice-shadow animate-pulse">
-          <div className="pt-6 pb-4">
-            <div className="h-4 w-40 bg-gray-200 rounded" />
-          </div>
-          <div className="flex py-3 items-center gap-5">
-            <div className="w-[100px] h-[57px] bg-gray-200 rounded-md" />
-            <div className="flex flex-col gap-2">
-              <div className="h-3 w-24 bg-gray-200 rounded" />
-              <div className="h-5 w-48 bg-gray-200 rounded" />
+      <GeneralWrapperStyled>
+        <div className="pb-4">
+          <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="flex flex-col md:flex-row gap-5 pt-2 animate-pulse">
+          <div className="hidden md:block w-56 flex-shrink-0 space-y-3">
+            <div className="w-full aspect-video bg-gray-200 rounded-lg" />
+            <div className="bg-white nice-shadow rounded-lg p-3 space-y-3">
+              <div className="h-3 w-16 bg-gray-200 rounded" />
+              <div className="h-4 w-32 bg-gray-200 rounded" />
+              <div className="h-3 w-full bg-gray-100 rounded" />
+            </div>
+            <div className="bg-white nice-shadow rounded-lg p-2 space-y-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 bg-gray-100 rounded" />
+              ))}
             </div>
           </div>
-          <div className="flex space-x-3 pb-2 mt-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-8 w-24 bg-gray-200 rounded" />
-            ))}
+          <div className="flex-1 min-w-0">
+            <div className="bg-white nice-shadow rounded-lg p-6 space-y-4">
+              <div className="h-5 w-40 bg-gray-200 rounded" />
+              <div className="h-10 bg-gray-100 rounded" />
+              <div className="h-24 bg-gray-100 rounded" />
+            </div>
           </div>
         </div>
-        <div className="p-10">
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 animate-pulse">
-            <div className="h-4 w-32 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-100 rounded" />
-            <div className="h-10 bg-gray-100 rounded" />
-          </div>
-        </div>
-      </div>
+      </GeneralWrapperStyled>
     )
   }
 
@@ -110,76 +117,174 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     ? getBoardThumbnailMediaDirectory(org?.org_uuid, boardUuid, board.thumbnail_image)
     : '/empty_thumbnail.png'
 
+  const canvasLink = `/board/${boardUuid.replace('board_', '')}`
+  const createdDate = board.creation_date ? dayjs(board.creation_date).format('MMM D, YYYY') : null
+
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr] grid-cols-1">
-      <div className="ps-4 pe-4 sm:ps-10 sm:pe-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow relative min-w-0 overflow-hidden">
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: 'Boards', href: '/boards', icon: <ChalkboardSimple size={14} /> },
+    <GeneralWrapperStyled>
+      {/* Breadcrumbs */}
+      <div className="pb-4">
+        <Breadcrumbs
+          items={[
+            { label: t('boards.boards', 'Boards'), href: '/boards', icon: <ChalkboardSimple size={14} /> },
             { label: board.name },
-          ]} />
-        </div>
-
-        <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex py-3 grow min-w-0 items-center">
-            <Link href={`/board/${boardUuid.replace('board_', '')}`} className="shrink-0">
-              <img
-                className="w-[72px] sm:w-[100px] h-[41px] sm:h-[57px] rounded-md drop-shadow-md object-cover"
-                src={thumbnailUrl}
-                alt=""
-              />
-            </Link>
-            <div className="flex flex-col justify-center ps-3 sm:ps-5 min-w-0">
-              <div className="text-gray-400 font-semibold text-xs sm:text-sm">Board Settings</div>
-              <div className="text-black font-bold text-base sm:text-xl -mt-1 first-letter:uppercase truncate">
-                {board.name}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center self-center rounded-lg shadow-sm shadow-neutral-300/40 ring-1 ring-neutral-200/60 overflow-hidden shrink-0">
-            <div className={`px-2.5 sm:px-3.5 py-2 text-sm font-semibold flex items-center space-x-2 ${
-              board.public
-                ? 'bg-green-50/70 text-green-700'
-                : 'bg-amber-50/70 text-amber-700'
-            }`}>
-              {board.public ? <Globe className="w-4 h-4" /> : <Users className="w-4 h-4" />}
-              <span className="hidden sm:inline">{board.public ? 'Public' : 'Private'}</span>
-            </div>
-            <div className="w-px self-stretch bg-neutral-200/80" />
-            <Link
-              href={`/board/${boardUuid.replace('board_', '')}`}
-              className="px-2.5 sm:px-3.5 py-2 text-sm font-semibold text-neutral-600 bg-neutral-50/70 hover:bg-neutral-100/70 transition-colors flex items-center space-x-2"
-            >
-              <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline">View Board</span>
-            </Link>
-          </div>
-        </div>
-
-        <DashTabBar tabs={tabs} />
+          ]}
+        />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="h-full overflow-y-auto overflow-x-hidden"
-      >
-        {params.subpage === 'general' && (
-          <BoardGeneralTab board={board} boardUuid={boardUuid} boardKey={boardKey} />
-        )}
-        {params.subpage === 'thumbnail' && (
-          <BoardThumbnailTab board={board} boardUuid={boardUuid} orgUuid={org?.org_uuid} boardKey={boardKey} />
-        )}
-        {params.subpage === 'access' && (
-          <BoardAccessTab board={board} boardUuid={boardUuid} boardKey={boardKey} />
-        )}
-        {params.subpage === 'members' && (
-          <BoardMembersTab boardUuid={boardUuid} />
-        )}
-      </motion.div>
-    </div>
+      <div className="flex flex-col md:flex-row gap-5 pt-2">
+        {/* ── Left Sidebar — 220px (matches Playground layout) ── */}
+        <div className="hidden md:block w-56 flex-shrink-0">
+          <div className="sticky top-24 space-y-3">
+            {/* Thumbnail */}
+            <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+              <img
+                src={thumbnailUrl}
+                alt={board.name}
+                className="w-full aspect-video object-cover"
+              />
+            </div>
+
+            {/* Info card */}
+            <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+              <div className="p-3 border-b border-gray-100">
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  {t('playgrounds.view.about', 'About')}
+                </p>
+                <h1 className="text-sm font-bold text-gray-900 leading-snug">
+                  {board.name}
+                </h1>
+                {board.description && (
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-4">
+                    {board.description}
+                  </p>
+                )}
+              </div>
+
+              <div className="px-3 py-2.5 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500">{t('playgrounds.view.access', 'Access')}</span>
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                    board.public ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+                  }`}>
+                    {board.public ? <Globe size={10} /> : <Lock size={10} />}
+                    {board.public ? t('boards.public', 'Public') : t('boards.private', 'Private')}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500">{t('boards.members.title', 'Members')}</span>
+                  <span className="flex items-center gap-1 text-xs text-gray-700 font-medium">
+                    <Users size={12} className="text-gray-400" />
+                    {board.member_count ?? 1}
+                  </span>
+                </div>
+
+                {createdDate && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-gray-500">{t('playgrounds.view.created', 'Created')}</span>
+                    <span className="flex items-center gap-1 text-xs text-gray-700">
+                      <Calendar size={10} className="text-gray-400" />
+                      {createdDate}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-3 pb-3">
+                <Link
+                  href={canvasLink}
+                  className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-bold bg-black hover:bg-gray-800 text-white transition-colors"
+                >
+                  <Eye size={12} />
+                  {t('boards.open_board', 'Open Board Canvas')}
+                </Link>
+              </div>
+            </div>
+
+            {/* Section Navigation Tabs Card */}
+            <div className="bg-white nice-shadow rounded-lg p-1.5 space-y-1">
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2.5 py-1.5">
+                Settings & Navigation
+              </p>
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.key}
+                  href={tab.href}
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-md text-xs font-medium transition-colors ${
+                    tab.active
+                      ? 'bg-neutral-100 text-black font-semibold'
+                      : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main Content Area — Right side ── */}
+        <div className="flex-1 min-w-0">
+          {/* Mobile Sub-Navigation tabs */}
+          <div className="md:hidden mb-4 bg-white nice-shadow rounded-lg p-1.5 flex gap-1 overflow-x-auto">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+                  tab.active
+                    ? 'bg-black text-white font-semibold'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Right Settings Container */}
+          <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+            {/* Header with section title & "Open Board" button */}
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">
+                  {currentTab.label}
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {currentTab.description}
+                </p>
+              </div>
+              <Link
+                href={canvasLink}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
+              >
+                <Eye size={13} />
+                <span>{t('boards.open_board', 'Open Canvas')}</span>
+              </Link>
+            </div>
+
+            {/* Tab Body */}
+            <div className="p-5">
+              {params.subpage === 'general' && (
+                <BoardGeneralTab board={board} boardUuid={boardUuid} />
+              )}
+              {params.subpage === 'thumbnail' && (
+                <BoardThumbnailTab board={board} boardUuid={boardUuid} orgUuid={org?.org_uuid} />
+              )}
+              {params.subpage === 'access' && (
+                <BoardAccessTab board={board} boardUuid={boardUuid} />
+              )}
+              {params.subpage === 'members' && (
+                <BoardMembersTab boardUuid={boardUuid} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </GeneralWrapperStyled>
   )
 }
 

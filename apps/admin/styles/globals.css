@@ -468,6 +468,10 @@
     font-family: var(--font-default, 'Wix Madefor Text'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     letter-spacing: -0.02em;
   }
+  html.dark,
+  .dark body {
+    background-color: #4C4C4C !important;
+  }
 
   /* The -0.02em tracking above is tuned for Latin. Arabic is a cursive script
      where letters join along a baseline, and negative tracking crushes those

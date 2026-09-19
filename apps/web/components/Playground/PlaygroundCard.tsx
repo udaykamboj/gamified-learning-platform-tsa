@@ -1,17 +1,40 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Globe, Lock, Users, Pencil } from 'lucide-react'
+import {
+  Globe,
+  Lock,
+  Users,
+  Pencil,
+  Eye,
+  Copy,
+  Trash2,
+  MoreVertical,
+  CheckSquare,
+  Square,
+} from 'lucide-react'
 import { Cube } from '@phosphor-icons/react'
+import { useTranslation } from 'react-i18next'
 import { Playground } from '@services/playgrounds/playgrounds'
 import { getPlaygroundThumbnailMediaDirectory } from '@services/media/media'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@components/ui/dropdown-menu'
 
 interface PlaygroundCardProps {
   playground: Playground
   orgslug: string
   canEdit?: boolean
+  isSelected?: boolean
+  onToggleSelect?: (pgUuid: string) => void
+  onDuplicate?: (pgUuid: string) => Promise<void>
+  onDelete?: (pgUuid: string) => Promise<void>
 }
 
 const accessConfig = {
@@ -20,7 +43,15 @@ const accessConfig = {
   restricted: { icon: Users, label: 'Restricted', className: 'bg-amber-100 text-amber-700' },
 }
 
-export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit }: PlaygroundCardProps) {
+export default function PlaygroundCard({
+  playground,
+  orgslug: _orgslug,
+  canEdit,
+  isSelected = false,
+  onToggleSelect,
+  onDuplicate,
+  onDelete,
+}: PlaygroundCardProps) {
   const { track } = useLHAnalytics('learner')
   const access = accessConfig[playground.access_type as keyof typeof accessConfig] || accessConfig.authenticated
   const AccessIcon = access.icon
@@ -33,6 +64,12 @@ export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit 
     })
   }
 
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleSelect?.(playground.playground_uuid)
+  }
+
   const thumbnailUrl =
     playground.thumbnail_image && playground.org_uuid
       ? getPlaygroundThumbnailMediaDirectory(
@@ -43,21 +80,37 @@ export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit 
       : null
 
   const playgroundLink = `/playground/${playground.playground_uuid}`
-  const editLink = `/editor/playground/${playground.playground_uuid}/edit`
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
-      {/* Edit button — top right, appears on hover */}
-      {canEdit && (
-        <div className="absolute top-2 end-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Link
-            href={editLink}
-            className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md flex items-center justify-center"
-          >
-            <Pencil className="w-3.5 h-3.5 text-gray-700" />
-          </Link>
-        </div>
+    <div
+      className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${
+        isSelected ? 'ring-2 ring-black ring-offset-2' : ''
+      }`}
+    >
+      {/* Selection checkbox */}
+      {onToggleSelect && (
+        <button
+          onClick={handleSelectClick}
+          aria-label={isSelected ? 'Deselect playground' : 'Select playground'}
+          className={`absolute top-2 start-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
+            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          {isSelected ? (
+            <CheckSquare className="w-4 h-4 text-black" />
+          ) : (
+            <Square className="w-4 h-4 text-gray-500" />
+          )}
+        </button>
       )}
+
+      {/* Options menu */}
+      <PlaygroundCardOptions
+        playground={playground}
+        canEdit={canEdit}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+      />
 
       {/* Thumbnail */}
       <Link href={playgroundLink} onClick={handleOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
@@ -113,6 +166,107 @@ export default function PlaygroundCard({ playground, orgslug: _orgslug, canEdit 
           </Link>
         </div>
       </div>
+    </div>
+  )
+}
+
+function PlaygroundCardOptions({
+  playground,
+  canEdit,
+  onDuplicate,
+  onDelete,
+}: {
+  playground: Playground
+  canEdit?: boolean
+  onDuplicate?: (pgUuid: string) => Promise<void>
+  onDelete?: (pgUuid: string) => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const playgroundLink = `/playground/${playground.playground_uuid}`
+  const editLink = `/editor/playground/${playground.playground_uuid}/edit`
+
+  return (
+    <div
+      className={`absolute top-2 end-2 z-20 transition-opacity ${
+        !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+      }`}
+    >
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <button
+            aria-label="Playground actions"
+            className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md"
+          >
+            <MoreVertical size={18} className="text-gray-700" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuItem asChild>
+            <Link href={playgroundLink} className="flex items-center cursor-pointer">
+              <Eye className="me-2 h-4 w-4" />
+              {t('playgrounds.open_playground', 'Open Playground')}
+            </Link>
+          </DropdownMenuItem>
+
+          {canEdit && (
+            <DropdownMenuItem asChild>
+              <Link href={editLink} className="flex items-center cursor-pointer">
+                <Pencil className="me-2 h-4 w-4" />
+                {t('playgrounds.edit_playground', 'Edit in Editor')}
+              </Link>
+            </DropdownMenuItem>
+          )}
+
+          {onDuplicate && (
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('playgrounds.duplicate_playground', 'Duplicate Playground')}
+                confirmationMessage={t(
+                  'playgrounds.duplicate_playground_confirm',
+                  'Are you sure you want to duplicate this playground?'
+                )}
+                dialogTitle={t('playgrounds.duplicate_playground_title', {
+                  name: playground.name,
+                  defaultValue: `Duplicate "${playground.name}"`,
+                })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                    <Copy className="me-2 h-4 w-4" />
+                    {t('playgrounds.duplicate_playground', 'Duplicate Playground')}
+                  </button>
+                }
+                functionToExecute={() => onDuplicate(playground.playground_uuid)}
+                status="info"
+              />
+            </DropdownMenuItem>
+          )}
+
+          {canEdit && onDelete && (
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('playgrounds.delete_playground', 'Delete Playground')}
+                confirmationMessage={t(
+                  'playgrounds.delete_playground_confirm',
+                  'Are you sure you want to delete this playground? This action cannot be undone.'
+                )}
+                dialogTitle={t('playgrounds.delete_playground_title', {
+                  name: playground.name,
+                  defaultValue: `Delete "${playground.name}"`,
+                })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                    <Trash2 className="me-2 h-4 w-4" />
+                    {t('playgrounds.delete_playground', 'Delete Playground')}
+                  </button>
+                }
+                functionToExecute={() => onDelete(playground.playground_uuid)}
+                status="warning"
+              />
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

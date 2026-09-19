@@ -38,7 +38,7 @@ import {
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { DASHBOARD_MENU_ITEMS, DashboardMenuItem } from '@/lib/dashboard-menu-items'
 import { isFeatureAvailable } from '@services/plans/plans'
-import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
+import { getMenuColorClasses, isLightColor } from '@services/utils/ts/colorUtils'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
 import {
@@ -86,7 +86,7 @@ export const OrgMenu = (props: any) => {
 
   // Get primary color from org config (v2: customization.general.color, v1: general.color)
   const config = org?.config?.config
-  const primaryColor = config?.customization?.general?.color || config?.general?.color || ''
+  const primaryColor = config?.customization?.general?.color || config?.general?.color || '#3D3D3D'
   const colors = getMenuColorClasses(primaryColor)
 
   // Filter dashboard menu items by resolved_features from API
@@ -150,10 +150,10 @@ export const OrgMenu = (props: any) => {
       )}
       <nav
         aria-label="Top navigation"
-        className={`backdrop-blur-lg fixed start-0 end-0 h-[60px] ${!primaryColor ? 'bg-black/90 border-b border-white/10' : ''}`}
+        className="backdrop-blur-lg fixed start-0 end-0 h-[60px] border-b border-white/10"
         style={{
           zIndex: 'var(--z-nav)',
-          backgroundColor: primaryColor || undefined,
+          backgroundColor: '#3D3D3D',
           top: topOffset
         }}
       >
@@ -163,7 +163,12 @@ export const OrgMenu = (props: any) => {
               <Link href="/dashboard">
                 <div className="flex w-auto h-9 rounded-md items-center m-auto py-1 justify-center">
                   {!org || (org && !org?.logo_image) ? (
-                    <img src="/starlab.svg" alt="StarLab" className={`max-h-[30px] ${!primaryColor ? 'text-white' : 'text-foreground'}`} />
+                    <img
+                      src="/starlab.svg"
+                      alt="StarLab"
+                      className="max-h-[30px]"
+                      style={isLightColor(primaryColor) ? { filter: 'brightness(0)' } : undefined}
+                    />
                   ) : (
                     <img src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)} alt={org?.name} className="h-[30px] rounded-sm" />
                   )}

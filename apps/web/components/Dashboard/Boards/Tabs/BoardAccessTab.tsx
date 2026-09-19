@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Globe, Users } from 'lucide-react'
+import { Globe, Users, Lock } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useQueryClient } from '@tanstack/react-query'
@@ -14,11 +14,9 @@ import { useTranslation } from 'react-i18next'
 interface BoardAccessTabProps {
   board: any
   boardUuid: string
-  boardKey: string | null
+  boardKey?: string | null
 }
 
-// A board is private to its owner and the members they add (Members tab), or
-// public to anyone with the link. There is no group-based access.
 function BoardAccessTab({ board, boardUuid, boardKey: _boardKey }: BoardAccessTabProps) {
   const { t } = useTranslation()
   const org = useOrg() as any
@@ -38,74 +36,79 @@ function BoardAccessTab({ board, boardUuid, boardKey: _boardKey }: BoardAccessTa
     setIsPublic(value)
     try {
       await updateBoard(boardUuid, { public: value }, access_token)
-      toast.success(value ? t('boards.access.board_set_public') : t('boards.access.board_set_private'))
+      toast.success(value ? t('boards.access.board_set_public', 'Board set to public') : t('boards.access.board_set_private', 'Board set to private'))
       queryClient.invalidateQueries({ queryKey: queryKeys.boards.detail(boardUuid) })
       queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(org?.slug) })
     } catch {
       setIsPublic(!value)
-      toast.error(t('boards.access.access_update_error'))
+      toast.error(t('boards.access.access_update_error', 'Failed to update access'))
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.access.title')}</h1>
-          <h2 className="text-gray-500 text-xs sm:text-sm">{t('boards.access.description')}</h2>
-        </div>
-        <div className={`flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mx-auto mb-3 ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}>
-          <ConfirmationModal
-            confirmationButtonText={t('boards.access.set_to_public')}
-            confirmationMessage={t('boards.access.set_to_public_confirm')}
-            dialogTitle={t('boards.access.make_board_public')}
-            dialogTrigger={
-              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
-                {isPublic && (
-                  <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                    {t('boards.access.active')}
-                  </div>
-                )}
-                <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
-                  <Globe className="text-slate-400" size={32} />
-                  <div className="text-xl sm:text-2xl text-slate-700 font-bold">{t('boards.access.public_option')}</div>
-                  <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                    {t('boards.access.public_description')}
-                  </div>
+    <div className="space-y-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}>
+        <ConfirmationModal
+          confirmationButtonText={t('boards.access.set_to_public', 'Set to Public')}
+          confirmationMessage={t('boards.access.set_to_public_confirm', 'Are you sure you want to make this board public? Anyone with the link will be able to view it.')}
+          dialogTitle={t('boards.access.make_board_public', 'Make Board Public')}
+          dialogTrigger={
+            <div className={`relative p-5 rounded-xl border-2 transition-all cursor-pointer text-start flex flex-col justify-between h-48 ${
+              isPublic ? 'border-black bg-neutral-50/60' : 'border-gray-200 hover:border-gray-300 bg-white'
+            }`}>
+              {isPublic && (
+                <div className="absolute top-3 end-3 bg-green-100 text-green-700 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                  {t('boards.access.active', 'Active')}
+                </div>
+              )}
+              <div className="w-10 h-10 rounded-lg bg-white nice-shadow flex items-center justify-center text-black mb-3">
+                <Globe size={20} />
+              </div>
+              <div>
+                <div className="text-base font-bold text-gray-900 mb-1">
+                  {t('boards.access.public_option', 'Public')}
+                </div>
+                <div className="text-xs text-gray-500 leading-relaxed">
+                  {t('boards.access.public_description', 'Anyone with the link can view this board.')}
                 </div>
               </div>
-            }
-            functionToExecute={() => handleSetAccess(true)}
-            status="info"
-          />
-          <ConfirmationModal
-            confirmationButtonText={t('boards.access.set_to_private')}
-            confirmationMessage={t('boards.access.set_to_private_confirm')}
-            dialogTitle={t('boards.access.make_board_private')}
-            dialogTrigger={
-              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
-                {!isPublic && (
-                  <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                    {t('boards.access.active')}
-                  </div>
-                )}
-                <div className="flex flex-col space-y-1 justify-center items-center h full p-2 sm:p-4">
-                  <Users className="text-slate-400" size={32} />
-                  <div className="text-xl sm:text-2xl text-slate-700 font-bold">{t('boards.access.private_option')}</div>
-                  <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                    {t('boards.access.private_description')}
-                  </div>
-                </div>
-              </div>
-            }
-            functionToExecute={() => handleSetAccess(false)}
-            status="info"
-          />
-        </div>
+            </div>
+          }
+          functionToExecute={() => handleSetAccess(true)}
+          status="info"
+        />
 
+        <ConfirmationModal
+          confirmationButtonText={t('boards.access.set_to_private', 'Set to Private')}
+          confirmationMessage={t('boards.access.set_to_private_confirm', 'Are you sure you want to make this board private? Only members added will be able to view and edit.')}
+          dialogTitle={t('boards.access.make_board_private', 'Make Board Private')}
+          dialogTrigger={
+            <div className={`relative p-5 rounded-xl border-2 transition-all cursor-pointer text-start flex flex-col justify-between h-48 ${
+              !isPublic ? 'border-black bg-neutral-50/60' : 'border-gray-200 hover:border-gray-300 bg-white'
+            }`}>
+              {!isPublic && (
+                <div className="absolute top-3 end-3 bg-green-100 text-green-700 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                  {t('boards.access.active', 'Active')}
+                </div>
+              )}
+              <div className="w-10 h-10 rounded-lg bg-white nice-shadow flex items-center justify-center text-black mb-3">
+                <Lock size={20} />
+              </div>
+              <div>
+                <div className="text-base font-bold text-gray-900 mb-1">
+                  {t('boards.access.private_option', 'Private')}
+                </div>
+                <div className="text-xs text-gray-500 leading-relaxed">
+                  {t('boards.access.private_description', 'Only explicitly added members can access this board.')}
+                </div>
+              </div>
+            </div>
+          }
+          functionToExecute={() => handleSetAccess(false)}
+          status="info"
+        />
       </div>
     </div>
   )
