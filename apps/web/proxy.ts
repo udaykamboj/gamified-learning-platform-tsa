@@ -2,6 +2,7 @@ import { getAPIUrl } from './services/config/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from './services/auth/cookies'
 
 // =============================================================================
 // Tenancy
@@ -206,6 +207,73 @@ function tenantRequestHeaders(
 }
 
 // =============================================================================
+// Session detection
+// =============================================================================
+//
+// A session is NOT "the LH_session cookie is present". That marker is
+// non-httpOnly and lives for the full 30-day refresh window, so it routinely
+// outlives the credentials it was minted next to: an expired or revoked refresh
+// cookie, a sign-out that only cleared one of the domain-scoped and host-only
+// copies, or a browser that kept the marker after the tokens were dropped.
+//
+// Trusting the marker alone let /dashboard — and every org route behind the
+// catch-all — render the whole student application for a visitor with no
+// session at all. The client then discovered the truth, tore the page down and
+// sent them to /login: a flash of authenticated chrome followed by a redirect,
+// which reads as a page that flickers. The dashboard was never actually theirs
+// to see.
+//
+// A real session carries the marker AND at least one httpOnly token cookie —
+// /api/auth/* writes them in the same response (app/api/auth/[...path]/route.ts).
+// Either token counts: a refresh response re-mints only the access token, so a
+// session can legitimately hold LH_access while LH_refresh has expired.
+function hasSessionMarkerCookie(req: NextRequest): boolean {
+  return !!req.cookies.get('LH_session')?.value
+}
+
+function hasUsableSession(req: NextRequest): boolean {
+  if (!hasSessionMarkerCookie(req)) return false
+  return !!(
+    req.cookies.get(ACCESS_TOKEN_COOKIE)?.value
+    || req.cookies.get(REFRESH_TOKEN_COOKIE)?.value
+  )
+}
+
+/**
+ * Send an unauthenticated visitor to the login page, remembering where they
+ * were headed.
+ *
+ * An orphaned marker (present, but no token behind it) is expired on the way
+ * out. Left in place it is worse than no marker at all: the client polls on it
+ * every refetch tick, and — because /login treats any marker as "already
+ * signed in" — it bounces the visitor straight back here. Clearing it here ends
+ * that loop at the source instead of letting the two pages disagree.
+ */
+function loginRedirect(
+  req: NextRequest,
+  instance: InstanceInfo,
+): NextResponse {
+  const { pathname, search } = req.nextUrl
+  const callbackUrl = encodeURIComponent(pathname + search)
+  const response = NextResponse.redirect(
+    new URL(`/login?callbackUrl=${callbackUrl}`, req.url),
+  )
+  if (hasSessionMarkerCookie(req)) {
+    expireSessionMarker(response, instance)
+  }
+  return response
+}
+
+/** Expire LH_session in both the host-only and domain-scoped variants. */
+function expireSessionMarker(response: NextResponse, instance: InstanceInfo): void {
+  const domain = cookieDomainFor(instance)
+  response.cookies.set({ name: 'LH_session', value: '', path: '/', maxAge: 0 })
+  if (domain) {
+    response.cookies.set({ name: 'LH_session', value: '', path: '/', maxAge: 0, domain })
+  }
+}
+
+// =============================================================================
 // Middleware
 // =============================================================================
 
@@ -275,10 +343,8 @@ export default async function proxy(req: NextRequest) {
   //     (or admin) area. Admins land on /admin after login, not here.
   // -------------------------------------------------------------------------
   if (pathname === '/dashboard') {
-    const hasSession = !!req.cookies.get('LH_session')?.value
-    if (!hasSession) {
-      const callbackUrl = encodeURIComponent(pathname + search)
-      return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+    if (!hasUsableSession(req)) {
+      return loginRedirect(req, instance)
     }
     
     const resolved = await resolveTenant(req, instance)
@@ -360,7 +426,12 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   const authPaths = ['/login', '/signup', '/reset', '/forgot', '/verify-email']
   if (authPaths.includes(pathname)) {
-    const hasSession = !!req.cookies.get('LH_session')?.value
+    const hasSession = hasUsableSession(req)
+    // An orphaned marker (present, but no token behind it) is not a session.
+    // These pages are where a visitor bounced off a guarded route ends up, so
+    // this is the last place the stale cookie can be dropped before the client
+    // starts polling on it — and before /login would bounce them back out.
+    const orphanedMarker = !hasSession && hasSessionMarkerCookie(req)
 
     // A logged-in user has no business on /login — bounce them to the hub (the
     // page itself re-verifies, so this is a best-effort UX shortcut).
@@ -392,6 +463,7 @@ export default async function proxy(req: NextRequest) {
       new URL(`/auth${pathname}${search}`, req.url),
       { request: { headers: requestHeaders } },
     )
+    if (orphanedMarker) expireSessionMarker(response, instance)
     setOrgCookies(response, resolved, instance)
     setInstanceCookies(response, instance)
     return response
@@ -540,12 +612,21 @@ export default async function proxy(req: NextRequest) {
 
   // The apex is the public website. Keep it out of tenant resolution so the
   // marketing page owns `/` in every tenancy mode.
+  //
+  // It is deliberately NOT redirected to /dashboard on the strength of cookies.
+  // Those cookies say a session was minted, not that one is still valid, and the
+  // edge cannot tell the difference — only the client can, once it has asked the
+  // backend. Redirecting here sent anyone holding a stale session off a public
+  // page into the app, which then discovered there was no session and threw
+  // them back at /login: / → /dashboard → /login, with the dashboard in between.
+  // `ApexSessionGate` (app/apex-session-gate.tsx) makes the same decision on the
+  // client, after verification, so no one is ever shown the wrong page.
   if (pathname === '/') {
-    const hasSession = !!req.cookies.get('LH_session')?.value
-    if (hasSession) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
-    return NextResponse.next()
+    const response = NextResponse.next()
+    // Clear an orphaned marker on the public site too, so a visitor who lands
+    // here first stops the client from polling on a session that isn't there.
+    if (hasSessionMarkerCookie(req)) expireSessionMarker(response, instance)
+    return response
   }
 
   // -------------------------------------------------------------------------
@@ -568,7 +649,7 @@ export default async function proxy(req: NextRequest) {
   ) {
     const resolved = await resolveTenant(req, instance)
     if (resolved.source === 'default') {
-      const hasSession = !!req.cookies.get('LH_session')?.value
+      const hasSession = hasUsableSession(req)
       const target = hasSession ? `/home${search}` : `/auth/login${search}`
       const requestHeaders = tenantRequestHeaders(req, resolved, instance)
       const response = NextResponse.rewrite(new URL(target, req.url), {
@@ -585,12 +666,10 @@ export default async function proxy(req: NextRequest) {
   //     All routes at this level belong to the authenticated student application,
   //     so we strictly enforce authentication at the edge.
   // -------------------------------------------------------------------------
-  const hasSession = !!req.cookies.get('LH_session')?.value
-  if (!hasSession) {
+  if (!hasUsableSession(req)) {
     // If an unauthenticated user accesses a student route directly (e.g. /courses),
     // redirect them to the login gateway.
-    const callbackUrl = encodeURIComponent(pathname + search)
-    return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
+    return loginRedirect(req, instance)
   }
 
   const resolved = await resolveTenant(req, instance)

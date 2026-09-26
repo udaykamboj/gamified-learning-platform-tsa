@@ -372,6 +372,27 @@ def get_base_url_from_request(request: Request) -> str:
     return f"{request.url.scheme}://{request.url.netloc}"
 
 
+def is_email_suppressed(to: Optional[str]) -> bool:
+    """Whether `send_email` would drop this message on purpose.
+
+    Two deliberate suppressions: the demo org's reserved `.invalid` addresses
+    (RFC 2606 can never resolve, so no provider can ever accept them) and any
+    send at all in development mode. Both make `send_email` return `None`.
+
+    That `None` means "there was nothing to send", NOT "the send failed" — a
+    real failure comes back as `False`, or raises. Callers that read a falsy
+    return as failure must consult this first, or a suppression they asked for
+    turns into a 500 and breaks a flow that in fact completed: account
+    creation, for one, had a user in the database and still reported failure
+    because the verification mail was intentionally not sent.
+    """
+    from src.services.demo.flags import is_demo_email
+
+    if is_demo_email(to):
+        return True
+    return get_starlab_config().general_config.development_mode
+
+
 def send_email(
     to: EmailStr,
     subject: str,
@@ -422,10 +443,10 @@ def send_email(
     # receive mail" a property of the system instead of a convention: no code
     # path added later can accidentally mail forty fictional people, and the
     # provider is never handed an address it will bounce (which costs sender
-    # reputation on a shared domain).
-    from src.services.demo.flags import is_demo_email
-
-    if is_demo_email(to_addr) or lh_config.development_mode:
+    # reputation on a shared domain). `is_email_suppressed` is the single place
+    # that decision is made, so callers can ask whether a `None` return means
+    # "dropped on purpose" or "the send failed".
+    if is_email_suppressed(to_addr):
         logger.warning(
             "Dropping email to %s (subject=%r) [demo/dev mode]", to_addr, subject
         )

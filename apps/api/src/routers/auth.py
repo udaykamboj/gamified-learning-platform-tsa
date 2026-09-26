@@ -597,7 +597,7 @@ async def login(
         )
 
     # Step 4: Check email verification (required for SaaS login only)
-    if not user.email_verified and get_deployment_mode() == 'saas' and not get_starlab_config().development_mode:
+    if not user.email_verified and get_deployment_mode() == 'saas' and not get_starlab_config().general_config.development_mode:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={

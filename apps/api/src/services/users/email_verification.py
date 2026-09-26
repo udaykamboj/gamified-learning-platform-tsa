@@ -22,6 +22,7 @@ from src.services.users.emails import send_email_verification_email
 from src.services.email.utils import (
     get_base_url_from_request,
     get_trusted_base_url_from_request,
+    is_email_suppressed,
 )
 from src.services.security.rate_limiting import check_verification_resend_rate_limit
 from src.services.webhooks.dispatch import dispatch_webhooks
@@ -169,7 +170,7 @@ async def send_verification_email(
         sender_name=sender_name,
     )
 
-    if not email_sent:
+    if not email_sent and not is_email_suppressed(user.email):
         raise HTTPException(
             status_code=500,
             detail="Failed to send verification email",
