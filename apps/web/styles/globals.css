@@ -265,6 +265,33 @@
     letter-spacing: normal;
   }
 
+  /* A password field paints U+2022 for every character, so that glyph is the
+     only thing telling a person how long their password is — they count dots.
+     Three defaults spoil it:
+
+       1. The -0.02em on html/body is tuned for reading prose. Inherited onto
+          masked glyphs it has already resolved against <html>'s 16px into a
+          fixed -0.32px, which cramps the dots into a clump.
+       2. The Arabic override above resets that to `normal`, so the identical
+          field reads differently per language. This rule follows it in both
+          layers, so the dots come out the same in either direction.
+       3. Ligatures stay on by default. A run of identical bullets is precisely
+          the case a font substitutes a cluster glyph for, which fuses
+          neighbouring dots into blobs.
+
+     Positive tracking spaces them evenly and `none` stops the fusing. No
+     `!important`: this only has to beat an *inherited* value, and a declaration
+     on the element itself wins over inheritance in any layer.
+
+     Keyed on [type] rather than a class so every password field matches,
+     including the ones on /forgot and /reset. It also stops applying the
+     moment the field is revealed (type flips to text), so the visible
+     characters keep normal prose tracking. */
+  input[type='password'] {
+    letter-spacing: 0.08em;
+    font-variant-ligatures: none;
+  }
+
   /* Arabic is set in Tajawal, full stop — not layered as a per-glyph fallback.
      Tajawal carries a Latin subset, so forcing it keeps a mixed Arabic screen
      in one typeface instead of alternating between two designs with different
@@ -486,6 +513,33 @@
   :lang(fa),
   :lang(fa) body {
     letter-spacing: normal;
+  }
+
+  /* A password field paints U+2022 for every character, so that glyph is the
+     only thing telling a person how long their password is — they count dots.
+     Three defaults spoil it:
+
+       1. The -0.02em on html/body is tuned for reading prose. Inherited onto
+          masked glyphs it has already resolved against <html>'s 16px into a
+          fixed -0.32px, which cramps the dots into a clump.
+       2. The Arabic override above resets that to `normal`, so the identical
+          field reads differently per language. This rule follows it in both
+          layers, so the dots come out the same in either direction.
+       3. Ligatures stay on by default. A run of identical bullets is precisely
+          the case a font substitutes a cluster glyph for, which fuses
+          neighbouring dots into blobs.
+
+     Positive tracking spaces them evenly and `none` stops the fusing. No
+     `!important`: this only has to beat an *inherited* value, and a declaration
+     on the element itself wins over inheritance in any layer.
+
+     Keyed on [type] rather than a class so every password field matches,
+     including the ones on /forgot and /reset. It also stops applying the
+     moment the field is revealed (type flips to text), so the visible
+     characters keep normal prose tracking. */
+  input[type='password'] {
+    letter-spacing: 0.08em;
+    font-variant-ligatures: none;
   }
 
   /* Arabic is set in Tajawal, full stop — not layered as a per-glyph fallback.

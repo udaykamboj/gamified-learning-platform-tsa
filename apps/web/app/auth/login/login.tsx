@@ -5,7 +5,7 @@ import FormLayout, {
 import * as Form from '@radix-ui/react-form'
 import { useFormik } from 'formik'
 import React, { useState, useEffect } from 'react'
-import { AlertTriangle, Info, Lock, Mail, Shield, X, Clock, Send, CheckCircle2 } from 'lucide-react'
+import { AlertTriangle, Info, Lock, Mail, Shield, X, Clock, Send, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { checkSSOEnabled, redirectToSSOLogin } from '@services/auth/sso'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -29,6 +29,7 @@ const LoginClient = (props: LoginClientProps) => {
   const { signIn, signOut, status, completeMfaLogin, requestMagicLink, completeMagicLink } = useAuth()
   const { track } = useLHAnalytics('public')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [ssoEnabled, setSsoEnabled] = useState(false)
   const [ssoLoading, setSsoLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
@@ -787,16 +788,28 @@ const LoginClient = (props: LoginClientProps) => {
                       {t('auth.forgot_password')}
                     </Link>
                   </div>
-                  <Form.Control asChild>
-                    <input
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      value={formik.values.password}
-                      type="password"
-                      autoComplete="current-password"
-                      className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
-                    />
-                  </Form.Control>
+                  <div className="relative">
+                    <Form.Control asChild>
+                      <input
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.password}
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm pe-11"
+                      />
+                    </Form.Control>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? t('auth.hide_password') : t('auth.show_password')}
+                      aria-pressed={showPassword}
+                      title={showPassword ? t('auth.hide_password') : t('auth.show_password')}
+                      className="absolute end-1 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-md text-black/40 transition-colors hover:bg-black/5 hover:text-black/70 focus:outline-none focus:ring-2 focus:ring-black/10"
+                    >
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
                 </FormField>
 
                 <TurnstileWidget

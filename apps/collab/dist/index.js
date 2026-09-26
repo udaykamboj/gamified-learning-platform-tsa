@@ -4,10 +4,14 @@ import { Database } from '@hocuspocus/extension-database';
 import jwt from 'jsonwebtoken';
 import Redis from 'ioredis';
 const PORT = parseInt(process.env.COLLAB_PORT || '4000', 10);
-const API_URL = process.env.LEARNHOUSE_API_URL || 'http://localhost:8000';
-const SECRET_KEY = process.env.LEARNHOUSE_AUTH_JWT_SECRET_KEY || '';
+const API_URL = process.env.STARLAB_API_URL || 'http://localhost:8000';
+const SECRET_KEY = process.env.STARLAB_AUTH_JWT_SECRET_KEY || '';
 const INTERNAL_KEY = process.env.COLLAB_INTERNAL_KEY || '';
-const REDIS_URL = process.env.LEARNHOUSE_REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = process.env.STARLAB_REDIS_URL || 'redis://localhost:6379';
+// Only honor x-forwarded-for when a trusted proxy is known to set it.
+// Without this flag, a direct client can spoof the header per request and
+// bypass the rate limiter by presenting a fresh IP each time.
+const TRUST_PROXY = process.env.COLLAB_TRUST_PROXY === 'true';
 // Timeout for all outbound HTTP requests (ms)
 const FETCH_TIMEOUT_MS = 10_000;
 // Debounce interval before flushing ydoc state to the database (ms)
@@ -16,7 +20,7 @@ const DB_FLUSH_DELAY = 5000;
 const REDIS_YDOC_TTL = 3600;
 // ── Startup validation ──────────────────────────────────────────────────────
 if (!SECRET_KEY) {
-    console.error('[collab] FATAL: LEARNHOUSE_AUTH_JWT_SECRET_KEY is not set');
+    console.error('[collab] FATAL: STARLAB_AUTH_JWT_SECRET_KEY is not set');
     process.exit(1);
 }
 if (!INTERNAL_KEY) {
@@ -112,7 +116,7 @@ function scheduleDbFlush(boardUuid, state) {
 // ── Server ──────────────────────────────────────────────────────────────────
 // Max concurrent users per board
 const MAX_BOARD_USERS = 10;
-const server = Server.configure({
+const server = new Server({
     port: PORT,
     async onRequest({ request, response }) {
         // Health check endpoint — handles both "/" (k8s probe) and "/health"
@@ -125,10 +129,13 @@ const server = Server.configure({
             // eslint-disable-next-line no-throw-literal
             throw null;
         }
-        // Rate limiting by IP
-        const ip = request.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-            request.socket.remoteAddress ||
-            'unknown';
+        // Rate limiting by IP. Only read x-forwarded-for when we're explicitly
+        // behind a trusted proxy; otherwise a client can spoof the header to
+        // rotate through unlimited buckets.
+        const forwarded = TRUST_PROXY
+            ? request.headers['x-forwarded-for']?.split(',')[0]?.trim()
+            : undefined;
+        const ip = forwarded || request.socket.remoteAddress || 'unknown';
         if (isRateLimited(ip)) {
             response.writeHead(429, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify({ error: 'Too many connection attempts' }));

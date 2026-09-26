@@ -6,7 +6,7 @@ import FormLayout, {
   FormField,
 } from '@components/Objects/StyledElements/Form/Form'
 import * as Form from '@radix-ui/react-form'
-import { AlertTriangle, Info, Mail, User } from 'lucide-react'
+import { AlertTriangle, Info, Mail, User, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { signup, resendVerificationEmail } from '@services/auth/auth'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -70,6 +70,7 @@ function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
   const { t } = useTranslation()
   const { track } = useLHAnalytics('public')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [showPassword, setShowPassword] = React.useState(false)
   const contextOrg = useOrg() as any
   const org = (contextOrg && (contextOrg.id || contextOrg.slug)) ? contextOrg : propOrg
   const _router = useRouter()
@@ -319,17 +320,29 @@ function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
                 </span>
               )}
             </div>
-            <Form.Control asChild>
-              <input
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.password}
-                type="password"
-                autoComplete="new-password"
-                required
-                className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
-              />
-            </Form.Control>
+            <div className="relative">
+              <Form.Control asChild>
+                <input
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm pe-11"
+                />
+              </Form.Control>
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? t('auth.hide_password') : t('auth.show_password')}
+                aria-pressed={showPassword}
+                title={showPassword ? t('auth.hide_password') : t('auth.show_password')}
+                className="absolute end-1 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-md text-black/40 transition-colors hover:bg-black/5 hover:text-black/70 focus:outline-none focus:ring-2 focus:ring-black/10"
+              >
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
             <PasswordStrengthIndicator password={formik.values.password} />
           </FormField>
 

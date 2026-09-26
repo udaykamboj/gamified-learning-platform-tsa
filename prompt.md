@@ -1,8 +1,8 @@
-Yes — you want to change the actual data/auth architecture, not just hide the organization UI. The LearnHouse admin/course-management system can stay, but your app should have a fixed organization and accounts explicitly associated with a role.
+Yes — you want to change the actual data/auth architecture, not just hide the organization UI. The StarLab admin/course-management system can stay, but your app should have a fixed organization and accounts explicitly associated with a role.
 
-Refactor LearnHouse Into Single-Organization Student + Admin System
+Refactor StarLab Into Single-Organization Student + Admin System
 
-The app is built on the LearnHouse open-source codebase. Its current architecture is heavily centered around users creating and managing organizations. That model does not apply to our application.
+The app is built on the StarLab open-source codebase. Its current architecture is heavily centered around users creating and managing organizations. That model does not apply to our application.
 
 Refactor both the frontend AND backend/database/authentication architecture around this model:
 
@@ -33,7 +33,7 @@ Cannot access administrative APIs/routes.
 Admin account
 
 Administrative account associated with the same single organization.
-Can use the existing LearnHouse administrative/course-management system.
+Can use the existing StarLab administrative/course-management system.
 Can create/edit/delete courses and lessons.
 Can manage course content and students.
 Can access the admin dashboard.
@@ -60,7 +60,7 @@ An account should have a clear role, such as:
 role = "student"
 role = "admin"
 
-or the equivalent structure already supported by LearnHouse.
+or the equivalent structure already supported by StarLab.
 
 The backend must use this role for authorization.
 
@@ -73,9 +73,9 @@ If an unauthenticated user logs in, determine their role and redirect them to th
 
 Students attempting to access /admin or admin APIs must be rejected by the backend, not merely redirected by the frontend.
 
-4. Keep the Existing LearnHouse Admin System
+4. Keep the Existing StarLab Admin System
 
-Do not throw away the existing LearnHouse admin/course-management functionality.
+Do not throw away the existing StarLab admin/course-management functionality.
 
 I specifically want to keep the useful parts of the existing admin system for managing courses.
 
@@ -85,7 +85,7 @@ Admin account
       ↓
 Single organization
       ↓
-Existing LearnHouse admin tools
+Existing StarLab admin tools
       ↓
 Courses / lessons / students / content
 
@@ -93,7 +93,7 @@ The admin should not see an organization-creation workflow before reaching these
 
 5. Database / Backend
 
-Audit the existing LearnHouse database relationships and modify them where necessary.
+Audit the existing StarLab database relationships and modify them where necessary.
 
 The backend should consistently understand:
 
@@ -133,7 +133,7 @@ Do not show admins unnecessary organization onboarding either.
 
 8. Preserve Existing Functionality
 
-Do not unnecessarily rewrite LearnHouse.
+Do not unnecessarily rewrite StarLab.
 
 First understand the existing:
 
@@ -171,7 +171,7 @@ The finished system should behave like a normal educational platform:
                               │
                               ↓
                        Same underlying
-                       LearnHouse system
+                       StarLab system
 
 Most important: this is an architectural/backend change. Do not solve it by merely removing organization buttons from the UI. The authentication, authorization, database relationships, API behavior, and routing should all reflect the single-organization + student/admin model.
 
@@ -183,11 +183,11 @@ Select one answer
 Unblock /admin in OSS (Recommended)
 Treat the StarLab superadmin/Admin console as core (not enterprise-gated): update eeGate + its contract test so the console renders in this single-org deployment, matching your 'Admin → /admin' requirement.
 Keep OSS gate, route admins to dash
-Leave the EE policy intact; admins land on the LearnHouse course-management dash (/orgs/{slug}/dash) instead of /admin.
+Leave the EE policy intact; admins land on the StarLab course-management dash (/orgs/{slug}/dash) instead of /admin.
 
 Choose “Unblock /admin in OSS (Recommended).”
 
-That matches what you actually want: Admin → /admin → StarLab/LearnHouse admin console, while students stay in the normal student dashboard.
+That matches what you actually want: Admin → /admin → StarLab admin console, while students stay in the normal student dashboard.
 
 The important part is to make /admin core for your single-org deployment, not to bypass security entirely. The coding agent should:
 
@@ -206,7 +206,7 @@ Admin login → /admin
 
 Both → same single organization
 
-I would not choose “Keep OSS gate, route admins to dash” because that puts you back into LearnHouse's organization-oriented dashboard model, which is exactly what you're trying to move away from.
+I would not choose “Keep OSS gate, route admins to dash” because that puts you back into StarLab's organization-oriented dashboard model, which is exactly what you're trying to move away from.
 
 what does this mean:  understand completely. You don't want a "locked down" organization creation system that admins can use; you want the organization creation system entirely removed from the codebase because the application fundamentally does not support creating new organizations.
 
@@ -223,7 +223,7 @@ It means the coding agent is proposing a much more permanent change than simply 
 
 In plain English
 
-Your current LearnHouse code has functionality like:
+Your current StarLab code has functionality like:
 
 User → Create Organization → Manage Organization → Add/use courses
 

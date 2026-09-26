@@ -17,7 +17,7 @@ from src.services.users.emails import (
     send_password_reset_email,
     send_password_reset_email_platform,
 )
-from src.services.email.utils import get_base_url_from_request
+from src.services.email.utils import get_base_url_from_request, is_email_suppressed
 from src.db.users import (
     AnonymousUser,
     PublicUser,
@@ -180,7 +180,7 @@ async def send_reset_password_code(
         sender_name=resolve_org_sender_name(org_config),
     )
 
-    if not isEmailSent:
+    if not isEmailSent and not is_email_suppressed(user.email):
         logging.error(f"Failed to send password reset email to user: {user.user_uuid}")
         raise HTTPException(
             status_code=500,
@@ -361,7 +361,7 @@ async def send_reset_password_code_platform(
         base_url=base_url,
     )
 
-    if not isEmailSent:
+    if not isEmailSent and not is_email_suppressed(user.email):
         logging.error(f"Failed to send password reset email to user: {user.user_uuid}")
         raise HTTPException(
             status_code=500,

@@ -6,7 +6,7 @@ Okay, you're not understanding what could change. What we need to change about t
 
 ## ChatGPT
 
-Yes — I understand the distinction now. The core mistake was treating LearnHouse like a **teacher-managed LMS**, when what you actually want is a **centrally authored, student-driven learning platform**.
+Yes — I understand the distinction now. The core mistake was treating StarLab like a **teacher-managed LMS**, when what you actually want is a **centrally authored, student-driven learning platform**.
 
 The architecture should work more like **Khan Academy**, not Google Classroom:
 

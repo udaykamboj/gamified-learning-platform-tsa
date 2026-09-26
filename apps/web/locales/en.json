@@ -250,6 +250,8 @@
     "sign_in": "Sign in",
     "email": "Email",
     "password": "Password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
     "forgot_password": "Forgot password?",
     "login_to": "Welcome back",
     "sign_up": "Sign up",
