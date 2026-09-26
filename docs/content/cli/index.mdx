@@ -1,0 +1,79 @@
+import { Callout } from 'nextra/components'
+
+# CLI
+
+The StarLab CLI is the primary tool for deploying, managing, and developing StarLab. It orchestrates Docker Compose services and provides an interactive setup wizard for production deployments, as well as a full local development environment.
+
+<img src="/img/pages/cli/cli-screenshot.png" alt="StarLab CLI" style={{ borderRadius: '12px', marginTop: '1rem' }} />
+
+**Package**: [`starlab`](https://www.npmjs.com/package/starlab) on npm
+
+## Installation
+
+### Quick Start (recommended)
+
+```bash
+npx starlab@latest setup
+```
+
+### One-line Install (macOS / Linux)
+
+Installs Docker, Node.js, and launches the CLI:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.sh | bash
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/starlab/starlab/main/apps/cli/install.ps1 | iex
+```
+
+## Requirements
+
+- **Node.js** 18+
+- **Docker** with Docker Compose v2
+
+## What It Does
+
+The CLI handles two main workflows:
+
+### Production Deployment
+
+The [setup wizard](/cli/setup-wizard) generates a complete Docker Compose deployment with:
+
+- **StarLab app** container (Next.js + FastAPI)
+- **PostgreSQL** database (with optional pgvector for AI)
+- **Redis** cache
+- **Caddy** or **Nginx** reverse proxy (with optional auto-SSL)
+
+Each deployment gets a unique ID, allowing multiple instances on the same machine.
+
+### Local Development
+
+The [`dev` command](/cli/dev-mode) starts infrastructure in Docker and runs the API, web, and collaboration servers locally with hot reload.
+
+## Quick Reference
+
+| Command | Description |
+| --- | --- |
+| `npx starlab setup` | Interactive setup wizard |
+| `npx starlab start` | Start all services |
+| `npx starlab stop` | Stop all services |
+| `npx starlab update` | Update to latest or a specific version |
+| `npx starlab status` | Show service status |
+| `npx starlab health` | Run health checks |
+| `npx starlab logs` | Stream container logs |
+| `npx starlab config` | Show installation info |
+| `npx starlab env` | Edit environment variables |
+| `npx starlab backup` | Backup database |
+| `npx starlab restore <archive>` | Restore database from backup |
+| `npx starlab doctor` | Run diagnostics |
+| `npx starlab deployments` | Manage deployments & resource limits |
+| `npx starlab shell` | Open shell in a container |
+| `npx starlab dev` | Start dev environment |
+
+<Callout type="info">
+See [Commands](/cli/commands) for the full reference including all flags.
+</Callout>

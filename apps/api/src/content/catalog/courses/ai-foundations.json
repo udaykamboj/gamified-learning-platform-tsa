@@ -1,0 +1,124 @@
+{
+  "slug": "ai-foundations",
+  "order": 1,
+  "name": "AI Foundations",
+  "description": "What AI is, how it learns, and where you already meet it.",
+  "about": "A short, self-paced introduction to artificial intelligence. You will learn what people mean by AI, how machine learning finds patterns in data, and how to recognise AI in the apps you use every day.",
+  "learnings": "Explain AI in plain words; describe how a model learns from examples; spot AI in everyday tools",
+  "tags": "ai,foundations,machine learning",
+  "chapters": [
+    {
+      "slug": "aif-what-is-ai",
+      "name": "What AI is",
+      "description": "Separating the idea from the hype.",
+      "activities": [
+        {
+          "slug": "aif-meaning",
+          "name": "What people mean by AI",
+          "kind": "document",
+          "body": [
+            "h2:A computer program that learns patterns",
+            "p:Most AI you use is a program that has learned patterns from lots of examples, instead of following rules a person wrote line by line.",
+            {"ul": [
+              "A spam filter learned what spam looks like from millions of emails.",
+              "A music app learned which songs people who like yours also play.",
+              "A photo app learned what faces look like from labelled pictures."
+            ]},
+            {"info": "AI is good at patterns it has seen before. It is not magic, and it can be confidently wrong."},
+            {"quiz": {
+              "q": "What does most everyday AI do?",
+              "a": [
+                ["Finds patterns it learned from examples", true],
+                ["Thinks and feels like a person", false],
+                ["Follows only rules a programmer typed in", false]
+              ]
+            }}
+          ]
+        },
+        {
+          "slug": "aif-everyday",
+          "name": "AI in your day",
+          "kind": "document",
+          "body": [
+            "h2:You already use it",
+            "p:Autocomplete on your phone keyboard, video recommendations and voice assistants all use AI.",
+            {"ol": [
+              "Notice when an app predicts what you want next.",
+              "Ask what examples it might have learned from.",
+              "Ask what could go wrong if those examples were unfair."
+            ]}
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "aif-how-models-learn",
+      "name": "How models learn",
+      "description": "Training data in, predictions out.",
+      "activities": [
+        {
+          "slug": "aif-training-data",
+          "name": "Training data",
+          "kind": "document",
+          "body": [
+            "h2:Examples are the teacher",
+            "p:A model is trained by showing it many examples with the right answer, then adjusting it until its guesses match.",
+            {"warn": "If the examples are narrow or biased, the model learns that too."}
+          ]
+        },
+        {
+          "slug": "aif-practice-learning",
+          "name": "Practice: how models learn",
+          "kind": "assignment",
+          "assignment": {
+            "role": "practice",
+            "title": "How models learn",
+            "description": "Check your understanding of training data and predictions. Retry as often as you like.",
+            "tasks": [
+              {
+                "slug": "aif-practice-q1",
+                "title": "Training data",
+                "description": "Choose the best answer.",
+                "hint": "Think about where a model's knowledge comes from.",
+                "questions": [
+                  {"q": "Where does a trained model's knowledge come from?", "a": [["The examples it was trained on", true], ["The internet in real time", false], ["Its own opinions", false]]},
+                  {"q": "What happens if training examples are biased?", "a": [["The model can learn the bias", true], ["The model removes the bias automatically", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "aif-unit-test",
+      "name": "Unit test",
+      "description": "Show what you know.",
+      "activities": [
+        {
+          "slug": "aif-unit-test-1",
+          "name": "Unit test: AI Foundations",
+          "kind": "assignment",
+          "assignment": {
+            "role": "assessment",
+            "title": "AI Foundations unit test",
+            "description": "Pass with 80% to complete the course.",
+            "tasks": [
+              {
+                "slug": "aif-test-q1",
+                "title": "Foundations",
+                "description": "Answer every question.",
+                "hint": "",
+                "questions": [
+                  {"q": "Which is an example of everyday AI?", "a": [["Video recommendations", true], ["A light switch", false]]},
+                  {"q": "AI is best described as…", "a": [["Pattern-finding learned from examples", true], ["A program that is never wrong", false]]},
+                  {"q": "Why check an AI's answer?", "a": [["It can be confidently wrong", true], ["It is always right", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

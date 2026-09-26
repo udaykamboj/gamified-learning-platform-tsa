@@ -1,0 +1,96 @@
+{
+  "slug": "prompt-engineering",
+  "order": 2,
+  "name": "Prompt Engineering",
+  "description": "Get useful results from AI tools with clear instructions.",
+  "about": "Learn how to write prompts that give AI tools the context, examples and constraints they need, and how to iterate when the first answer is not right.",
+  "learnings": "Write clear prompts; give context and examples; iterate on weak answers",
+  "tags": "ai,prompts,practical",
+  "chapters": [
+    {
+      "slug": "pe-clear-instructions",
+      "name": "Clear instructions",
+      "description": "Say what you want, for whom, and in what shape.",
+      "activities": [
+        {
+          "slug": "pe-anatomy",
+          "name": "Anatomy of a good prompt",
+          "kind": "document",
+          "body": [
+            "h2:Task, context, format",
+            "p:A strong prompt names the task, gives the context the tool cannot guess, and describes the format you want back.",
+            {"code": {"lang": "text", "text": "Explain photosynthesis to a 12-year-old in 5 bullet points, using one everyday example."}},
+            {"quiz": {
+              "q": "Which prompt is clearer?",
+              "a": [
+                ["Summarise this article in 3 bullet points for a busy student", true],
+                ["Tell me about this", false]
+              ]
+            }}
+          ]
+        },
+        {
+          "slug": "pe-iterate",
+          "name": "Iterate on weak answers",
+          "kind": "document",
+          "body": [
+            "h2:The first answer is a draft",
+            "p:If the answer misses, say what was wrong and what to change instead of starting over.",
+            {"ul": ["Too long? Ask for a word limit.", "Too vague? Ask for an example.", "Wrong level? Name the audience."]}
+          ]
+        },
+        {
+          "slug": "pe-practice-prompts",
+          "name": "Practice: better prompts",
+          "kind": "assignment",
+          "assignment": {
+            "role": "practice",
+            "title": "Better prompts",
+            "description": "Pick the stronger prompt each time.",
+            "tasks": [
+              {
+                "slug": "pe-practice-q1",
+                "title": "Choosing prompts",
+                "description": "Choose the best option.",
+                "hint": "Look for task, context and format.",
+                "questions": [
+                  {"q": "What should a prompt usually include?", "a": [["Task, context and the format you want", true], ["Only a single keyword", false]]},
+                  {"q": "The answer was too long. What do you do?", "a": [["Ask again with a length limit", true], ["Give up on the tool", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "pe-unit-test",
+      "name": "Unit test",
+      "description": "Show what you know.",
+      "activities": [
+        {
+          "slug": "pe-unit-test-1",
+          "name": "Unit test: Prompt Engineering",
+          "kind": "assignment",
+          "assignment": {
+            "role": "assessment",
+            "title": "Prompt Engineering unit test",
+            "description": "Pass with 80% to complete the course.",
+            "tasks": [
+              {
+                "slug": "pe-test-q1",
+                "title": "Prompting",
+                "description": "Answer every question.",
+                "hint": "",
+                "questions": [
+                  {"q": "Why give context in a prompt?", "a": [["The tool cannot guess what it isn't told", true], ["It makes the answer slower", false]]},
+                  {"q": "Which describes iterating?", "a": [["Refining the prompt based on the last answer", true], ["Repeating the same prompt word for word", false]]}
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

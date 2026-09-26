@@ -1,0 +1,601 @@
+'use client'
+
+import React, { useState, useMemo } from 'react'
+import { Search, X, Users, Globe, Lock, MoreVertical, Settings2, Eye, Trash2, CheckSquare, Square, Copy } from 'lucide-react'
+import { ChalkboardSimple } from '@phosphor-icons/react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getUriWithOrg } from '@services/config/config'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/query/keys'
+import { createBoard, deleteBoard, duplicateBoard, getBoards } from '@services/boards/boards'
+import { getBoardThumbnailMediaDirectory } from '@services/media/media'
+import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
+import Link from 'next/link'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@components/ui/dropdown-menu"
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
+import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
+import { searchMatchesAny } from '@/lib/search/normalize'
+import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import CatalogPagination, { useCatalogPagination } from '@components/Objects/Catalog/CatalogPagination'
+
+interface BoardListClientProps {
+  org_id: number
+  orgslug: string
+}
+
+function CreateBoardForm({ onCreated, orgId, accessToken, onCancel }: {
+  onCreated: () => void
+  orgId: number
+  accessToken: string
+  onCancel: () => void
+}) {
+  const { t } = useTranslation()
+  const { track } = useLHAnalytics('dashboard')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim() || isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await createBoard(orgId, { name, description }, accessToken)
+      track(AnalyticsEvent.BoardCreated, { has_description: !!description.trim() })
+      toast.success(t('boards.board_created', 'Board created'))
+      setName('')
+      setDescription('')
+      onCreated()
+    } catch {
+      toast.error(t('boards.board_created_error', 'Failed to create board'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 p-1">
+      <div>
+        <label className="text-sm font-medium text-gray-700">{t('boards.name', 'Name')}</label>
+        <input
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          placeholder={t('boards.name_placeholder', 'e.g., Project Planning')}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-gray-700">{t('boards.description', 'Description')}</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          placeholder={t('boards.description_placeholder', 'Brief description...')}
+          rows={3}
+        />
+      </div>
+      <div className="flex gap-2 justify-end pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          {t('common.cancel', 'Cancel')}
+        </button>
+        <button
+          type="submit"
+          disabled={!name.trim() || isSubmitting}
+          className="rounded-lg bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-gray-800 transition-colors"
+        >
+          {isSubmitting ? t('boards.creating', 'Creating...') : t('boards.create_board', 'Create Board')}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+/**
+ * My boards: the boards a student owns or was added to. Anyone signed in can
+ * create as many as they want; each board is private until its owner shares it
+ * (docs/refactor/progress/00-requirements.md, R13).
+ */
+export default function BoardListClient({ org_id, orgslug }: BoardListClientProps) {
+  const { t } = useTranslation()
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const queryClient = useQueryClient()
+
+  const currentUserId = session?.data?.user?.id
+
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set())
+
+  const { data: boards, isLoading } = useQuery({
+    queryKey: queryKeys.boards.list(orgslug),
+    queryFn: () => getBoards(org_id, access_token),
+    enabled: !!access_token && !!org_id,
+    staleTime: 60_000,
+  })
+
+  const allBoards = boards || []
+
+  const filteredBoards = useMemo(() => {
+    if (!searchQuery.trim()) return allBoards
+    return allBoards.filter((board: any) =>
+      searchMatchesAny([board.name, board.description], searchQuery)
+    )
+  }, [allBoards, searchQuery])
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedBoards,
+    pageNumbers,
+    goToPage: goToCatalogPage,
+    resetPage,
+  } = useCatalogPagination(filteredBoards)
+
+  React.useEffect(() => {
+    resetPage()
+  }, [searchQuery, resetPage])
+
+  const handleCreated = () => {
+    setCreateModalOpen(false)
+    queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+  }
+
+  const toggleBoardSelection = (boardUuid: string) => {
+    const newSelection = new Set(selectedBoards)
+    if (newSelection.has(boardUuid)) {
+      newSelection.delete(boardUuid)
+    } else {
+      newSelection.add(boardUuid)
+    }
+    setSelectedBoards(newSelection)
+  }
+
+  const selectAllBoards = () => {
+    const allBoardUuids = paginatedBoards.map((board: any) => board.board_uuid)
+    setSelectedBoards(new Set(allBoardUuids))
+  }
+
+  const clearSelection = () => {
+    setSelectedBoards(new Set())
+  }
+
+  const bulkDeleteBoards = async () => {
+    const toastId = toast.loading(t('boards.deleting_boards', { count: selectedBoards.size }))
+    let successCount = 0
+    let errorCount = 0
+
+    for (const boardUuid of selectedBoards) {
+      try {
+        await deleteBoard(boardUuid, access_token)
+        successCount++
+      } catch {
+        errorCount++
+      }
+    }
+
+    toast.dismiss(toastId)
+    if (errorCount === 0) {
+      toast.success(t('boards.boards_deleted_success', { count: successCount }))
+    } else {
+      toast.error(t('boards.boards_deleted_partial', { success: successCount, error: errorCount }))
+    }
+
+    clearSelection()
+    queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+  }
+
+  const handleDeleteBoard = async (boardUuid: string) => {
+    const toastId = toast.loading(t('boards.deleting_board'))
+    try {
+      await deleteBoard(boardUuid, access_token)
+      queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+      toast.success(t('boards.board_deleted_success'))
+    } catch {
+      toast.error(t('boards.board_deleted_error'))
+    } finally {
+      toast.dismiss(toastId)
+    }
+  }
+
+  const handleDuplicateBoard = async (boardUuid: string) => {
+    const toastId = toast.loading(t('boards.duplicating_board'))
+    try {
+      await duplicateBoard(boardUuid, access_token)
+      queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+      toast.success(t('boards.board_duplicated_success'))
+    } catch {
+      toast.error(t('boards.board_duplicated_error'))
+    } finally {
+      toast.dismiss(toastId)
+    }
+  }
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      goToCatalogPage(page)
+      setSelectedBoards(new Set())
+    }
+  }
+
+  return (
+    <>
+      <div className="w-full">
+        <GeneralWrapperStyled>
+          <div className="flex flex-col space-y-2 mb-2">
+            <div className="flex items-center justify-between">
+              <TypeOfContentTitle title={t('boards.boards', 'Boards')} type="board" />
+              {access_token && (
+                <button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105"
+                >
+                  <div>{t('boards.new_board', 'New Board')}</div>
+                  <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                </button>
+              )}
+            </div>
+
+            {/* Search and Bulk Actions */}
+            {allBoards.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
+                <div className="relative w-full sm:w-80">
+                  <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('boards.search_placeholder', 'Search boards...')}
+                    className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Bulk Actions */}
+                {selectedBoards.size > 0 && (
+                  <div className="flex items-center gap-2 ms-auto flex-wrap">
+                    <span className="text-sm font-medium text-gray-500 px-2">
+                      {t('boards.selected_count', { count: selectedBoards.size })}
+                    </span>
+                    <button
+                      onClick={selectAllBoards}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                    >
+                      <span>{t('boards.select_all', 'Select All')}</span>
+                    </button>
+                    <button
+                      onClick={clearSelection}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>{t('boards.clear_selection', 'Clear')}</span>
+                    </button>
+                    <ConfirmationModal
+                      confirmationButtonText={t('boards.delete_selected', 'Delete Selected')}
+                      confirmationMessage={t('boards.delete_selected_confirm', { count: selectedBoards.size })}
+                      dialogTitle={t('boards.delete_boards_title', 'Delete Boards')}
+                      dialogTrigger={
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white nice-shadow rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                          <span>{t('boards.delete_selected', 'Delete Selected')}</span>
+                        </button>
+                      }
+                      functionToExecute={bulkDeleteBoards}
+                      status="warning"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Search Results Info */}
+            {searchQuery && (
+              <div className="mb-2 text-sm text-gray-500">
+                {filteredBoards.length !== 1
+                  ? t('boards.pagination.results_plural', { count: filteredBoards.length, query: searchQuery })
+                  : t('boards.pagination.results', { count: filteredBoards.length, query: searchQuery })}
+              </div>
+            )}
+
+            {/* Loading */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="animate-pulse rounded-xl bg-white nice-shadow overflow-hidden">
+                    <div className="aspect-video bg-gray-200" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-100 rounded w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {paginatedBoards.map((board: any) => (
+                  <BoardCard
+                    key={board.board_uuid}
+                    board={board}
+                    orgslug={orgslug}
+                    orgUuid={org?.org_uuid}
+                    isOwner={board.created_by === currentUserId}
+                    isSelected={selectedBoards.has(board.board_uuid)}
+                    onToggleSelect={toggleBoardSelection}
+                    onDuplicate={handleDuplicateBoard}
+                    onDelete={handleDeleteBoard}
+                  />
+                ))}
+
+                {/* No search results */}
+                {filteredBoards.length === 0 && searchQuery && (
+                  <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
+                    <Search className="w-12 h-12 text-gray-300 mb-4" />
+                    <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('boards.no_boards_found', 'No boards found')}</h2>
+                    <p className="text-gray-400">{t('boards.try_different_search', 'Try a different search term')}</p>
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {allBoards.length === 0 && !searchQuery && (
+                  <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
+                    <div className="p-4 bg-white rounded-full nice-shadow mb-4">
+                      <ChalkboardSimple size={32} className="text-gray-300" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-600 mb-2">{t('boards.no_boards_yet', 'No boards yet')}</h2>
+                    <p className="text-md text-gray-400 mb-6 max-w-xs text-center">
+                      {t('boards.no_boards_description', 'Create interactive collaborative boards for your organization.')}
+                    </p>
+                    {access_token && (
+                      <button
+                        onClick={() => setCreateModalOpen(true)}
+                        className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105"
+                      >
+                        <div>{t('boards.new_board', 'New Board')}</div>
+                        <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <CatalogPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageNumbers={pageNumbers}
+              onPageChange={goToPage}
+              previousLabel={t('boards.pagination.previous', 'Previous')}
+              nextLabel={t('boards.pagination.next', 'Next')}
+              className="mt-8 mb-6"
+            />
+
+            {totalPages > 1 && (
+              <div className="mb-6 text-center text-sm text-gray-500">
+                {t('boards.pagination.page_of', { current: currentPage, total: totalPages })}
+              </div>
+            )}
+          </div>
+        </GeneralWrapperStyled>
+      </div>
+
+      <Modal
+        isDialogOpen={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        dialogTitle={t('boards.create_new_board', 'Create New Board')}
+        dialogDescription={t('boards.create_new_board_description', 'Give your board a name and optional description to get started.')}
+        customWidth="sm:max-w-md"
+        dialogContent={
+          <CreateBoardForm
+            onCreated={handleCreated}
+            orgId={org_id}
+            accessToken={access_token}
+            onCancel={() => setCreateModalOpen(false)}
+          />
+        }
+      />
+    </>
+  )
+}
+
+function BoardCard({ board, orgslug, orgUuid, isOwner, isSelected, onToggleSelect, onDuplicate, onDelete }: {
+  board: any
+  orgslug: string
+  orgUuid: string
+  isOwner: boolean
+  isSelected: boolean
+  onToggleSelect: (_boardUuid: string) => void
+  onDuplicate: (_boardUuid: string) => Promise<void>
+  onDelete: (_boardUuid: string) => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const thumbnailImage = board.thumbnail_image
+    ? getBoardThumbnailMediaDirectory(orgUuid, board.board_uuid, board.thumbnail_image)
+    : '/empty_thumbnail.png'
+
+  // Owners manage settings; people it's shared with go straight to the board.
+  const settingsLink = isOwner
+    ? getUriWithOrg(orgslug, `/boards/${board.board_uuid.replace('board_', '')}/general`)
+    : `/board/${board.board_uuid.replace('board_', '')}`
+
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleSelect(board.board_uuid)
+  }
+
+  return (
+    <div className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+      {/* Selection checkbox */}
+      <button
+        onClick={handleSelectClick}
+        aria-label={isSelected ? 'Deselect board' : 'Select board'}
+        className={`absolute top-2 start-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`}
+      >
+        {isSelected ? (
+          <CheckSquare className="w-4 h-4 text-black" />
+        ) : (
+          <Square className="w-4 h-4 text-gray-500" />
+        )}
+      </button>
+
+      {/* Options menu */}
+      <BoardCardOptions
+        board={board}
+        orgslug={orgslug}
+        isOwner={isOwner}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+      />
+
+      <Link
+        href={settingsLink}
+        className="block relative aspect-video overflow-hidden bg-gray-50"
+      >
+        <div
+          className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+          style={{ backgroundImage: `url(${thumbnailImage})` }}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+        <div className="absolute bottom-2 start-2">
+          {board.public ? (
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <Globe size={10} />
+              {t('boards.public', 'Public')}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-full">
+              <Lock size={10} />
+              {t('boards.private', 'Private')}
+            </span>
+          )}
+        </div>
+      </Link>
+
+      <div className="p-3 flex flex-col space-y-1.5">
+        <div className="flex items-start justify-between">
+          <Link href={settingsLink} className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1">
+            {board.name}
+          </Link>
+        </div>
+
+        {board.description && (
+          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+            {board.description}
+          </p>
+        )}
+
+        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
+          <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+            <Users size={12} />
+            <span>{board.member_count !== 1
+              ? t('boards.member_count_plural', { count: board.member_count, defaultValue: `${board.member_count} members` })
+              : t('boards.member_count', { count: board.member_count, defaultValue: `${board.member_count} member` })}</span>
+          </div>
+          <Link
+            href={settingsLink}
+            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+          >
+            {isOwner ? t('boards.settings', 'Settings') : t('boards.open_board', 'Open Board')}
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BoardCardOptions({ board, orgslug, isOwner, onDuplicate, onDelete }: {
+  board: any
+  orgslug: string
+  isOwner: boolean
+  onDuplicate: (_boardUuid: string) => Promise<void>
+  onDelete: (_boardUuid: string) => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <div className={`absolute top-2 end-2 z-20 transition-opacity ${
+        !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+      }`}>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger asChild>
+            <button aria-label="Board actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+              <MoreVertical size={18} className="text-gray-700" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuItem asChild>
+              <Link href={`/board/${board.board_uuid.replace('board_', '')}`} className="flex items-center cursor-pointer">
+                <Eye className="me-2 h-4 w-4" /> {t('boards.open_board', 'Open Board')}
+              </Link>
+            </DropdownMenuItem>
+            {isOwner && (
+            <DropdownMenuItem asChild>
+              <Link href={getUriWithOrg(orgslug, `/boards/${board.board_uuid.replace('board_', '')}/general`)} className="flex items-center cursor-pointer">
+                <Settings2 className="me-2 h-4 w-4" /> {t('boards.settings', 'Settings')}
+              </Link>
+            </DropdownMenuItem>
+            )}
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('boards.duplicate_board', 'Duplicate Board')}
+                confirmationMessage={t('boards.duplicate_board_confirm', 'Are you sure you want to duplicate this board?')}
+                dialogTitle={t('boards.duplicate_board_title', { name: board.name, defaultValue: `Duplicate "${board.name}"` })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                    <Copy className="me-2 h-4 w-4" /> {t('boards.duplicate_board', 'Duplicate Board')}
+                  </button>
+                }
+                functionToExecute={() => onDuplicate(board.board_uuid)}
+                status="info"
+              />
+            </DropdownMenuItem>
+            {isOwner && (
+            <DropdownMenuItem asChild>
+              <ConfirmationModal
+                confirmationButtonText={t('boards.delete_board', 'Delete Board')}
+                confirmationMessage={t('boards.delete_board_confirm', 'Are you sure you want to delete this board? This action cannot be undone.')}
+                dialogTitle={t('boards.delete_board_title', { name: board.name, defaultValue: `Delete "${board.name}"` })}
+                dialogTrigger={
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                    <Trash2 className="me-2 h-4 w-4" /> {t('boards.delete_board', 'Delete Board')}
+                  </button>
+                }
+                functionToExecute={() => onDelete(board.board_uuid)}
+                status="warning"
+              />
+            </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
+  )
+}
